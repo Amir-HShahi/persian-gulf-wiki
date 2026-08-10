@@ -1,0 +1,78 @@
+server:
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: core
+  mvc:
+    problemdetails:
+      enabled: true
+  web:
+    locale: fa
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: openid,email,profile
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    access-token-ttl-minutes: 15
+    access-token-cookie-name: access_token
+    refresh-token-ttl-days: 30
+    refresh-token-cookie-name: refresh_token
+    pending-token-ttl-minutes: 15
+  password:
+    reset-token-ttl-minutes: 30
+  email-verification:
+    token-ttl-minutes: 30
+  mail:
+    frontend-base-url: ${FRONTEND_BASE_URL}
+    from-address: ${MAIL_FROM}
+  cors:
+    allowed-origins: ${FRONTEND_ORIGINS}
+  cookie:
+    # Registrable parent domain shared by the API and frontend hosts (e.g.
+    # "persiangulfwiki.ravensandrunse.me" for api.persiangulfwiki.ravensandrunse.me +
+    # persiangulfwiki.ravensandrunse.me) — widens the CSRF cookie so frontend JS on a
+    # sibling host can read it. See SecurityConfig for why this is required.
+    domain: ${COOKIE_DOMAIN}
+  oauth2:
+    abandoned-account-ttl-hours: 24
+    success-redirect-url: ${FRONTEND_BASE_URL}/oauth2/success
+    pending-password-redirect-url: ${FRONTEND_BASE_URL}/oauth2/set-password
+    failure-redirect-url: ${FRONTEND_BASE_URL}/oauth2/error
+  admin:
+    bootstrap-email: ${ADMIN_BOOTSTRAP_EMAIL:}
+    bootstrap-username: ${ADMIN_BOOTSTRAP_USERNAME:}
+    bootstrap-password: ${ADMIN_BOOTSTRAP_PASSWORD:}
