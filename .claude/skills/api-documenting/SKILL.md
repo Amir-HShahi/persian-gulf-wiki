@@ -1,5 +1,5 @@
 ---
-name: api-docs
+name: api-documenting
 description: Documents `core`'s REST endpoints with springdoc-openapi annotations and serves them through a Scalar UI page. Trigger whenever the user asks to document an endpoint, add OpenAPI/Swagger annotations, set up or update the Scalar/API docs UI, or when a new controller/exception is added and its docs need to stay in sync. Do NOT trigger for general controller implementation work that doesn't mention documentation.
 ---
 
