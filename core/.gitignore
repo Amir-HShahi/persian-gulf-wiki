@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Claude Code ###
+.claude/scheduled_tasks.lock
