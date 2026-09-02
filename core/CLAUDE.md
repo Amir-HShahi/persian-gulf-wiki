@@ -26,15 +26,19 @@ worker. This file only covers what's relevant to working inside `core`.
   `pom.xml`).
 - **Persistence**: Postgres via Spring Data JPA, schema changes via Flyway migrations only
   (no `ddl-auto`).
-- **Caching / async**: Redis for caching and rate-limiting; Kafka for messaging where async
-  processing (e.g. handing image/dataset jobs to the Go worker) is needed.
+- **Caching**: Redis for caching and rate-limiting.
+- **Async messaging**: not wired in yet. Kafka was removed after sitting unused in `pom.xml`
+  (no producer/consumer code ever existed) — it just added a flaky Testcontainers dependency
+  to every test. Add `spring-boot-starter-kafka` (+ `-test`, `testcontainers-kafka`) back only
+  when a real async use case starts (e.g. handing image/dataset jobs to the Go worker), not
+  speculatively.
 
 ## Testing
 
-Testcontainers (Postgres, Kafka) are already wired in — see
-`src/test/java/.../TestcontainersConfiguration.java`. Prefer integration tests against real
-Postgres/Kafka containers over mocking the database, consistent with how the rest of the
-stack is tested.
+Testcontainers (Postgres) are already wired in — see
+`src/test/java/.../TestcontainersConfiguration.java`. Prefer integration tests against a real
+Postgres container over mocking the database, consistent with how the rest of the stack is
+tested.
 
 ## Out of scope here
 

@@ -1,0 +1,56 @@
+name: Deploy Staging
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [master]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - name: Determine version
+        id: version
+        run: |
+          VERSION=$(cd core && ./mvnw -q -Dexpression=project.version -DforceStdout help:evaluate)
+          SHA=$(git rev-parse --short HEAD)
+          echo "tag=${VERSION}-sha.${SHA}" >> "$GITHUB_OUTPUT"
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: core/Dockerfile
+          build-args: |
+            APP_VERSION=${{ steps.version.outputs.tag }}
+          push: true
+          tags: |
+            ghcr.io/amir-hshahi/persian-gulf-wiki-core:staging
+            ghcr.io/amir-hshahi/persian-gulf-wiki-core:${{ steps.version.outputs.tag }}
+      - name: Install cloudflared
+        run: |
+          curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+          sudo dpkg -i cloudflared.deb
+      - name: Deploy over Cloudflare-tunneled SSH
+        env:
+          TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+          TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+        run: |
+          install -m 600 -D /dev/stdin ~/.ssh/pgw_deploy <<< "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}"
+          ssh -i ~/.ssh/pgw_deploy \
+              -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+              -o ProxyCommand="cloudflared access ssh --hostname ${{ secrets.STAGING_SSH_HOSTNAME }}" \
+              deploy@${{ secrets.STAGING_SSH_HOSTNAME }} \
+              "cd /opt/pgw && ./deploy.sh ghcr.io/amir-hshahi/persian-gulf-wiki-core:staging"

@@ -15,16 +15,20 @@ import io.swagger.v3.oas.models.servers.Server;
 
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
+import java.util.Optional;
 
 @Configuration
 public class OpenApiConfig {
 
     @Bean
-    OpenAPI customOpenAPI(@Value("${app.jwt.access-token-cookie-name}") String cookieName) {
+    OpenAPI customOpenAPI(@Value("${app.jwt.access-token-cookie-name}") String cookieName,
+                           Optional<BuildProperties> buildProperties) {
+        String version = buildProperties.map(BuildProperties::getVersion).orElse("dev");
         return new OpenAPI()
                 .components(new Components()
                 .addSecuritySchemes("cookieAuth",
@@ -40,7 +44,7 @@ public class OpenApiConfig {
                                                 only be tested from a browser session that has actually logged \
                                                 in, or an HTTP client that replays the real Set-Cookie response \
                                                 (e.g. curl --cookie-jar, Postman's cookie jar).""")))
-                .info(new Info().title("Persian Gulf Wiki API").version("0.0.1")
+                .info(new Info().title("Persian Gulf Wiki API").version(version)
                         .description("""
                                 ## Response envelope
 
@@ -104,7 +108,7 @@ public class OpenApiConfig {
                                 ## Local development: cookies won't show up on plain `localhost`
 
                                 All auth/session/CSRF cookies this API sets carry a `Domain` attribute scoped to \
-                                this API's real deployed parent domain (e.g. `persiangulfwiki.ravensandrunse.me`). \
+                                this API's real deployed parent domain (e.g. `persiangulfwiki.ravensandrunes.me`). \
                                 Browsers reject a `Set-Cookie` whose `Domain` isn't a match for the host the \
                                 request actually went to — so if your local frontend dev server runs on plain \
                                 `http://localhost:xxxx` and calls this API directly, **every cookie this API sets \
@@ -122,7 +126,7 @@ public class OpenApiConfig {
                                 through unchanged and the browser still drops the cookie.
                                 2. **Run your dev frontend on a real subdomain instead of `localhost`.** Add a \
                                 hosts-file entry pointing a subdomain of this API's parent domain (e.g. \
-                                `dev.persiangulfwiki.ravensandrunse.me`) at `127.0.0.1`, and serve your dev \
+                                `dev.persiangulfwiki.ravensandrunes.me`) at `127.0.0.1`, and serve your dev \
                                 frontend from there. This makes your local frontend genuinely same-site with the \
                                 real API, so cookies work exactly as in production with no proxy rewriting needed.
 
@@ -131,7 +135,9 @@ public class OpenApiConfig {
                                 the browser or from request headers.
                                 """))
                 .servers(List.of(
-                        new Server().url("https://persiangulfwiki.ravensandrunes.me").description("Development"),
+                        new Server().url("https://pgw-api.ravensandrunes.me").description("Production"),
+                        new Server().url("https://pgw-staging-api.ravensandrunes.me")
+                                .description("Staging"),
                         new Server().url("http://localhost:8080").description("Local")));
     }
 

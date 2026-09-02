@@ -1,0 +1,9 @@
+core/target/
+.idea/
+*.iml
+.env
+.env.example
+.github/
+.claude/
+docker-compose.yml
+docker-compose.deploy.yml
