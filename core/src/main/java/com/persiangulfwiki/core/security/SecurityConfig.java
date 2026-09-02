@@ -84,6 +84,8 @@ public class SecurityConfig {
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         // Public API docs, not app data.
                         .requestMatchers("/docs/**", "/v3/api-docs/**").permitAll()
+                        // Deploy health check hits this unauthenticated — no app data exposed.
+                        .requestMatchers("/actuator/health/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(problemDetailAuthenticationEntryPoint))
                 // Both default to enabled and would otherwise turn an unauthenticated request
