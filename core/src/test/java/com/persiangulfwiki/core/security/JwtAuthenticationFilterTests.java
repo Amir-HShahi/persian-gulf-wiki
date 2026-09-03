@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class JwtAuthenticationFilterTests {
 
-    private static final String PROTECTED_ENDPOINT = "/actuator/health";
+    private static final String PROTECTED_ENDPOINT = "/api/users/me";
     private static final String ACCESS_TOKEN_COOKIE = "access_token";
 
     @Autowired
