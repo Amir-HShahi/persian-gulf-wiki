@@ -24,3 +24,10 @@ spring:
 app:
   mail:
     from-address: ${MAIL_FROM:noreply@localhost}
+
+  # TTL for accounts minted by POST /api/dev/test-users, reclaimed hourly by
+  # DevTestUserSweeper. Long enough that a slow suite's users outlive the run that created
+  # them, short enough that a machine running suites all day doesn't accumulate a backlog.
+  # Only DevUserSeeder's named fixtures are exempt — the sweeper matches on the e2e- prefix.
+  dev:
+    test-user-ttl-hours: ${DEV_TEST_USER_TTL_HOURS:6}
