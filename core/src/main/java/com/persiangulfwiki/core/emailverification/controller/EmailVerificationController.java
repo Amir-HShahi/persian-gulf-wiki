@@ -45,7 +45,7 @@ public class EmailVerificationController {
             + "second time. Unauthenticated: the caller is identified entirely by the token, not "
             + "by a session cookie.")
     @ApiResponse(responseCode = "200", description = "Email verified: the token's owning user is marked emailVerified, and the token "
-            + "is consumed. Body is `{ \"data\": null, \"message\": string }`.")
+            + "is consumed. No payload — the response carries only a confirmation message.")
     @ApiResponse(responseCode = "400", description = "Request failed field validation. `detail` is a fixed "
             + "summary string (\"validation failed\") — the actual failures are in the `errors` array, one "
             + "entry per field with `field` and `message`. `token` is required.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
@@ -66,7 +66,7 @@ public class EmailVerificationController {
             + "delivery failures are logged server-side and not surfaced to the caller. Does not "
             + "invalidate any previously issued, still-valid verification token.")
     @ApiResponse(responseCode = "200", description = "New verification token issued and persisted; email dispatch was triggered "
-            + "(not confirmed delivered). Body is `{ \"data\": null, \"message\": string }`.")
+            + "(not confirmed delivered). No payload — the response carries only a confirmation message.")
     @ApiResponse(responseCode = "401", description = "Caller is not authenticated (missing/invalid/expired session cookie)", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "404", description = "The authenticated user id no longer resolves to a user (e.g. the account "
             + "was deleted after the session cookie was issued).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))

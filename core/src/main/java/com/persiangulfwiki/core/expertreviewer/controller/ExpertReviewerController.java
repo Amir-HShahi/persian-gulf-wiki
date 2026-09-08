@@ -52,9 +52,7 @@ public class ExpertReviewerController {
     @Operation(summary = "Apply for the Expert Reviewer role", description = "Any authenticated user may apply, stating the entity type they "
             + "claim expertise in and a justification. Only one PENDING application per "
             + "(applicant, entityType) is allowed at a time.")
-    @ApiResponse(responseCode = "201", description = "Application created with status PENDING. Body is "
-            + "`{ \"data\": { id, applicantUserId, entityType, justification, status, createdAt, reviewedAt }, "
-            + "\"message\": string }`.")
+    @ApiResponse(responseCode = "201", description = "Application created with status PENDING.")
     @ApiResponse(responseCode = "400", description = "Request failed field validation. `detail` is a fixed summary string "
             + "(\"validation failed\") — the actual failures are in the `errors` array, one entry per field with "
             + "`field` and `message`. Both `entityType` and `justification` must be non-blank.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
@@ -75,9 +73,7 @@ public class ExpertReviewerController {
     }
 
     @Operation(summary = "List expert reviewer applications", description = "Admin only. Optional status filter (PENDING/APPROVED/REJECTED); omitted returns all.")
-    @ApiResponse(responseCode = "200", description = "List of applications. Body is "
-            + "`{ \"data\": [ { id, applicantUserId, entityType, justification, status, createdAt, reviewedAt }, ... ], "
-            + "\"message\": string }`.")
+    @ApiResponse(responseCode = "200", description = "List of applications.")
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "Either the account is authenticated but not an admin, or its email address "
             + "is not yet verified — both surface as a plain 403 with no way to distinguish them from the "
@@ -97,9 +93,7 @@ public class ExpertReviewerController {
     @Operation(summary = "Approve or reject an expert reviewer application", description = "Admin only. Approving grants the EXPERT_REVIEWER role scoped to the "
             + "application's entityType, using the same grant mechanism as /api/admin/users/{id}/role. "
             + "Reviewing an application that isn't currently PENDING is a 409.")
-    @ApiResponse(responseCode = "200", description = "Review decision applied. Body is "
-            + "`{ \"data\": { id, applicantUserId, entityType, justification, status, createdAt, reviewedAt }, "
-            + "\"message\": string }`.")
+    @ApiResponse(responseCode = "200", description = "Review decision applied.")
     @ApiResponse(responseCode = "400", description = "Request failed field validation. `detail` is a fixed summary string "
             + "(\"validation failed\") — the actual failure is in the `errors` array, one entry per field with "
             + "`field` and `message`. `decision` (APPROVE or REJECT) is required.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))

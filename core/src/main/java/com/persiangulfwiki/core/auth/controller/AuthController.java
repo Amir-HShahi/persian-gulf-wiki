@@ -87,7 +87,7 @@ public class AuthController {
                         "request — a 201 here does not guarantee a verification email was actually sent.")
         @ApiResponse(responseCode = "201", description = "User created; access and refresh cookies set (auto-login on signup, same cookies "
                         +
-                        "as login). Body is `{ \"data\": { id, username, email }, \"message\": string }`.", headers = @Header(name = "Set-Cookie", description = "Two cookies are set: `access_token` (short-lived) and `refresh_token` "
+                        "as login).", headers = @Header(name = "Set-Cookie", description = "Two cookies are set: `access_token` (short-lived) and `refresh_token` "
                         +
                         "(long-lived), identical in shape to login's. The freshly-registered account is "
                         +
@@ -132,8 +132,8 @@ public class AuthController {
         }
 
         @Operation(summary = "Authenticate (Login) a user", description = "On success, sets the access-token and refresh-token cookies via Set-Cookie.")
-        @ApiResponse(responseCode = "200", description = "Authenticated; access and refresh cookies set. Body is "
-                        + "`{ \"data\": null, \"message\": string }`.", headers = @Header(name = "Set-Cookie", description = "Two cookies are set: `access_token` (short-lived) and `refresh_token` "
+        @ApiResponse(responseCode = "200", description = "Authenticated; access and refresh cookies set. No payload — the "
+                        + "response carries only a confirmation message.", headers = @Header(name = "Set-Cookie", description = "Two cookies are set: `access_token` (short-lived) and `refresh_token` "
                         +
                         "(long-lived, used to obtain new access tokens from POST /api/auth/refresh). Both are " +
                         "HttpOnly (not readable from JavaScript), Secure (HTTPS only), SameSite=None, and scoped " +
@@ -164,8 +164,8 @@ public class AuthController {
                         "revoked regardless of outcome, so a stolen-and-replayed token fails on its next use), " +
                         "re-fetches the user's roles from the database (not the old token's claims, so a role " +
                         "change since login is picked up), and issues a new access/refresh cookie pair.")
-        @ApiResponse(responseCode = "200", description = "Refreshed; new access and refresh cookies set. Body is "
-                        + "`{ \"data\": null, \"message\": string }`.", headers = @Header(name = "Set-Cookie", description = "Two cookies are set, replacing the previous pair: `access_token` (short-lived) "
+        @ApiResponse(responseCode = "200", description = "Refreshed; new access and refresh cookies set. No payload — the "
+                        + "response carries only a confirmation message.", headers = @Header(name = "Set-Cookie", description = "Two cookies are set, replacing the previous pair: `access_token` (short-lived) "
                         +
                         "and `refresh_token` (long-lived, single-use — this response's value must be used for " +
                         "the next refresh, since the one just presented is now revoked). Both are HttpOnly " +
@@ -200,8 +200,8 @@ public class AuthController {
                         +
                         "both auth cookies. Idempotent by design: a missing cookie, an already-revoked token, " +
                         "or a token that doesn't match any session is not an error — logout always succeeds.")
-        @ApiResponse(responseCode = "200", description = "Logged out; access and refresh cookies cleared. Body is "
-                        + "`{ \"data\": null, \"message\": string }`.", headers = @Header(name = "Set-Cookie", description = "Two cookies are cleared: `access_token` and `refresh_token`, each sent back "
+        @ApiResponse(responseCode = "200", description = "Logged out; access and refresh cookies cleared. No payload — the "
+                        + "response carries only a confirmation message.", headers = @Header(name = "Set-Cookie", description = "Two cookies are cleared: `access_token` and `refresh_token`, each sent back "
                         +
                         "with an empty value and Max-Age 0 so the browser deletes them. Uses the same " +
                         "HttpOnly/Secure/SameSite=None/path `/` attributes as when they were set, which is " +
@@ -233,8 +233,8 @@ public class AuthController {
         @Operation(summary = "Log out every session for the current user", description = "Revokes all active refresh tokens for the authenticated user (all devices, "
                         +
                         "not just the current one) and clears this response's access/refresh cookies.")
-        @ApiResponse(responseCode = "200", description = "All sessions revoked; access and refresh cookies cleared. Body is "
-                        + "`{ \"data\": null, \"message\": string }`.", headers = @Header(name = "Set-Cookie", description = "Two cookies are cleared: `access_token` and `refresh_token`, each sent back "
+        @ApiResponse(responseCode = "200", description = "All sessions revoked; access and refresh cookies cleared. No payload — "
+                        + "the response carries only a confirmation message.", headers = @Header(name = "Set-Cookie", description = "Two cookies are cleared: `access_token` and `refresh_token`, each sent back "
                         +
                         "with an empty value and Max-Age 0 so the browser deletes them. Uses the same " +
                         "HttpOnly/Secure/SameSite=None/path `/` attributes as when they were set, which is " +

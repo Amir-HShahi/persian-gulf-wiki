@@ -49,8 +49,7 @@ public class AdminController {
 
     @Operation(summary = "List users", description = "Admin only. Simple page/size paging, newest-registered ordering left to the "
             + "database's default id order (no explicit sort requested by this step).")
-    @ApiResponse(responseCode = "200", description = "Page of users. Body is "
-            + "`{ \"data\": [ { id, username, email, enabled, emailVerified, roles, createdAt }, ... ], \"message\": string }`.")
+    @ApiResponse(responseCode = "200", description = "Page of users.")
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "Either the account is authenticated but not an admin, or its email address "
             + "is not yet verified — both surface as a plain 403 with no way to distinguish them from the "
@@ -74,8 +73,8 @@ public class AdminController {
             + "ADMIN is rejected with a 409, since nothing could grant the next one back. Every "
             + "grant/revoke of ADMIN itself is additionally logged at WARN level, on top of the "
             + "normal audit-log entry, since it's the highest-trust action in the system.")
-    @ApiResponse(responseCode = "200", description = "Role grant/revoke applied. Body is "
-            + "`{ \"data\": null, \"message\": string }`.")
+    @ApiResponse(responseCode = "200", description = "Role grant/revoke applied. No payload — the response carries only a "
+            + "confirmation message.")
     @ApiResponse(responseCode = "400", description = "Request failed field validation. `detail` is a fixed summary string "
             + "(\"validation failed\") — the actual failures are in the `errors` array, one entry per field with "
             + "`field` and `message`. `role` and `action` are required; `entityType` is free-form and only "
@@ -109,8 +108,8 @@ public class AdminController {
             + "today — SUSPEND and BAN are administratively distinct but both persist as "
             + "enabled=false; REINSTATE sets enabled=true. Which of SUSPEND/BAN was requested "
             + "is preserved only in the audit log, not as separate persisted state.")
-    @ApiResponse(responseCode = "200", description = "Status updated. Body is "
-            + "`{ \"data\": null, \"message\": string }`.")
+    @ApiResponse(responseCode = "200", description = "Status updated. No payload — the response carries only a "
+            + "confirmation message.")
     @ApiResponse(responseCode = "400", description = "Request failed field validation. `detail` is a fixed summary string "
             + "(\"validation failed\") — the actual failure is in the `errors` array, one entry per field with "
             + "`field` and `message`. `action` (SUSPEND, BAN, or REINSTATE) is required.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
