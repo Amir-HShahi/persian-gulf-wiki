@@ -34,7 +34,7 @@ Steps to bring up a fresh VPS so it can receive deploys from `deploy-staging.yml
 On the VPS, create `/opt/pgw/` containing:
 - `docker-compose.deploy.yml` — copy from repo root. **This file is not synced automatically** — if it changes in the repo, manually update it on the VPS too.
 - `deploy.sh` — copy from `deploy/deploy.sh` in the repo. Same caveat: not auto-synced.
-- `.env` — all the secrets `docker-compose.deploy.yml` interpolates (`DB_PASSWORD`, `MAIL_*`, `GOOGLE_CLIENT_*`, `JWT_SECRET`, `FRONTEND_*`, `ADMIN_BOOTSTRAP_*`). Never commit this file anywhere.
+- `.env` — all the secrets `docker-compose.deploy.yml` interpolates (`DB_PASSWORD`, `MAIL_*`, `GOOGLE_CLIENT_*`, `JWT_SECRET`, `FRONTEND_*`, `ADMIN_BOOTSTRAP_*`). Never commit this file anywhere. On **staging** it also carries the Mailpit switches — see §8.
 
 Paste multi-line files into the console carefully — Hetzner's web console (and similar VNC-style consoles) can corrupt heredoc pastes. If a script throws a bash syntax error right after pasting, that's the likely cause: re-write it via `base64 -d` from a single-line encoded blob instead, and verify with `sha256sum`.
 
@@ -47,3 +47,28 @@ Paste multi-line files into the console carefully — Hetzner's web console (and
 ## 7. Production-specific
 
 - The `production` GitHub Environment should have a required reviewer configured (Settings → Environments → production → protection rules) so `deploy-production.yml` pauses for manual approval before running.
+
+## 8. Staging-only: Mailpit
+
+Staging sends mail to a Mailpit container instead of a real provider, so verification/reset emails land in a web inbox at `pgw-staging-mail.ravensandrunes.me`. **Never on production.**
+
+In `/opt/pgw/.env`:
+
+```
+COMPOSE_PROFILES=staging
+MAIL_HOST=mailpit
+MAIL_PORT=1025
+SPRING_PROFILES_ACTIVE=dev
+```
+
+- `COMPOSE_PROFILES=staging` is what activates the service (`mailpit` sits under `profiles: [staging]` in the shared compose file); production omits it and never creates the container.
+- `SPRING_PROFILES_ACTIVE=dev` loads `application-dev.yaml`, which disables SMTP auth/STARTTLS — Mailpit has neither, and without it every send fails with `530 Error: authentication Required`.
+- SMTP 1025 is intentionally unpublished (open relay on a public IP); the UI binds to `127.0.0.1:8025`, tunnel-only.
+
+Start it once by hand — `deploy.sh` won't, since Mailpit is deliberately not in `app`'s `depends_on` (Compose auto-enables profiled dependencies, which would start it on production too):
+
+```
+cd /opt/pgw && docker compose -f docker-compose.deploy.yml --profile staging up -d mailpit
+```
+
+Cloudflare (done for the current staging box; repeat per new one): proxied `CNAME pgw-staging-mail` → `<staging-tunnel-id>.cfargotunnel.com`, tunnel ingress → `http://localhost:8025` before the 404 catch-all, and a `self_hosted` Access app with an email allowlist (one-time PIN — no other IdP configured). **Create the Access app first** — between DNS and policy the inbox's live verification links are exposed. `curl -I` the hostname: a `302` to `cloudflareaccess.com` means the gate is on; a `200` means it isn't.

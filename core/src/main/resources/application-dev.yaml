@@ -1,0 +1,26 @@
+# Local development profile: points outgoing mail at the Mailpit container from
+# docker-compose.yml (SMTP on 1025, web UI on http://localhost:8025) so registration,
+# email-verification and password-reset messages are readable locally instead of being
+# sent to a real inbox. Activate with SPRING_PROFILES_ACTIVE=dev.
+#
+# These values shadow the ${MAIL_*} placeholders in application.yaml, so the base
+# placeholders are never resolved under this profile and MAIL_USERNAME/MAIL_PASSWORD
+# need not be set at all in .env.
+spring:
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ""
+    password: ""
+    properties:
+      mail:
+        smtp:
+          # Mailpit runs without credentials or TLS by default; leaving auth/starttls on
+          # makes every send fail before it reaches the inbox.
+          auth: false
+          starttls:
+            enable: false
+
+app:
+  mail:
+    from-address: ${MAIL_FROM:noreply@localhost}
