@@ -25,6 +25,7 @@ services:
       ADMIN_BOOTSTRAP_USERNAME: ${ADMIN_BOOTSTRAP_USERNAME:-}
       ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-}
       SPRING_DATA_REDIS_HOST: redis
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -52,6 +53,27 @@ services:
     volumes:
       - redis-data:/data
 
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    # This file serves both staging and production. The profile keeps Mailpit out of
+    # production entirely: it only starts where COMPOSE_PROFILES=staging is set in
+    # /opt/pgw/.env. Deliberately not in app's depends_on — Compose auto-enables a
+    # profiled service that something depends on, which would start it in production too.
+    profiles:
+      - staging
+    environment:
+      MP_MAX_MESSAGES: 2000
+      MP_DATABASE: /data/mailpit.db
+    ports:
+      # SMTP stays on the compose network only — the app reaches it as mailpit:1025.
+      # Publishing it would put an open relay on a public IP. The UI binds to loopback
+      # so it's reachable only through the Cloudflare Tunnel, never on the VPS's IP.
+      - "127.0.0.1:8025:8025"
+    volumes:
+      - mailpit-data:/data
+
 volumes:
   postgres-data:
   redis-data:
+  mailpit-data:

@@ -26,6 +26,29 @@ services:
     volumes:
       - pgadmin-data:/var/lib/pgadmin
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: pgw-mailpit
+    restart: unless-stopped
+    environment:
+      # Keep every message the app sends for the life of the container — dev
+      # flows (register → verify → reset) are easier to follow with history.
+      MP_MAX_MESSAGES: 0
+      # Without MP_DATABASE the store is in-memory and every restart loses the inbox.
+      MP_DATABASE: /data/mailpit.db
+      # Deliberately no MP_SMTP_AUTH_* vars: setting MP_SMTP_AUTH_ACCEPT_ANY puts the
+      # listener into an authenticated mode that *requires* the client to issue AUTH
+      # (any credentials pass), which collides with smtp.auth=false in the dev profile
+      # and fails every send with "530 Error: authentication Required". With these unset
+      # Mailpit asks for nothing at all.
+    ports:
+      # 1025 = SMTP (what spring.mail talks to), 8025 = web UI.
+      - "1025:1025"
+      - "8025:8025"
+    volumes:
+      - mailpit-data:/data
+
 volumes:
   postgres-data:
   pgadmin-data:
+  mailpit-data:
