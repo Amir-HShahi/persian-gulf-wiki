@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,10 @@ import org.springframework.util.StringUtils;
 // ADMIN_BOOTSTRAP_EMAIL, ADMIN_BOOTSTRAP_USERNAME, and ADMIN_BOOTSTRAP_PASSWORD are all set.
 @Slf4j
 @Component
+// Must run before DevUserSeeder (@Order(2)): that seeder creates an ADMIN too, and the
+// existsByRole check below would then treat a configured ADMIN_BOOTSTRAP_* account as
+// already-satisfied and silently skip it.
+@Order(1)
 @RequiredArgsConstructor
 public class AdminBootstrapRunner implements ApplicationRunner {
 
