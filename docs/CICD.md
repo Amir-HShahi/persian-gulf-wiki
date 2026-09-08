@@ -16,6 +16,7 @@
 - **`/actuator/health/**` must be `permitAll()`** in `SecurityConfig.java` — the health check curl is unauthenticated.
 - **GitHub secrets per environment** (`staging`, `production`): `CF_ACCESS_CLIENT_ID`, `CF_ACCESS_CLIENT_SECRET`, `DEPLOY_SSH_PRIVATE_KEY`, and `STAGING_SSH_HOSTNAME`/`PROD_SSH_HOSTNAME`.
 - **Branch ruleset on `master`**: PR required, `verify` CI check required, no force-push/delete, no admin bypass.
+- **Claude PR review** (`claude-review.yml`): runs on every PR `opened`/`synchronize` event, except PRs from `dependabot[bot]` or branches starting with `release-please--` (auto-generated diffs, no judgment calls needed). Auths via `CLAUDE_CODE_OAUTH_TOKEN` (generated locally with `claude setup-token` against a Claude Pro/Max subscription, not a pay-per-token API key) and needs `id-token: write` permission for that OAuth exchange. It's given an explicit review `prompt` — without one, `claude-code-action` defaults to reactive mode (only responds to `@claude` mentions) and silently does nothing on a plain PR event. Posts feedback via `gh pr comment` and inline comments, not as a required status check — it doesn't block merging. Note: a workflow file's *own* first PR can't be reviewed by itself — GitHub requires a new/changed workflow's content to match `master` before it'll fully execute; it starts working normally on the next PR after merge.
 
 ## Gotchas learned the hard way
 
