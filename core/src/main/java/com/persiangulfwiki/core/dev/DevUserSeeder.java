@@ -38,7 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class DevUserSeeder implements ApplicationRunner {
 
-    // Shared by every seeded account, and documented in docs/DEV-SEED.md. Satisfies
+    // Shared by every seeded account, and documented in docs/DEV-USERS.md. Satisfies
     // PasswordConstraintValidator's rules so these accounts can also be used to exercise
     // password-change flows that re-validate the current password.
     private static final String DEV_PASSWORD = "Dev-Password1!";
@@ -59,7 +59,7 @@ public class DevUserSeeder implements ApplicationRunner {
         seed("admin@dev.local", "dev_admin", true, true, Role.CONTRIBUTOR, Role.ADMIN);
         seed("disabled@dev.local", "dev_disabled", true, false, Role.CONTRIBUTOR);
 
-        log.info("dev user seeding complete — accounts share the password documented in docs/DEV-SEED.md");
+        log.info("dev user seeding complete — accounts share the password documented in docs/DEV-USERS.md");
     }
 
     // Find-or-create, not insert: the compose Postgres volume survives restarts, so this runs

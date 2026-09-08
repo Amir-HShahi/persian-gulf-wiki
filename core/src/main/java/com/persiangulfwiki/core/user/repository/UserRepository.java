@@ -22,4 +22,9 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByEmail(String email);
 
     long deleteByPasswordHashIsNullAndCreatedAtBefore(Instant threshold);
+
+    // Used only by DevTestUserSweeper, which exists only under the dev profile. Kept here
+    // rather than on a dev-local repository so there is one JpaRepository per entity, matching
+    // how deleteByPasswordHashIsNullAndCreatedAtBefore above serves OAuth2CleanupJob.
+    long deleteByEmailStartingWithAndCreatedAtBefore(String emailPrefix, Instant threshold);
 }
