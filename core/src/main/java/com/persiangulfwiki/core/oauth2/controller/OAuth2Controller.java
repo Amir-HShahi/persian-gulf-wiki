@@ -67,7 +67,7 @@ public class OAuth2Controller {
             + "session pair, identical in shape to login's — from this point on the account behaves "
             + "as a regular account with no special pending status.")
     @ApiResponse(responseCode = "200", description = "Username and password set; pending cookie replaced with a real access/refresh "
-            + "session. Body is `{ \"data\": null, \"message\": string }`.", headers = @Header(name = "Set-Cookie", description = "Two cookies are set: `access_token` (short-lived) and `refresh_token` "
+            + "session. No payload — the response carries only a confirmation message.", headers = @Header(name = "Set-Cookie", description = "Two cookies are set: `access_token` (short-lived) and `refresh_token` "
             + "(long-lived), identical in shape to login's.", schema = @Schema(type = "string")))
     @ApiResponse(responseCode = "400", description = "Request failed field validation. `detail` is a fixed "
             + "summary string (\"validation failed\") — the actual failures are in the `errors` array, one "

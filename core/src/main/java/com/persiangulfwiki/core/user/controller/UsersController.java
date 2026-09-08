@@ -63,8 +63,7 @@ public class UsersController {
 
     @Operation(summary = "Get the current user's profile", description = "Reads the user id from the access-token cookie's authenticated principal; there is "
             + "no path parameter, so this can only ever return the caller's own profile.")
-    @ApiResponse(responseCode = "200", description = "Profile of the authenticated user. Body is "
-            + "`{ \"data\": { id, username, email, roles }, \"message\": string }`.")
+    @ApiResponse(responseCode = "200", description = "Profile of the authenticated user.")
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "404", description = "The access token is valid but the user it names no longer exists (e.g. the "
             + "account was deleted after the token was issued, but before it expired).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
@@ -84,8 +83,7 @@ public class UsersController {
     @Operation(summary = "List the current user's active sessions", description = "Returns every refresh token for the authenticated user that is neither "
             + "revoked nor expired, newest first — one entry per device/browser currently able "
             + "to refresh a session.")
-    @ApiResponse(responseCode = "200", description = "Active sessions for the authenticated user (empty list if none). Body is "
-            + "`{ \"data\": [ { id, deviceLabel, ipAddress, createdAt, expiresAt }, ... ], \"message\": string }`.")
+    @ApiResponse(responseCode = "200", description = "Active sessions for the authenticated user (empty list if none).")
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "The authenticated account's email address is not yet verified.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @GetMapping("/me/sessions")
@@ -101,8 +99,8 @@ public class UsersController {
             + "expires). Can only target the caller's own sessions — a session id that exists "
             + "but belongs to another user is reported identically to one that doesn't exist "
             + "at all, to avoid leaking other users' session ids via a status-code oracle.")
-    @ApiResponse(responseCode = "200", description = "Session revoked. Body is "
-            + "`{ \"data\": null, \"message\": string }`.")
+    @ApiResponse(responseCode = "200", description = "Session revoked. No payload — the response carries only a "
+            + "confirmation message.")
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "The authenticated account's email address is not yet verified.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "404", description = "No session with that id belongs to the authenticated user — either it never "
@@ -125,8 +123,8 @@ public class UsersController {
             + "active refresh token for the user — including the one behind this very request — "
             + "and clears this response's access/refresh cookies, so the frontend must force a "
             + "fresh login afterward.")
-    @ApiResponse(responseCode = "200", description = "Password changed; access and refresh cookies cleared. Body is "
-            + "`{ \"data\": null, \"message\": string }`.")
+    @ApiResponse(responseCode = "200", description = "Password changed; access and refresh cookies cleared. No payload — "
+            + "the response carries only a confirmation message.")
     @ApiResponse(responseCode = "400", description = "Request failed field validation. `detail` is a fixed "
             + "summary string (\"validation failed\") — the actual failures are in the `errors` array, one "
             + "entry per field with `field` and `message`. For `newPassword`, `message` enumerates every "
@@ -165,8 +163,8 @@ public class UsersController {
             + "authenticate anywhere but /api/auth/oauth2/complete-registration until it sets "
             + "one), so unlinking can never leave the account with zero login paths. A "
             + "notification email is sent best-effort to the account's address either way.")
-    @ApiResponse(responseCode = "200", description = "Google unlinked (or was already unlinked — idempotent). Body is "
-            + "`{ \"data\": null, \"message\": string }`.")
+    @ApiResponse(responseCode = "200", description = "Google unlinked (or was already unlinked — idempotent). No payload — "
+            + "the response carries only a confirmation message.")
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "The authenticated account's email address is not yet verified.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "404", description = "The access token is valid but the user it names no longer exists.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))

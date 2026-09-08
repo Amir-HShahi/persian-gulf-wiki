@@ -40,7 +40,7 @@ public class PasswordController {
             + "sendPasswordResetEmail is @Async, so this response does not confirm delivery, "
             + "only that the token was persisted.")
     @ApiResponse(responseCode = "200", description = "Reset token issued and persisted; email dispatch was triggered (not confirmed "
-            + "delivered). Body is `{ \"data\": null, \"message\": string }`.")
+            + "delivered). No payload — the response carries only a confirmation message.")
     @ApiResponse(responseCode = "400", description = "Request failed field validation. `detail` is a fixed "
             + "summary string (\"validation failed\") — the actual failures are in the `errors` array, one "
             + "entry per field with `field` and `message`. `email` is required and must be a "
@@ -59,8 +59,8 @@ public class PasswordController {
             + "an unrecognized one. On success, every existing session for the user is revoked "
             + "— including the one, if any, that the caller is currently using — so a stolen "
             + "refresh cookie can't outlive the credential that issued it.")
-    @ApiResponse(responseCode = "200", description = "Password changed; all of the user's active sessions revoked. Body is "
-            + "`{ \"data\": null, \"message\": string }`.")
+    @ApiResponse(responseCode = "200", description = "Password changed; all of the user's active sessions revoked. No payload "
+            + "— the response carries only a confirmation message.")
     @ApiResponse(responseCode = "400", description = "Request failed field validation. `detail` is a fixed "
             + "summary string (\"validation failed\") — the actual failures are in the `errors` array, one "
             + "entry per field with `field` and `message`. For `newPassword`, `message` enumerates every "

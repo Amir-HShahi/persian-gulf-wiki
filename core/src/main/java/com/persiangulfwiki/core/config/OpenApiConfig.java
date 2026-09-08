@@ -25,6 +25,13 @@ import java.util.Optional;
 @Configuration
 public class OpenApiConfig {
 
+    // Flattens ApiResult<T> to T on every documented response — see the class javadoc and the
+    // "Response envelope" section of the API description below.
+    @Bean
+    ApiResultSchemaConverter apiResultSchemaConverter() {
+        return new ApiResultSchemaConverter();
+    }
+
     @Bean
     OpenAPI customOpenAPI(@Value("${app.jwt.access-token-cookie-name}") String cookieName,
                            Optional<BuildProperties> buildProperties) {
@@ -46,15 +53,31 @@ public class OpenApiConfig {
                                                 (e.g. curl --cookie-jar, Postman's cookie jar).""")))
                 .info(new Info().title("Persian Gulf Wiki API").version(version)
                         .description("""
-                                ## Response envelope
+                                ## Response envelope — read this before using any response schema below
 
-                                Every successful (2xx) JSON response body is wrapped the same way: \
-                                `{ "data": ..., "message": "..." }`. `data` holds the endpoint's actual payload \
-                                — `null` for endpoints with nothing to return beyond the message — and `message` \
-                                is a localized, human-readable confirmation string. A `204 No Content` response \
-                                (e.g. revoking a session, unlinking Google, issuing the CSRF cookie) has no body \
-                                at all and is not wrapped. Error responses are never wrapped this way either — \
-                                see the error-body note below.
+                                **The response schemas shown throughout this page are simplified: they show only \
+                                the payload, not the envelope it actually arrives in.** On the wire, every \
+                                successful (2xx) JSON response body is wrapped the same way:
+
+                                ```json
+                                { "data": <the schema documented for that endpoint>, "message": "..." }
+                                ```
+
+                                `data` holds the endpoint's payload — exactly the schema shown under that \
+                                endpoint's success response — and `message` is a localized, human-readable \
+                                confirmation string. So where an endpoint documents a `RegisterResponse`, the \
+                                body you actually receive is `{ "data": { …RegisterResponse… }, "message": "…" }`, \
+                                and you read the payload at `response.data`. The envelope is omitted from every \
+                                individual schema purely to keep them readable — it is never absent from the \
+                                actual response.
+
+                                Endpoints that document **no success schema at all** still return the envelope, \
+                                with `data` set to `null`: `{ "data": null, "message": "..." }`. There is simply \
+                                no payload to document for them.
+
+                                Two exceptions are genuinely unwrapped: a `204 No Content` response (e.g. issuing \
+                                the CSRF cookie) has no body whatsoever, and error responses are never wrapped — \
+                                they are RFC 7807 error objects, documented in full on each endpoint.
 
                                 ## Response language
 
