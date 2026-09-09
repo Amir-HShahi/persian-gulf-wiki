@@ -1,0 +1,3 @@
+package imagepipe
+
+import "testing"
