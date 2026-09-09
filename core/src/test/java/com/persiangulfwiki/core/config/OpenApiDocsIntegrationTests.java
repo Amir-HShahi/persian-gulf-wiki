@@ -81,4 +81,23 @@ class OpenApiDocsIntegrationTests {
                 .andExpect(jsonPath("$.info.description")
                         .value(org.hamcrest.Matchers.containsString("\"data\"")));
     }
+
+    @Test
+    void logoIsAdvertisedOnTheInfoObject() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.info['x-logo'].url").value("/docs/logo.svg"))
+                .andExpect(jsonPath("$.info['x-logo'].altText").value("Persian Gulf Wiki"));
+    }
+
+    @Test
+    void stagingIsTheFirstServerOffered() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.servers[0].description").value("Staging"))
+                .andExpect(jsonPath("$.servers[0].url")
+                        .value("https://pgw-staging-api.ravensandrunes.me"))
+                .andExpect(jsonPath("$.servers[1].description").value("Production"))
+                .andExpect(jsonPath("$.servers[2].description").value("Local"));
+    }
 }

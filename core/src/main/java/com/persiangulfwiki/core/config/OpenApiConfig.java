@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Configuration
@@ -36,6 +37,15 @@ public class OpenApiConfig {
     OpenAPI customOpenAPI(@Value("${app.jwt.access-token-cookie-name}") String cookieName,
                            Optional<BuildProperties> buildProperties) {
         String version = buildProperties.map(BuildProperties::getVersion).orElse("dev");
+        Info info = apiInfo(version);
+        // The conventional spec-level place to declare a logo, honoured by Redoc-style viewers.
+        // Scalar is not one of them — it has no logo option and ignores this — so the logo our
+        // own docs page shows is drawn in static/docs/index.html instead; this is here so the
+        // spec stays self-describing for anything else pointed at /v3/api-docs. Root-relative
+        // because the asset is served from the same origin as the spec, so it resolves on every
+        // environment in the server list without hardcoding a host. Set as a statement rather
+        // than chained into apiInfo() because addExtension returns void.
+        info.addExtension("x-logo", Map.of("url", "/docs/logo.svg", "altText", "Persian Gulf Wiki"));
         return new OpenAPI()
                 .components(new Components()
                 .addSecuritySchemes("cookieAuth",
@@ -51,7 +61,18 @@ public class OpenApiConfig {
                                                 only be tested from a browser session that has actually logged \
                                                 in, or an HTTP client that replays the real Set-Cookie response \
                                                 (e.g. curl --cookie-jar, Postman's cookie jar).""")))
-                .info(new Info().title("Persian Gulf Wiki API").version(version)
+                .info(info)
+                // Staging leads the list on purpose: docs UIs preselect the first server, and
+                // staging is the host frontend devs are meant to point at while building.
+                .servers(List.of(
+                        new Server().url("https://pgw-staging-api.ravensandrunes.me")
+                                .description("Staging"),
+                        new Server().url("https://pgw-api.ravensandrunes.me").description("Production"),
+                        new Server().url("http://localhost:8080").description("Local")));
+    }
+
+    private Info apiInfo(String version) {
+        return new Info().title("Persian Gulf Wiki API").version(version)
                         .description("""
                                 ## Response envelope — read this before using any response schema below
 
@@ -156,12 +177,7 @@ public class OpenApiConfig {
                                 Calling this API directly from bare `localhost` with no proxy and no hosts-file \
                                 mapping is not supported — the `Domain` mismatch cannot be worked around from \
                                 the browser or from request headers.
-                                """))
-                .servers(List.of(
-                        new Server().url("https://pgw-api.ravensandrunes.me").description("Production"),
-                        new Server().url("https://pgw-staging-api.ravensandrunes.me")
-                                .description("Staging"),
-                        new Server().url("http://localhost:8080").description("Local")));
+                                """);
     }
 
     // These two routes are registered by Spring Security's own oauth2Login() support, not by
@@ -189,7 +205,7 @@ public class OpenApiConfig {
                                         .addApiResponse("302", new ApiResponse()
                                                 .description(
                                                         "Redirects the browser to Google's consent screen.")
-                                                .headers(java.util.Map.of("Location", new Header()
+                                                .headers(Map.of("Location", new Header()
                                                         .description("Google's consent screen URL.")
                                                         .schema(new Schema<String>().type("string"))))))))
                 .addPathItem("/login/oauth2/code/google", new PathItem()
@@ -235,7 +251,7 @@ public class OpenApiConfig {
                                                 .description("Redirects the browser to one of this app's own "
                                                         + "pages — signed in, password setup, or error. See "
                                                         + "the description above for which.")
-                                                .headers(java.util.Map.of("Location", new Header()
+                                                .headers(Map.of("Location", new Header()
                                                         .description("One of the app's own result pages.")
                                                         .schema(new Schema<String>().type("string"))))))));
     }
