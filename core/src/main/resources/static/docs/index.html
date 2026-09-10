@@ -1,11 +1,46 @@
 <!doctype html>
 <html>
-  <head><title>Persian Gulf Wiki API</title></head>
+  <head>
+    <title>Persian Gulf Wiki API</title>
+    <link rel="icon" type="image/svg+xml" href="/docs/logo.svg" />
+    <style>
+      /*
+        Scalar has no logo option — neither a config field nor the `x-logo` spec extension that
+        Redoc-style viewers read — so the sidebar lockup is drawn here instead, against
+        `t-doc__sidebar` (Scalar's documented theming hook). Only the mark is artwork; the
+        wordmark is text coloured by Scalar's own sidebar variable, so it follows the light/dark
+        toggle. It deliberately does not use a prefers-color-scheme SVG: Scalar's theme toggle is
+        independent of the OS setting, so a dark-OS viewer reading the docs in light mode would
+        get a near-invisible wordmark.
+      */
+      .t-doc__sidebar::before {
+        content: "Persian Gulf Wiki";
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        min-height: 32px;
+        margin: 16px 12px 4px;
+        padding-left: 42px;
+        background: url(/docs/logo.svg) left center / 32px 32px no-repeat;
+        color: var(--scalar-sidebar-color-1, var(--scalar-color-1));
+        font-family: var(--scalar-font);
+        font-size: 15px;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+      }
+    </style>
+  </head>
   <body>
+    <!--
+      showDeveloperTools defaults to "localhost", which hides the toolbar's Configure panel on
+      every deployed host. Forced on so the docs behave the same on staging and production as
+      they do locally. The panel is client-side only — it changes the visitor's own view
+      (theme, layout) and reveals nothing but the Scalar config this page already ships.
+    -->
     <script
       id="api-reference"
       data-url="/v3/api-docs"
-      data-configuration='{"hideModels": true, "agent": {"disabled": true}}'
+      data-configuration='{"hideModels": true, "agent": {"disabled": true}, "favicon": "/docs/logo.svg", "showDeveloperTools": "always"}'
     ></script>
     <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
   </body>
