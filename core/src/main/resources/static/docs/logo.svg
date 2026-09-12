@@ -1,0 +1,17 @@
+<!--
+  Placeholder brand mark — a stylised gulf inlet in a rounded square. Serves double duty as
+  the tab icon and as the docs sidebar mark (see index.html). Swap this one file for the real
+  Persian Gulf Wiki asset when there is one; nothing else needs to change.
+
+  Colours are baked in rather than themed: this renders through an <img>/CSS background, which
+  gives the SVG its own styling context, so it inherits nothing from the page. The brand blue
+  reads against both the light and dark docs themes.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" role="img"
+     aria-label="Persian Gulf Wiki">
+  <rect width="40" height="40" rx="10" fill="#0f5d7c"/>
+  <path d="M10 30c4.5 0 4.5-4 9-4s4.5 4 9 4" fill="none" stroke="#7fd4e8"
+        stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M12 13h6a8 8 0 0 1 0 16h-2" fill="none" stroke="#ffffff" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
