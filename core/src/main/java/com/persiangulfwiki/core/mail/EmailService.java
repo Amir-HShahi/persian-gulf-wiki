@@ -37,7 +37,7 @@ public class EmailService {
     // padding, so a raw token needs no escaping to sit in the query string either.
     @Async
     public void sendPasswordResetEmail(String toEmail, String rawToken) {
-        String resetUrl = frontendBaseUrl + "/reset-password?token=" + rawToken;
+        String resetUrl = frontendBaseUrl + "/reset-password/" + rawToken;
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromAddress);
@@ -56,7 +56,7 @@ public class EmailService {
 
     @Async
     public void sendVerificationEmail(String toEmail, String rawToken) {
-        String verifyUrl = frontendBaseUrl + "/verify-email?token=" + rawToken;
+        String verifyUrl = frontendBaseUrl + "/verify-email/" + rawToken;
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromAddress);
