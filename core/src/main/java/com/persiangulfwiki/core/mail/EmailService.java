@@ -33,11 +33,11 @@ public class EmailService {
     @Value("${app.mail.from-address}")
     private final String fromAddress;
 
-    // Tokens ride in the path, not a query string — TokenHasher emits base64url without
-    // padding, so a raw token is already safe as a single path segment with no escaping.
+    // Tokens ride in a query param, not the path — TokenHasher emits base64url without
+    // padding, so a raw token needs no escaping to sit in the query string either.
     @Async
     public void sendPasswordResetEmail(String toEmail, String rawToken) {
-        String resetUrl = frontendBaseUrl + "/reset-password/" + rawToken;
+        String resetUrl = frontendBaseUrl + "/reset-password?token=" + rawToken;
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromAddress);
@@ -56,7 +56,7 @@ public class EmailService {
 
     @Async
     public void sendVerificationEmail(String toEmail, String rawToken) {
-        String verifyUrl = frontendBaseUrl + "/verify-email/" + rawToken;
+        String verifyUrl = frontendBaseUrl + "/verify-email?token=" + rawToken;
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromAddress);
