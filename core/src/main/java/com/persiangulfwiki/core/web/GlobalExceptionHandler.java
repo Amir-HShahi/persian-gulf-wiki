@@ -4,6 +4,15 @@ import com.persiangulfwiki.core.admin.exception.InvalidPagingParametersException
 import com.persiangulfwiki.core.admin.exception.LastAdminException;
 import com.persiangulfwiki.core.admin.exception.RoleAlreadyGrantedException;
 import com.persiangulfwiki.core.admin.exception.RoleNotGrantedException;
+import com.persiangulfwiki.core.article.exception.ArticleNotFoundException;
+import com.persiangulfwiki.core.article.exception.DuplicateSlugException;
+import com.persiangulfwiki.core.article.exception.DuplicateTranslationLanguageException;
+import com.persiangulfwiki.core.article.exception.EntityTypeNotDerivableException;
+import com.persiangulfwiki.core.article.exception.InvalidEntityTypeException;
+import com.persiangulfwiki.core.article.exception.NotRevisionAuthorException;
+import com.persiangulfwiki.core.article.exception.RevisionNotEditableException;
+import com.persiangulfwiki.core.article.exception.RevisionNotFoundException;
+import com.persiangulfwiki.core.article.exception.TranslationNotFoundException;
 import com.persiangulfwiki.core.auth.exception.AccountDisabledException;
 import com.persiangulfwiki.core.auth.exception.DuplicateUserException;
 import com.persiangulfwiki.core.auth.exception.InvalidCredentialsException;
@@ -15,6 +24,11 @@ import com.persiangulfwiki.core.expertreviewer.exception.DuplicatePendingApplica
 import com.persiangulfwiki.core.expertreviewer.exception.InvalidApplicationStatusException;
 import com.persiangulfwiki.core.oauth2.exception.PasswordAlreadySetException;
 import com.persiangulfwiki.core.password.exception.InvalidPasswordResetTokenException;
+import com.persiangulfwiki.core.source.exception.SourceNotFoundException;
+import com.persiangulfwiki.core.subject.exception.InvalidGeometryException;
+import com.persiangulfwiki.core.subject.exception.InvalidSubjectKindException;
+import com.persiangulfwiki.core.subject.exception.SubjectKindMismatchException;
+import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
 import com.persiangulfwiki.core.user.exception.SessionAlreadyRevokedException;
 import com.persiangulfwiki.core.user.exception.SessionNotFoundException;
 import com.persiangulfwiki.core.user.exception.UserNotFoundException;
@@ -35,6 +49,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import lombok.RequiredArgsConstructor;
@@ -160,6 +175,76 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidApplicationStatus"), "INVALID_APPLICATION_STATUS", request);
     }
 
+    @ExceptionHandler(SubjectNotFoundException.class)
+    public ProblemDetail handleSubjectNotFound(SubjectNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.subjectNotFound"), "SUBJECT_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(SourceNotFoundException.class)
+    public ProblemDetail handleSourceNotFound(SourceNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.sourceNotFound"), "SOURCE_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(InvalidSubjectKindException.class)
+    public ProblemDetail handleInvalidSubjectKind(InvalidSubjectKindException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidSubjectKind"), "INVALID_SUBJECT_KIND", request);
+    }
+
+    @ExceptionHandler(InvalidGeometryException.class)
+    public ProblemDetail handleInvalidGeometry(InvalidGeometryException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidGeometry"), "INVALID_GEOMETRY", request);
+    }
+
+    @ExceptionHandler(SubjectKindMismatchException.class)
+    public ProblemDetail handleSubjectKindMismatch(SubjectKindMismatchException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.subjectKindMismatch"), "SUBJECT_KIND_MISMATCH", request);
+    }
+
+    @ExceptionHandler(ArticleNotFoundException.class)
+    public ProblemDetail handleArticleNotFound(ArticleNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.articleNotFound"), "ARTICLE_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(TranslationNotFoundException.class)
+    public ProblemDetail handleTranslationNotFound(TranslationNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.translationNotFound"), "TRANSLATION_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(RevisionNotFoundException.class)
+    public ProblemDetail handleRevisionNotFound(RevisionNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.revisionNotFound"), "REVISION_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(DuplicateTranslationLanguageException.class)
+    public ProblemDetail handleDuplicateTranslationLanguage(DuplicateTranslationLanguageException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.duplicateTranslationLanguage"), "DUPLICATE_TRANSLATION_LANGUAGE", request);
+    }
+
+    @ExceptionHandler(DuplicateSlugException.class)
+    public ProblemDetail handleDuplicateSlug(DuplicateSlugException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.duplicateSlug"), "DUPLICATE_SLUG", request);
+    }
+
+    @ExceptionHandler(RevisionNotEditableException.class)
+    public ProblemDetail handleRevisionNotEditable(RevisionNotEditableException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.revisionNotEditable"), "REVISION_NOT_EDITABLE", request);
+    }
+
+    @ExceptionHandler(NotRevisionAuthorException.class)
+    public ProblemDetail handleNotRevisionAuthor(NotRevisionAuthorException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.FORBIDDEN, resolve("error.notRevisionAuthor"), "NOT_REVISION_AUTHOR", request);
+    }
+
+    @ExceptionHandler(EntityTypeNotDerivableException.class)
+    public ProblemDetail handleEntityTypeNotDerivable(EntityTypeNotDerivableException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.entityTypeNotDerivable"), "ENTITY_TYPE_NOT_DERIVABLE", request);
+    }
+
+    @ExceptionHandler(InvalidEntityTypeException.class)
+    public ProblemDetail handleInvalidEntityType(InvalidEntityTypeException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidEntityType"), "INVALID_ENTITY_TYPE", request);
+    }
+
     // ResponseEntityExceptionHandler's own ~20 built-in handlers (malformed JSON body,
     // unsupported HTTP method, unmatched route → 404, missing/invalid request param, etc.)
     // all funnel through this single method before returning. Without this override, those
@@ -213,6 +298,27 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     private record FieldViolation(String field, String message) {
+    }
+
+    // Overridden for the same reason as handleMethodArgumentNotValid: @Validated class +
+    // jakarta constraints directly on @PathVariable/@RequestParam (e.g. @Min on `page`) throw
+    // this instead of MethodArgumentNotValidException, and without this override it would
+    // still be a 400 ProblemDetail (Spring's own inherited handling) but without the per-field
+    // "errors" breakdown the frontend keys off of.
+    @Override
+    protected ResponseEntity<Object> handleHandlerMethodValidationException(
+            HandlerMethodValidationException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        List<FieldViolation> errors = ex.getParameterValidationResults().stream()
+                .flatMap(result -> result.getResolvableErrors().stream()
+                        .map(error -> new FieldViolation(
+                                result.getMethodParameter().getParameterName(), error.getDefaultMessage())))
+                .toList();
+
+        HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
+        ProblemDetail problemDetail = ProblemDetails.of(
+                HttpStatus.BAD_REQUEST, resolve("error.validationFailed"), "VALIDATION_FAILED", servletRequest);
+        problemDetail.setProperty("errors", errors);
+        return ResponseEntity.badRequest().body(problemDetail);
     }
 
     // Without this, a @PreAuthorize denial (thrown as AuthorizationDeniedException, a

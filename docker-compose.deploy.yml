@@ -33,7 +33,11 @@ services:
         condition: service_started
 
   postgres:
-    image: postgres:16
+    # postgis/postgis rather than plain postgres: Island/Port location, OilField area,
+    # Species habitat and SubjectGeometry.geom are geometry columns, which the stock image
+    # has no extension for. Same PG major (16) as before, so the existing postgres-data
+    # volume is read as-is — no dump/restore, no reinitialisation.
+    image: postgis/postgis:16-3.4
     restart: unless-stopped
     environment:
       POSTGRES_DB: core

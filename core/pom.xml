@@ -70,6 +70,15 @@
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-database-postgresql</artifactId>
 		</dependency>
+		<!-- Spatial types for the Subject taxonomy: Island/Port location, OilField area,
+		     Species habitat and SubjectGeometry.geom are real geometries, not lat/lng pairs.
+		     Brings org.locationtech.jts:jts-core transitively, which is what the entity
+		     fields are actually typed as. Version is managed by the Boot BOM alongside
+		     hibernate-core, so the two can never drift apart. -->
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-spatial</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
