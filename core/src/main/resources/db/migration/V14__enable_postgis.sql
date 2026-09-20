@@ -1,0 +1,14 @@
+-- Enables the spatial types the Subject taxonomy is built on: Island/Port location,
+-- OilField area, Species habitat and SubjectGeometry.geom are geometry columns, which
+-- stock Postgres has no type for.
+--
+-- Split out from V15's tables on purpose. Enabling an extension is an infrastructure step
+-- that depends on the *image* (postgis/postgis, see docker-compose.yml and
+-- TestcontainersConfiguration) rather than on any table, and keeping it alone means a
+-- failure here reads as "the database isn't PostGIS" instead of hiding inside a long
+-- CREATE TABLE script.
+--
+-- IF NOT EXISTS because the postgis/postgis image's own init scripts already create the
+-- extension in the default database on first boot; this migration is what guarantees it
+-- for a database that image didn't initialise.
+CREATE EXTENSION IF NOT EXISTS postgis;

@@ -31,3 +31,15 @@ app:
   # Only DevUserSeeder's named fixtures are exempt — the sweeper matches on the e2e- prefix.
   dev:
     test-user-ttl-hours: ${DEV_TEST_USER_TTL_HOURS:6}
+
+    # TTLs for the content fixtures minted by POST /api/dev/test-subjects and
+    # /api/dev/test-sources, reclaimed hourly by DevTestSubjectSweeper and
+    # DevTestSourceSweeper. Same reasoning as the user TTL above; kept as separate knobs
+    # because a suite that churns subjects per test may want a shorter window than one that
+    # creates a handful of shared citations per run.
+    test-subject-ttl-hours: ${DEV_TEST_SUBJECT_TTL_HOURS:6}
+    test-source-ttl-hours: ${DEV_TEST_SOURCE_TTL_HOURS:6}
+
+    # TTL for the article+translation+revision fixtures minted by POST /api/dev/test-articles,
+    # reclaimed hourly by DevTestArticleSweeper. Same reasoning as the two TTLs above.
+    test-article-ttl-hours: ${DEV_TEST_ARTICLE_TTL_HOURS:6}

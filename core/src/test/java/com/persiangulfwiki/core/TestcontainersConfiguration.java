@@ -21,10 +21,23 @@ public class TestcontainersConfiguration {
 		return Mockito.mock(JavaMailSender.class);
 	}
 
+	// postgis/postgis, pinned to the same 16-3.4 the compose stacks run. Two deliberate
+	// changes from the previous new PostgreSQLContainer(parse("postgres:latest")):
+	//
+	// asCompatibleSubstituteFor("postgres") is required, not cosmetic — PostgreSQLContainer
+	// verifies the image name against its own expected "postgres" and throws on any other
+	// repository, so without it every integration test fails before the container starts.
+	//
+	// The tag is pinned rather than :latest because prod is pinned to 16: PostGIS geometry
+	// columns are exactly the kind of thing that behaves differently across majors, and
+	// testing on whatever :latest resolved to that morning is how that divergence reaches
+	// production unnoticed. The image ships the postgis extension preinstalled; V14 still
+	// runs CREATE EXTENSION to actually enable it in this database.
 	@Bean
 	@ServiceConnection
 	PostgreSQLContainer postgresContainer() {
-		return new PostgreSQLContainer(DockerImageName.parse("postgres:latest"));
+		return new PostgreSQLContainer(DockerImageName.parse("postgis/postgis:16-3.4")
+				.asCompatibleSubstituteFor("postgres"));
 	}
 
 	@Bean
