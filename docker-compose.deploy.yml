@@ -32,6 +32,33 @@ services:
       redis:
         condition: service_started
 
+  pipeline:
+    image: ${PIPELINE_IMAGE}
+    restart: unless-stopped
+    # No published port. core already owns 8080 on the host, and the worker's
+    # /healthz only needs to be reachable by the container healthcheck, which
+    # runs inside the container.
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: core
+      DB_USERNAME: core
+      DB_PASSWORD: ${DB_PASSWORD}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_USE_SSL: ${MINIO_USE_SSL:-false}
+      MINIO_RAW_BUCKET: ${MINIO_RAW_BUCKET}
+      MINIO_DERIVED_BUCKET: ${MINIO_DERIVED_BUCKET}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      # Every table the worker touches is created by core's Flyway migrations.
+      # Starting before those have run means querying tables that do not exist
+      # yet, so the worker waits for core to report ready rather than
+      # crash-looping until it does.
+      app:
+        condition: service_healthy
+
   postgres:
     image: postgres:16
     restart: unless-stopped

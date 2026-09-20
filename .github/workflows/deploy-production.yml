@@ -31,6 +31,20 @@ jobs:
           tags: |
             ghcr.io/amir-hshahi/persian-gulf-wiki-core:${{ steps.version.outputs.version }}
             ghcr.io/amir-hshahi/persian-gulf-wiki-core:latest
+      # The pipeline is a separate image from the same commit: it has its own
+      # runtime (libvips) and its own release cadence would only add a way for
+      # the two to drift apart.
+      - name: Build and push submission-pipeline
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: submission-pipeline/Dockerfile
+          build-args: |
+            APP_VERSION=${{ steps.version.outputs.version }}
+          push: true
+          tags: |
+            ghcr.io/amir-hshahi/persian-gulf-wiki-pipeline:${{ steps.version.outputs.version }}
+            ghcr.io/amir-hshahi/persian-gulf-wiki-pipeline:latest
       - name: Install cloudflared
         run: |
           curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
@@ -45,4 +59,4 @@ jobs:
               -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
               -o ProxyCommand="cloudflared access ssh --hostname ${{ secrets.PROD_SSH_HOSTNAME }}" \
               deploy@${{ secrets.PROD_SSH_HOSTNAME }} \
-              "cd /opt/pgw && ./deploy.sh ghcr.io/amir-hshahi/persian-gulf-wiki-core:${{ steps.version.outputs.version }}"
+              "cd /opt/pgw && ./deploy.sh ghcr.io/amir-hshahi/persian-gulf-wiki-core:${{ steps.version.outputs.version }} ghcr.io/amir-hshahi/persian-gulf-wiki-pipeline:${{ steps.version.outputs.version }}"
