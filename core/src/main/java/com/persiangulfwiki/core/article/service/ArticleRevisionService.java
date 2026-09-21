@@ -5,6 +5,7 @@ import com.persiangulfwiki.core.article.dto.UpdateRevisionRequest;
 import com.persiangulfwiki.core.article.entity.ArticleRevision;
 import com.persiangulfwiki.core.article.entity.ArticleTranslation;
 import com.persiangulfwiki.core.article.entity.RevisionStatus;
+import com.persiangulfwiki.core.article.event.RevisionSubmittedEvent;
 import com.persiangulfwiki.core.article.exception.NotRevisionAuthorException;
 import com.persiangulfwiki.core.article.exception.RevisionNotEditableException;
 import com.persiangulfwiki.core.article.exception.RevisionNotFoundException;
@@ -14,6 +15,7 @@ import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,11 @@ public class ArticleRevisionService {
     // String the entity actually stores. See the JSON-mapping decision comment on
     // ArticleRevision.body for why the entity is String rather than JsonNode.
     private final ObjectMapper objectMapper;
+
+    // Lets submit() announce that a revision is now awaiting review without this package
+    // knowing that a moderation package exists -- see RevisionSubmittedEvent for why the
+    // notification has to run in this direction, and why the listener is synchronous.
+    private final ApplicationEventPublisher eventPublisher;
 
     // The sole place a new ArticleRevision row is ever inserted -- both ArticleService.create
     // and ArticleTranslationService.addTranslation call this rather than building the entity
@@ -93,23 +100,75 @@ public class ArticleRevisionService {
         return toResponse(getRevisionScoped(articleId, language, revisionId));
     }
 
-    // Moves DRAFT|CHANGES_REQUESTED -> PENDING and nothing else.
+    // Moves DRAFT|CHANGES_REQUESTED -> PENDING, then announces it.
     //
-    // TODO(Phase 3): ModerationService extends this transition with task creation (a first
-    // submit, from DRAFT, opens a new ModerationTask) and task reopen (a resubmit after
-    // REQUEST_CHANGES, from CHANGES_REQUESTED, reopens the existing one) -- both belong to
-    // the moderation package, not here. This method stays the bare status move on purpose:
-    // the moderation package depends on article, and wiring task creation into this method
-    // would invert that dependency.
+    // Phase 3 resolved the TODO that used to sit here (it asked for task creation on a first
+    // submit and task reopen on a resubmit after REQUEST_CHANGES, without inverting the
+    // package dependency) by publishing RevisionSubmittedEvent instead of calling into
+    // moderation: moderation listens, and this package still knows nothing about it. The
+    // listener is synchronous and runs inside this transaction, so a revision cannot end up
+    // PENDING with no moderation task behind it. Read RevisionSubmittedEvent before changing
+    // any of that.
     @Transactional
     public RevisionResponse submit(UUID callerUserId, UUID articleId, String language, UUID revisionId) {
         ArticleRevision revision = getRevisionScoped(articleId, language, revisionId);
         requireAuthor(revision, callerUserId);
         requireEditable(revision);
 
-        revision.setStatus(RevisionStatus.PENDING);
+        // Captured before the write: DRAFT means nobody has ever reviewed this revision,
+        // CHANGES_REQUESTED means a moderator sent it back and the author has now fixed it.
+        // Those are the two branches the listener has to tell apart, and after setStatus they
+        // are indistinguishable.
+        boolean firstSubmission = revision.getStatus() == RevisionStatus.DRAFT;
 
-        return toResponse(articleRevisionRepository.save(revision));
+        revision.setStatus(RevisionStatus.PENDING);
+        ArticleRevision saved = articleRevisionRepository.save(revision);
+
+        eventPublisher.publishEvent(new RevisionSubmittedEvent(saved.getId(), firstSubmission));
+
+        return toResponse(saved);
+    }
+
+    // Read-only status probe for the moderation package, which must refuse to record a
+    // decision on a revision that is not actually awaiting review. Exposed as a narrow
+    // accessor rather than letting moderation reach for ArticleRevisionRepository directly,
+    // so this package keeps sole ownership of its own persistence.
+    @Transactional(readOnly = true)
+    public RevisionStatus getStatus(UUID revisionId) {
+        return articleRevisionRepository.findById(revisionId)
+                .orElseThrow(RevisionNotFoundException::new)
+                .getStatus();
+    }
+
+    // The write half of the same boundary: moderation decides the outcome, this package
+    // applies it. Called only from ModerationService, and only with APPROVED, REJECTED or
+    // CHANGES_REQUESTED -- a decision can never produce DRAFT or PENDING.
+    //
+    // APPROVE is the one outcome that does more than move a status: an approved revision
+    // becomes what readers of that translation actually see, which means pointing the
+    // translation's currentRevisionId at it. That pointer move belongs here rather than in
+    // moderation for the same reason getStatus does -- article_translations is this
+    // package's table.
+    //
+    // Note what deliberately does NOT happen on approval: sibling-language translations are
+    // not flipped to OUTDATED. That cascade is an explicitly deferred design question (what
+    // exactly isOutdated() diffs against was never settled), not an oversight -- see the
+    // ArticleTranslation entity.
+    @Transactional
+    public void applyModerationOutcome(UUID revisionId, RevisionStatus outcome) {
+        ArticleRevision revision = articleRevisionRepository.findById(revisionId)
+                .orElseThrow(RevisionNotFoundException::new);
+        revision.setStatus(outcome);
+        articleRevisionRepository.save(revision);
+
+        if (outcome != RevisionStatus.APPROVED) {
+            return;
+        }
+
+        ArticleTranslation translation = articleTranslationRepository.findById(revision.getTranslationId())
+                .orElseThrow(TranslationNotFoundException::new);
+        translation.setCurrentRevisionId(revision.getId());
+        articleTranslationRepository.save(translation);
     }
 
     private void requireAuthor(ArticleRevision revision, UUID callerUserId) {

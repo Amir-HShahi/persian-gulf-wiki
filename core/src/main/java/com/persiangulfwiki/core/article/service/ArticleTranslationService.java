@@ -58,11 +58,11 @@ public class ArticleTranslationService {
                 .translationState(TranslationState.UP_TO_DATE)
                 .build());
 
-        UUID revisionId = articleRevisionService.createInitialRevision(
+        // Left null on purpose -- see the same decision in ArticleService.create. A new
+        // language starts unpublished like any other draft, and stays that way until a
+        // moderator approves its first revision.
+        articleRevisionService.createInitialRevision(
                 translation.getId(), request.title(), request.body(), request.summary(), authorUserId);
-
-        translation.setCurrentRevisionId(revisionId);
-        articleTranslationRepository.save(translation);
 
         return toResponse(translation);
     }
