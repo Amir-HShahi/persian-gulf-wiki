@@ -2,6 +2,7 @@ package com.persiangulfwiki.core.dev;
 
 import com.persiangulfwiki.core.TestcontainersConfiguration;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
+import com.persiangulfwiki.core.moderation.repository.ModerationTaskRepository;
 import com.persiangulfwiki.core.source.repository.SourceRepository;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 
@@ -43,6 +44,9 @@ class DevTestContentEndpointDisabledIntegrationTests {
     private ArticleRepository articleRepository;
 
     @Autowired
+    private ModerationTaskRepository moderationTaskRepository;
+
+    @Autowired
     private ApplicationContext applicationContext;
 
     @Test
@@ -50,12 +54,14 @@ class DevTestContentEndpointDisabledIntegrationTests {
         assertThat(applicationContext.getBeanNamesForType(DevTestSubjectController.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestSourceController.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestArticleController.class)).isEmpty();
-        // The sweepers matter most of the six: they are the ones that delete rows, on a
+        assertThat(applicationContext.getBeanNamesForType(DevTestModerationController.class)).isEmpty();
+        // The sweepers matter most of the eight: they are the ones that delete rows, on a
         // schedule rather than on a request, so an unprofiled copy would run in production
         // with nothing to trigger it and nothing to notice.
         assertThat(applicationContext.getBeanNamesForType(DevTestSubjectSweeper.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestSourceSweeper.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestArticleSweeper.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestModerationSweeper.class)).isEmpty();
     }
 
     @Test
@@ -69,6 +75,8 @@ class DevTestContentEndpointDisabledIntegrationTests {
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(get("/api/dev/test-articles/{articleId}", UUID.randomUUID()))
                 .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/dev/test-moderation-tasks/{taskId}", UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -76,6 +84,7 @@ class DevTestContentEndpointDisabledIntegrationTests {
         long subjectsBefore = subjectRepository.count();
         long sourcesBefore = sourceRepository.count();
         long articlesBefore = articleRepository.count();
+        long moderationTasksBefore = moderationTaskRepository.count();
 
         // 403 rather than 401 for the same reason as the user fixture route: the main chain's
         // CSRF filter runs ahead of authorization and /api/dev/** is not exempt from it, so
@@ -93,9 +102,14 @@ class DevTestContentEndpointDisabledIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/dev/test-moderation-tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden());
 
         assertThat(subjectRepository.count()).isEqualTo(subjectsBefore);
         assertThat(sourceRepository.count()).isEqualTo(sourcesBefore);
         assertThat(articleRepository.count()).isEqualTo(articlesBefore);
+        assertThat(moderationTaskRepository.count()).isEqualTo(moderationTasksBefore);
     }
 }

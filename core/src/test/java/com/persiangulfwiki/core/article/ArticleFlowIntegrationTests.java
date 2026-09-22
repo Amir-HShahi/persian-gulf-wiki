@@ -33,6 +33,7 @@ import java.util.Base64;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -276,12 +277,16 @@ class ArticleFlowIntegrationTests {
                 .andReturn().getResponse().getContentAsString();
         UUID articleId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(created, "$.data.id"));
 
-        String translation = mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa"))
+        mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.language").value("fa"))
-                .andExpect(jsonPath("$.data.currentRevisionId").exists())
-                .andReturn().getResponse().getContentAsString();
-        UUID revisionId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(translation, "$.data.currentRevisionId"));
+                // Created, but not published: currentRevisionId names the revision readers are
+                // served, and only a moderator's approval may point it at one. A brand-new
+                // article has nothing approved, so it is null -- the draft below is reachable
+                // through the revision history instead.
+                .andExpect(jsonPath("$.data.currentRevisionId").value(nullValue()));
+
+        UUID revisionId = firstRevisionId(articleId);
 
         mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa/revisions/" + revisionId))
                 .andExpect(status().isOk())
@@ -384,10 +389,7 @@ class ArticleFlowIntegrationTests {
                 .andReturn().getResponse().getContentAsString();
         UUID articleId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(created, "$.data.id"));
 
-        String translation = mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa"))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-        UUID revisionId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(translation, "$.data.currentRevisionId"));
+        UUID revisionId = firstRevisionId(articleId);
 
         UpdateRevisionRequest update = new UpdateRevisionRequest("Edited title", nestedBody(), "edited summary");
         mockMvc.perform(patch("/api/articles/" + articleId + "/translations/fa/revisions/" + revisionId)
@@ -404,8 +406,11 @@ class ArticleFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.status").value("DRAFT"));
     }
 
-    // submit() must do only the status move -- no moderation state exists yet (the moderation
-    // package is Phase 3), so the only observable effect is DRAFT -> PENDING.
+    // Scoped to the status move on purpose. Phase 3 has since landed, so submit now also opens
+    // a moderation task -- but that half belongs to the moderation package and is covered by
+    // ModerationFlowIntegrationTests. What this test still pins down is that the article-side
+    // contract did not change when moderation was wired in: an author submitting a draft
+    // observes DRAFT -> PENDING and nothing else about their own revision.
     @Test
     void submitMovesDraftToPendingOnly() throws Exception {
         registerVerifiedContributor("afauth9", "af-author9@example.com");
@@ -636,12 +641,19 @@ class ArticleFlowIntegrationTests {
                 .andReturn().getResponse().getContentAsString();
         UUID articleId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(created, "$.data.id"));
 
-        String translation = mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa"))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-        UUID revisionId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(translation, "$.data.currentRevisionId"));
+        UUID revisionId = firstRevisionId(articleId);
 
         return new UUID[] {articleId, revisionId};
+    }
+
+    // A draft is found through the revision history, never through the translation's
+    // currentRevisionId -- that pointer names published content and stays null until a
+    // moderator approves a revision (Phase 3), so it is not a way to reach a draft.
+    private UUID firstRevisionId(UUID articleId) throws Exception {
+        String revisions = mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa/revisions"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        return UUID.fromString(com.jayway.jsonpath.JsonPath.read(revisions, "$.data[0].id"));
     }
 
     // --- Regression coverage for what this change could plausibly have broken ---

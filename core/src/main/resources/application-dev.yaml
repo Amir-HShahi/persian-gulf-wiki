@@ -43,3 +43,11 @@ app:
     # TTL for the article+translation+revision fixtures minted by POST /api/dev/test-articles,
     # reclaimed hourly by DevTestArticleSweeper. Same reasoning as the two TTLs above.
     test-article-ttl-hours: ${DEV_TEST_ARTICLE_TTL_HOURS:6}
+
+    # TTL for the moderation-task fixtures minted by POST /api/dev/test-moderation-tasks,
+    # reclaimed hourly by DevTestModerationSweeper. Same reasoning again, with one operational
+    # note: this sweeper runs at :10, ahead of DevTestUserSweeper at :30, because an expired
+    # task's decision rows can block that user sweep outright — see the cron comment in
+    # DevTestModerationSweeper. Shortening this below the user TTL widens that window rather
+    # than narrowing it, so keep the two in step.
+    test-moderation-ttl-hours: ${DEV_TEST_MODERATION_TTL_HOURS:6}
