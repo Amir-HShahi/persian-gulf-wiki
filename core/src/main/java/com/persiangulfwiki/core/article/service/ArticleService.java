@@ -64,11 +64,14 @@ public class ArticleService {
                 .translationState(TranslationState.UP_TO_DATE)
                 .build());
 
-        UUID revisionId = articleRevisionService.createInitialRevision(
+        // currentRevisionId is deliberately left null here. It names the revision readers are
+        // served, and a revision nobody has reviewed is not that -- only a moderator's APPROVE
+        // may point it anywhere (ArticleRevisionService.applyModerationOutcome is the sole
+        // writer). Setting it to the freshly created DRAFT, as this originally did, published
+        // unmoderated content to anonymous readers the instant an article was created and made
+        // the approval step a no-op that re-pointed it where it already pointed.
+        articleRevisionService.createInitialRevision(
                 translation.getId(), request.title(), request.body(), request.summary(), creatorUserId);
-
-        translation.setCurrentRevisionId(revisionId);
-        articleTranslationRepository.save(translation);
 
         return toResponse(article);
     }

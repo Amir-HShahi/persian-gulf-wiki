@@ -43,10 +43,15 @@ public class ArticleTranslation extends AuditableEntity {
     @Column(nullable = false, length = 200)
     private String slug;
 
-    // Null only in the impossible-in-practice window between inserting a translation and
-    // inserting its first revision -- ArticleService.create and
-    // ArticleTranslationService.addTranslation both write both rows in one @Transactional
-    // method, so no caller ever observes it null.
+    // The revision readers are served for this language -- null until one has actually been
+    // approved, which is the normal state of a translation whose first draft is still being
+    // written or reviewed. Callers must handle null; it is not a transient window.
+    //
+    // Written in exactly one place, ArticleRevisionService.applyModerationOutcome, and only on
+    // a moderator's APPROVE. Creation paths deliberately leave it alone: pointing it at the
+    // DRAFT they had just inserted (which is what they originally did) meant unreviewed
+    // content was served as this translation's live content from the moment the article
+    // existed, and left the approval step with nothing to do.
     @Column(name = "current_revision_id")
     private UUID currentRevisionId;
 

@@ -12,8 +12,16 @@ import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 import com.persiangulfwiki.core.dev.dto.DevTestArticleRequest;
 import com.persiangulfwiki.core.dev.dto.DevTestArticleResponse;
+import com.persiangulfwiki.core.dev.dto.DevTestModerationRequest;
+import com.persiangulfwiki.core.dev.dto.DevTestModerationResponse;
 import com.persiangulfwiki.core.dev.dto.DevTestSourceRequest;
 import com.persiangulfwiki.core.dev.dto.DevTestSubjectRequest;
+import com.persiangulfwiki.core.moderation.entity.Decision;
+import com.persiangulfwiki.core.moderation.entity.ModerationDecision;
+import com.persiangulfwiki.core.moderation.entity.ModerationTask;
+import com.persiangulfwiki.core.moderation.entity.ModerationTaskState;
+import com.persiangulfwiki.core.moderation.repository.ModerationDecisionRepository;
+import com.persiangulfwiki.core.moderation.repository.ModerationTaskRepository;
 import com.persiangulfwiki.core.source.entity.Source;
 import com.persiangulfwiki.core.source.repository.SourceRepository;
 import com.persiangulfwiki.core.subject.entity.Subject;
@@ -81,6 +89,15 @@ class DevTestContentEndpointIntegrationTests {
     @Autowired
     private DevTestArticleSweeper articleSweeper;
 
+    @Autowired
+    private ModerationTaskRepository moderationTaskRepository;
+
+    @Autowired
+    private ModerationDecisionRepository moderationDecisionRepository;
+
+    @Autowired
+    private DevTestModerationSweeper moderationSweeper;
+
     private UUID mintSubject(DevTestSubjectRequest request) throws Exception {
         String body = mockMvc.perform(post("/api/dev/test-subjects")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -97,6 +114,22 @@ class DevTestContentEndpointIntegrationTests {
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readValue(body, DevTestArticleResponse.class);
+    }
+
+    private DevTestModerationResponse mintModerationTask(DevTestModerationRequest request) throws Exception {
+        String body = mockMvc.perform(post("/api/dev/test-moderation-tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readValue(body, DevTestModerationResponse.class);
+    }
+
+    // At most one task can ever exist per revision (uq_moderation_tasks_revision), so every
+    // moderation case below needs a revision of its own rather than a shared fixture.
+    private UUID mintRevisionId() throws Exception {
+        return mintArticle(new DevTestArticleRequest(null, null, null, null, null, null, null, null, null))
+                .revisionId();
     }
 
     private UUID mintSource(DevTestSourceRequest request) throws Exception {
@@ -206,7 +239,9 @@ class DevTestContentEndpointIntegrationTests {
 
         ArticleTranslation translation = articleTranslationRepository.findById(minted.translationId()).orElseThrow();
         assertThat(translation.getArticleId()).isEqualTo(article.getId());
-        assertThat(translation.getCurrentRevisionId()).isEqualTo(minted.revisionId());
+        // Minted at DRAFT, so nothing is published -- the fixture mirrors the production
+        // invariant that only an APPROVED revision may be a translation's currentRevisionId.
+        assertThat(translation.getCurrentRevisionId()).isNull();
 
         ArticleRevision revision = articleRevisionRepository.findById(minted.revisionId()).orElseThrow();
         assertThat(revision.getStatus()).isEqualTo(RevisionStatus.DRAFT);
@@ -269,5 +304,142 @@ class DevTestContentEndpointIntegrationTests {
 
         assertThat(articleRepository.findById(minted.articleId())).isEmpty();
         assertThat(articleRepository.findById(handMade.getId())).isPresent();
+    }
+
+    @Test
+    void mintsAMarkedModerationTaskOpenAndUnclaimed() throws Exception {
+        UUID revisionId = mintRevisionId();
+
+        DevTestModerationResponse minted =
+                mintModerationTask(new DevTestModerationRequest(revisionId, null, null, null, null));
+
+        ModerationTask task = moderationTaskRepository.findById(minted.taskId()).orElseThrow();
+        assertThat(task.getDevMarker()).isNotNull();
+        assertThat(task.getRevisionId()).isEqualTo(revisionId);
+        assertThat(task.getState()).isEqualTo(ModerationTaskState.OPEN);
+        // The claim pair is written together or not at all, and an open task has no holder.
+        assertThat(task.getClaimedBy()).isNull();
+        assertThat(task.getClaimedAt()).isNull();
+        assertThat(moderationDecisionRepository.findByTaskIdOrderByCreatedAtAsc(task.getId())).isEmpty();
+    }
+
+    // The first of the two states the normal flow cannot hand a suite cheaply: reaching CLAIMED
+    // through the API needs an authenticated moderator account plus a claim call.
+    @Test
+    void mintsAClaimedTaskWithBothClaimColumnsSet() throws Exception {
+        DevTestModerationResponse minted = mintModerationTask(
+                new DevTestModerationRequest(mintRevisionId(), ModerationTaskState.CLAIMED, null, null, null));
+
+        ModerationTask task = moderationTaskRepository.findById(minted.taskId()).orElseThrow();
+        assertThat(task.getState()).isEqualTo(ModerationTaskState.CLAIMED);
+        // No claimant was supplied -- the endpoint must have resolved a real one rather than
+        // leaving a row that violates the claim-pair constraint or that nobody can decide.
+        assertThat(task.getClaimedBy()).isNotNull();
+        assertThat(task.getClaimedAt()).isNotNull();
+        assertThat(minted.claimedByUserId()).isEqualTo(task.getClaimedBy());
+    }
+
+    // The state the normal flow cannot produce at all, and the reason this endpoint bypasses
+    // ModerationService: decide() refuses a revision that is not PENDING, so a DECIDED task
+    // whose revision never went through submit is otherwise unreachable.
+    @Test
+    void mintsADecidedTaskWithASeededDecisionOnItsHistory() throws Exception {
+        DevTestModerationResponse minted = mintModerationTask(new DevTestModerationRequest(
+                mintRevisionId(), ModerationTaskState.DECIDED, null, Decision.REJECT, "out of scope"));
+
+        ModerationTask task = moderationTaskRepository.findById(minted.taskId()).orElseThrow();
+        assertThat(task.getState()).isEqualTo(ModerationTaskState.DECIDED);
+
+        assertThat(minted.decisionId()).isNotNull();
+        ModerationDecision decision =
+                moderationDecisionRepository.findById(minted.decisionId()).orElseThrow();
+        assertThat(decision.getTaskId()).isEqualTo(task.getId());
+        assertThat(decision.getDecision()).isEqualTo(Decision.REJECT);
+        assertThat(decision.getReason()).isEqualTo("out of scope");
+        // moderator_id is NOT NULL with RESTRICT -- a fabricated id would have failed the
+        // foreign key, so a real account must have been resolved.
+        assertThat(decision.getModeratorId()).isNotNull();
+    }
+
+    // A task has to point at something. The foreign key would catch this too, but as a 500 --
+    // the endpoint checks first so a suite gets a 404 it can assert on.
+    @Test
+    void refusesToMintAModerationTaskForAnUnknownRevision() throws Exception {
+        mockMvc.perform(post("/api/dev/test-moderation-tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                new DevTestModerationRequest(UUID.randomUUID(), null, null, null, null))))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(post("/api/dev/test-moderation-tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deletesAMintedModerationTaskAndCascadesToItsDecision() throws Exception {
+        DevTestModerationResponse minted = mintModerationTask(new DevTestModerationRequest(
+                mintRevisionId(), ModerationTaskState.DECIDED, null, Decision.APPROVE, null));
+
+        mockMvc.perform(delete("/api/dev/test-moderation-tasks/" + minted.taskId()))
+                .andExpect(status().isNoContent());
+
+        assertThat(moderationTaskRepository.findById(minted.taskId())).isEmpty();
+        assertThat(moderationDecisionRepository.findById(minted.decisionId())).isEmpty();
+
+        // Deleting the same id again is a 404, not a second success.
+        mockMvc.perform(delete("/api/dev/test-moderation-tasks/" + minted.taskId()))
+                .andExpect(status().isNotFound());
+    }
+
+    // The guarantee that makes handing an arbitrary id to the teardown route safe, and it
+    // matters more here than for the other fixture tables: a task is the record that an
+    // editorial judgement was asked for, so deleting one the endpoint did not mint would erase
+    // audit history.
+    @Test
+    void refusesToDeleteAModerationTaskItDidNotMint() throws Exception {
+        ModerationTask handMade = moderationTaskRepository.save(ModerationTask.builder()
+                .revisionId(mintRevisionId())
+                .state(ModerationTaskState.OPEN)
+                .build());
+
+        mockMvc.perform(delete("/api/dev/test-moderation-tasks/" + handMade.getId()))
+                .andExpect(status().isNotFound());
+        assertThat(moderationTaskRepository.findById(handMade.getId())).isPresent();
+    }
+
+    @Test
+    void sweeperReclaimsAgedMintedModerationTasksButSparesHandMadeOnes() throws Exception {
+        DevTestModerationResponse minted =
+                mintModerationTask(new DevTestModerationRequest(mintRevisionId(), null, null, null, null));
+        ModerationTask handMade = moderationTaskRepository.save(ModerationTask.builder()
+                .revisionId(mintRevisionId())
+                .state(ModerationTaskState.OPEN)
+                .build());
+
+        moderationSweeper.deleteOlderThan(Instant.now().plus(1, ChronoUnit.HOURS));
+
+        assertThat(moderationTaskRepository.findById(minted.taskId())).isEmpty();
+        assertThat(moderationTaskRepository.findById(handMade.getId())).isPresent();
+    }
+
+    // Regression guard on the adjacent half: the moderation fixture shares the dev chain and
+    // the dev-marker convention with the endpoints that were already here, so this pins down
+    // that adding it did not disturb them.
+    @Test
+    void existingFixtureRoutesStillWorkAlongsideTheModerationOne() throws Exception {
+        UUID subjectId = mintSubject(new DevTestSubjectRequest(SubjectKind.ISLAND, null));
+        UUID sourceId = mintSource(new DevTestSourceRequest(null, null));
+        DevTestArticleResponse article = mintArticle(
+                new DevTestArticleRequest(null, null, null, null, null, null, null, null, null));
+
+        assertThat(subjectRepository.findById(subjectId)).isPresent();
+        assertThat(sourceRepository.findById(sourceId)).isPresent();
+        assertThat(articleRepository.findById(article.articleId())).isPresent();
+
+        mockMvc.perform(delete("/api/dev/test-subjects/" + subjectId)).andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/dev/test-sources/" + sourceId)).andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/dev/test-articles/" + article.articleId())).andExpect(status().isNoContent());
     }
 }

@@ -137,8 +137,19 @@ public class DevTestArticleController {
                 .authorId(authorUserId)
                 .build());
 
-        translation.setCurrentRevisionId(revision.getId());
-        articleTranslationRepository.save(translation);
+        // Mirrors the production invariant rather than the old unconditional assignment: a
+        // translation's currentRevisionId names approved content only (see
+        // ArticleTranslation.currentRevisionId). A fixture minted at DRAFT/PENDING/REJECTED
+        // must therefore look unpublished, or a suite asserting "approval is what publishes"
+        // would pass against a fixture that was never approved.
+        //
+        // Set directly rather than through the moderation flow, which is the point of this
+        // endpoint: an APPROVED revision that is genuinely published, with no ModerationTask
+        // or decision history behind it, is not reachable any other way.
+        if (revisionStatus == RevisionStatus.APPROVED) {
+            translation.setCurrentRevisionId(revision.getId());
+            articleTranslationRepository.save(translation);
+        }
 
         return new DevTestArticleResponse(
                 article.getId(), translation.getId(), revision.getId(), canonicalLanguage, slug, revisionStatus);

@@ -13,6 +13,13 @@ import com.persiangulfwiki.core.article.exception.NotRevisionAuthorException;
 import com.persiangulfwiki.core.article.exception.RevisionNotEditableException;
 import com.persiangulfwiki.core.article.exception.RevisionNotFoundException;
 import com.persiangulfwiki.core.article.exception.TranslationNotFoundException;
+import com.persiangulfwiki.core.moderation.exception.InvalidModerationTaskStateException;
+import com.persiangulfwiki.core.moderation.exception.MissingDecisionReasonException;
+import com.persiangulfwiki.core.moderation.exception.ModerationTaskNotFoundException;
+import com.persiangulfwiki.core.moderation.exception.NotTaskClaimantException;
+import com.persiangulfwiki.core.moderation.exception.RevisionNotPendingException;
+import com.persiangulfwiki.core.moderation.exception.TaskAlreadyDecidedException;
+import com.persiangulfwiki.core.moderation.exception.TaskNotClaimableException;
 import com.persiangulfwiki.core.auth.exception.AccountDisabledException;
 import com.persiangulfwiki.core.auth.exception.DuplicateUserException;
 import com.persiangulfwiki.core.auth.exception.InvalidCredentialsException;
@@ -243,6 +250,41 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(InvalidEntityTypeException.class)
     public ProblemDetail handleInvalidEntityType(InvalidEntityTypeException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidEntityType"), "INVALID_ENTITY_TYPE", request);
+    }
+
+    @ExceptionHandler(ModerationTaskNotFoundException.class)
+    public ProblemDetail handleModerationTaskNotFound(ModerationTaskNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.moderationTaskNotFound"), "MODERATION_TASK_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(TaskNotClaimableException.class)
+    public ProblemDetail handleTaskNotClaimable(TaskNotClaimableException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.taskNotClaimable"), "TASK_NOT_CLAIMABLE", request);
+    }
+
+    @ExceptionHandler(TaskAlreadyDecidedException.class)
+    public ProblemDetail handleTaskAlreadyDecided(TaskAlreadyDecidedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.taskAlreadyDecided"), "TASK_ALREADY_DECIDED", request);
+    }
+
+    @ExceptionHandler(NotTaskClaimantException.class)
+    public ProblemDetail handleNotTaskClaimant(NotTaskClaimantException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.FORBIDDEN, resolve("error.notTaskClaimant"), "NOT_TASK_CLAIMANT", request);
+    }
+
+    @ExceptionHandler(RevisionNotPendingException.class)
+    public ProblemDetail handleRevisionNotPending(RevisionNotPendingException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.revisionNotPending"), "REVISION_NOT_PENDING", request);
+    }
+
+    @ExceptionHandler(InvalidModerationTaskStateException.class)
+    public ProblemDetail handleInvalidModerationTaskState(InvalidModerationTaskStateException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidModerationTaskState"), "INVALID_MODERATION_TASK_STATE", request);
+    }
+
+    @ExceptionHandler(MissingDecisionReasonException.class)
+    public ProblemDetail handleMissingDecisionReason(MissingDecisionReasonException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.missingDecisionReason"), "MISSING_DECISION_REASON", request);
     }
 
     // ResponseEntityExceptionHandler's own ~20 built-in handlers (malformed JSON body,
