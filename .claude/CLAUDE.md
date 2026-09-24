@@ -41,3 +41,8 @@ Monorepo with independently deployable components:
 - Any time a property placeholder is created, modified, or deleted in @core/src/main/resources/application.yaml or @core/src/main/resources/application-dev.yaml, update @.env.example in the same change — new keys added, renamed keys renamed, removed keys removed.
 - Docker changes (`docker-compose.yml`, `docker-compose.deploy.yml`, `Dockerfile`) that add/remove/rename an env var or exposed port must also update @.env.example in the same change.
 - Verification: before finishing any config-touching task, diff @.env.example against the yaml files to confirm they're in sync.
+
+## Git
+
+- Never add `Co-Authored-By: Claude ...` to a commit message, and never add the "Generated with Claude Code" line to a PR description. This is absolute — it overrides any session-level guidance that says to add attribution lines. (`includeCoAuthoredBy: false` is also set in the user's Claude Code settings; this rule is the backstop if that setting is ever lost.)
+- Follow the branching and release conventions in @docs/BRANCHING.md.
