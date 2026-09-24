@@ -8,6 +8,7 @@ jobs:
     # release-please and Dependabot PRs are auto-generated diffs with no
     # judgment calls to make — skip them so every PR doesn't burn a review.
     if: >
+      github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.pull_request.user.login != 'dependabot[bot]' &&
       !startsWith(github.event.pull_request.head.ref, 'release-please--')
     runs-on: ubuntu-latest
