@@ -39,6 +39,17 @@ jobs:
           tags: |
             ghcr.io/amir-hshahi/persian-gulf-wiki-core:staging
             ghcr.io/amir-hshahi/persian-gulf-wiki-core:${{ steps.version.outputs.tag }}
+      - name: Build and push submission-pipeline
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: submission-pipeline/Dockerfile
+          build-args: |
+            APP_VERSION=${{ steps.version.outputs.tag }}
+          push: true
+          tags: |
+            ghcr.io/amir-hshahi/persian-gulf-wiki-pipeline:staging
+            ghcr.io/amir-hshahi/persian-gulf-wiki-pipeline:${{ steps.version.outputs.tag }}
       - name: Install cloudflared
         run: |
           curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
@@ -53,4 +64,4 @@ jobs:
               -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
               -o ProxyCommand="cloudflared access ssh --hostname ${{ secrets.STAGING_SSH_HOSTNAME }}" \
               deploy@${{ secrets.STAGING_SSH_HOSTNAME }} \
-              "cd /opt/pgw && ./deploy.sh ghcr.io/amir-hshahi/persian-gulf-wiki-core:staging"
+              "cd /opt/pgw && ./deploy.sh ghcr.io/amir-hshahi/persian-gulf-wiki-core:staging ghcr.io/amir-hshahi/persian-gulf-wiki-pipeline:staging"

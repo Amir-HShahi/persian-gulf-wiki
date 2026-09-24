@@ -32,6 +32,87 @@ services:
       redis:
         condition: service_started
 
+  pipeline:
+    image: ${PIPELINE_IMAGE}
+    restart: unless-stopped
+    # No published port. core already owns 8080 on the host, and the worker's
+    # /healthz only needs to be reachable by the container healthcheck, which
+    # runs inside the container.
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: core
+      DB_USERNAME: core
+      DB_PASSWORD: ${DB_PASSWORD}
+      # MinIO runs in this compose network, so the worker reaches it by service
+      # name and the traffic never leaves the host. TLS would only be
+      # encrypting a loopback hop.
+      MINIO_ENDPOINT: minio:9000
+      MINIO_USE_SSL: "false"
+      # The worker currently authenticates as the MinIO root account. That is
+      # more privilege than it needs and should become a dedicated user with a
+      # bucket-scoped policy before this holds anything that matters.
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_RAW_BUCKET: ${MINIO_RAW_BUCKET:-submissions-raw}
+      MINIO_DERIVED_BUCKET: ${MINIO_DERIVED_BUCKET:-submissions-derived}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      # Every table the worker touches is created by core's Flyway migrations.
+      # Starting before those have run means querying tables that do not exist
+      # yet, so the worker waits for core to report ready rather than
+      # crash-looping until it does.
+      app:
+        condition: service_healthy
+      # Buckets are not created by the server on first write, so the worker
+      # waits for the one-shot that creates them.
+      minio-init:
+        condition: service_completed_successfully
+
+  minio:
+    # Pulled from quay.io, which is MinIO's own registry: Docker Hub now
+    # requires authentication for minio/minio and publishes no :latest tag.
+    # Pinned to a dated release so a deploy cannot pick up a different server.
+    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      # The S3 API stays on the compose network only. Publishing it would put
+      # object storage on a public IP. The console binds to loopback so it is
+      # reachable through the Cloudflare Tunnel and nowhere else, the same way
+      # Mailpit's UI is handled below.
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  minio-init:
+    image: quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      RAW_BUCKET: ${MINIO_RAW_BUCKET:-submissions-raw}
+      DERIVED_BUCKET: ${MINIO_DERIVED_BUCKET:-submissions-derived}
+    # --ignore-existing makes this safe to re-run on every deploy.
+    # $$ escapes the variable so Compose leaves it for the shell to expand.
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD &&
+      mc mb --ignore-existing local/$$RAW_BUCKET &&
+      mc mb --ignore-existing local/$$DERIVED_BUCKET
+      "
+    restart: "no"
+
   postgres:
     # postgis/postgis rather than plain postgres: Island/Port location, OilField area,
     # Species habitat and SubjectGeometry.geom are geometry columns, which the stock image
@@ -79,5 +160,6 @@ services:
 
 volumes:
   postgres-data:
+  minio-data:
   redis-data:
   mailpit-data:
