@@ -1,6 +1,7 @@
 package com.persiangulfwiki.core.oauth2;
 
 import com.persiangulfwiki.core.TestcontainersConfiguration;
+import com.persiangulfwiki.core.config.SupportedLocales;
 import com.persiangulfwiki.core.user.entity.Role;
 import com.persiangulfwiki.core.user.entity.User;
 import com.persiangulfwiki.core.user.entity.UserRole;
@@ -8,6 +9,7 @@ import com.persiangulfwiki.core.user.repository.UserRepository;
 import com.persiangulfwiki.core.user.repository.UserRoleRepository;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +31,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -78,9 +81,23 @@ class GoogleOAuth2SuccessHandlerTests {
     }
 
     private void invoke(String sub, String email, MockHttpServletResponse response) throws Exception {
+        invoke(sub, email, response, new MockHttpServletRequest());
+    }
+
+    private void invoke(String sub, String email, MockHttpServletResponse response, MockHttpServletRequest request)
+            throws Exception {
         OAuth2AuthenticationToken authentication = new OAuth2AuthenticationToken(oidcUser(sub, email), AUTHORITIES,
                 "google");
-        successHandler.onAuthenticationSuccess(new MockHttpServletRequest(), response, authentication);
+        successHandler.onAuthenticationSuccess(request, response, authentication);
+    }
+
+    // MockHttpServletRequest#getLocale falls back to ENGLISH when no locale is set, so a test
+    // that cares about the resolved language has to say so explicitly rather than rely on the
+    // default.
+    private MockHttpServletRequest requestWithLocale(Locale locale) {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addPreferredLocale(locale);
+        return request;
     }
 
     @Test
@@ -129,6 +146,49 @@ class GoogleOAuth2SuccessHandlerTests {
         assertThat(response.getCookie("access_token")).isNotNull();
         assertThat(response.getCookie("refresh_token")).isNotNull();
         assertThat(response.getRedirectedUrl()).isEqualTo(successRedirectUrl);
+    }
+
+    @Test
+    void autoLinkNotificationIsSentInTheLanguageTheBrowserAskedFor() throws Exception {
+        // This runs in the OAuth2 filter chain, where LocaleContextHolder still holds the JVM
+        // default — the locale has to come off the request or every one of these emails goes
+        // out in the fallback language regardless of who triggered it.
+        String email = "autolink-arabic@example.com";
+        String googleSub = UUID.randomUUID().toString();
+
+        userRepository.save(User.builder()
+                .username("autolinkarabic")
+                .email(email)
+                .passwordHash("already-set-hash")
+                .emailVerified(true)
+                .build());
+
+        invoke(googleSub, email, new MockHttpServletResponse(), requestWithLocale(SupportedLocales.ARABIC));
+
+        ArgumentCaptor<SimpleMailMessage> captor = ArgumentCaptor.forClass(SimpleMailMessage.class);
+        verify(javaMailSender, timeout(2000).times(1)).send(captor.capture());
+        assertThat(captor.getValue().getSubject()).isEqualTo("تم ربط حساب جوجل");
+    }
+
+    @Test
+    void autoLinkNotificationFallsBackToDefaultLocaleForAnUnsupportedLanguage() throws Exception {
+        // request.getLocale() is unconstrained — it returns whatever Accept-Language said, so
+        // the normalization to a bundle we actually ship has to hold.
+        String email = "autolink-german@example.com";
+        String googleSub = UUID.randomUUID().toString();
+
+        userRepository.save(User.builder()
+                .username("autolinkgerman")
+                .email(email)
+                .passwordHash("already-set-hash")
+                .emailVerified(true)
+                .build());
+
+        invoke(googleSub, email, new MockHttpServletResponse(), requestWithLocale(Locale.GERMAN));
+
+        ArgumentCaptor<SimpleMailMessage> captor = ArgumentCaptor.forClass(SimpleMailMessage.class);
+        verify(javaMailSender, timeout(2000).times(1)).send(captor.capture());
+        assertThat(captor.getValue().getSubject()).isEqualTo("اتصال حساب گوگل");
     }
 
     @Test

@@ -155,9 +155,8 @@ must be modeled as an API-key-in-cookie, not HTTP Bearer.
   rather than documenting a shape that isn't real.
 - **Document the CSRF header on every endpoint that requires one.** `SecurityConfig` enables
   `CookieCsrfTokenRepository.withHttpOnlyFalse()` for everything *except* the routes in its
-  `csrf(...).ignoringRequestMatchers(...)` list (currently `/api/auth/register`, `/api/auth/login`,
-  `/api/password/forgot-password`, `/api/password/reset-password`,
-  `/api/email-verification/verify` — note this is a *different* list from the `permitAll`
+  `csrf(...).ignoringRequestMatchers(...)` list (currently `/api/password/forgot-password`,
+  `/api/password/reset-password`, `/api/email-verification/verify` — note this is a *different* list from the `permitAll`
   authorization list above, so check both independently, don't assume they match). Every other
   state-changing endpoint (e.g. `/api/auth/logout`, `/api/auth/logout-all`, `/api/auth/refresh`)
   requires the caller to have first called `GET /api/auth/csrf` to receive the `XSRF-TOKEN`

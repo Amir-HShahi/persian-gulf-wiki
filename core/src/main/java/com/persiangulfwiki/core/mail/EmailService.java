@@ -1,5 +1,7 @@
 package com.persiangulfwiki.core.mail;
 
+import com.persiangulfwiki.core.config.SupportedLocales;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,12 +20,6 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class EmailService {
 
-    // Emails are sent @Async, outside any request's LocaleContextHolder, and there's no
-    // per-user locale preference stored yet — so every email renders in the app's default
-    // locale (fa) regardless of which locale the triggering request used. Revisit once User
-    // gets a locale column.
-    private static final Locale EMAIL_LOCALE = Locale.forLanguageTag("fa");
-
     private final JavaMailSender javaMailSender;
     private final MessageSource messageSource;
 
@@ -34,16 +30,23 @@ public class EmailService {
     private final String fromAddress;
 
     // Tokens ride in a query param, not the path — TokenHasher emits base64url without
-    // padding, so a raw token needs no escaping to sit in the query string either.
+    // padding, so a raw token needs no escaping to sit in the query string either. The
+    // locale, by contrast, is a path prefix (/fa/...) because that's how the frontend
+    // routes languages.
+    //
+    // Every send* method takes the locale explicitly: @Async hands the body off to
+    // AsyncMailConfig's executor, so LocaleContextHolder is already gone by the time the
+    // method actually runs — the caller has to resolve it on the request thread.
     @Async
-    public void sendPasswordResetEmail(String toEmail, String rawToken) {
-        String resetUrl = frontendBaseUrl + "/reset-password?token=" + rawToken;
+    public void sendPasswordResetEmail(String toEmail, String rawToken, Locale locale) {
+        Locale emailLocale = SupportedLocales.normalize(locale);
+        String resetUrl = localizedUrl(emailLocale, "/reset-password?token=" + rawToken);
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromAddress);
         message.setTo(toEmail);
-        message.setSubject(resolve("email.passwordReset.subject"));
-        message.setText(resolve("email.passwordReset.body", resetUrl));
+        message.setSubject(resolve(emailLocale, "email.passwordReset.subject"));
+        message.setText(resolve(emailLocale, "email.passwordReset.body", resetUrl));
 
         try {
             javaMailSender.send(message);
@@ -55,14 +58,15 @@ public class EmailService {
     }
 
     @Async
-    public void sendVerificationEmail(String toEmail, String rawToken) {
-        String verifyUrl = frontendBaseUrl + "/verify-email?token=" + rawToken;
+    public void sendVerificationEmail(String toEmail, String rawToken, Locale locale) {
+        Locale emailLocale = SupportedLocales.normalize(locale);
+        String verifyUrl = localizedUrl(emailLocale, "/verify-email?token=" + rawToken);
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromAddress);
         message.setTo(toEmail);
-        message.setSubject(resolve("email.verifyEmail.subject"));
-        message.setText(resolve("email.verifyEmail.body", verifyUrl));
+        message.setSubject(resolve(emailLocale, "email.verifyEmail.subject"));
+        message.setText(resolve(emailLocale, "email.verifyEmail.body", verifyUrl));
 
         try {
             javaMailSender.send(message);
@@ -74,12 +78,14 @@ public class EmailService {
     }
 
     @Async
-    public void sendGoogleAccountLinkedEmail(String toEmail) {
+    public void sendGoogleAccountLinkedEmail(String toEmail, Locale locale) {
+        Locale emailLocale = SupportedLocales.normalize(locale);
+
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromAddress);
         message.setTo(toEmail);
-        message.setSubject(resolve("email.googleLinked.subject"));
-        message.setText(resolve("email.googleLinked.body"));
+        message.setSubject(resolve(emailLocale, "email.googleLinked.subject"));
+        message.setText(resolve(emailLocale, "email.googleLinked.body"));
 
         try {
             javaMailSender.send(message);
@@ -91,12 +97,14 @@ public class EmailService {
     }
 
     @Async
-    public void sendGoogleAccountUnlinkedEmail(String toEmail) {
+    public void sendGoogleAccountUnlinkedEmail(String toEmail, Locale locale) {
+        Locale emailLocale = SupportedLocales.normalize(locale);
+
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromAddress);
         message.setTo(toEmail);
-        message.setSubject(resolve("email.googleUnlinked.subject"));
-        message.setText(resolve("email.googleUnlinked.body"));
+        message.setSubject(resolve(emailLocale, "email.googleUnlinked.subject"));
+        message.setText(resolve(emailLocale, "email.googleUnlinked.body"));
 
         try {
             javaMailSender.send(message);
@@ -107,7 +115,11 @@ public class EmailService {
         }
     }
 
-    private String resolve(String key, Object... args) {
-        return messageSource.getMessage(key, args, EMAIL_LOCALE);
+    private String localizedUrl(Locale locale, String path) {
+        return frontendBaseUrl + "/" + locale.getLanguage() + path;
+    }
+
+    private String resolve(Locale locale, String key, Object... args) {
+        return messageSource.getMessage(key, args, locale);
     }
 }

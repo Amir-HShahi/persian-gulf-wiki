@@ -36,6 +36,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import static com.persiangulfwiki.core.CsrfTestSupport.xsrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -82,11 +83,13 @@ class EmailVerificationFlowIntegrationTests {
     private LoginCookies registerAndLogin(String username, String email, String password) throws Exception {
         RegisterRequest register = new RegisterRequest(username, email, password);
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
 
         var loginResponse = mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new LoginRequest(email, password))))
                 .andExpect(status().isOk())
@@ -180,6 +183,24 @@ class EmailVerificationFlowIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new VerifyEmailRequest(rawToken))))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void resendEmailLinkCarriesRequestLocaleAsPathPrefix() throws Exception {
+        LoginCookies cookies = registerAndLogin("zohre", "zohre@example.com", "Correct-Horse1!");
+        clearInvocations(javaMailSender);
+
+        Cookie csrfCookie = fetchCsrfCookie();
+        mockMvc.perform(post("/api/email-verification/resend")
+                        .header("Accept-Language", "ar")
+                        .cookie(cookies.accessToken(), csrfCookie)
+                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue())))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<SimpleMailMessage> messageCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
+        verify(javaMailSender, timeout(2000).times(1)).send(messageCaptor.capture());
+
+        assertThat(messageCaptor.getValue().getText()).contains("http://localhost:3000/ar/verify-email?token=");
     }
 
     @Test

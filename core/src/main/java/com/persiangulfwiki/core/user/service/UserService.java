@@ -14,6 +14,7 @@ import com.persiangulfwiki.core.user.repository.RefreshTokenRepository;
 import com.persiangulfwiki.core.user.repository.UserRepository;
 import com.persiangulfwiki.core.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,7 +90,7 @@ public class UserService {
             // the executor's uncaught-exception handler) can propagate back into this
             // transactional method — unlike GoogleOAuth2SuccessHandler's call site, no
             // defensive try/catch is needed here.
-            emailService.sendGoogleAccountUnlinkedEmail(user.getEmail());
+            emailService.sendGoogleAccountUnlinkedEmail(user.getEmail(), LocaleContextHolder.getLocale());
         }
     }
 }

@@ -73,7 +73,11 @@ public class GoogleOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             // explicitly there instead.
             String email = oidcUser.getEmail().toLowerCase(Locale.ROOT);
 
-            GoogleOAuth2LoginOutcome outcome = userResolver.resolve(googleSub, email);
+            // The container resolves this straight from Accept-Language, independent of Spring
+            // MVC — which matters because DispatcherServlet hasn't run yet on this request, so
+            // LocaleContextHolder would only give the JVM default. EmailService normalizes
+            // whatever comes back against the bundles we actually ship.
+            GoogleOAuth2LoginOutcome outcome = userResolver.resolve(googleSub, email, request.getLocale());
 
             if (outcome.pending()) {
                 issuePendingSessionAndRedirect(outcome.user(), response);

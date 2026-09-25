@@ -45,6 +45,15 @@ public class EmailVerificationRequiredFilter extends OncePerRequestFilter {
             PathPatternRequestMatcher.withDefaults().matcher("/api/auth/logout-all"),
             PathPatternRequestMatcher.withDefaults().matcher("/api/auth/refresh"),
             PathPatternRequestMatcher.withDefaults().matcher("/api/auth/csrf"),
+            // Starting a *new* session must never be blocked by the old one's state. A
+            // freshly-registered, still-unverified user has no way to log out (they'd need
+            // to reach a logout button they never got to), so without these two a stale
+            // unverified cookie would permanently wedge the client out of register/login.
+            // Both endpoints authenticate from the request body and replace the auth
+            // cookies wholesale, so letting an unverified token reach them grants nothing
+            // the caller couldn't get by sending no cookie at all.
+            PathPatternRequestMatcher.withDefaults().matcher("/api/auth/register"),
+            PathPatternRequestMatcher.withDefaults().matcher("/api/auth/login"),
             PathPatternRequestMatcher.withDefaults().matcher("/api/users/me"),
             // A pending-password-setup token (see PendingPasswordSetupFilter) carries no
             // `verified` claim at all, even though the underlying Google-verified account

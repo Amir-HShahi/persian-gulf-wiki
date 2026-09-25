@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static com.persiangulfwiki.core.CsrfTestSupport.xsrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -120,6 +121,7 @@ class DevTestUserEndpointIntegrationTests {
 
         LoginRequest login = new LoginRequest(response.email(), response.password());
         mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk());

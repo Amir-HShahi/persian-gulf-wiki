@@ -51,9 +51,11 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .oauth2Login(oauth2 -> oauth2.successHandler(googleOAuth2SuccessHandler)
                         .failureHandler(googleOAuth2FailureHandler))
-                // register/login authorize via request-body credentials, not an ambient cookie,
-                // so CSRF doesn't apply to them; every other endpoint — including refresh and
-                // logout, which are cookie-authenticated — stays protected.
+                // CSRF is ignored only for endpoints that neither read nor write an ambient
+                // auth cookie. register and login are deliberately NOT on that list: both set
+                // the session cookies, and both revoke whatever refresh-token cookie the
+                // request still carries, so a cross-site page could otherwise force a login or
+                // a logout on a victim's browser without ever reading a token.
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(csrfTokenRepository)
                         // Default request handler (XorCsrfTokenRequestAttributeHandler) is left in
@@ -62,10 +64,11 @@ public class SecurityConfig {
                         // sending it as X-XSRF-TOKEN — see AGENTS.md / frontend CSRF notes for the
                         // exact algorithm it must match.
                         //
-                        // Same reasoning as register/login: authorized via request-body data only,
-                        // no ambient auth cookie consumed, so CSRF doesn't apply.
-                        .ignoringRequestMatchers("/api/auth/register", "/api/auth/login",
-                                "/api/password/forgot-password", "/api/password/reset-password",
+                        // These three carry their own single-use, server-side-hashed token in the
+                        // request body or query string and touch no ambient auth cookie, so a
+                        // cross-site submission gains nothing the attacker couldn't do directly.
+                        .ignoringRequestMatchers("/api/password/forgot-password",
+                                "/api/password/reset-password",
                                 "/api/email-verification/verify"))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth

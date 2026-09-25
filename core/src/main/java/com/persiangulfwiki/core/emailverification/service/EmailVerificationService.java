@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,7 +51,7 @@ public class EmailVerificationService {
 
         // Fire-and-forget: sendVerificationEmail is @Async, so this returns immediately
         // and failures are logged inside EmailService rather than surfaced here.
-        emailService.sendVerificationEmail(user.getEmail(), rawToken);
+        emailService.sendVerificationEmail(user.getEmail(), rawToken, LocaleContextHolder.getLocale());
         log.info("email verification token issued for user {}", user.getId());
     }
 

@@ -23,6 +23,7 @@ import java.util.Base64;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static com.persiangulfwiki.core.CsrfTestSupport.xsrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -185,6 +186,7 @@ class OAuth2FlowIntegrationTests {
         RegisterRequest register = new RegisterRequest(takenUsername, "username-taken-owner@example.com",
                 "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
@@ -210,6 +212,7 @@ class OAuth2FlowIntegrationTests {
         String email = "already-complete@example.com";
         RegisterRequest register = new RegisterRequest(username, email, "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
@@ -219,6 +222,7 @@ class OAuth2FlowIntegrationTests {
         userRepository.save(user);
 
         var loginResponse = mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new LoginRequest(email, "Correct-Horse1!"))))
                 .andExpect(status().isOk())

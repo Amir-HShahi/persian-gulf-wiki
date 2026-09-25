@@ -42,7 +42,12 @@ public class PendingPasswordSetupFilter extends OncePerRequestFilter {
     private static final RequestMatcher ALLOWLIST = new OrRequestMatcher(List.of(
             PathPatternRequestMatcher.withDefaults().matcher("/api/auth/oauth2/complete-registration"),
             PathPatternRequestMatcher.withDefaults().matcher("/api/auth/csrf"),
-            PathPatternRequestMatcher.withDefaults().matcher("/api/auth/logout")));
+            PathPatternRequestMatcher.withDefaults().matcher("/api/auth/logout"),
+            // Same reasoning as EmailVerificationRequiredFilter's allowlist: a pending
+            // Google signup that the user abandons must still be able to start over on a
+            // different email via register/login, which replace the auth cookies wholesale.
+            PathPatternRequestMatcher.withDefaults().matcher("/api/auth/register"),
+            PathPatternRequestMatcher.withDefaults().matcher("/api/auth/login")));
 
     private final ObjectMapper objectMapper;
 
