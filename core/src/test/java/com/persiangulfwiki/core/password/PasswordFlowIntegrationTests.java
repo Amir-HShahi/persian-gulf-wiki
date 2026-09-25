@@ -40,6 +40,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static com.persiangulfwiki.core.CsrfTestSupport.xsrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
@@ -84,6 +85,7 @@ class PasswordFlowIntegrationTests {
     private String registerAndRequestResetToken(String username, String email, String password) throws Exception {
         RegisterRequest register = new RegisterRequest(username, email, password);
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
@@ -111,6 +113,7 @@ class PasswordFlowIntegrationTests {
     void forgotPasswordForKnownEmailCreatesResetToken() throws Exception {
         RegisterRequest register = new RegisterRequest("olivia", "olivia@example.com", "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
@@ -140,6 +143,7 @@ class PasswordFlowIntegrationTests {
     void forgotPasswordWithoutCsrfTokenStillSucceeds() throws Exception {
         RegisterRequest register = new RegisterRequest("peter", "peter@example.com", "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
@@ -156,6 +160,7 @@ class PasswordFlowIntegrationTests {
         String email = "nora@example.com";
         RegisterRequest register = new RegisterRequest("nora", email, "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
@@ -198,6 +203,7 @@ class PasswordFlowIntegrationTests {
         String email = "lena@example.com";
         RegisterRequest register = new RegisterRequest("lena", email, "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
@@ -233,6 +239,7 @@ class PasswordFlowIntegrationTests {
         String rawResetToken = registerAndRequestResetToken("frank", email, "Correct-Horse1!");
 
         String refreshCookieBeforeReset = mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new LoginRequest(email, "Correct-Horse1!"))))
                 .andExpect(status().isOk())
@@ -245,11 +252,13 @@ class PasswordFlowIntegrationTests {
                 .andExpect(status().isOk());
 
         mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new LoginRequest(email, "Correct-Horse1!"))))
                 .andExpect(status().isUnauthorized());
 
         mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new LoginRequest(email, "new-Correct-Horse1!"))))
                 .andExpect(status().isOk());
@@ -343,6 +352,7 @@ class PasswordFlowIntegrationTests {
     private LoginCookies registerAndLogin(String username, String email, String password) throws Exception {
         RegisterRequest register = new RegisterRequest(username, email, password);
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
@@ -355,6 +365,7 @@ class PasswordFlowIntegrationTests {
         userRepository.save(user);
 
         var loginResponse = mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new LoginRequest(email, password))))
                 .andExpect(status().isOk())
@@ -385,11 +396,13 @@ class PasswordFlowIntegrationTests {
                 .andExpect(cookie().maxAge("refresh_token", 0));
 
         mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new LoginRequest(email, "Correct-Horse1!"))))
                 .andExpect(status().isUnauthorized());
 
         mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new LoginRequest(email, "new-Correct-Horse1!"))))
                 .andExpect(status().isOk());
@@ -417,6 +430,7 @@ class PasswordFlowIntegrationTests {
                 .andExpect(status().isOk());
 
         mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new LoginRequest(email, originalPassword))))
                 .andExpect(status().isUnauthorized());
@@ -433,11 +447,13 @@ class PasswordFlowIntegrationTests {
                 .andExpect(status().isOk());
 
         mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new LoginRequest(email, resetPassword))))
                 .andExpect(status().isUnauthorized());
 
         mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new LoginRequest(email, changedPassword))))
                 .andExpect(status().isOk());
@@ -445,6 +461,7 @@ class PasswordFlowIntegrationTests {
 
     private LoginCookies loginOnly(String email, String password) throws Exception {
         var loginResponse = mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new LoginRequest(email, password))))
                 .andExpect(status().isOk())
@@ -467,6 +484,7 @@ class PasswordFlowIntegrationTests {
                 .andExpect(status().isUnauthorized());
 
         mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new LoginRequest(email, "Correct-Horse1!"))))
                 .andExpect(status().isOk());

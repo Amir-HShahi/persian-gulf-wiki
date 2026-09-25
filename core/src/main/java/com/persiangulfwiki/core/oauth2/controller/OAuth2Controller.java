@@ -90,8 +90,7 @@ public class OAuth2Controller {
     @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = "CSRF token. Call GET /api/auth/csrf first to receive the XSRF-TOKEN cookie, "
             + "then encode its value and send the encoded result in this header — see the API "
             + "description above for the required encoding algorithm; sending the raw cookie value "
-            + "here is rejected. This endpoint is cookie-authenticated, so unlike register/login it is "
-            + "NOT exempt from CSRF protection.")
+            + "here is rejected.")
     @PostMapping("/complete-registration")
     @ResponseStatus(HttpStatus.OK)
     public ApiResult<Void> completeRegistration(

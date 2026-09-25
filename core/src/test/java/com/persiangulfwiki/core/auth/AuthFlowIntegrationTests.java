@@ -38,6 +38,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.timeout;
+import static com.persiangulfwiki.core.CsrfTestSupport.xsrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -117,12 +118,14 @@ class AuthFlowIntegrationTests {
     void registerLoginThenMeReturnsRegisteredProfile() throws Exception {
         RegisterRequest register = new RegisterRequest("frank", "Frank@Example.com", "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
 
         LoginRequest login = new LoginRequest("Frank@Example.com", "Correct-Horse1!");
         Cookie accessTokenCookie = mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk())
@@ -148,12 +151,14 @@ class AuthFlowIntegrationTests {
     void meWithTamperedCookieIsRejected() throws Exception {
         RegisterRequest register = new RegisterRequest("grace", "grace@example.com", "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
 
         LoginRequest login = new LoginRequest("grace@example.com", "Correct-Horse1!");
         Cookie accessTokenCookie = mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk())
@@ -175,12 +180,14 @@ class AuthFlowIntegrationTests {
     void refreshRotatesTokenAndRejectsReuseOfOldOne() throws Exception {
         RegisterRequest register = new RegisterRequest("heidi", "heidi@example.com", "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
 
         LoginRequest login = new LoginRequest("heidi@example.com", "Correct-Horse1!");
         var loginResponse = mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk())
@@ -220,12 +227,14 @@ class AuthFlowIntegrationTests {
     void logoutRevokesRefreshTokenSoSubsequentRefreshFails() throws Exception {
         RegisterRequest register = new RegisterRequest("ivan", "ivan@example.com", "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
 
         LoginRequest login = new LoginRequest("ivan@example.com", "Correct-Horse1!");
         Cookie refreshCookie = mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk())
@@ -251,12 +260,14 @@ class AuthFlowIntegrationTests {
     void refreshWithoutCsrfTokenIsRejected() throws Exception {
         RegisterRequest register = new RegisterRequest("judy", "judy@example.com", "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
 
         LoginRequest login = new LoginRequest("judy@example.com", "Correct-Horse1!");
         Cookie refreshCookie = mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk())
@@ -272,12 +283,14 @@ class AuthFlowIntegrationTests {
     void refreshWithUnmaskedCsrfTokenIsRejected() throws Exception {
         RegisterRequest register = new RegisterRequest("kevin", "kevin@example.com", "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
 
         LoginRequest login = new LoginRequest("kevin@example.com", "Correct-Horse1!");
         Cookie refreshCookie = mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk())
@@ -296,12 +309,14 @@ class AuthFlowIntegrationTests {
     void logoutAllRevokesEverySessionSoAllPendingRefreshesFail() throws Exception {
         RegisterRequest register = new RegisterRequest("mallory", "mallory@example.com", "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
 
         LoginRequest login = new LoginRequest("mallory@example.com", "Correct-Horse1!");
         var firstLoginResponse = mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk())
@@ -312,6 +327,7 @@ class AuthFlowIntegrationTests {
         assertThat(firstRefreshCookie).isNotNull();
 
         Cookie secondRefreshCookie = mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk())
@@ -342,12 +358,14 @@ class AuthFlowIntegrationTests {
     void logoutAllWithoutCsrfTokenIsRejected() throws Exception {
         RegisterRequest register = new RegisterRequest("niaj", "niaj@example.com", "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
 
         LoginRequest login = new LoginRequest("niaj@example.com", "Correct-Horse1!");
         Cookie accessCookie = mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk())
@@ -363,6 +381,7 @@ class AuthFlowIntegrationTests {
     void registerDispatchesExactlyOneVerificationEmailContainingRawToken() throws Exception {
         RegisterRequest register = new RegisterRequest("oscar", "oscar@example.com", "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
@@ -379,6 +398,7 @@ class AuthFlowIntegrationTests {
     void registerResponseIncludesVerificationEmailMessage() throws Exception {
         RegisterRequest register = new RegisterRequest("penny", "penny@example.com", "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated())
@@ -393,6 +413,7 @@ class AuthFlowIntegrationTests {
 
         RegisterRequest register = new RegisterRequest("quinn", "quinn@example.com", "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated())
@@ -408,6 +429,7 @@ class AuthFlowIntegrationTests {
         RegisterRequest register = new RegisterRequest("sybil", "sybil@example.com", "Correct-Horse1!");
 
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated())
@@ -425,6 +447,7 @@ class AuthFlowIntegrationTests {
 
         RegisterRequest register = new RegisterRequest("staleuser", email, "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
@@ -442,6 +465,7 @@ class AuthFlowIntegrationTests {
 
         RegisterRequest register = new RegisterRequest("freshuser", email, "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isConflict());
@@ -451,6 +475,7 @@ class AuthFlowIntegrationTests {
     void unverifiedUserFromRegisterCanReachAllowlistedRoutesButIsBlockedElsewhere() throws Exception {
         RegisterRequest register = new RegisterRequest("trent", "trent@example.com", "Correct-Horse1!");
         var registerResponse = mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated())
@@ -503,12 +528,14 @@ class AuthFlowIntegrationTests {
     void crossOriginRefreshWithCsrfHeaderStillSucceeds() throws Exception {
         RegisterRequest register = new RegisterRequest("rachel", "rachel@example.com", "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
 
         LoginRequest login = new LoginRequest("rachel@example.com", "Correct-Horse1!");
         Cookie refreshCookie = mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk())
@@ -528,6 +555,7 @@ class AuthFlowIntegrationTests {
     void disabledUserCannotLogIn() throws Exception {
         RegisterRequest register = new RegisterRequest("wendy", "wendy@example.com", "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
@@ -536,6 +564,7 @@ class AuthFlowIntegrationTests {
 
         LoginRequest login = new LoginRequest("wendy@example.com", "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isUnauthorized())
@@ -547,12 +576,14 @@ class AuthFlowIntegrationTests {
     void disabledUserExistingRefreshTokenIsRejectedAndRevoked() throws Exception {
         RegisterRequest register = new RegisterRequest("xena", "xena@example.com", "Correct-Horse1!");
         mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated());
 
         LoginRequest login = new LoginRequest("xena@example.com", "Correct-Horse1!");
         Cookie refreshCookie = mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk())
@@ -589,6 +620,7 @@ class AuthFlowIntegrationTests {
         // non-allowlisted route is for an unverified session.
         RegisterRequest first = new RegisterRequest("sam", "sam@example.com", "Correct-Horse1!");
         var firstResponse = mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(first)))
                 .andExpect(status().isCreated())
@@ -600,6 +632,7 @@ class AuthFlowIntegrationTests {
 
         RegisterRequest second = new RegisterRequest("sam2", "sam2@example.com", "Correct-Horse1!");
         var secondResponse = mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .cookie(firstAccessCookie, firstRefreshCookie)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(second)))
@@ -627,6 +660,7 @@ class AuthFlowIntegrationTests {
     void loginWhileHoldingUnverifiedSessionSucceedsAndRevokesTheOldRefreshToken() throws Exception {
         RegisterRequest register = new RegisterRequest("tina", "tina@example.com", "Correct-Horse1!");
         var registerResponse = mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated())
@@ -637,6 +671,7 @@ class AuthFlowIntegrationTests {
 
         LoginRequest login = new LoginRequest("tina@example.com", "Correct-Horse1!");
         Cookie newRefreshCookie = mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .cookie(staleAccessCookie, staleRefreshCookie)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
@@ -656,6 +691,7 @@ class AuthFlowIntegrationTests {
     void failedLoginLeavesTheExistingSessionUsable() throws Exception {
         RegisterRequest register = new RegisterRequest("uma", "uma@example.com", "Correct-Horse1!");
         var registerResponse = mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated())
@@ -668,6 +704,7 @@ class AuthFlowIntegrationTests {
         // silently sign the caller out of the session they still have.
         LoginRequest wrong = new LoginRequest("uma@example.com", "Wrong-Horse1!");
         mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
                         .cookie(accessCookie, refreshCookie)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(wrong)))
@@ -686,6 +723,7 @@ class AuthFlowIntegrationTests {
         // register/login were opened up, everything else still rejects an unverified session.
         RegisterRequest register = new RegisterRequest("vera", "vera@example.com", "Correct-Horse1!");
         Cookie accessCookie = mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(register)))
                 .andExpect(status().isCreated())
@@ -695,6 +733,52 @@ class AuthFlowIntegrationTests {
         mockMvc.perform(get("/api/users/me/sessions").cookie(accessCookie))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("EMAIL_NOT_VERIFIED"));
+    }
+
+    @Test
+    void registerWithoutCsrfTokenIsRejected() throws Exception {
+        // register sets the session cookies and revokes whatever refresh-token cookie the
+        // request carries, so it consumes ambient auth state and must stay CSRF-protected —
+        // otherwise a cross-site page could force a signup, or a logout, on a victim.
+        RegisterRequest register = new RegisterRequest("walter", "walter@example.com", "Correct-Horse1!");
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(register)))
+                .andExpect(status().isForbidden());
+
+        assertThat(userRepository.findByEmail("walter@example.com")).isEmpty();
+    }
+
+    @Test
+    void loginWithoutCsrfTokenIsRejected() throws Exception {
+        RegisterRequest register = new RegisterRequest("xavier", "xavier@example.com", "Correct-Horse1!");
+        mockMvc.perform(post("/api/auth/register")
+                        .with(xsrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(register)))
+                .andExpect(status().isCreated());
+
+        LoginRequest login = new LoginRequest("xavier@example.com", "Correct-Horse1!");
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(login)))
+                .andExpect(status().isForbidden())
+                .andExpect(cookie().doesNotExist("access_token"));
+    }
+
+    @Test
+    void registerWithRawCsrfCookieResentAsHeaderIsRejected() throws Exception {
+        // The masked-header requirement is what makes the double-submit check meaningful
+        // here; a regression that accepted the raw cookie value would weaken it to nothing.
+        Cookie csrfCookie = fetchCsrfCookie();
+
+        RegisterRequest register = new RegisterRequest("yuri", "yuri@example.com", "Correct-Horse1!");
+        mockMvc.perform(post("/api/auth/register")
+                        .cookie(csrfCookie)
+                        .header("X-XSRF-TOKEN", csrfCookie.getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(register)))
+                .andExpect(status().isForbidden());
     }
 
     private void disableUser(String email) {

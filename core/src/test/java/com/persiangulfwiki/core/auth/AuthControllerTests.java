@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.not;
+import static com.persiangulfwiki.core.CsrfTestSupport.xsrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -41,6 +42,7 @@ class AuthControllerTests {
                 RegisterRequest request = new RegisterRequest("alice", "Alice@Example.com", "Correct-Horse1!");
 
                 mockMvc.perform(post("/api/auth/register")
+                                .with(xsrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                                 .andExpect(status().isCreated())
@@ -59,6 +61,7 @@ class AuthControllerTests {
                                 "Correct-Horse1!");
 
                 mockMvc.perform(post("/api/auth/register")
+                                .with(xsrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                                 .andExpect(status().isCreated())
@@ -72,6 +75,7 @@ class AuthControllerTests {
                                 "Correct-Horse1!");
 
                 mockMvc.perform(post("/api/auth/register")
+                                .with(xsrf())
                                 .header("Accept-Language", "en")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
@@ -84,12 +88,14 @@ class AuthControllerTests {
         void registerRejectsDuplicateEmail() throws Exception {
                 RegisterRequest first = new RegisterRequest("bob", "bob@example.com", "Correct-Horse1!");
                 mockMvc.perform(post("/api/auth/register")
+                                .with(xsrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(first)))
                                 .andExpect(status().isCreated());
 
                 RegisterRequest duplicate = new RegisterRequest("bob2", "BOB@example.com", "Another-Pass1!");
                 mockMvc.perform(post("/api/auth/register")
+                                .with(xsrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(duplicate)))
                                 .andExpect(status().isConflict());
@@ -100,6 +106,7 @@ class AuthControllerTests {
                 RegisterRequest invalid = new RegisterRequest("carol", "not-an-email", "short");
 
                 mockMvc.perform(post("/api/auth/register")
+                                .with(xsrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(invalid)))
                                 .andExpect(status().isBadRequest());
@@ -110,6 +117,7 @@ class AuthControllerTests {
                 RegisterRequest weakPassword = new RegisterRequest("dana", "dana@example.com", "alllowercase");
 
                 mockMvc.perform(post("/api/auth/register")
+                                .with(xsrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(weakPassword)))
                                 .andExpect(status().isBadRequest())
@@ -127,6 +135,7 @@ class AuthControllerTests {
                 RegisterRequest invalidUsername = new RegisterRequest("carol!", "carol@example.com", "Correct-Horse1!");
 
                 mockMvc.perform(post("/api/auth/register")
+                                .with(xsrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(invalidUsername)))
                                 .andExpect(status().isBadRequest())
@@ -141,6 +150,7 @@ class AuthControllerTests {
                 RegisterRequest malformedEmail = new RegisterRequest("erin", "not-an-email", "Correct-Horse1!");
 
                 mockMvc.perform(post("/api/auth/register")
+                                .with(xsrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(malformedEmail)))
                                 .andExpect(status().isBadRequest())
@@ -155,6 +165,7 @@ class AuthControllerTests {
                 RegisterRequest multipleAtSigns = new RegisterRequest("frank", "a@@b.com", "Correct-Horse1!");
 
                 mockMvc.perform(post("/api/auth/register")
+                                .with(xsrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(multipleAtSigns)))
                                 .andExpect(status().isBadRequest())
@@ -168,6 +179,7 @@ class AuthControllerTests {
         void loginSetsAccessTokenCookieAndOmitsTokenFromBody() throws Exception {
                 RegisterRequest register = new RegisterRequest("dave", "dave@example.com", "Correct-Horse1!");
                 mockMvc.perform(post("/api/auth/register")
+                                .with(xsrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(register)))
                                 .andExpect(status().isCreated());
@@ -175,6 +187,7 @@ class AuthControllerTests {
                 LoginRequest login = new LoginRequest("dave@example.com", "Correct-Horse1!");
 
                 mockMvc.perform(post("/api/auth/login")
+                                .with(xsrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(login)))
                                 .andExpect(status().isOk())
@@ -187,11 +200,13 @@ class AuthControllerTests {
         void loginRejectsWrongPasswordAndNonexistentEmailIdentically() throws Exception {
                 RegisterRequest register = new RegisterRequest("erin", "erin@example.com", "Correct-Horse1!");
                 mockMvc.perform(post("/api/auth/register")
+                                .with(xsrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(register)))
                                 .andExpect(status().isCreated());
 
                 String wrongPasswordBody = mockMvc.perform(post("/api/auth/login")
+                                .with(xsrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(
                                                 new LoginRequest("erin@example.com", "wrong-pass"))))
@@ -199,6 +214,7 @@ class AuthControllerTests {
                                 .andReturn().getResponse().getContentAsString();
 
                 String noSuchUserBody = mockMvc.perform(post("/api/auth/login")
+                                .with(xsrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(
                                                 new LoginRequest("nobody@example.com", "whatever"))))

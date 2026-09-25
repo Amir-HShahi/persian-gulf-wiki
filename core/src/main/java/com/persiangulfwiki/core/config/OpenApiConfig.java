@@ -146,8 +146,8 @@ public class OpenApiConfig {
                                 ```
 
                                 Endpoints that don't require this header at all are called out individually \
-                                (register, login, forgot-password, reset-password, verify-email) — everything \
-                                else that's cookie-authenticated needs the encoded header on every request.
+                                (forgot-password, reset-password, verify-email) — everything else, including \
+                                register and login, needs the encoded header on every request.
 
                                 ## Local development: cookies won't show up on plain `localhost`
 

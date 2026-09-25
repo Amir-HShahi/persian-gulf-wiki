@@ -67,7 +67,8 @@ public class AuthController {
         @Operation(summary = "Issue a CSRF token", description = "Calling this endpoint is what causes the XSRF-TOKEN cookie to actually be set on "
                         +
                         "the response. Call this before any state-changing request other than " +
-                        "register/login/forgot-password/reset-password/verify-email, then encode the XSRF-TOKEN " +
+                        "forgot-password/reset-password/verify-email — including register and login — then " +
+                        "encode the XSRF-TOKEN " +
                         "cookie's value and send the encoded result as the X-XSRF-TOKEN header on that request " +
                         "— see the API description above for the required encoding algorithm; sending the raw " +
                         "cookie value is rejected.")
@@ -111,6 +112,18 @@ public class AuthController {
                         "check (`detail`: \"email already in use\" / \"username already in use\") or, on a " +
                         "check-then-insert race, by a unique-constraint violation on save (`detail`: " +
                         "\"username or email already in use\").", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+        @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = "CSRF token. Call GET /api/auth/csrf first to receive the XSRF-TOKEN cookie, "
+                        +
+                        "then encode its value and send the encoded result in this header — see the API "
+                        +
+                        "description above for the required encoding algorithm; sending the raw cookie value "
+                        +
+                        "here is rejected.")
+        @ApiResponse(responseCode = "403", description = "Missing or invalid X-XSRF-TOKEN header. This is checked before the request "
+                        +
+                        "body is looked at, so it is returned regardless of whether the credentials "
+                        +
+                        "themselves are valid.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
         @PostMapping("/register")
         @ResponseStatus(HttpStatus.CREATED)
         public ApiResult<RegisterResponse> register(@Valid @RequestBody RegisterRequest request,
@@ -161,6 +174,18 @@ public class AuthController {
                         "returned identically whether the email doesn't exist or the password is wrong — this " +
                         "is deliberate, not a bug, to avoid a user-enumeration oracle on this endpoint. A " +
                         "disabled account returns a distinct message but the same status.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+        @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = "CSRF token. Call GET /api/auth/csrf first to receive the XSRF-TOKEN cookie, "
+                        +
+                        "then encode its value and send the encoded result in this header — see the API "
+                        +
+                        "description above for the required encoding algorithm; sending the raw cookie value "
+                        +
+                        "here is rejected.")
+        @ApiResponse(responseCode = "403", description = "Missing or invalid X-XSRF-TOKEN header. This is checked before the request "
+                        +
+                        "body is looked at, so it is returned regardless of whether the credentials "
+                        +
+                        "themselves are valid.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
         @PostMapping("/login")
         @ResponseStatus(HttpStatus.OK)
         public ApiResult<Void> login(@Valid @RequestBody LoginRequest request,
