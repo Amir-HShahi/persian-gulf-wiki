@@ -10,9 +10,10 @@ import com.persiangulfwiki.core.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Locale;
 
 // Holds the DB-mutating half of the Google login branching (see GoogleOAuth2SuccessHandler
 // for the case A/B/C/D writeup) as its own bean so it gets its own transactional proxy.
@@ -34,8 +35,11 @@ class GoogleOAuth2UserResolver {
     private final UserRoleRepository userRoleRepository;
     private final EmailService emailService;
 
+    // locale is passed in rather than read from LocaleContextHolder: this runs in the OAuth2
+    // filter chain, before DispatcherServlet sets the resolved locale, so the holder would
+    // yield the JVM default here. The caller reads it off the request instead.
     @Transactional
-    GoogleOAuth2LoginOutcome resolve(String googleSub, String email) {
+    GoogleOAuth2LoginOutcome resolve(String googleSub, String email, Locale locale) {
         User existingByGoogleSub = userRepository.findByGoogleSub(googleSub).orElse(null);
         User existingByEmail = userRepository.findByEmail(email).orElse(null);
 
@@ -52,10 +56,8 @@ class GoogleOAuth2UserResolver {
             existingByEmail.setGoogleSub(googleSub);
             userRepository.save(existingByEmail);
 
-            // Runs in the OAuth2 filter chain, before DispatcherServlet sets the resolved
-            // locale, so this is normally the JVM default and EmailService falls back to fa.
             try {
-                emailService.sendGoogleAccountLinkedEmail(email, LocaleContextHolder.getLocale());
+                emailService.sendGoogleAccountLinkedEmail(email, locale);
             } catch (Exception e) {
                 log.error("failed to trigger Google-account-linked email for user {}", existingByEmail.getId(), e);
             }
