@@ -10,6 +10,7 @@ import com.persiangulfwiki.core.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,8 +52,10 @@ class GoogleOAuth2UserResolver {
             existingByEmail.setGoogleSub(googleSub);
             userRepository.save(existingByEmail);
 
+            // Runs in the OAuth2 filter chain, before DispatcherServlet sets the resolved
+            // locale, so this is normally the JVM default and EmailService falls back to fa.
             try {
-                emailService.sendGoogleAccountLinkedEmail(email);
+                emailService.sendGoogleAccountLinkedEmail(email, LocaleContextHolder.getLocale());
             } catch (Exception e) {
                 log.error("failed to trigger Google-account-linked email for user {}", existingByEmail.getId(), e);
             }

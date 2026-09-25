@@ -194,6 +194,40 @@ class PasswordFlowIntegrationTests {
     }
 
     @Test
+    void forgotPasswordEmailLinkCarriesRequestLocaleAsPathPrefix() throws Exception {
+        String email = "lena@example.com";
+        RegisterRequest register = new RegisterRequest("lena", email, "Correct-Horse1!");
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(register)))
+                .andExpect(status().isCreated());
+        clearInvocations(javaMailSender);
+
+        mockMvc.perform(post("/api/password/forgot-password")
+                        .header("Accept-Language", "en")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new ForgotPasswordRequest(email))))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<SimpleMailMessage> messageCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
+        verify(javaMailSender, timeout(2000).times(1)).send(messageCaptor.capture());
+
+        assertThat(messageCaptor.getValue().getText()).contains("http://localhost:3000/en/reset-password?token=");
+        assertThat(messageCaptor.getValue().getSubject()).isEqualTo("Password Reset Request");
+    }
+
+    @Test
+    void forgotPasswordEmailLinkFallsBackToFarsiPathPrefixWithoutAcceptLanguage() throws Exception {
+        String email = "mina@example.com";
+        registerAndRequestResetToken("mina", email, "Correct-Horse1!");
+
+        ArgumentCaptor<SimpleMailMessage> messageCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
+        verify(javaMailSender, timeout(2000).times(1)).send(messageCaptor.capture());
+
+        assertThat(messageCaptor.getValue().getText()).contains("http://localhost:3000/fa/reset-password?token=");
+    }
+
+    @Test
     void resetPasswordFullFlowRevokesOldSessionAndUpdatesCredential() throws Exception {
         String email = "frank@example.com";
         String rawResetToken = registerAndRequestResetToken("frank", email, "Correct-Horse1!");

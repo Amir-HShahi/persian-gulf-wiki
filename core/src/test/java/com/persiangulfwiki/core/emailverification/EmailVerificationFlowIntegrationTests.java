@@ -183,6 +183,24 @@ class EmailVerificationFlowIntegrationTests {
     }
 
     @Test
+    void resendEmailLinkCarriesRequestLocaleAsPathPrefix() throws Exception {
+        LoginCookies cookies = registerAndLogin("zohre", "zohre@example.com", "Correct-Horse1!");
+        clearInvocations(javaMailSender);
+
+        Cookie csrfCookie = fetchCsrfCookie();
+        mockMvc.perform(post("/api/email-verification/resend")
+                        .header("Accept-Language", "ar")
+                        .cookie(cookies.accessToken(), csrfCookie)
+                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue())))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<SimpleMailMessage> messageCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
+        verify(javaMailSender, timeout(2000).times(1)).send(messageCaptor.capture());
+
+        assertThat(messageCaptor.getValue().getText()).contains("http://localhost:3000/ar/verify-email?token=");
+    }
+
+    @Test
     void resendDispatchesExactlyOneEmailContainingRawToken() throws Exception {
         String email = "yara@example.com";
         LoginCookies cookies = registerAndLogin("yara", email, "Correct-Horse1!");

@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,7 +58,7 @@ public class PasswordService {
 
         // Fire-and-forget: sendPasswordResetEmail is @Async, so this returns immediately
         // and failures are logged inside EmailService rather than surfaced here.
-        emailService.sendPasswordResetEmail(user.getEmail(), rawToken);
+        emailService.sendPasswordResetEmail(user.getEmail(), rawToken, LocaleContextHolder.getLocale());
         log.info("password reset token issued for user {}", user.getId());
     }
 
