@@ -582,6 +582,121 @@ class AuthFlowIntegrationTests {
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void registerAgainWhileHoldingUnverifiedSessionSucceedsAndReplacesTheSession() throws Exception {
+        // A freshly-registered account is unverified and its owner has no way to log out, so
+        // starting over on a different email must not be blocked the way every other
+        // non-allowlisted route is for an unverified session.
+        RegisterRequest first = new RegisterRequest("sam", "sam@example.com", "Correct-Horse1!");
+        var firstResponse = mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(first)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse();
+        Cookie firstAccessCookie = firstResponse.getCookie("access_token");
+        Cookie firstRefreshCookie = firstResponse.getCookie("refresh_token");
+        assertThat(firstAccessCookie).isNotNull();
+        assertThat(firstRefreshCookie).isNotNull();
+
+        RegisterRequest second = new RegisterRequest("sam2", "sam2@example.com", "Correct-Horse1!");
+        var secondResponse = mockMvc.perform(post("/api/auth/register")
+                        .cookie(firstAccessCookie, firstRefreshCookie)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(second)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.email").value("sam2@example.com"))
+                .andReturn().getResponse();
+        Cookie secondRefreshCookie = secondResponse.getCookie("refresh_token");
+        assertThat(secondRefreshCookie).isNotNull();
+        assertThat(secondRefreshCookie.getValue()).isNotEqualTo(firstRefreshCookie.getValue());
+
+        // The abandoned session is revoked server-side, not merely overwritten in the browser.
+        Cookie csrfCookie = fetchCsrfCookie();
+        mockMvc.perform(post("/api/auth/refresh")
+                        .cookie(firstRefreshCookie, csrfCookie)
+                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue())))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(post("/api/auth/refresh")
+                        .cookie(secondRefreshCookie, csrfCookie)
+                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue())))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void loginWhileHoldingUnverifiedSessionSucceedsAndRevokesTheOldRefreshToken() throws Exception {
+        RegisterRequest register = new RegisterRequest("tina", "tina@example.com", "Correct-Horse1!");
+        var registerResponse = mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(register)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse();
+        Cookie staleAccessCookie = registerResponse.getCookie("access_token");
+        Cookie staleRefreshCookie = registerResponse.getCookie("refresh_token");
+        assertThat(staleRefreshCookie).isNotNull();
+
+        LoginRequest login = new LoginRequest("tina@example.com", "Correct-Horse1!");
+        Cookie newRefreshCookie = mockMvc.perform(post("/api/auth/login")
+                        .cookie(staleAccessCookie, staleRefreshCookie)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(login)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getCookie("refresh_token");
+        assertThat(newRefreshCookie).isNotNull();
+        assertThat(newRefreshCookie.getValue()).isNotEqualTo(staleRefreshCookie.getValue());
+
+        Cookie csrfCookie = fetchCsrfCookie();
+        mockMvc.perform(post("/api/auth/refresh")
+                        .cookie(staleRefreshCookie, csrfCookie)
+                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue())))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void failedLoginLeavesTheExistingSessionUsable() throws Exception {
+        RegisterRequest register = new RegisterRequest("uma", "uma@example.com", "Correct-Horse1!");
+        var registerResponse = mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(register)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse();
+        Cookie accessCookie = registerResponse.getCookie("access_token");
+        Cookie refreshCookie = registerResponse.getCookie("refresh_token");
+        assertThat(refreshCookie).isNotNull();
+
+        // Credentials are checked before the old session is revoked, so a typo must not
+        // silently sign the caller out of the session they still have.
+        LoginRequest wrong = new LoginRequest("uma@example.com", "Wrong-Horse1!");
+        mockMvc.perform(post("/api/auth/login")
+                        .cookie(accessCookie, refreshCookie)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(wrong)))
+                .andExpect(status().isUnauthorized());
+
+        Cookie csrfCookie = fetchCsrfCookie();
+        mockMvc.perform(post("/api/auth/refresh")
+                        .cookie(refreshCookie, csrfCookie)
+                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue())))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void registerAllowlistDoesNotWidenTheUnverifiedBlockOnOtherRoutes() throws Exception {
+        // Regression guard for the allowlist added to EmailVerificationRequiredFilter: only
+        // register/login were opened up, everything else still rejects an unverified session.
+        RegisterRequest register = new RegisterRequest("vera", "vera@example.com", "Correct-Horse1!");
+        Cookie accessCookie = mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(register)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getCookie("access_token");
+        assertThat(accessCookie).isNotNull();
+
+        mockMvc.perform(get("/api/users/me/sessions").cookie(accessCookie))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("EMAIL_NOT_VERIFIED"));
+    }
+
     private void disableUser(String email) {
         User user = userRepository.findByEmail(email).orElseThrow();
         user.setEnabled(false);

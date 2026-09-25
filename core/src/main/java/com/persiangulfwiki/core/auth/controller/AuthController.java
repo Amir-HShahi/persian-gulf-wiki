@@ -84,7 +84,12 @@ public class AuthController {
         @Operation(summary = "Register a new user", description = "Creates the user with the CONTRIBUTOR role and, best-effort, triggers a "
                         +
                         "verification email. A failure sending that email is logged and does NOT fail the " +
-                        "request — a 201 here does not guarantee a verification email was actually sent.")
+                        "request — a 201 here does not guarantee a verification email was actually sent. " +
+                        "Safe to call while already signed in: any session cookies still on the request are " +
+                        "abandoned — the old refresh token is invalidated and both cookies are replaced with " +
+                        "the new account's. This holds even for an unverified or password-pending session, so " +
+                        "a user who signed up with the wrong email can simply register again without first " +
+                        "finding a way to sign out.")
         @ApiResponse(responseCode = "201", description = "User created; access and refresh cookies set (auto-login on signup, same cookies "
                         +
                         "as login).", headers = @Header(name = "Set-Cookie", description = "Two cookies are set: `access_token` (short-lived) and `refresh_token` "
@@ -112,6 +117,10 @@ public class AuthController {
                         HttpServletRequest httpRequest, HttpServletResponse response) {
                 User user = authService.register(request);
 
+                // Only after the account actually exists: a 409/400 must leave the caller's
+                // existing session untouched.
+                revokePresentedSession(httpRequest);
+
                 // Auto-login on signup: same cookies login would set. The account is unverified,
                 // so the access token's `verified` claim is false until email verification.
                 LoginResult result = authService.issueSessionFor(user, httpRequest);
@@ -131,7 +140,11 @@ public class AuthController {
                 return ApiResult.of(data, message);
         }
 
-        @Operation(summary = "Authenticate (Login) a user", description = "On success, sets the access-token and refresh-token cookies via Set-Cookie.")
+        @Operation(summary = "Authenticate (Login) a user", description = "On success, sets the access-token and refresh-token cookies via Set-Cookie. " +
+                        "Safe to call while already signed in: any session cookies still on the request are " +
+                        "abandoned — the old refresh token is invalidated and both cookies are replaced. This " +
+                        "holds even for an unverified or password-pending session. Credentials are checked " +
+                        "first, so a failed attempt leaves the existing session intact.")
         @ApiResponse(responseCode = "200", description = "Authenticated; access and refresh cookies set. No payload — the "
                         + "response carries only a confirmation message.", headers = @Header(name = "Set-Cookie", description = "Two cookies are set: `access_token` (short-lived) and `refresh_token` "
                         +
@@ -153,6 +166,10 @@ public class AuthController {
         public ApiResult<Void> login(@Valid @RequestBody LoginRequest request,
                         HttpServletRequest httpRequest, HttpServletResponse response) {
                 LoginResult result = authService.login(request, httpRequest);
+
+                // Only after the credentials check passed: a typo'd password must not
+                // silently kill the session the caller still has.
+                revokePresentedSession(httpRequest);
                 setAuthCookies(response, result);
 
                 String message = messageSource.getMessage("success.login", null, LocaleContextHolder.getLocale());
@@ -264,6 +281,24 @@ public class AuthController {
 
                 String message = messageSource.getMessage("success.logoutAll", null, LocaleContextHolder.getLocale());
                 return ApiResult.ofMessage(message);
+        }
+
+        // register and login start a brand-new session, so any session the caller still
+        // carries is abandoned by definition. Clearing the cookies alone would leave the
+        // old refresh token usable server-side, so it's revoked here the same way logout
+        // does it; the replacement cookies set immediately after overwrite the old pair.
+        // Idempotent and non-fatal: a missing, garbage, or already-revoked cookie is not
+        // an error, and must never fail an otherwise valid register/login.
+        private void revokePresentedSession(HttpServletRequest request) {
+                String rawRefreshToken = CookieUtils.read(request, refreshTokenCookieName);
+                if (rawRefreshToken == null) {
+                        return;
+                }
+                try {
+                        authService.logout(rawRefreshToken);
+                } catch (Exception e) {
+                        log.warn("failed to revoke the refresh token presented to register/login", e);
+                }
         }
 
         private void setAuthCookies(HttpServletResponse response, LoginResult result) {
