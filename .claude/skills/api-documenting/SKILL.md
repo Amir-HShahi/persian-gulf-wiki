@@ -96,6 +96,15 @@ must be modeled as an API-key-in-cookie, not HTTP Bearer.
 
 - **Controller-level `@Tag(name, description)`** — one per resource area (`Auth`, `Password`,
   `EmailVerification`, `Users`, ...), matching the controller's package, not the class name.
+- **Register every new tag in `OpenApiConfig.TAG_ORDER`.** springdoc emits the spec's
+  top-level `tags` array in no stable order and Scalar's sidebar renders it verbatim, so the
+  order is pinned by `tagOrderCustomizer`. Place a feature's tag with its related area (auth
+  flows together, content features together), and put a dev fixture tag (`Dev Test <Feature>`,
+  from the feature's `dev/DevTest*Controller`) **immediately after** the feature tag it mints
+  states for — e.g. `Articles`, `Dev Test Articles`. A tag left out still renders, but after
+  every listed one, splitting it from its pair. Update both expected lists in
+  `OpenApiDocsIntegrationTests` (non-dev: no `Dev Test *` tags) and
+  `OpenApiDevDocsIntegrationTests` (dev profile: full paired order) in the same change.
 - **`@Operation(summary, description)`** per method. `summary` is a short imperative phrase
   ("Register a new user"); `description` explains side effects that aren't obvious from the
   method body alone (e.g. register also fires a verification email best-effort — see the comment

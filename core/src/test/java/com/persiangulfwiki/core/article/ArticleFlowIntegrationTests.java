@@ -7,7 +7,12 @@ import com.persiangulfwiki.core.TestcontainersConfiguration;
 import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
 import com.persiangulfwiki.core.article.dto.CreateTranslationRequest;
 import com.persiangulfwiki.core.article.dto.UpdateRevisionRequest;
+import com.persiangulfwiki.core.article.entity.ArticleRevision;
 import com.persiangulfwiki.core.article.entity.EntityType;
+import com.persiangulfwiki.core.article.entity.RevisionStatus;
+import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
+import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
+import com.persiangulfwiki.core.article.service.ArticleRevisionService;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
 import com.persiangulfwiki.core.auth.dto.RegisterRequest;
 import com.persiangulfwiki.core.subject.dto.CreateSubjectRequest;
@@ -30,9 +35,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.nullValue;
 import static com.persiangulfwiki.core.CsrfTestSupport.xsrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -67,6 +74,15 @@ class ArticleFlowIntegrationTests {
     @Autowired
     private UserRoleRepository userRoleRepository;
 
+    @Autowired
+    private ArticleTranslationRepository articleTranslationRepository;
+
+    @Autowired
+    private ArticleRevisionRepository articleRevisionRepository;
+
+    @Autowired
+    private ArticleRevisionService articleRevisionService;
+
     private void registerContributor(String username, String email) throws Exception {
         RegisterRequest register = new RegisterRequest(username, email, PASSWORD);
         mockMvc.perform(post("/api/auth/register")
@@ -89,6 +105,14 @@ class ArticleFlowIntegrationTests {
     private User seedModerator(String username, String email) throws Exception {
         User user = registerVerifiedContributor(username, email);
         userRoleRepository.save(UserRole.builder().user(user).role(Role.MODERATOR).build());
+        return user;
+    }
+
+    // ADMIN only, deliberately without MODERATOR: proves the read rule honours the
+    // ADMIN > MODERATOR role hierarchy rather than a literal ROLE_MODERATOR check.
+    private User seedAdmin(String username, String email) throws Exception {
+        User user = registerVerifiedContributor(username, email);
+        userRoleRepository.save(UserRole.builder().user(user).role(Role.ADMIN).build());
         return user;
     }
 
@@ -289,9 +313,10 @@ class ArticleFlowIntegrationTests {
                 // through the revision history instead.
                 .andExpect(jsonPath("$.data.currentRevisionId").value(nullValue()));
 
-        UUID revisionId = firstRevisionId(articleId);
+        UUID revisionId = firstRevisionId(articleId, accessCookie);
 
-        mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa/revisions/" + revisionId))
+        mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa/revisions/" + revisionId)
+                        .cookie(accessCookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.revisionNumber").value(1))
                 .andExpect(jsonPath("$.data.status").value("DRAFT"))
@@ -392,7 +417,7 @@ class ArticleFlowIntegrationTests {
                 .andReturn().getResponse().getContentAsString();
         UUID articleId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(created, "$.data.id"));
 
-        UUID revisionId = firstRevisionId(articleId);
+        UUID revisionId = firstRevisionId(articleId, accessCookie);
 
         UpdateRevisionRequest update = new UpdateRevisionRequest("Edited title", nestedBody(), "edited summary");
         mockMvc.perform(patch("/api/articles/" + articleId + "/translations/fa/revisions/" + revisionId)
@@ -432,7 +457,8 @@ class ArticleFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.id").value(revisionId.toString()))
                 .andExpect(jsonPath("$.data.status").value("PENDING"));
 
-        mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa/revisions/" + revisionId))
+        mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa/revisions/" + revisionId)
+                        .cookie(accessCookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("PENDING"));
     }
@@ -494,7 +520,8 @@ class ArticleFlowIntegrationTests {
 
     // Revision reads are scoped through (articleId, language), not a bare revisionId lookup:
     // a real revision id that belongs to a different article's translation must 404 under
-    // this article's path rather than leak that article's content by id guessing.
+    // this article's path. Read as the revision's own author, so the 404 can only come from
+    // the path scoping, not from the unapproved-revision read rule.
     @Test
     void revisionFromAnotherArticleIsNotReadableUnderThisArticlesPath() throws Exception {
         registerVerifiedContributor("afauth12", "af-author12@example.com");
@@ -508,7 +535,8 @@ class ArticleFlowIntegrationTests {
         UUID revisionOfA = articleA[1];
         UUID articleBId = articleB[0];
 
-        mockMvc.perform(get("/api/articles/" + articleBId + "/translations/fa/revisions/" + revisionOfA))
+        mockMvc.perform(get("/api/articles/" + articleBId + "/translations/fa/revisions/" + revisionOfA)
+                        .cookie(accessCookie))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("REVISION_NOT_FOUND"));
     }
@@ -542,9 +570,26 @@ class ArticleFlowIntegrationTests {
     // value must produce a translated 400 with a stable code, not a generic binding failure.
     @Test
     void listFilterWithInvalidEntityTypeIsRejected() throws Exception {
-        mockMvc.perform(get("/api/articles").param("entityType", "SEA_MONSTER"))
+        mockMvc.perform(get("/api/articles").param("language", "fa").param("entityType", "SEA_MONSTER"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_ENTITY_TYPE"));
+    }
+
+    // language is required: omitting it is a 400 (not an unfiltered list across every
+    // language), and a blank value fails the same length/presence rules as creating a
+    // translation, as a 400 rather than a 500.
+    @Test
+    void listWithoutOrWithBlankLanguageIsRejected() throws Exception {
+        mockMvc.perform(get("/api/articles"))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(get("/api/articles").param("language", " "))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"));
+
+        mockMvc.perform(get("/api/articles").param("language", "x".repeat(21)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"));
     }
 
     // Controller is deliberately NOT @Validated (see its class comment) -- @Min/@Max on a
@@ -554,7 +599,7 @@ class ArticleFlowIntegrationTests {
     // maximum case must stay a 400, not fall through to an unhandled 500.
     @Test
     void pageSizeAboveTheMaximumIsRejected() throws Exception {
-        mockMvc.perform(get("/api/articles").param("size", "101"))
+        mockMvc.perform(get("/api/articles").param("language", "fa").param("size", "101"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"));
     }
@@ -644,19 +689,157 @@ class ArticleFlowIntegrationTests {
                 .andReturn().getResponse().getContentAsString();
         UUID articleId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(created, "$.data.id"));
 
-        UUID revisionId = firstRevisionId(articleId);
+        UUID revisionId = firstRevisionId(articleId, accessCookie);
 
         return new UUID[] {articleId, revisionId};
     }
 
     // A draft is found through the revision history, never through the translation's
     // currentRevisionId -- that pointer names published content and stays null until a
-    // moderator approves a revision (Phase 3), so it is not a way to reach a draft.
-    private UUID firstRevisionId(UUID articleId) throws Exception {
-        String revisions = mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa/revisions"))
+    // moderator approves a revision (Phase 3), so it is not a way to reach a draft. Read as the
+    // author, since a draft is hidden from everyone else.
+    private UUID firstRevisionId(UUID articleId, Cookie authorAccessCookie) throws Exception {
+        String revisions = mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa/revisions")
+                        .cookie(authorAccessCookie))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         return UUID.fromString(com.jayway.jsonpath.JsonPath.read(revisions, "$.data[0].id"));
+    }
+
+    // --- Revision read authorization: only APPROVED content is public ---
+
+    // No endpoint creates a follow-up revision on an existing translation, nor moves one
+    // straight to CHANGES_REQUESTED/REJECTED without a moderation round trip, so the extra
+    // revisions these tests need are inserted directly.
+    private ArticleRevision insertRevision(UUID translationId, int revisionNumber, RevisionStatus status,
+            UUID authorId) {
+        return articleRevisionRepository.save(ArticleRevision.builder()
+                .translationId(translationId)
+                .revisionNumber(revisionNumber)
+                .title(status + " title")
+                .body("{\"text\":\"" + status + "\"}")
+                .status(status)
+                .authorId(authorId)
+                .build());
+    }
+
+    private UUID translationId(UUID articleId) {
+        return articleTranslationRepository.findByArticleIdAndLanguage(articleId, "fa").orElseThrow().getId();
+    }
+
+    // Every non-APPROVED status is hidden from an anonymous caller and from a signed-in
+    // non-author, and visible to the author, a moderator and an admin. Hidden reads are 404
+    // REVISION_NOT_FOUND -- never 401/403 -- so they're indistinguishable from a missing id.
+    @Test
+    void unapprovedRevisionIsReadableOnlyByItsAuthorAndModerators() throws Exception {
+        User author = registerVerifiedContributor("afrd1", "af-rd-author1@example.com");
+        Cookie authorAccess = loginAccessCookie("af-rd-author1@example.com");
+        Cookie authorCsrf = fetchCsrfCookie();
+        registerVerifiedContributor("afrd2", "af-rd-other1@example.com");
+        Cookie otherAccess = loginAccessCookie("af-rd-other1@example.com");
+        seedModerator("afrd3", "af-rd-mod1@example.com");
+        Cookie moderatorAccess = loginAccessCookie("af-rd-mod1@example.com");
+        seedAdmin("afrd4", "af-rd-admin1@example.com");
+        Cookie adminAccess = loginAccessCookie("af-rd-admin1@example.com");
+
+        UUID[] ids = createArticleAndReturnArticleAndRevisionId(authorAccess, authorCsrf, uniqueSlug("read-authz"));
+        UUID articleId = ids[0];
+        UUID translationId = translationId(articleId);
+
+        List<UUID> hiddenRevisionIds = List.of(
+                ids[1],
+                insertRevision(translationId, 2, RevisionStatus.PENDING, author.getId()).getId(),
+                insertRevision(translationId, 3, RevisionStatus.CHANGES_REQUESTED, author.getId()).getId(),
+                insertRevision(translationId, 4, RevisionStatus.REJECTED, author.getId()).getId());
+
+        for (UUID revisionId : hiddenRevisionIds) {
+            String path = "/api/articles/" + articleId + "/translations/fa/revisions/" + revisionId;
+
+            mockMvc.perform(get(path))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value("REVISION_NOT_FOUND"))
+                    .andExpect(jsonPath("$.data").doesNotExist());
+            mockMvc.perform(get(path).cookie(otherAccess))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value("REVISION_NOT_FOUND"));
+
+            for (Cookie allowed : List.of(authorAccess, moderatorAccess, adminAccess)) {
+                mockMvc.perform(get(path).cookie(allowed))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.data.id").value(revisionId.toString()));
+            }
+        }
+    }
+
+    // The collection is filtered, not rejected: every caller gets 200 with the APPROVED
+    // history, plus whatever unapproved revisions that caller may see. An approved revision
+    // stays readable anonymously, by id as well as in the list.
+    @Test
+    void revisionListIsFilteredToWhatTheCallerMayRead() throws Exception {
+        User author = registerVerifiedContributor("afrl1", "af-rl-author1@example.com");
+        Cookie authorAccess = loginAccessCookie("af-rl-author1@example.com");
+        Cookie authorCsrf = fetchCsrfCookie();
+        User otherAuthor = registerVerifiedContributor("afrl2", "af-rl-other1@example.com");
+        Cookie otherAccess = loginAccessCookie("af-rl-other1@example.com");
+        seedModerator("afrl3", "af-rl-mod1@example.com");
+        Cookie moderatorAccess = loginAccessCookie("af-rl-mod1@example.com");
+        seedAdmin("afrl4", "af-rl-admin1@example.com");
+        Cookie adminAccess = loginAccessCookie("af-rl-admin1@example.com");
+
+        UUID[] ids = createArticleAndReturnArticleAndRevisionId(authorAccess, authorCsrf, uniqueSlug("list-authz"));
+        UUID articleId = ids[0];
+        UUID approvedId = ids[1];
+        articleRevisionService.applyModerationOutcome(approvedId, RevisionStatus.APPROVED);
+        UUID translationId = translationId(articleId);
+        UUID authorDraftId = insertRevision(translationId, 2, RevisionStatus.DRAFT, author.getId()).getId();
+        UUID otherRejectedId = insertRevision(translationId, 3, RevisionStatus.REJECTED, otherAuthor.getId()).getId();
+
+        String listPath = "/api/articles/" + articleId + "/translations/fa/revisions";
+
+        mockMvc.perform(get(listPath))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].id").value(contains(approvedId.toString())));
+        mockMvc.perform(get(listPath).cookie(authorAccess))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].id").value(contains(approvedId.toString(), authorDraftId.toString())));
+        mockMvc.perform(get(listPath).cookie(otherAccess))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].id").value(contains(approvedId.toString(), otherRejectedId.toString())));
+        for (Cookie privileged : List.of(moderatorAccess, adminAccess)) {
+            mockMvc.perform(get(listPath).cookie(privileged))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data[*].id").value(contains(
+                            approvedId.toString(), authorDraftId.toString(), otherRejectedId.toString())));
+        }
+
+        mockMvc.perform(get(listPath + "/" + approvedId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("APPROVED"));
+
+        // Adjacent public reads are untouched: the article and its translation are still
+        // anonymous 200s, and the translation still points readers at the approved revision.
+        mockMvc.perform(get("/api/articles/" + articleId)).andExpect(status().isOk());
+        mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.currentRevisionId").value(approvedId.toString()));
+    }
+
+    // Documented 403 on the revision reads: a session for an unverified account is refused
+    // before the read rule runs, even though the same request with no cookie at all succeeds.
+    @Test
+    void revisionReadWithUnverifiedSessionIsForbidden() throws Exception {
+        registerVerifiedContributor("afrv1", "af-rv-author1@example.com");
+        Cookie authorAccess = loginAccessCookie("af-rv-author1@example.com");
+        UUID articleId = createArticleAndReturnArticleAndRevisionId(
+                authorAccess, fetchCsrfCookie(), uniqueSlug("unverified-read"))[0];
+        registerContributor("afrv2", "af-rv-unverified1@example.com");
+        Cookie unverifiedAccess = loginAccessCookie("af-rv-unverified1@example.com");
+
+        String listPath = "/api/articles/" + articleId + "/translations/fa/revisions";
+        mockMvc.perform(get(listPath).cookie(unverifiedAccess))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("EMAIL_NOT_VERIFIED"));
+        mockMvc.perform(get(listPath)).andExpect(status().isOk());
     }
 
     // --- Regression coverage for what this change could plausibly have broken ---

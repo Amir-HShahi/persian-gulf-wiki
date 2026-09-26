@@ -12,6 +12,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.oas.models.tags.Tag;
 
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,12 +20,36 @@ import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @Configuration
 public class OpenApiConfig {
+
+    // Sidebar order of the docs UI. springdoc emits the spec's tag list in no stable order and
+    // Scalar renders it verbatim, so it is pinned here — each "Dev Test *" fixture tag sits right
+    // after the feature whose states it mints. A tag missing from this list still renders, just
+    // after all listed ones; add new controllers' tags here.
+    private static final List<String> TAG_ORDER = List.of(
+            "Authentication",
+            "OAuth2",
+            "Email Verification",
+            "Password Management",
+            "User Management",
+            "Dev Test Users",
+            "Admin",
+            "Expert Reviewer",
+            "Subjects",
+            "Dev Test Subjects",
+            "Sources",
+            "Dev Test Sources",
+            "Articles",
+            "Dev Test Articles",
+            "Moderation",
+            "Dev Test Moderation Tasks");
 
     // Flattens ApiResult<T> to T on every documented response — see the class javadoc and the
     // "Response envelope" section of the API description below.
@@ -178,6 +203,23 @@ public class OpenApiConfig {
                                 mapping is not supported — the `Domain` mismatch cannot be worked around from \
                                 the browser or from request headers.
                                 """);
+    }
+
+    @Bean
+    OpenApiCustomizer tagOrderCustomizer() {
+        return openApi -> {
+            if (openApi.getTags() == null) {
+                return;
+            }
+            List<Tag> tags = new ArrayList<>(openApi.getTags());
+            tags.sort(Comparator.comparingInt(tag -> tagRank(tag.getName())));
+            openApi.setTags(tags);
+        };
+    }
+
+    private static int tagRank(String name) {
+        int index = TAG_ORDER.indexOf(name);
+        return index < 0 ? TAG_ORDER.size() : index;
     }
 
     // These two routes are registered by Spring Security's own oauth2Login() support, not by

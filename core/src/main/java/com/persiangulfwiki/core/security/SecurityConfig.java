@@ -104,6 +104,9 @@ public class SecurityConfig {
                         // and keeps its CSRF requirement. Unlike subjects, article mutations
                         // carry no role check at all — see ArticleController's class comment for
                         // why gating authorship by moderator role would be self-defeating here.
+                        // permitAll only lets the request in: non-APPROVED revision content is
+                        // still restricted to its author and moderators, enforced in
+                        // ArticleRevisionService, not by this matcher.
                         .requestMatchers(HttpMethod.GET, "/api/articles", "/api/articles/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(problemDetailAuthenticationEntryPoint))

@@ -7,7 +7,12 @@ import com.jayway.jsonpath.JsonPath;
 import com.persiangulfwiki.core.TestcontainersConfiguration;
 import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
 import com.persiangulfwiki.core.article.dto.UpdateRevisionRequest;
+import com.persiangulfwiki.core.article.entity.ArticleRevision;
 import com.persiangulfwiki.core.article.entity.EntityType;
+import com.persiangulfwiki.core.article.entity.RevisionStatus;
+import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
+import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
+import com.persiangulfwiki.core.article.service.ArticleRevisionService;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
 import com.persiangulfwiki.core.auth.dto.RegisterRequest;
 import com.persiangulfwiki.core.moderation.dto.DecideRequest;
@@ -79,6 +84,15 @@ class ModerationFlowIntegrationTests {
 
     @Autowired
     private ModerationTaskRepository moderationTaskRepository;
+
+    @Autowired
+    private ArticleTranslationRepository articleTranslationRepository;
+
+    @Autowired
+    private ArticleRevisionRepository articleRevisionRepository;
+
+    @Autowired
+    private ArticleRevisionService articleRevisionService;
 
     // --- Account / session helpers (same dance as ArticleFlowIntegrationTests) ---
 
@@ -177,16 +191,34 @@ class ModerationFlowIntegrationTests {
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         UUID articleId = UUID.fromString(JsonPath.read(created, "$.data.id"));
-        return new Draft(articleId, firstRevisionId(articleId));
+        return new Draft(articleId, firstRevisionId(articleId, accessCookie));
+    }
+
+    // Subject-bound so a list query can filter by subjectId and see only this test's rows --
+    // the articles table is shared with every other test in the suite.
+    private Draft createSubjectBoundDraft(Cookie accessCookie, Cookie csrfCookie, UUID subjectId, String slug,
+            String title, String summary) throws Exception {
+        CreateArticleRequest createArticle = new CreateArticleRequest(subjectId, null, "fa", slug, title,
+                simpleBody("body"), summary);
+        String created = mockMvc.perform(post("/api/articles")
+                        .cookie(accessCookie, csrfCookie)
+                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createArticle)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        UUID articleId = UUID.fromString(JsonPath.read(created, "$.data.id"));
+        return new Draft(articleId, firstRevisionId(articleId, accessCookie));
     }
 
     // Discovers a freshly created article's draft revision through the revision *history*,
     // not through the translation's currentRevisionId. Those are two different things and
     // must not be conflated in a test: currentRevisionId names published content, and a
     // brand-new article has none until a moderator approves something, so reading it here
-    // would find null.
-    private UUID firstRevisionId(UUID articleId) throws Exception {
-        String revisions = mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa/revisions"))
+    // would find null. Read as the author, since a draft is hidden from everyone else.
+    private UUID firstRevisionId(UUID articleId, Cookie authorAccessCookie) throws Exception {
+        String revisions = mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa/revisions")
+                        .cookie(authorAccessCookie))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         return UUID.fromString(JsonPath.read(revisions, "$.data[0].id"));
@@ -220,9 +252,12 @@ class ModerationFlowIntegrationTests {
                 .content(objectMapper.writeValueAsString(update)));
     }
 
-    private ResultActions readRevision(Draft draft) throws Exception {
+    // Reads as the given caller: a revision that is not APPROVED is visible only to its author
+    // and to moderators, so reading an in-review revision anonymously would 404.
+    private ResultActions readRevision(Cookie accessCookie, Draft draft) throws Exception {
         return mockMvc.perform(get("/api/articles/" + draft.articleId()
-                + "/translations/fa/revisions/" + draft.revisionId()));
+                        + "/translations/fa/revisions/" + draft.revisionId())
+                .cookie(accessCookie));
     }
 
     // Creates an article, submits its first revision, and returns the task the submit opened.
@@ -311,7 +346,7 @@ class ModerationFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.entityType").value("ISLAND"))
                 .andReturn().getResponse().getContentAsString();
         UUID articleId = UUID.fromString(JsonPath.read(created, "$.data.id"));
-        Draft draft = new Draft(articleId, firstRevisionId(articleId));
+        Draft draft = new Draft(articleId, firstRevisionId(articleId, authorAccess));
 
         // Nothing is published yet, and that is what makes the APPROVE assertion at the end of
         // this test meaningful rather than vacuous: the pointer starts null and only the
@@ -352,7 +387,7 @@ class ModerationFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.decisions[0].reason")
                         .value("Needs a source for the population figure."));
 
-        readRevision(draft)
+        readRevision(authorAccess, draft)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("CHANGES_REQUESTED"));
 
@@ -389,7 +424,7 @@ class ModerationFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.decisions[1].decision").value("APPROVE"))
                 .andExpect(jsonPath("$.data.decisions[1].reason").value(nullValue()));
 
-        readRevision(draft)
+        readRevision(authorAccess, draft)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("APPROVED"));
 
@@ -554,7 +589,7 @@ class ModerationFlowIntegrationTests {
 
         // The refused decision left nothing behind: no decision row, and the revision is
         // still waiting on its author.
-        readRevision(draft)
+        readRevision(authorAccess, draft)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("CHANGES_REQUESTED"));
     }
@@ -664,7 +699,7 @@ class ModerationFlowIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.state").value("DECIDED"));
 
-        readRevision(draft)
+        readRevision(authorAccess, draft)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("REJECTED"));
 
@@ -732,7 +767,8 @@ class ModerationFlowIntegrationTests {
 
     // The new MODERATOR-only path must not have tightened the article chain: article reads
     // are still open to a caller with no account at all, which is the rule /api/moderation
-    // deliberately does not follow.
+    // deliberately does not follow. The one exception is an unapproved revision's content,
+    // which only its author (and moderators) may read -- an anonymous caller gets 404.
     @Test
     void articleReadsAreStillPublicAfterTheModerationRoleGate() throws Exception {
         registerVerifiedContributor("mfauth15", "mf-author15@example.com");
@@ -740,12 +776,102 @@ class ModerationFlowIntegrationTests {
         Cookie authorCsrf = fetchCsrfCookie();
         Draft draft = createDraft(authorAccess, authorCsrf, uniqueSlug("public-read"));
 
-        mockMvc.perform(get("/api/articles")).andExpect(status().isOk());
+        mockMvc.perform(get("/api/articles").param("language", "fa")).andExpect(status().isOk());
         mockMvc.perform(get("/api/articles/" + draft.articleId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(draft.articleId().toString()));
-        readRevision(draft)
+        readRevision(authorAccess, draft)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("DRAFT"));
+        mockMvc.perform(get("/api/articles/" + draft.articleId()
+                        + "/translations/fa/revisions/" + draft.revisionId()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("REVISION_NOT_FOUND"));
+    }
+
+    // --- Per-language article list: only approved content, and only the latest approval ---
+
+    // The list is public, so it must only ever show what a moderator approved: an article whose
+    // fa translation is still a draft is left out entirely, an article with no en translation is
+    // absent from the en list, and once a translation has several revisions the row carries the
+    // most recently approved one -- never an older approval, never a newer unreviewed draft.
+    @Test
+    void articleListPerLanguageShowsOnlyTheLatestApprovedRevisionOfEachTranslation() throws Exception {
+        seedModerator("mfmod16", "mf-mod16@example.com");
+        Cookie modAccess = loginAccessCookie("mf-mod16@example.com");
+        Cookie modCsrf = fetchCsrfCookie();
+        UUID subjectId = createIslandSubject(modAccess, modCsrf);
+
+        User author = registerVerifiedContributor("mfauth16", "mf-author16@example.com");
+        Cookie authorAccess = loginAccessCookie("mf-author16@example.com");
+        Cookie authorCsrf = fetchCsrfCookie();
+
+        String approvedSlug = uniqueSlug("list-approved");
+        Draft approved = createSubjectBoundDraft(authorAccess, authorCsrf, subjectId, approvedSlug,
+                "First approved title", "First approved summary");
+        UUID taskId = submitAndOpenTask(authorAccess, authorCsrf, approved);
+        claim(modAccess, modCsrf, taskId).andExpect(status().isOk());
+        decide(modAccess, modCsrf, taskId, Decision.APPROVE, null).andExpect(status().isOk());
+
+        createSubjectBoundDraft(authorAccess, authorCsrf, subjectId, uniqueSlug("list-draft"),
+                "Unreviewed title", "Unreviewed summary");
+
+        mockMvc.perform(get("/api/articles").param("language", "fa").param("subjectId", subjectId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(1)))
+                .andExpect(jsonPath("$.data[0].id").value(approved.articleId().toString()))
+                .andExpect(jsonPath("$.data[0].subjectId").value(subjectId.toString()))
+                .andExpect(jsonPath("$.data[0].entityType").value("ISLAND"))
+                .andExpect(jsonPath("$.data[0].language").value("fa"))
+                .andExpect(jsonPath("$.data[0].slug").value(approvedSlug))
+                .andExpect(jsonPath("$.data[0].title").value("First approved title"))
+                .andExpect(jsonPath("$.data[0].summary").value("First approved summary"))
+                .andExpect(jsonPath("$.data[0].currentRevisionId").value(approved.revisionId().toString()));
+
+        mockMvc.perform(get("/api/articles").param("language", "en").param("subjectId", subjectId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(0)));
+
+        // No endpoint creates a follow-up revision on an already-approved translation yet, so
+        // the second and third revisions are inserted directly; the second is then published
+        // through applyModerationOutcome, the same writer a moderator's APPROVE goes through.
+        UUID translationId = articleTranslationRepository
+                .findByArticleIdAndLanguage(approved.articleId(), "fa").orElseThrow().getId();
+        ArticleRevision secondApproved = articleRevisionRepository.save(ArticleRevision.builder()
+                .translationId(translationId)
+                .revisionNumber(2)
+                .parentRevisionId(approved.revisionId())
+                .title("Second approved title")
+                .body("{\"text\":\"second\"}")
+                .summary("Second approved summary")
+                .status(RevisionStatus.PENDING)
+                .authorId(author.getId())
+                .build());
+        articleRevisionService.applyModerationOutcome(secondApproved.getId(), RevisionStatus.APPROVED);
+        articleRevisionRepository.save(ArticleRevision.builder()
+                .translationId(translationId)
+                .revisionNumber(3)
+                .parentRevisionId(secondApproved.getId())
+                .title("Newer draft title")
+                .body("{\"text\":\"third\"}")
+                .summary("Newer draft summary")
+                .status(RevisionStatus.DRAFT)
+                .authorId(author.getId())
+                .build());
+
+        mockMvc.perform(get("/api/articles").param("language", "fa").param("subjectId", subjectId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", hasSize(1)))
+                .andExpect(jsonPath("$.data[0].id").value(approved.articleId().toString()))
+                .andExpect(jsonPath("$.data[0].title").value("Second approved title"))
+                .andExpect(jsonPath("$.data[0].summary").value("Second approved summary"))
+                .andExpect(jsonPath("$.data[0].currentRevisionId").value(secondApproved.getId().toString()));
+
+        // Adjacent behavior: the article-level read is unchanged by the list's new shape.
+        mockMvc.perform(get("/api/articles/" + approved.articleId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(approved.articleId().toString()))
+                .andExpect(jsonPath("$.data.entityType").value("ISLAND"))
+                .andExpect(jsonPath("$.data.title").doesNotExist());
     }
 }
