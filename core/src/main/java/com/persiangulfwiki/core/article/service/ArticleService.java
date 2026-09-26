@@ -1,8 +1,10 @@
 package com.persiangulfwiki.core.article.service;
 
+import com.persiangulfwiki.core.article.dto.ArticleListItemResponse;
 import com.persiangulfwiki.core.article.dto.ArticleResponse;
 import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
 import com.persiangulfwiki.core.article.entity.Article;
+import com.persiangulfwiki.core.article.entity.ArticleRevision;
 import com.persiangulfwiki.core.article.entity.ArticleTranslation;
 import com.persiangulfwiki.core.article.entity.EntityType;
 import com.persiangulfwiki.core.article.entity.TranslationState;
@@ -11,6 +13,7 @@ import com.persiangulfwiki.core.article.exception.DuplicateSlugException;
 import com.persiangulfwiki.core.article.exception.EntityTypeNotDerivableException;
 import com.persiangulfwiki.core.article.exception.InvalidEntityTypeException;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
+import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
@@ -18,13 +21,17 @@ import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +39,9 @@ public class ArticleService {
 
     private final ArticleRepository articleRepository;
     private final ArticleTranslationRepository articleTranslationRepository;
+    private final ArticleRevisionRepository articleRevisionRepository;
     private final ArticleRevisionService articleRevisionService;
+    private final ArticleVisibilityService articleVisibilityService;
     private final SubjectRepository subjectRepository;
 
     // Article + its canonical translation + that translation's first DRAFT revision, written
@@ -76,27 +85,42 @@ public class ArticleService {
         return toResponse(article);
     }
 
+    // An article nothing has been approved in yet is 404 to anyone but its authors and
+    // moderators -- see ArticleVisibilityService.
     @Transactional(readOnly = true)
-    public ArticleResponse get(UUID articleId) {
-        return toResponse(articleRepository.findById(articleId).orElseThrow(ArticleNotFoundException::new));
+    public ArticleResponse get(UUID articleId, @Nullable UUID callerUserId, boolean isCallerModerator) {
+        Article article = articleRepository.findById(articleId).orElseThrow(ArticleNotFoundException::new);
+        if (!articleVisibilityService.isArticleReadableBy(article, callerUserId, isCallerModerator)) {
+            throw new ArticleNotFoundException();
+        }
+        return toResponse(article);
     }
 
+    // Only translations with an approved revision are listed: title/summary come from
+    // currentRevisionId, which only a moderator's APPROVE sets, so unreviewed text never
+    // reaches this public list. One page = three queries (translations, then their articles
+    // and revisions by id) rather than one per row.
     @Transactional(readOnly = true)
-    public List<ArticleResponse> list(UUID subjectId, String entityTypeFilter, Pageable pageable) {
+    public List<ArticleListItemResponse> list(String language, UUID subjectId, String entityTypeFilter, Pageable pageable) {
         EntityType entityType = entityTypeFilter == null ? null : parseEntityType(entityTypeFilter);
 
-        Page<Article> articles;
-        if (subjectId != null && entityType != null) {
-            articles = articleRepository.findBySubjectIdAndEntityType(subjectId, entityType, pageable);
-        } else if (subjectId != null) {
-            articles = articleRepository.findBySubjectId(subjectId, pageable);
-        } else if (entityType != null) {
-            articles = articleRepository.findByEntityType(entityType, pageable);
-        } else {
-            articles = articleRepository.findAll(pageable);
-        }
+        List<ArticleTranslation> translations = articleTranslationRepository
+                .findPublishedByLanguage(language, subjectId, entityType, pageable)
+                .getContent();
 
-        return articles.getContent().stream().map(this::toResponse).toList();
+        Map<UUID, Article> articlesById = articleRepository
+                .findAllById(translations.stream().map(ArticleTranslation::getArticleId).toList())
+                .stream()
+                .collect(Collectors.toMap(Article::getId, Function.identity()));
+        Map<UUID, ArticleRevision> revisionsById = articleRevisionRepository
+                .findAllById(translations.stream().map(ArticleTranslation::getCurrentRevisionId).toList())
+                .stream()
+                .collect(Collectors.toMap(ArticleRevision::getId, Function.identity()));
+
+        return translations.stream()
+                .map(translation -> toListItemResponse(articlesById.get(translation.getArticleId()), translation,
+                        revisionsById.get(translation.getCurrentRevisionId())))
+                .toList();
     }
 
     // Same reasoning as SubjectService.parseKind: a raw String filter parsed here produces a
@@ -132,5 +156,13 @@ public class ArticleService {
         return new ArticleResponse(article.getId(), article.getSubjectId(), article.getEntityType(),
                 article.getCanonicalLanguage(), article.getCreatedByUserId(), article.getCreatedAt(),
                 article.getUpdatedAt());
+    }
+
+    private ArticleListItemResponse toListItemResponse(
+            Article article, ArticleTranslation translation, ArticleRevision revision) {
+        return new ArticleListItemResponse(article.getId(), article.getSubjectId(), article.getEntityType(),
+                article.getCanonicalLanguage(), article.getCreatedByUserId(), article.getCreatedAt(),
+                article.getUpdatedAt(), translation.getLanguage(), translation.getSlug(), revision.getTitle(),
+                revision.getSummary(), revision.getId());
     }
 }

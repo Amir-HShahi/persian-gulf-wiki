@@ -15,6 +15,7 @@ import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,7 @@ public class ArticleRevisionService {
 
     private final ArticleTranslationRepository articleTranslationRepository;
     private final ArticleRevisionRepository articleRevisionRepository;
+    private final ArticleVisibilityService articleVisibilityService;
 
     // Converts JsonNode (every DTO's shape for `body`) to/from the pre-serialized JSON-text
     // String the entity actually stores. See the JSON-mapping decision comment on
@@ -87,17 +89,34 @@ public class ArticleRevisionService {
         return toResponse(articleRevisionRepository.save(revision));
     }
 
+    // Silently drops revisions the caller may not read (see isReadableBy) rather than
+    // rejecting the whole request, so a public reader still gets the APPROVED history and
+    // learns nothing about whether unapproved revisions exist. A translation the caller may
+    // not read at all is a 404, not an empty list -- 200 [] would confirm it exists.
     @Transactional(readOnly = true)
-    public List<RevisionResponse> list(UUID articleId, String language) {
+    public List<RevisionResponse> list(UUID articleId, String language, @Nullable UUID callerUserId,
+            boolean isCallerModerator) {
         ArticleTranslation translation = getTranslation(articleId, language);
+        if (!articleVisibilityService.isTranslationReadableBy(translation, callerUserId, isCallerModerator)) {
+            throw new TranslationNotFoundException();
+        }
         return articleRevisionRepository.findByTranslationIdOrderByRevisionNumberAsc(translation.getId()).stream()
+                .filter(revision -> isReadableBy(revision, callerUserId, isCallerModerator))
                 .map(this::toResponse)
                 .toList();
     }
 
+    // A revision the caller may not read throws RevisionNotFoundException (404), not a
+    // 401/403 -- a deliberate project decision, so the single GET hides a hidden revision's
+    // existence the same way list() does. Don't "fix" this to 403.
     @Transactional(readOnly = true)
-    public RevisionResponse get(UUID articleId, String language, UUID revisionId) {
-        return toResponse(getRevisionScoped(articleId, language, revisionId));
+    public RevisionResponse get(UUID articleId, String language, UUID revisionId, @Nullable UUID callerUserId,
+            boolean isCallerModerator) {
+        ArticleRevision revision = getRevisionScoped(articleId, language, revisionId);
+        if (!isReadableBy(revision, callerUserId, isCallerModerator)) {
+            throw new RevisionNotFoundException();
+        }
+        return toResponse(revision);
     }
 
     // Moves DRAFT|CHANGES_REQUESTED -> PENDING, then announces it.
@@ -171,6 +190,17 @@ public class ArticleRevisionService {
         articleTranslationRepository.save(translation);
     }
 
+    // The read-authorization rule for revision content: only APPROVED revisions are public;
+    // every other status (DRAFT, PENDING, CHANGES_REQUESTED, REJECTED) is visible only to its
+    // author and to moderators (ADMIN included, via the role hierarchy the caller resolves).
+    // Fails closed: an anonymous caller (null id) matches no author, and a status added to
+    // RevisionStatus later is hidden until it is deliberately listed here.
+    private boolean isReadableBy(ArticleRevision revision, @Nullable UUID callerUserId, boolean isCallerModerator) {
+        return revision.getStatus() == RevisionStatus.APPROVED
+                || isCallerModerator
+                || revision.getAuthorId().equals(callerUserId);
+    }
+
     private void requireAuthor(ArticleRevision revision, UUID callerUserId) {
         if (!revision.getAuthorId().equals(callerUserId)) {
             throw new NotRevisionAuthorException();
@@ -190,7 +220,10 @@ public class ArticleRevisionService {
 
     // Scoped through the translation rather than a bare findById: a revisionId that exists
     // but belongs to a different article/language's translation must 404 the same as one
-    // that doesn't exist at all, not leak another article's content by id guessing.
+    // that doesn't exist at all, so the (articleId, language, revisionId) triple in the URL
+    // is always a consistent resource path. This is URL integrity, NOT access control --
+    // revision ids are random v4 UUIDs, and who may read a revision is decided solely by
+    // isReadableBy.
     private ArticleRevision getRevisionScoped(UUID articleId, String language, UUID revisionId) {
         ArticleTranslation translation = getTranslation(articleId, language);
         ArticleRevision revision = articleRevisionRepository.findById(revisionId).orElseThrow(RevisionNotFoundException::new);

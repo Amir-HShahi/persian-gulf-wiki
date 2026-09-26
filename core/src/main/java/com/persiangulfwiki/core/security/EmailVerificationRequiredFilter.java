@@ -26,7 +26,8 @@ import java.util.List;
 // Unauthenticated requests are left alone — anyRequest().authenticated() and the 401
 // entry point already handle those. Authenticated requests from an unverified account
 // are blocked here except for a small allowlist, so unverified users can still complete
-// email verification, log out, or refresh their session.
+// email verification, log out, or refresh their session. On a public route (PublicRoutes)
+// they are not blocked but demoted to anonymous — see the branch below.
 //
 // This runs as a Spring Security filter, ahead of the DispatcherServlet, so it can't
 // route through GlobalExceptionHandler's @ExceptionHandler methods the way a controller-
@@ -77,6 +78,17 @@ public class EmailVerificationRequiredFilter extends OncePerRequestFilter {
         boolean emailVerified = verified != null && verified;
 
         if (!emailVerified && !ALLOWLIST.matches(request)) {
+            // A public route is served to this caller exactly as to one with no cookie:
+            // clearing the context here lets AnonymousAuthenticationFilter install the
+            // anonymous token, so the service layer sees no identity and no roles. Proceeding
+            // as the caller instead would let an unverified session use its author/moderator
+            // reads — an identity this filter otherwise refuses to honour until verification.
+            if (PublicRoutes.ALL.matches(request)) {
+                SecurityContextHolder.clearContext();
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             ProblemDetail problemDetail = ProblemDetails.of(
                     HttpStatus.FORBIDDEN, "email verification required", "EMAIL_NOT_VERIFIED", request);
 

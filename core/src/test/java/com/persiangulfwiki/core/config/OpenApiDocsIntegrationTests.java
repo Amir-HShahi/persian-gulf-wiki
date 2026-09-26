@@ -1,5 +1,6 @@
 package com.persiangulfwiki.core.config;
 
+import com.jayway.jsonpath.JsonPath;
 import com.persiangulfwiki.core.TestcontainersConfiguration;
 
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,9 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -99,5 +103,18 @@ class OpenApiDocsIntegrationTests {
                         .value("https://pgw-staging-api.ravensandrunes.me"))
                 .andExpect(jsonPath("$.servers[1].description").value("Production"))
                 .andExpect(jsonPath("$.servers[2].description").value("Local"));
+    }
+
+    @Test
+    void tagsFollowTheSidebarOrderAndCarryNoDevFixtureTagsOutsideDev() throws Exception {
+        String spec = mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<String> tagNames = JsonPath.read(spec, "$.tags[*].name");
+        assertThat(tagNames).containsExactly(
+                "Authentication", "OAuth2", "Email Verification", "Password Management",
+                "User Management", "Admin", "Expert Reviewer", "Subjects", "Sources", "Articles",
+                "Moderation");
     }
 }
