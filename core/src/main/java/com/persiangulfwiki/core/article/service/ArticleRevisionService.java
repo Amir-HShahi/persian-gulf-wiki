@@ -32,6 +32,7 @@ public class ArticleRevisionService {
 
     private final ArticleTranslationRepository articleTranslationRepository;
     private final ArticleRevisionRepository articleRevisionRepository;
+    private final ArticleVisibilityService articleVisibilityService;
 
     // Converts JsonNode (every DTO's shape for `body`) to/from the pre-serialized JSON-text
     // String the entity actually stores. See the JSON-mapping decision comment on
@@ -90,11 +91,15 @@ public class ArticleRevisionService {
 
     // Silently drops revisions the caller may not read (see isReadableBy) rather than
     // rejecting the whole request, so a public reader still gets the APPROVED history and
-    // learns nothing about whether unapproved revisions exist.
+    // learns nothing about whether unapproved revisions exist. A translation the caller may
+    // not read at all is a 404, not an empty list -- 200 [] would confirm it exists.
     @Transactional(readOnly = true)
     public List<RevisionResponse> list(UUID articleId, String language, @Nullable UUID callerUserId,
             boolean isCallerModerator) {
         ArticleTranslation translation = getTranslation(articleId, language);
+        if (!articleVisibilityService.isTranslationReadableBy(translation, callerUserId, isCallerModerator)) {
+            throw new TranslationNotFoundException();
+        }
         return articleRevisionRepository.findByTranslationIdOrderByRevisionNumberAsc(translation.getId()).stream()
                 .filter(revision -> isReadableBy(revision, callerUserId, isCallerModerator))
                 .map(this::toResponse)

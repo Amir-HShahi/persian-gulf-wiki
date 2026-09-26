@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -87,27 +86,28 @@ public class SecurityConfig {
                         // "everything else requires auth" default below.
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         // Public API docs, not app data.
-                        .requestMatchers("/docs/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers(PublicRoutes.API_DOCS).permitAll()
                         // Deploy health check hits this unauthenticated — no app data exposed.
-                        .requestMatchers("/actuator/health/**").permitAll()
-                        // Public wiki content: reading a subject or a citation needs no account.
-                        // Scoped to GET on purpose — POST /api/subjects and POST /api/sources fall
-                        // through to anyRequest().authenticated() below and keep their role check
-                        // and CSRF requirement. Widening either of these to all methods would make
-                        // both endpoints anonymously writable, which is why the method is named
-                        // here rather than relying on the path alone.
-                        .requestMatchers(HttpMethod.GET, "/api/subjects", "/api/subjects/**",
-                                "/api/sources", "/api/sources/**").permitAll()
-                        // Same reasoning, for articles/translations/revisions: reading requires
-                        // no account, but every mutation (create article/translation, edit or
-                        // submit a revision) falls through to anyRequest().authenticated() below
-                        // and keeps its CSRF requirement. Unlike subjects, article mutations
-                        // carry no role check at all — see ArticleController's class comment for
-                        // why gating authorship by moderator role would be self-defeating here.
-                        // permitAll only lets the request in: non-APPROVED revision content is
-                        // still restricted to its author and moderators, enforced in
-                        // ArticleRevisionService, not by this matcher.
-                        .requestMatchers(HttpMethod.GET, "/api/articles", "/api/articles/**").permitAll()
+                        .requestMatchers(PublicRoutes.HEALTH).permitAll()
+                        // Public wiki content: reading an article, subject or citation needs no
+                        // account. Scoped to GET on purpose (see PublicRoutes.CONTENT_READS):
+                        // POST /api/subjects, POST /api/sources and every article mutation fall
+                        // through to anyRequest().authenticated() below and keep their CSRF
+                        // requirement (and, for subjects/sources, their role check). Article
+                        // mutations carry no role check at all — see ArticleController's class
+                        // comment for why gating authorship by moderator role would be
+                        // self-defeating here.
+                        //
+                        // permitAll only lets the request in. Anything not yet approved (a
+                        // revision, a translation, or an article with no approved translation)
+                        // is still restricted to its authors and moderators, enforced in
+                        // ArticleVisibilityService/ArticleRevisionService, not by this matcher.
+                        //
+                        // These routes, plus the docs and health routes above, are also where
+                        // PendingPasswordSetupFilter and EmailVerificationRequiredFilter treat a
+                        // restricted session as anonymous instead of rejecting it — a cookie must
+                        // never make a public page less reachable than no cookie at all.
+                        .requestMatchers(PublicRoutes.CONTENT_READS).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(problemDetailAuthenticationEntryPoint))
                 // Both default to enabled and would otherwise turn an unauthenticated request

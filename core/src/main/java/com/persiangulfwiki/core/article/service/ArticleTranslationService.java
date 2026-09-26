@@ -14,6 +14,7 @@ import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,13 +27,22 @@ public class ArticleTranslationService {
     private final ArticleRepository articleRepository;
     private final ArticleTranslationRepository articleTranslationRepository;
     private final ArticleRevisionService articleRevisionService;
+    private final ArticleVisibilityService articleVisibilityService;
 
     // Adds a language to an existing article, writing that language's first DRAFT revision in
     // the same transaction -- same "detail row must exist together with its parent" reasoning
     // as ArticleService.create.
+    //
+    // An article the caller may not read is 404 here too, checked before the duplicate checks
+    // below: otherwise a 409 would confirm that a hidden article exists, and anyone holding its
+    // id could attach a language to someone else's unapproved draft.
     @Transactional
-    public TranslationResponse addTranslation(UUID authorUserId, UUID articleId, CreateTranslationRequest request) {
+    public TranslationResponse addTranslation(UUID authorUserId, boolean isAuthorModerator, UUID articleId,
+            CreateTranslationRequest request) {
         Article article = articleRepository.findById(articleId).orElseThrow(ArticleNotFoundException::new);
+        if (!articleVisibilityService.isArticleReadableBy(article, authorUserId, isAuthorModerator)) {
+            throw new ArticleNotFoundException();
+        }
 
         if (articleTranslationRepository.findByArticleIdAndLanguage(articleId, request.language()).isPresent()) {
             throw new DuplicateTranslationLanguageException();
@@ -67,10 +77,17 @@ public class ArticleTranslationService {
         return toResponse(translation);
     }
 
+    // A translation with no approved revision yet is 404 to anyone but its authors and
+    // moderators -- see ArticleVisibilityService.
     @Transactional(readOnly = true)
-    public TranslationResponse get(UUID articleId, String language) {
-        return toResponse(articleTranslationRepository.findByArticleIdAndLanguage(articleId, language)
-                .orElseThrow(TranslationNotFoundException::new));
+    public TranslationResponse get(UUID articleId, String language, @Nullable UUID callerUserId,
+            boolean isCallerModerator) {
+        ArticleTranslation translation = articleTranslationRepository.findByArticleIdAndLanguage(articleId, language)
+                .orElseThrow(TranslationNotFoundException::new);
+        if (!articleVisibilityService.isTranslationReadableBy(translation, callerUserId, isCallerModerator)) {
+            throw new TranslationNotFoundException();
+        }
+        return toResponse(translation);
     }
 
     private TranslationResponse toResponse(ArticleTranslation translation) {

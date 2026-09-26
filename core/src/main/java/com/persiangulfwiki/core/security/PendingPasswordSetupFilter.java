@@ -27,6 +27,8 @@ import java.util.List;
 // of a normal session, so it can't touch the rest of the API until it sets a password. This
 // filter is that enforcement: it blocks every request carrying a pending-scope token except
 // a small allowlist, forcing the client through /api/auth/oauth2/complete-registration first.
+// Public routes (PublicRoutes) are the exception: there the token is dropped and the request
+// proceeds as anonymous, since the same request with no cookie at all would be let through.
 //
 // It runs before EmailVerificationRequiredFilter for the same reason it exists at all — a
 // pending-scope token carries no `verified` claim, so if EmailVerificationRequiredFilter ran
@@ -69,6 +71,16 @@ public class PendingPasswordSetupFilter extends OncePerRequestFilter {
         }
 
         if (!ALLOWLIST.matches(request)) {
+            // Same demotion as EmailVerificationRequiredFilter's: a public route reads as
+            // anonymous rather than 403, and never as this narrow token's own identity.
+            // Clearing the context also means EmailVerificationRequiredFilter, which runs
+            // next, sees no authentication and passes the request straight through.
+            if (PublicRoutes.ALL.matches(request)) {
+                SecurityContextHolder.clearContext();
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             ProblemDetail problemDetail = ProblemDetails.of(
                     HttpStatus.FORBIDDEN, "password setup required", "PASSWORD_SETUP_REQUIRED", request);
 

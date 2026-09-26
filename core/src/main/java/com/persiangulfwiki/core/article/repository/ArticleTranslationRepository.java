@@ -23,6 +23,8 @@ public interface ArticleTranslationRepository extends JpaRepository<ArticleTrans
 
     List<ArticleTranslation> findByArticleId(UUID articleId);
 
+    boolean existsByArticleIdAndCurrentRevisionIdIsNotNull(UUID articleId);
+
     // Translations in one language that have an approved revision, filtered by their article's
     // subject/entityType (either filter null = not applied). Ordered newest article first, with
     // id as tiebreak so paging is stable.

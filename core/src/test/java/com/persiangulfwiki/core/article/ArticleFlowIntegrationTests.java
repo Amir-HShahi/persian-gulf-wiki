@@ -7,14 +7,17 @@ import com.persiangulfwiki.core.TestcontainersConfiguration;
 import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
 import com.persiangulfwiki.core.article.dto.CreateTranslationRequest;
 import com.persiangulfwiki.core.article.dto.UpdateRevisionRequest;
+import com.persiangulfwiki.core.article.entity.Article;
 import com.persiangulfwiki.core.article.entity.ArticleRevision;
 import com.persiangulfwiki.core.article.entity.EntityType;
 import com.persiangulfwiki.core.article.entity.RevisionStatus;
+import com.persiangulfwiki.core.article.repository.ArticleRepository;
 import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 import com.persiangulfwiki.core.article.service.ArticleRevisionService;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
 import com.persiangulfwiki.core.auth.dto.RegisterRequest;
+import com.persiangulfwiki.core.security.JwtService;
 import com.persiangulfwiki.core.subject.dto.CreateSubjectRequest;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.user.entity.Role;
@@ -24,6 +27,7 @@ import com.persiangulfwiki.core.user.repository.UserRepository;
 import com.persiangulfwiki.core.user.repository.UserRoleRepository;
 
 import jakarta.servlet.http.Cookie;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,9 +35,12 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
@@ -48,8 +55,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-// Phase 2 (article core): article -> translation -> revision. Every GET is public; every
-// mutation needs an authenticated, email-verified account (any contributor, not
+// Phase 2 (article core): article -> translation -> revision. Every GET is reachable without an
+// account, but shows an anonymous caller only approved content; every mutation needs an authenticated, email-verified account (any contributor, not
 // hasRole('MODERATOR') -- deliberately different from /api/subjects). See
 // ArticleController's class comment and SecurityConfig's articles requestMatchers entry for
 // why. Structured the same way as SubjectFlowIntegrationTests: helpers first, then the new
@@ -75,6 +82,9 @@ class ArticleFlowIntegrationTests {
     private UserRoleRepository userRoleRepository;
 
     @Autowired
+    private ArticleRepository articleRepository;
+
+    @Autowired
     private ArticleTranslationRepository articleTranslationRepository;
 
     @Autowired
@@ -82,6 +92,9 @@ class ArticleFlowIntegrationTests {
 
     @Autowired
     private ArticleRevisionService articleRevisionService;
+
+    @Autowired
+    private JwtService jwtService;
 
     private void registerContributor(String username, String email) throws Exception {
         RegisterRequest register = new RegisterRequest(username, email, PASSWORD);
@@ -184,8 +197,8 @@ class ArticleFlowIntegrationTests {
     // --- Smoke: the new behavior this phase adds ---
 
     // Main path: entityType is DERIVED from the bound subject's kind, never client-chosen,
-    // and the created article is readable by a caller with no account at all -- proving the
-    // public-read rule, not merely session reuse.
+    // and once its first revision is approved the article is readable by a caller with no
+    // account at all -- proving the public-read rule, not merely session reuse.
     @Test
     void contributorCreatesSubjectBoundArticleAndAnonymousReadsItBack() throws Exception {
         seedModerator("afmod1", "af-mod1@example.com");
@@ -211,6 +224,7 @@ class ArticleFlowIntegrationTests {
                 .andReturn().getResponse().getContentAsString();
 
         UUID articleId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(created, "$.data.id"));
+        articleRevisionService.applyModerationOutcome(firstRevisionId(articleId, accessCookie), RevisionStatus.APPROVED);
 
         mockMvc.perform(get("/api/articles/" + articleId))
                 .andExpect(status().isOk())
@@ -285,7 +299,8 @@ class ArticleFlowIntegrationTests {
     // Atomicity: creating an article also writes its canonical translation and that
     // translation's first revision (revisionNumber = 1, DRAFT) in the same transaction. An
     // article with zero translations must never be observable -- the canonical-language GET
-    // must succeed right after create, not 404.
+    // must succeed right after create, not 404. Read as the author: nothing is approved yet, so
+    // to anyone else the translation is hidden.
     @Test
     void createIsAtomicThroughCanonicalTranslationAndFirstRevision() throws Exception {
         registerVerifiedContributor("afauth5", "af-author5@example.com");
@@ -304,7 +319,7 @@ class ArticleFlowIntegrationTests {
                 .andReturn().getResponse().getContentAsString();
         UUID articleId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(created, "$.data.id"));
 
-        mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa"))
+        mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa").cookie(accessCookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.language").value("fa"))
                 // Created, but not published: currentRevisionId names the revision readers are
@@ -353,7 +368,7 @@ class ArticleFlowIntegrationTests {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.language").value("en"));
 
-        mockMvc.perform(get("/api/articles/" + articleId + "/translations/en"))
+        mockMvc.perform(get("/api/articles/" + articleId + "/translations/en").cookie(accessCookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.language").value("en"));
 
@@ -638,7 +653,8 @@ class ArticleFlowIntegrationTests {
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("EMAIL_NOT_VERIFIED"));
     }
 
     @Test
@@ -824,22 +840,207 @@ class ArticleFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.currentRevisionId").value(approvedId.toString()));
     }
 
-    // Documented 403 on the revision reads: a session for an unverified account is refused
-    // before the read rule runs, even though the same request with no cookie at all succeeds.
-    @Test
-    void revisionReadWithUnverifiedSessionIsForbidden() throws Exception {
-        registerVerifiedContributor("afrv1", "af-rv-author1@example.com");
-        Cookie authorAccess = loginAccessCookie("af-rv-author1@example.com");
-        UUID articleId = createArticleAndReturnArticleAndRevisionId(
-                authorAccess, fetchCsrfCookie(), uniqueSlug("unverified-read"))[0];
-        registerContributor("afrv2", "af-rv-unverified1@example.com");
-        Cookie unverifiedAccess = loginAccessCookie("af-rv-unverified1@example.com");
+    // --- Unpublished articles and translations: hidden like unapproved revisions ---
 
-        String listPath = "/api/articles/" + articleId + "/translations/fa/revisions";
-        mockMvc.perform(get(listPath).cookie(unverifiedAccess))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("EMAIL_NOT_VERIFIED"));
-        mockMvc.perform(get(listPath)).andExpect(status().isOk());
+    // Adds a translation through the real endpoint, as the given caller.
+    private void addTranslation(UUID articleId, String language, Cookie accessCookie, Cookie csrfCookie)
+            throws Exception {
+        CreateTranslationRequest request = new CreateTranslationRequest(
+                language, uniqueSlug("tr-" + language), "Title " + language, simpleBody(language), null);
+        mockMvc.perform(post("/api/articles/" + articleId + "/translations")
+                        .cookie(accessCookie, csrfCookie)
+                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
+    }
+
+    private UUID translationId(UUID articleId, String language) {
+        return articleTranslationRepository.findByArticleIdAndLanguage(articleId, language).orElseThrow().getId();
+    }
+
+    private ResultActions read(String path, @Nullable Cookie accessCookie) throws Exception {
+        MockHttpServletRequestBuilder request = get(path);
+        if (accessCookie != null) {
+            request.cookie(accessCookie);
+        }
+        return mockMvc.perform(request);
+    }
+
+    private void expectHidden(String path, @Nullable Cookie accessCookie, String code) throws Exception {
+        read(path, accessCookie)
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(code))
+                .andExpect(jsonPath("$.data").doesNotExist());
+    }
+
+    private void expectVisible(String path, @Nullable Cookie accessCookie) throws Exception {
+        read(path, accessCookie).andExpect(status().isOk());
+    }
+
+    // Nothing approved yet: the article, both translations and their revision lists are 404 to
+    // an anonymous caller and to an unrelated contributor -- the same codes as an id that does
+    // not exist -- and readable by the creator, a moderator and an admin. A translator who only
+    // wrote a revision of the en translation reaches the article and en, but not fa.
+    @Test
+    void unpublishedArticleAndTranslationsAreVisibleOnlyToTheirAuthorsAndModerators() throws Exception {
+        registerVerifiedContributor("afup1", "af-up-author1@example.com");
+        Cookie authorAccess = loginAccessCookie("af-up-author1@example.com");
+        Cookie authorCsrf = fetchCsrfCookie();
+        User translator = registerVerifiedContributor("afup2", "af-up-translator1@example.com");
+        Cookie translatorAccess = loginAccessCookie("af-up-translator1@example.com");
+        registerVerifiedContributor("afup3", "af-up-other1@example.com");
+        Cookie otherAccess = loginAccessCookie("af-up-other1@example.com");
+        seedModerator("afup4", "af-up-mod1@example.com");
+        Cookie moderatorAccess = loginAccessCookie("af-up-mod1@example.com");
+        seedAdmin("afup5", "af-up-admin1@example.com");
+        Cookie adminAccess = loginAccessCookie("af-up-admin1@example.com");
+
+        UUID articleId = createArticleAndReturnArticleAndRevisionId(
+                authorAccess, authorCsrf, uniqueSlug("unpublished"))[0];
+        addTranslation(articleId, "en", authorAccess, authorCsrf);
+        UUID translatorDraftId = insertRevision(
+                translationId(articleId, "en"), 2, RevisionStatus.DRAFT, translator.getId()).getId();
+
+        String articlePath = "/api/articles/" + articleId;
+        String faPath = articlePath + "/translations/fa";
+        String enPath = articlePath + "/translations/en";
+
+        for (Cookie outsider : Arrays.asList(null, otherAccess)) {
+            expectHidden(articlePath, outsider, "ARTICLE_NOT_FOUND");
+            expectHidden(faPath, outsider, "TRANSLATION_NOT_FOUND");
+            expectHidden(enPath, outsider, "TRANSLATION_NOT_FOUND");
+            expectHidden(faPath + "/revisions", outsider, "TRANSLATION_NOT_FOUND");
+            expectHidden(enPath + "/revisions", outsider, "TRANSLATION_NOT_FOUND");
+        }
+
+        for (Cookie allowed : List.of(authorAccess, moderatorAccess, adminAccess)) {
+            read(articlePath, allowed)
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.id").value(articleId.toString()));
+            read(faPath, allowed)
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.currentRevisionId").value(nullValue()));
+            expectVisible(enPath, allowed);
+            expectVisible(faPath + "/revisions", allowed);
+        }
+
+        expectVisible(articlePath, translatorAccess);
+        expectVisible(enPath, translatorAccess);
+        read(enPath + "/revisions", translatorAccess)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].id").value(contains(translatorDraftId.toString())));
+        expectHidden(faPath, translatorAccess, "TRANSLATION_NOT_FOUND");
+        expectHidden(faPath + "/revisions", translatorAccess, "TRANSLATION_NOT_FOUND");
+    }
+
+    // The creator reaches their article through createdByUserId alone, even with no revision of
+    // their own in it -- but that grants no access to a translation they did not write.
+    @Test
+    void articleCreatorWithNoRevisionOfTheirOwnStillSeesTheArticle() throws Exception {
+        registerVerifiedContributor("afcr1", "af-cr-author1@example.com");
+        Cookie authorAccess = loginAccessCookie("af-cr-author1@example.com");
+        User creator = registerVerifiedContributor("afcr2", "af-cr-creator1@example.com");
+        Cookie creatorAccess = loginAccessCookie("af-cr-creator1@example.com");
+
+        UUID articleId = createArticleAndReturnArticleAndRevisionId(
+                authorAccess, fetchCsrfCookie(), uniqueSlug("creator-only"))[0];
+        Article article = articleRepository.findById(articleId).orElseThrow();
+        article.setCreatedByUserId(creator.getId());
+        articleRepository.save(article);
+
+        expectVisible("/api/articles/" + articleId, creatorAccess);
+        expectHidden("/api/articles/" + articleId + "/translations/fa", creatorAccess, "TRANSLATION_NOT_FOUND");
+        expectHidden("/api/articles/" + articleId, null, "ARTICLE_NOT_FOUND");
+    }
+
+    // Approving one translation publishes it and its article to everyone, while a sibling
+    // translation with nothing approved stays hidden.
+    @Test
+    void approvingATranslationPublishesItAndItsArticleButNotItsUnapprovedSibling() throws Exception {
+        registerVerifiedContributor("afpb1", "af-pb-author1@example.com");
+        Cookie authorAccess = loginAccessCookie("af-pb-author1@example.com");
+        Cookie authorCsrf = fetchCsrfCookie();
+
+        UUID[] ids = createArticleAndReturnArticleAndRevisionId(authorAccess, authorCsrf, uniqueSlug("publish"));
+        UUID articleId = ids[0];
+        addTranslation(articleId, "en", authorAccess, authorCsrf);
+        articleRevisionService.applyModerationOutcome(ids[1], RevisionStatus.APPROVED);
+
+        expectVisible("/api/articles/" + articleId, null);
+        read("/api/articles/" + articleId + "/translations/fa", null)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.currentRevisionId").value(ids[1].toString()));
+        read("/api/articles/" + articleId + "/translations/fa/revisions", null)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].id").value(contains(ids[1].toString())));
+        expectHidden("/api/articles/" + articleId + "/translations/en", null, "TRANSLATION_NOT_FOUND");
+    }
+
+    // Adding a language to an article the caller cannot see is a 404 -- even for a language the
+    // article already has, which would otherwise answer 409 and confirm the article exists --
+    // and writes nothing. A moderator may add one; once published, anyone verified may.
+    @Test
+    void addingTranslationToAnUnpublishedArticleIsHiddenFromOutsiders() throws Exception {
+        registerVerifiedContributor("afat1", "af-at-author1@example.com");
+        Cookie authorAccess = loginAccessCookie("af-at-author1@example.com");
+        Cookie authorCsrf = fetchCsrfCookie();
+        registerVerifiedContributor("afat2", "af-at-other1@example.com");
+        Cookie otherAccess = loginAccessCookie("af-at-other1@example.com");
+        Cookie otherCsrf = fetchCsrfCookie();
+        seedModerator("afat3", "af-at-mod1@example.com");
+        Cookie moderatorAccess = loginAccessCookie("af-at-mod1@example.com");
+        Cookie moderatorCsrf = fetchCsrfCookie();
+
+        UUID[] ids = createArticleAndReturnArticleAndRevisionId(authorAccess, authorCsrf, uniqueSlug("add-tr"));
+        UUID articleId = ids[0];
+
+        for (String language : List.of("en", "fa")) {
+            CreateTranslationRequest request = new CreateTranslationRequest(
+                    language, uniqueSlug("outsider-" + language), "Title", simpleBody("body"), null);
+            mockMvc.perform(post("/api/articles/" + articleId + "/translations")
+                            .cookie(otherAccess, otherCsrf)
+                            .header("X-XSRF-TOKEN", maskCsrfToken(otherCsrf.getValue()))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value("ARTICLE_NOT_FOUND"));
+        }
+        assertThat(articleTranslationRepository.findByArticleIdAndLanguage(articleId, "en")).isEmpty();
+
+        addTranslation(articleId, "en", moderatorAccess, moderatorCsrf);
+
+        articleRevisionService.applyModerationOutcome(ids[1], RevisionStatus.APPROVED);
+        addTranslation(articleId, "ar", otherAccess, otherCsrf);
+    }
+
+    // An unverified or password-pending session reads public routes as anonymous -- not as
+    // itself. The author and a moderator lose their own/privileged view of an unpublished
+    // article the moment their session is restricted, instead of being refused with a 403.
+    @Test
+    void restrictedSessionsReadAsAnonymousNotAsThemselves() throws Exception {
+        User author = registerVerifiedContributor("afrs1", "af-rs-author1@example.com");
+        Cookie authorAccess = loginAccessCookie("af-rs-author1@example.com");
+        User moderator = seedModerator("afrs2", "af-rs-mod1@example.com");
+        UUID[] ids = createArticleAndReturnArticleAndRevisionId(
+                authorAccess, fetchCsrfCookie(), uniqueSlug("restricted-read"));
+        String articlePath = "/api/articles/" + ids[0];
+        String revisionPath = articlePath + "/translations/fa/revisions/" + ids[1];
+
+        for (User restricted : List.of(author, moderator)) {
+            restricted.setEmailVerified(false);
+            userRepository.save(restricted);
+        }
+        Cookie unverifiedAuthor = loginAccessCookie("af-rs-author1@example.com");
+        Cookie unverifiedModerator = loginAccessCookie("af-rs-mod1@example.com");
+        Cookie pendingAuthor = new Cookie("access_token", jwtService.generatePendingPasswordSetupToken(author.getId()));
+
+        for (Cookie restrictedAccess : List.of(unverifiedAuthor, unverifiedModerator, pendingAuthor)) {
+            expectHidden(articlePath, restrictedAccess, "ARTICLE_NOT_FOUND");
+            expectHidden(articlePath + "/translations/fa", restrictedAccess, "TRANSLATION_NOT_FOUND");
+            expectHidden(revisionPath, restrictedAccess, "REVISION_NOT_FOUND");
+            expectVisible("/api/articles?language=fa", restrictedAccess);
+        }
     }
 
     // --- Regression coverage for what this change could plausibly have broken ---

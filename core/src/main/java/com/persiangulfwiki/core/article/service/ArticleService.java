@@ -21,6 +21,7 @@ import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,7 @@ public class ArticleService {
     private final ArticleTranslationRepository articleTranslationRepository;
     private final ArticleRevisionRepository articleRevisionRepository;
     private final ArticleRevisionService articleRevisionService;
+    private final ArticleVisibilityService articleVisibilityService;
     private final SubjectRepository subjectRepository;
 
     // Article + its canonical translation + that translation's first DRAFT revision, written
@@ -83,9 +85,15 @@ public class ArticleService {
         return toResponse(article);
     }
 
+    // An article nothing has been approved in yet is 404 to anyone but its authors and
+    // moderators -- see ArticleVisibilityService.
     @Transactional(readOnly = true)
-    public ArticleResponse get(UUID articleId) {
-        return toResponse(articleRepository.findById(articleId).orElseThrow(ArticleNotFoundException::new));
+    public ArticleResponse get(UUID articleId, @Nullable UUID callerUserId, boolean isCallerModerator) {
+        Article article = articleRepository.findById(articleId).orElseThrow(ArticleNotFoundException::new);
+        if (!articleVisibilityService.isArticleReadableBy(article, callerUserId, isCallerModerator)) {
+            throw new ArticleNotFoundException();
+        }
+        return toResponse(article);
     }
 
     // Only translations with an approved revision are listed: title/summary come from

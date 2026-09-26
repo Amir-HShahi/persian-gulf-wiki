@@ -238,6 +238,33 @@ class EmailVerificationFlowIntegrationTests {
                 .andExpect(status().isOk());
     }
 
+    // An unverified session is demoted to anonymous on every public route instead of 403 --
+    // a cookie must never make a public page less reachable than no cookie. Everything else
+    // stays gated: a non-public GET, and a write on a public path (reads are GET-only).
+    @Test
+    void unverifiedSessionReadsPublicRoutesAsAnonymousButStaysGatedElsewhere() throws Exception {
+        LoginCookies cookies = registerAndLogin("pubread", "pubread@example.com", "Correct-Horse1!");
+
+        for (String publicPath : List.of("/api/subjects", "/api/sources", "/v3/api-docs", "/docs/index.html",
+                "/actuator/health")) {
+            mockMvc.perform(get(publicPath).cookie(cookies.accessToken()))
+                    .andExpect(status().isOk());
+        }
+        mockMvc.perform(get("/api/articles").param("language", "fa").cookie(cookies.accessToken()))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/users/me/sessions").cookie(cookies.accessToken()))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("EMAIL_NOT_VERIFIED"));
+        mockMvc.perform(post("/api/articles")
+                        .with(xsrf())
+                        .cookie(cookies.accessToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("EMAIL_NOT_VERIFIED"));
+    }
+
     @Test
     void verifiedSessionSelfHealsAfterRefreshAndCanReachGatedEndpoint() throws Exception {
         String email = "bruno@example.com";

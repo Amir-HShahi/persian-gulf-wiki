@@ -22,4 +22,11 @@ public interface ArticleRevisionRepository extends JpaRepository<ArticleRevision
     // in the query itself.
     @Query("select coalesce(max(r.revisionNumber), 0) from ArticleRevision r where r.translationId = :translationId")
     int findMaxRevisionNumber(@Param("translationId") UUID translationId);
+
+    boolean existsByTranslationIdAndAuthorId(UUID translationId, UUID authorId);
+
+    @Query("""
+            select count(r) > 0 from ArticleRevision r join ArticleTranslation t on t.id = r.translationId
+            where t.articleId = :articleId and r.authorId = :authorId""")
+    boolean existsInArticleByAuthor(@Param("articleId") UUID articleId, @Param("authorId") UUID authorId);
 }

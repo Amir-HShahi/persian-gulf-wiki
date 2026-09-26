@@ -225,9 +225,11 @@ class ModerationFlowIntegrationTests {
     }
 
     // The published pointer, which only an APPROVE may move. Null for any translation whose
-    // content has never been approved.
-    private UUID currentRevisionId(UUID articleId) throws Exception {
-        String translation = mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa"))
+    // content has never been approved. Read as the given caller: until something is approved the
+    // translation itself is hidden from everyone but its authors and moderators.
+    private UUID currentRevisionId(UUID articleId, Cookie readerAccessCookie) throws Exception {
+        String translation = mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa")
+                        .cookie(readerAccessCookie))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         String raw = JsonPath.read(translation, "$.data.currentRevisionId");
@@ -351,7 +353,7 @@ class ModerationFlowIntegrationTests {
         // Nothing is published yet, and that is what makes the APPROVE assertion at the end of
         // this test meaningful rather than vacuous: the pointer starts null and only the
         // moderator's approval moves it.
-        assertThat(currentRevisionId(articleId)).isNull();
+        assertThat(currentRevisionId(articleId, authorAccess)).isNull();
 
         // Round 1: submit -> a task exists, OPEN and unclaimed, and it is visible in the
         // moderator's queue through the real endpoint.
@@ -428,7 +430,7 @@ class ModerationFlowIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("APPROVED"));
 
-        assertThat(currentRevisionId(articleId)).isEqualTo(draft.revisionId());
+        assertThat(currentRevisionId(articleId, authorAccess)).isEqualTo(draft.revisionId());
     }
 
     // --- Negative / authorization ---
@@ -766,9 +768,10 @@ class ModerationFlowIntegrationTests {
     }
 
     // The new MODERATOR-only path must not have tightened the article chain: article reads
-    // are still open to a caller with no account at all, which is the rule /api/moderation
-    // deliberately does not follow. The one exception is an unapproved revision's content,
-    // which only its author (and moderators) may read -- an anonymous caller gets 404.
+    // are still reachable with no account at all, which is the rule /api/moderation
+    // deliberately does not follow. What an anonymous caller may see is decided by the read
+    // rules, not the chain: nothing unapproved -- an article with nothing approved yet, or an
+    // unapproved revision -- which comes back as 404, never 401/403, while its author reads it.
     @Test
     void articleReadsAreStillPublicAfterTheModerationRoleGate() throws Exception {
         registerVerifiedContributor("mfauth15", "mf-author15@example.com");
@@ -778,6 +781,9 @@ class ModerationFlowIntegrationTests {
 
         mockMvc.perform(get("/api/articles").param("language", "fa")).andExpect(status().isOk());
         mockMvc.perform(get("/api/articles/" + draft.articleId()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("ARTICLE_NOT_FOUND"));
+        mockMvc.perform(get("/api/articles/" + draft.articleId()).cookie(authorAccess))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(draft.articleId().toString()));
         readRevision(authorAccess, draft)
