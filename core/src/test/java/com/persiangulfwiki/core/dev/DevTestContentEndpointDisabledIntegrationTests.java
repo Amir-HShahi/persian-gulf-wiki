@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -62,6 +63,8 @@ class DevTestContentEndpointDisabledIntegrationTests {
         assertThat(applicationContext.getBeanNamesForType(DevTestSourceSweeper.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestArticleSweeper.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestModerationSweeper.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestMediaSweeper.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestMediaController.class)).isEmpty();
     }
 
     @Test
@@ -77,6 +80,8 @@ class DevTestContentEndpointDisabledIntegrationTests {
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(get("/api/dev/test-moderation-tasks/{taskId}", UUID.randomUUID()))
                 .andExpect(status().isUnauthorized());
+        mockMvc.perform(delete("/api/dev/test-media/{mediaId}", UUID.randomUUID()))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -103,6 +108,10 @@ class DevTestContentEndpointDisabledIntegrationTests {
                         .content("{}"))
                 .andExpect(status().isForbidden());
         mockMvc.perform(post("/api/dev/test-moderation-tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/dev/test-media")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isForbidden());

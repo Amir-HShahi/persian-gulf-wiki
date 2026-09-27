@@ -2,8 +2,10 @@ package com.persiangulfwiki.core.moderation.controller;
 
 import com.persiangulfwiki.core.common.dto.ApiResult;
 import com.persiangulfwiki.core.moderation.dto.DecideRequest;
+import com.persiangulfwiki.core.moderation.dto.ModerationTaskDetailResponse;
 import com.persiangulfwiki.core.moderation.dto.ModerationTaskResponse;
 import com.persiangulfwiki.core.moderation.service.ModerationService;
+import com.persiangulfwiki.core.web.SignedUrlResponses;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -59,7 +62,8 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/moderation")
 @RequiredArgsConstructor
-@Tag(name = "Moderation", description = "The editorial review queue. A moderator claims a task, reads the revision it points at, "
+@Tag(name = "Moderation", description = "The editorial review queue. A moderator claims a task, reads what it points at -- an "
+        + "article revision or a gallery item's metadata (see \"Get a task with what it judges\") -- "
         + "and records a decision on it. Moderators judge policy -- whether the content belongs on "
         + "the wiki at all -- not whether its facts are correct, which is a separate advisory "
         + "review by subject-matter experts. Every endpoint here requires the moderator role, "
@@ -97,6 +101,32 @@ public class ModerationController {
         return ApiResult.of(data, message);
     }
 
+    @Operation(summary = "Get a task with what it judges", description = "The task, in any state, together with what it judges. For a "
+            + "gallery item task (`mediaMetadataVersionId` set) that is `mediaReview`: the item with its "
+            + "renditions -- signed URLs that expire within minutes while the item is not public, so fetch "
+            + "the task again for fresh ones -- and the metadata version under review in full, with its "
+            + "caption in every language and every hotspot, including hotspots to panoramas that are not "
+            + "public yet (which the public never sees until their target is approved). For an edit, "
+            + "`mediaReview.current` is the item's approved version in the same full form, to compare the "
+            + "proposal against; it is null while the item has never been approved. For an article "
+            + "revision task `mediaReview` is null. The response is never cacheable and asks browsers not "
+            + "to send it as a referrer.")
+    @ApiResponse(responseCode = "200", description = "The task and, for a gallery item task, what it judges.")
+    @ApiResponse(responseCode = "400", description = "The id in the path is not a valid UUID.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "403", description = "The account does not hold the moderator role, or its email address is not yet verified.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "404", description = "No task with that id.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @SecurityRequirement(name = "cookieAuth")
+    @PreAuthorize("hasRole('MODERATOR')")
+    @GetMapping("/tasks/{taskId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResult<ModerationTaskDetailResponse> getTask(@PathVariable UUID taskId, HttpServletResponse response) {
+        ModerationTaskDetailResponse data = moderationService.get(taskId);
+        SignedUrlResponses.markPrivate(response);
+        String message = messageSource.getMessage("success.moderationTaskFetched", null, LocaleContextHolder.getLocale());
+        return ApiResult.of(data, message);
+    }
+
     @Operation(summary = "Claim a task", description = "Takes the task out of the open queue and assigns it to the calling moderator, who "
             + "from then on is the only account that may decide it. A task that has been sent "
             + "back to its author returns to the open queue and can be claimed again -- by anyone, "
@@ -130,20 +160,33 @@ public class ModerationController {
             + "REQUEST_CHANGES returns the revision to the author to fix and keeps this task "
             + "alive: it goes back to the open queue, and once the author resubmits it can be "
             + "claimed and decided again, accumulating a second entry in its decision history. "
-            + "Only the moderator currently holding the task may call this.")
+            + "Only the moderator currently holding the task may call this. A task for a gallery item's "
+            + "metadata (`mediaMetadataVersionId` set) takes APPROVE or REJECT only. Approving an item's "
+            + "first metadata publishes the item itself; rejecting it rejects the item, which is deleted "
+            + "after a grace period, and closes every other pending edit of it. Approving a later metadata "
+            + "edit makes it the item's current metadata and closes every older pending edit of the same "
+            + "item; rejecting one changes nothing that the public sees. A closed edit is marked rejected "
+            + "and its task decided, with a rejection in the caller's name explaining why.")
     @ApiResponse(responseCode = "200", description = "The task, with this decision appended to its history.")
     @ApiResponse(responseCode = "400", description = "One of: field validation failed (see `errors`); the id in the path is not a valid "
-            + "UUID; or `reason` was omitted for a REJECT or REQUEST_CHANGES decision, where it is "
-            + "required.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+            + "UUID; `reason` was omitted for a REJECT or REQUEST_CHANGES decision, where it is "
+            + "required; or REQUEST_CHANGES was sent for a gallery item task, which accepts only "
+            + "APPROVE and REJECT.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "One of: the caller is not the moderator holding this task (including the case where "
             + "nobody has claimed it yet); the account does not hold the moderator role; its email "
             + "address is not yet verified; or the CSRF header is missing or does not match the "
             + "cookie. Read `detail`/`code` for which one occurred.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "404", description = "No task with that id.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    @ApiResponse(responseCode = "409", description = "Either the task has already been decided, or its revision is not awaiting review -- "
+    @ApiResponse(responseCode = "409", description = "One of: the task has already been decided; its revision is not awaiting review -- "
             + "which is what happens when changes were requested and the author has not resubmitted "
-            + "yet.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+            + "yet; its gallery item metadata is not awaiting review; APPROVE was sent for a gallery "
+            + "item whose file has not finished processing; or APPROVE was sent for a gallery item whose "
+            + "processed files are missing from storage (code MEDIA_FILES_MISSING; nothing is published, "
+            + "and the task can still be rejected); APPROVE was sent for gallery item metadata older than "
+            + "the item's current metadata, or closed by another decision meanwhile (code "
+            + "METADATA_VERSION_SUPERSEDED); or APPROVE was sent for metadata of a gallery item that has "
+            + "been rejected (code MEDIA_ALREADY_REJECTED). Read `code` for which one occurred.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = "CSRF token. Call GET /api/auth/csrf first to receive the XSRF-TOKEN cookie, "
             + "then encode its value and send the encoded result in this header — see the API "
             + "description above for the required encoding algorithm; sending the raw cookie "

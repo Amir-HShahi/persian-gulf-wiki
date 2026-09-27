@@ -14,14 +14,19 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import org.jspecify.annotations.Nullable;
+
 import java.time.Instant;
 import java.util.UUID;
 
-// One revision awaiting a policy judgement, and the moderator queue's unit of work.
+// One thing awaiting a policy judgement, and the moderator queue's unit of work. The thing is
+// either an article revision or a media metadata version -- exactly one of revisionId and
+// mediaMetadataVersionId is set (ck_moderation_tasks_exactly_one_target, V18).
 //
-// At most one task ever exists per revision (uq_moderation_tasks_revision, V17). A rejected
-// revision does not get a second task -- the author writes a new revision, and that new
-// revision gets its own. This is why ModerationService's submit path is an
+// At most one task ever exists per target (uq_moderation_tasks_revision, V17, and
+// uq_moderation_tasks_media_metadata_version, V18). A rejected revision does not get a second
+// task -- the author writes a new revision, and that new revision gets its own; the same holds
+// for a rejected metadata version. This is why ModerationService's submit path is an
 // open-or-reopen on a single findByRevisionId rather than anything that has to reason about
 // which of several tasks is the live one.
 //
@@ -38,8 +43,11 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 public class ModerationTask extends AuditableEntity {
 
-    @Column(name = "revision_id", nullable = false, updatable = false)
-    private UUID revisionId;
+    @Column(name = "revision_id", updatable = false)
+    private @Nullable UUID revisionId;
+
+    @Column(name = "media_metadata_version_id", updatable = false)
+    private @Nullable UUID mediaMetadataVersionId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

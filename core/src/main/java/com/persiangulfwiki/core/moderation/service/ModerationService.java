@@ -3,17 +3,24 @@ package com.persiangulfwiki.core.moderation.service;
 import com.persiangulfwiki.core.article.entity.RevisionStatus;
 import com.persiangulfwiki.core.article.event.RevisionSubmittedEvent;
 import com.persiangulfwiki.core.article.service.ArticleRevisionService;
+import com.persiangulfwiki.core.media.entity.MetadataVersionStatus;
+import com.persiangulfwiki.core.media.event.MediaVersionAwaitingReviewEvent;
+import com.persiangulfwiki.core.media.service.MediaModerationService;
+import com.persiangulfwiki.core.media.service.MediaReadService;
 import com.persiangulfwiki.core.moderation.dto.DecideRequest;
 import com.persiangulfwiki.core.moderation.dto.ModerationDecisionResponse;
+import com.persiangulfwiki.core.moderation.dto.ModerationTaskDetailResponse;
 import com.persiangulfwiki.core.moderation.dto.ModerationTaskResponse;
 import com.persiangulfwiki.core.moderation.entity.Decision;
 import com.persiangulfwiki.core.moderation.entity.ModerationDecision;
 import com.persiangulfwiki.core.moderation.entity.ModerationTask;
 import com.persiangulfwiki.core.moderation.entity.ModerationTaskState;
 import com.persiangulfwiki.core.moderation.exception.InvalidModerationTaskStateException;
+import com.persiangulfwiki.core.moderation.exception.MetadataVersionNotPendingException;
 import com.persiangulfwiki.core.moderation.exception.MissingDecisionReasonException;
 import com.persiangulfwiki.core.moderation.exception.ModerationTaskNotFoundException;
 import com.persiangulfwiki.core.moderation.exception.NotTaskClaimantException;
+import com.persiangulfwiki.core.moderation.exception.RequestChangesNotSupportedException;
 import com.persiangulfwiki.core.moderation.exception.RevisionNotPendingException;
 import com.persiangulfwiki.core.moderation.exception.TaskAlreadyDecidedException;
 import com.persiangulfwiki.core.moderation.exception.TaskNotClaimableException;
@@ -23,7 +30,9 @@ import com.persiangulfwiki.core.moderation.repository.ModerationTaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.context.MessageSource;
 import org.springframework.context.event.EventListener;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -51,6 +60,16 @@ import java.util.UUID;
 //                      and this same task is decided again. This is the only path that puts
 //                      more than one decision row on one task, and it is why
 //                      ModerationDecision is a table rather than three columns on the task.
+//
+// A task judges one of two kinds of target (V18): an article revision, as above, or a gallery
+// item's metadata version. A media task takes APPROVE and REJECT only -- a contributor revises
+// media metadata by proposing a new version, which gets its own task, so there is nothing for
+// REQUEST_CHANGES to send back. What each outcome means for the item is MediaModerationService's
+// call, the same way ArticleRevisionService owns what it means for a revision -- including which
+// *other* pending versions of the item the outcome closes (an approval supersedes older ones, the
+// item's rejection takes every other one with it). Their tasks are closed here, in the same
+// transaction, with a REJECT recorded against the deciding moderator, so the queue never offers
+// a task whose version can no longer be decided.
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -61,6 +80,9 @@ public class ModerationService {
     private final ModerationTaskRepository moderationTaskRepository;
     private final ModerationDecisionRepository moderationDecisionRepository;
     private final ArticleRevisionService articleRevisionService;
+    private final MediaModerationService mediaModerationService;
+    private final MediaReadService mediaReadService;
+    private final MessageSource messageSource;
 
     // The article package's half of the submit endpoint, joined here rather than by a direct
     // call in the other direction -- see RevisionSubmittedEvent for why this is an event at
@@ -88,6 +110,26 @@ public class ModerationService {
         }
 
         existing.ifPresentOrElse(this::reopen, () -> open(event.revisionId()));
+    }
+
+    // The media package's counterpart of onRevisionSubmitted, fired when a gallery item's file
+    // turns READY -- see MediaVersionAwaitingReviewEvent for why it is an event and must stay
+    // synchronous. A media version never reopens a task (no REQUEST_CHANGES), so the only
+    // existing-task case is drift, e.g. a task minted straight into the table by the dev
+    // fixture endpoint; it is logged and the existing task left as it is.
+    @EventListener
+    @Transactional
+    public void onMediaVersionAwaitingReview(MediaVersionAwaitingReviewEvent event) {
+        if (moderationTaskRepository.existsByMediaMetadataVersionId(event.metadataVersionId())) {
+            log.warn("media metadata version {} became reviewable but already has a moderation task",
+                    event.metadataVersionId());
+            return;
+        }
+        moderationTaskRepository.save(ModerationTask.builder()
+                .mediaMetadataVersionId(event.metadataVersionId())
+                .state(ModerationTaskState.OPEN)
+                .build());
+        log.debug("opened moderation task for media metadata version {}", event.metadataVersionId());
     }
 
     private void open(UUID revisionId) {
@@ -143,6 +185,9 @@ public class ModerationService {
     //                  state-machine one. This also means TaskNotClaimableException belongs
     //                  to claim() alone and can never compete with this.
     //   3. PENDING  -> 409. Last, because it is about the revision rather than the task.
+    //                  For a media task: PENDING_REVIEW -> 409, and then REQUEST_CHANGES ->
+    //                  400, which comes after it so a decided-elsewhere version reports its
+    //                  state rather than a complaint about the decision chosen.
     //
     // That third guard is what closes the window REQUEST_CHANGES opens. Sending a revision
     // back leaves the task OPEN while the revision sits at CHANGES_REQUESTED, so the task is
@@ -160,8 +205,18 @@ public class ModerationService {
         if (!moderatorId.equals(task.getClaimedBy())) {
             throw new NotTaskClaimantException();
         }
-        if (articleRevisionService.getStatus(task.getRevisionId()) != RevisionStatus.PENDING) {
-            throw new RevisionNotPendingException();
+        if (task.getRevisionId() != null) {
+            if (articleRevisionService.getStatus(task.getRevisionId()) != RevisionStatus.PENDING) {
+                throw new RevisionNotPendingException();
+            }
+        } else {
+            if (mediaModerationService.getVersionStatus(task.getMediaMetadataVersionId())
+                    != MetadataVersionStatus.PENDING_REVIEW) {
+                throw new MetadataVersionNotPendingException();
+            }
+            if (request.decision() == Decision.REQUEST_CHANGES) {
+                throw new RequestChangesNotSupportedException();
+            }
         }
         requireReasonWhenSendingBack(request);
 
@@ -175,7 +230,13 @@ public class ModerationService {
         // The revision's new status and the task's new state are two different things and
         // are decided separately -- REQUEST_CHANGES is precisely the case where they diverge
         // (revision moves on, task goes back in the queue).
-        articleRevisionService.applyModerationOutcome(task.getRevisionId(), outcomeFor(request.decision()));
+        if (task.getRevisionId() != null) {
+            articleRevisionService.applyModerationOutcome(task.getRevisionId(), outcomeFor(request.decision()));
+        } else {
+            List<UUID> closed = mediaModerationService.applyModerationOutcome(task.getMediaMetadataVersionId(),
+                    request.decision() == Decision.APPROVE ? MetadataVersionStatus.APPROVED : MetadataVersionStatus.REJECTED);
+            closeTasksOf(closed, moderatorId, request.decision());
+        }
 
         if (request.decision() == Decision.REQUEST_CHANGES) {
             task.setState(ModerationTaskState.OPEN);
@@ -186,6 +247,42 @@ public class ModerationService {
 
         log.info("moderation task {} decided {} by moderator {}", task.getId(), request.decision(), moderatorId);
         return toResponse(moderationTaskRepository.save(task));
+    }
+
+    // A closed version on an item that never reached READY has no task yet, and never will: the
+    // READY transition only opens tasks for versions still pending. The reason is written in the
+    // deciding moderator's language, as their own note would be.
+    private void closeTasksOf(List<UUID> metadataVersionIds, UUID moderatorId, Decision cause) {
+        String reason = messageSource.getMessage(cause == Decision.APPROVE
+                ? "moderation.autoReject.superseded"
+                : "moderation.autoReject.itemRejected", null, LocaleContextHolder.getLocale());
+        for (UUID metadataVersionId : metadataVersionIds) {
+            moderationTaskRepository.findByMediaMetadataVersionId(metadataVersionId)
+                    .filter(task -> task.getState() != ModerationTaskState.DECIDED)
+                    .ifPresent(task -> {
+                        moderationDecisionRepository.save(ModerationDecision.builder()
+                                .taskId(task.getId())
+                                .moderatorId(moderatorId)
+                                .decision(Decision.REJECT)
+                                .reason(reason)
+                                .build());
+                        task.setState(ModerationTaskState.DECIDED);
+                        moderationTaskRepository.save(task);
+                        log.info("moderation task {} closed by moderator {}'s {} of another version", task.getId(),
+                                moderatorId, cause);
+                    });
+        }
+    }
+
+    // Readable in any state, including DECIDED, so a moderator can look back at what was
+    // judged. The media half is only as current as the item: an item since deleted (rejected
+    // and swept) takes its task with it (V18 CASCADE), so this never points at nothing.
+    @Transactional(readOnly = true)
+    public ModerationTaskDetailResponse get(UUID taskId) {
+        ModerationTask task = getTask(taskId);
+        return new ModerationTaskDetailResponse(toResponse(task), task.getMediaMetadataVersionId() != null
+                ? mediaReadService.getForReview(task.getMediaMetadataVersionId())
+                : null);
     }
 
     // stateFilter is the raw query-parameter string, not a bound enum -- see DecideRequest
@@ -255,7 +352,8 @@ public class ModerationService {
                                 decision.getModeratorId(), decision.getDecision(), decision.getReason(),
                                 decision.getCreatedAt()))
                         .toList();
-        return new ModerationTaskResponse(task.getId(), task.getRevisionId(), task.getState(), task.getClaimedBy(),
+        return new ModerationTaskResponse(task.getId(), task.getRevisionId(), task.getMediaMetadataVersionId(),
+                task.getState(), task.getClaimedBy(),
                 task.getClaimedAt(), task.getCreatedAt(), task.getUpdatedAt(), decisions);
     }
 }

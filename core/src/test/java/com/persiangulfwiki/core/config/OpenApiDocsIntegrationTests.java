@@ -115,6 +115,6 @@ class OpenApiDocsIntegrationTests {
         assertThat(tagNames).containsExactly(
                 "Authentication", "OAuth2", "Email Verification", "Password Management",
                 "User Management", "Admin", "Expert Reviewer", "Subjects", "Sources", "Articles",
-                "Moderation");
+                "Article Media", "Moderation");
     }
 }

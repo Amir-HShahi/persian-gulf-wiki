@@ -14,5 +14,6 @@ public record DevTestModerationResponse(
         UUID revisionId,
         ModerationTaskState state,
         UUID claimedByUserId,
-        UUID decisionId) {
+        UUID decisionId,
+        UUID mediaMetadataVersionId) {
 }

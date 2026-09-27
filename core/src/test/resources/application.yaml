@@ -35,6 +35,37 @@ app:
     success-redirect-url: http://localhost:3000/oauth2/success
     pending-password-redirect-url: http://localhost:3000/oauth2/set-password
     failure-redirect-url: http://localhost:3000/oauth2/error
+  # endpoint/public-endpoint/access-key/secret-key are supplied by TestcontainersConfiguration
+  # from the MinIO container it starts.
+  storage:
+    region: us-east-1
+    staging-bucket: test-staging
+    media-bucket: test-media
+    public-base-url: http://localhost/test-media/public
+    path-style: true
+  media:
+    job-stream: test-submissions
+    result-stream: test-submission-results
+    result-consumer-group: core
+    result-reclaim-idle-minutes: 5
+    result-max-deliveries: 5
+    processing-timeout-minutes: 60
+    upload-url-ttl-minutes: 10
+    signed-get-ttl-minutes: 10
+    max-bytes:
+      image: 26214400
+      panorama: 99614720
+      video: 99614720
+    reservations-per-window: 30
+    reservation-window-minutes: 60
+    max-pending-per-user: 20
+    storage-quota-bytes-per-user: 2147483648
+    metadata-edits-per-window: 20
+    metadata-edit-window-minutes: 60
+    max-pending-edits-per-user: 20
+    abandoned-upload-ttl-hours: 24
+    rejected-grace-days: 7
+    failed-grace-days: 7
   admin:
     bootstrap-email: ${ADMIN_BOOTSTRAP_EMAIL:}
     bootstrap-username: ${ADMIN_BOOTSTRAP_USERNAME:}

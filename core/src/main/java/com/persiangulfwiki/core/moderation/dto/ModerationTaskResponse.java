@@ -2,6 +2,8 @@ package com.persiangulfwiki.core.moderation.dto;
 
 import com.persiangulfwiki.core.moderation.entity.ModerationTaskState;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -11,9 +13,17 @@ import java.util.UUID;
 // REQUEST_CHANGES. Carried inline rather than behind a separate endpoint because a moderator
 // picking up a returned task needs to read what the previous round asked for before deciding
 // it again.
+//
+// Exactly one of revisionId and mediaMetadataVersionId is non-null: which one says what kind
+// of thing the task judges, and so which detail route a client follows to show it.
 public record ModerationTaskResponse(
         UUID id,
+        @Schema(description = "The article revision this task judges. Null when the task judges a media metadata "
+                + "version instead.", nullable = true)
         UUID revisionId,
+        @Schema(description = "The gallery item metadata version this task judges. Null when the task judges an "
+                + "article revision instead. Media tasks accept only APPROVE and REJECT.", nullable = true)
+        UUID mediaMetadataVersionId,
         ModerationTaskState state,
         UUID claimedBy,
         Instant claimedAt,

@@ -5,12 +5,11 @@ import com.persiangulfwiki.core.moderation.entity.ModerationTaskState;
 
 import java.util.UUID;
 
-// Every field is nullable, matching DevTestArticleRequest, but revisionId is the one a caller
-// realistically always sends: moderation_tasks.revision_id is NOT NULL (V17), so a task with
-// nothing to judge cannot exist. Omitting it is a 404 rather than a generated fixture on
-// purpose -- POST /api/dev/test-articles already returns the revisionId of the revision it
-// minted, so composing the two calls is one line in a suite and re-minting an article tree
-// here would be a second copy of that endpoint's logic to keep in step.
+// Every field is nullable, matching DevTestArticleRequest. At most one of revisionId and
+// mediaMetadataVersionId may be sent (ck_moderation_tasks_exactly_one_target, V18); sending both
+// is refused by that constraint as a 409. Sending neither mints a throwaway article whose first
+// revision is PENDING and targets that -- its id comes back in the response. Pass a target only
+// to judge a specific one, e.g. from POST /api/dev/test-articles or POST /api/dev/test-media.
 //
 // state is the point of this endpoint. The real flow only ever reaches CLAIMED by having a
 // moderator call claim, and DECIDED by having that same moderator then call decide on a
@@ -31,5 +30,6 @@ public record DevTestModerationRequest(
         ModerationTaskState state,
         UUID claimedByUserId,
         Decision decision,
-        String reason) {
+        String reason,
+        UUID mediaMetadataVersionId) {
 }

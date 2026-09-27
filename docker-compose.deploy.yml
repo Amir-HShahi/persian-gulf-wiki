@@ -26,11 +26,26 @@ services:
       ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-}
       SPRING_DATA_REDIS_HOST: redis
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
+      # The app reaches MinIO on the compose network; browsers reach it through the tunnel
+      # hostname in STORAGE_PUBLIC_ENDPOINT. Presigned URLs are signed for that public host.
+      STORAGE_ENDPOINT: http://minio:9000
+      STORAGE_PUBLIC_ENDPOINT: ${STORAGE_PUBLIC_ENDPOINT}
+      STORAGE_REGION: ${STORAGE_REGION:-us-east-1}
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY}
+      STORAGE_STAGING_BUCKET: ${STORAGE_STAGING_BUCKET}
+      STORAGE_MEDIA_BUCKET: ${STORAGE_MEDIA_BUCKET}
+      STORAGE_PUBLIC_BASE_URL: ${STORAGE_PUBLIC_BASE_URL}
+      STORAGE_PATH_STYLE: ${STORAGE_PATH_STYLE:-true}
+    # deploy.sh runs `up -d app` only, so everything the app needs must be reachable from here
+    # -- minio-init in particular, or a fresh VPS would start the app with no buckets.
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_started
+      minio-init:
+        condition: service_completed_successfully
 
   postgres:
     # postgis/postgis rather than plain postgres: Island/Port location, OilField area,
@@ -57,6 +72,43 @@ services:
     volumes:
       - redis-data:/data
 
+  # Community MinIO build -- see docker-compose.yml for why not upstream, and for the CORS
+  # caveat. Credentials are the root user's; there is no separate app key yet.
+  minio:
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
+    restart: unless-stopped
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: ${STORAGE_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${STORAGE_SECRET_KEY}
+      MINIO_API_CORS_ALLOW_ORIGIN: ${FRONTEND_ORIGINS}
+    ports:
+      # Loopback only, like Mailpit's UI: the S3 API is reached from outside through the
+      # Cloudflare Tunnel (STORAGE_PUBLIC_ENDPOINT's host), never on the VPS's IP. The tunnel
+      # caps a request body at 100 MB, which is why app.media.max-bytes stays under it until
+      # multipart uploads exist. The console is loopback-only and not tunnelled.
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - minio-data:/data
+
+  minio-init:
+    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z
+    depends_on:
+      - minio
+    environment:
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY}
+      STORAGE_STAGING_BUCKET: ${STORAGE_STAGING_BUCKET}
+      STORAGE_MEDIA_BUCKET: ${STORAGE_MEDIA_BUCKET}
+    entrypoint: >
+      sh -c '
+      until mc alias set local http://minio:9000 "$$STORAGE_ACCESS_KEY" "$$STORAGE_SECRET_KEY"; do sleep 1; done &&
+      mc mb --ignore-existing "local/$$STORAGE_STAGING_BUCKET" &&
+      mc mb --ignore-existing "local/$$STORAGE_MEDIA_BUCKET" &&
+      mc anonymous set download "local/$$STORAGE_MEDIA_BUCKET/public"
+      '
+
   mailpit:
     image: axllent/mailpit:latest
     restart: unless-stopped
@@ -81,3 +133,4 @@ volumes:
   postgres-data:
   redis-data:
   mailpit-data:
+  minio-data:
