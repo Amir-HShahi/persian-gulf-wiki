@@ -30,3 +30,43 @@ jobs:
           scan-ref: core
           severity: HIGH,CRITICAL
           exit-code: 0   # report-only at first; flip to 1 once the baseline is clean
+
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: submission-pipeline/go.mod
+          cache-dependency-path: submission-pipeline/go.sum
+
+      # govips reaches libvips through cgo, so the header and the library are
+      # needed to compile the tagged build, not merely to run it.
+      - name: Install libvips
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libvips-dev
+
+      - name: Vet
+        working-directory: submission-pipeline
+        run: go vet -tags vips ./...
+
+      # Both builds are exercised because they compile different files.
+      # internal/imagepipe has one implementation behind the vips tag and a
+      # refusing stub without it, so a change that breaks only the untagged
+      # build would otherwise reach master and break every developer machine.
+      - name: Build without vips
+        working-directory: submission-pipeline
+        run: go build ./...
+
+      - name: Test
+        working-directory: submission-pipeline
+        run: go test -tags vips -race ./...
+
+      - name: Dependency vulnerability scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: submission-pipeline
+          severity: HIGH,CRITICAL
+          exit-code: 0   # report-only at first; flip to 1 once the baseline is clean

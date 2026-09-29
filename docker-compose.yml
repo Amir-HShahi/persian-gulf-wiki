@@ -52,7 +52,49 @@ services:
     volumes:
       - mailpit-data:/data
 
+  minio:
+    # Pulled from quay.io, which is MinIO's own registry: Docker Hub now
+    # requires authentication for minio/minio and publishes no :latest tag.
+    # Pinned to a dated release so a deploy cannot pick up a different server.
+    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+    container_name: pgw-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      # Dev credentials, hardcoded like the Postgres ones above. The root
+      # password has an 8 character minimum, which is why this is not "minio".
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    ports:
+      # 9000 = S3 API (what the worker talks to), 9001 = web console.
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio-init:
+    image: quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
+    container_name: pgw-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    # MinIO does not create a bucket on first write, so the worker would fail
+    # every job until these exist. --ignore-existing keeps re-runs quiet.
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 minio minio123 &&
+      mc mb --ignore-existing local/submissions-raw &&
+      mc mb --ignore-existing local/submissions-derived
+      "
+    restart: "no"
+
 volumes:
   postgres-data:
+  minio-data:
   pgadmin-data:
   mailpit-data:
