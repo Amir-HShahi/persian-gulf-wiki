@@ -1,5 +1,6 @@
 package com.persiangulfwiki.core.dev.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.persiangulfwiki.core.user.entity.Role;
 
 import java.util.List;
@@ -12,5 +13,5 @@ import java.util.List;
 // user holding MODERATOR and nothing else, even though DevUserSeeder pairs every seeded role
 // with CONTRIBUTOR. The point of this endpoint is reaching arbitrary states, including ones
 // the seeder and the registration flow cannot produce.
-public record DevTestUserRequest(List<Role> roles, Boolean emailVerified, Boolean enabled) {
+public record DevTestUserRequest(@JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY) List<Role> roles, Boolean emailVerified, Boolean enabled) {
 }

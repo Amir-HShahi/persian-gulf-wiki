@@ -17,6 +17,11 @@ public interface ModerationTaskRepository extends JpaRepository<ModerationTask, 
     // is a total lookup rather than a "pick the live one out of several" query.
     Optional<ModerationTask> findByRevisionId(UUID revisionId);
 
+    // Same totality for metadata versions (uq_moderation_tasks_media_metadata_version, V18).
+    boolean existsByMediaMetadataVersionId(UUID mediaMetadataVersionId);
+
+    Optional<ModerationTask> findByMediaMetadataVersionId(UUID mediaMetadataVersionId);
+
     Page<ModerationTask> findByState(ModerationTaskState state, Pageable pageable);
 
     long deleteByDevMarkerAndCreatedAtBefore(String devMarker, Instant threshold);

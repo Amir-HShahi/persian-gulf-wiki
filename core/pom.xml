@@ -28,7 +28,21 @@
 	</scm>
 	<properties>
 		<java.version>25</java.version>
+		<awssdk.version>2.55.6</awssdk.version>
 	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<!-- Aligns every software.amazon.awssdk module (s3, auth, http clients, ...) on one
+			     version, so a transitive SDK module can never be resolved at a different one. -->
+			<dependency>
+				<groupId>software.amazon.awssdk</groupId>
+				<artifactId>bom</artifactId>
+				<version>${awssdk.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -78,6 +92,22 @@
 		<dependency>
 			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-spatial</artifactId>
+		</dependency>
+		<!-- Object storage for the article gallery: presigned PUT/GET plus HeadObject/Delete, all
+		     behind media.storage.MediaStorage so nothing else touches the SDK. Speaks plain S3,
+		     so the same client works against the self-hosted MinIO build and AWS S3 later.
+		     netty-nio-client is excluded because only the synchronous S3Client is used; the
+		     async Netty stack would otherwise ship unused (and be one more thing for Trivy to
+		     track). The default sync client, apache-client, stays. -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>software.amazon.awssdk</groupId>
+					<artifactId>netty-nio-client</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>
@@ -157,6 +187,13 @@
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Waits on the asynchronous pipeline-result consumer in tests; testing.md bans Thread.sleep.
+		     Version managed by the Spring Boot parent. -->
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-testcontainers</artifactId>
@@ -170,6 +207,11 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>testcontainers-postgresql</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers-minio</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

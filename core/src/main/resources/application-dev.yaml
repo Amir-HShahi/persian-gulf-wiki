@@ -25,6 +25,20 @@ app:
   mail:
     from-address: ${MAIL_FROM:noreply@localhost}
 
+  # Defaults match the minio/minio-init services in docker-compose.yml, so a plain
+  # `docker compose up` plus SPRING_PROFILES_ACTIVE=dev needs no STORAGE_* in .env at all.
+  # Both endpoints are localhost: the app runs on the host in dev, same as the browser.
+  storage:
+    endpoint: ${STORAGE_ENDPOINT:http://localhost:9000}
+    public-endpoint: ${STORAGE_PUBLIC_ENDPOINT:http://localhost:9000}
+    region: ${STORAGE_REGION:us-east-1}
+    access-key: ${STORAGE_ACCESS_KEY:pgw-dev}
+    secret-key: ${STORAGE_SECRET_KEY:pgw-dev-secret}
+    staging-bucket: ${STORAGE_STAGING_BUCKET:submissions-raw}
+    media-bucket: ${STORAGE_MEDIA_BUCKET:submissions-derived}
+    public-base-url: ${STORAGE_PUBLIC_BASE_URL:http://localhost:9000/submissions-derived/public}
+    path-style: ${STORAGE_PATH_STYLE:true}
+
   # TTL for accounts minted by POST /api/dev/test-users, reclaimed hourly by
   # DevTestUserSweeper. Long enough that a slow suite's users outlive the run that created
   # them, short enough that a machine running suites all day doesn't accumulate a backlog.
@@ -51,3 +65,7 @@ app:
     # DevTestModerationSweeper. Shortening this below the user TTL widens that window rather
     # than narrowing it, so keep the two in step.
     test-moderation-ttl-hours: ${DEV_TEST_MODERATION_TTL_HOURS:6}
+
+    # TTL for the gallery fixtures minted by POST /api/dev/test-media, reclaimed hourly by
+    # DevTestMediaSweeper at :15 -- ahead of the user sweep at :30, see the cron comment there.
+    test-media-ttl-hours: ${DEV_TEST_MEDIA_TTL_HOURS:6}

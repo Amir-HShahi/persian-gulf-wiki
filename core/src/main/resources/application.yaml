@@ -88,6 +88,67 @@ app:
     success-redirect-url: ${FRONTEND_BASE_URL}/oauth2/success
     pending-password-redirect-url: ${FRONTEND_BASE_URL}/oauth2/set-password
     failure-redirect-url: ${FRONTEND_BASE_URL}/oauth2/error
+  # Object storage for the article gallery (media.storage.S3MediaStorage). Speaks plain S3, so
+  # the self-hosted MinIO build now and AWS S3 later differ only in these values.
+  storage:
+    # Where the app itself reaches the store (e.g. http://minio:9000 on the compose network).
+    endpoint: ${STORAGE_ENDPOINT}
+    # Where the *browser* reaches it. Presigned URLs are signed for this host -- SigV4 signs the
+    # Host header -- so a URL for minio:9000 is useless to a browser outside Docker.
+    public-endpoint: ${STORAGE_PUBLIC_ENDPOINT}
+    region: ${STORAGE_REGION}
+    access-key: ${STORAGE_ACCESS_KEY}
+    secret-key: ${STORAGE_SECRET_KEY}
+    # Private; originals as uploaded, until the pipeline has processed them.
+    staging-bucket: ${STORAGE_STAGING_BUCKET}
+    # Processed variants; only its public/ prefix is anonymously readable.
+    media-bucket: ${STORAGE_MEDIA_BUCKET}
+    # Base URL approved variants are served from (the CDN, later). Read by the gallery read path.
+    public-base-url: ${STORAGE_PUBLIC_BASE_URL}
+    # true for MinIO (bucket in the path); false for AWS S3's virtual-hosted style.
+    path-style: ${STORAGE_PATH_STYLE}
+  media:
+    # The Redis stream the Go submission-pipeline consumes; shared with its REDIS_JOB_STREAM.
+    job-stream: ${REDIS_JOB_STREAM:submissions}
+    # The Redis stream the worker writes its results to, and core's consumer group on it. The
+    # stream name is shared with the worker (docs/MEDIA_PIPELINE.md); the group is core's own.
+    result-stream: ${REDIS_RESULT_STREAM:submission-results}
+    result-consumer-group: core
+    # A result entry left unacknowledged this long (its consumer died or applying it failed) is
+    # claimed again; after this many deliveries it is dropped and the item left to time out.
+    result-reclaim-idle-minutes: 5
+    result-max-deliveries: 5
+    # An item still PROCESSING this long after its job was queued is failed as timed out.
+    # Checked hourly, so an item can wait up to this plus an hour.
+    processing-timeout-minutes: 60
+    upload-url-ttl-minutes: 10
+    # Lifetime of the signed GET URLs handed to an uploader or moderator for an item that is not
+    # public yet. Short, because each one is a bearer credential for the file.
+    signed-get-ttl-minutes: 10
+    # Per-type upload limits, in bytes. Kept under 100 MB (not MiB) while staging uploads go
+    # through a Cloudflare Tunnel, which refuses larger request bodies; multipart lifts this.
+    max-bytes:
+      image: 26214400       # 25 MiB
+      panorama: 99614720    # 95 MiB
+      video: 99614720       # 95 MiB
+    # Anti-abuse: any signed-in account may upload, so each one gets a reservation rate, a cap
+    # on items awaiting processing/review at once, and a total storage quota.
+    reservations-per-window: 30
+    reservation-window-minutes: 60
+    max-pending-per-user: 20
+    storage-quota-bytes-per-user: 2147483648   # 2 GiB
+    # Metadata edits: each one opens a moderation task, so each non-moderator account gets an
+    # edit rate and a cap on edits awaiting review at once.
+    metadata-edits-per-window: 20
+    metadata-edit-window-minutes: 60
+    max-pending-edits-per-user: 20
+    # An UPLOADING item older than this can never be completed (its URL expired long ago).
+    abandoned-upload-ttl-hours: 24
+    # How long a REJECTED item survives before deletion, so a mistaken rejection can be undone.
+    rejected-grace-days: 7
+    # How long a FAILED item (and anything it left in storage) survives, so its uploader can
+    # still read why it failed.
+    failed-grace-days: 7
   admin:
     bootstrap-email: ${ADMIN_BOOTSTRAP_EMAIL:}
     bootstrap-username: ${ADMIN_BOOTSTRAP_USERNAME:}

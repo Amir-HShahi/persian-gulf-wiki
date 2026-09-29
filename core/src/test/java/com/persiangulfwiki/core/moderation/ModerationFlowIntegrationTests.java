@@ -15,6 +15,14 @@ import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 import com.persiangulfwiki.core.article.service.ArticleRevisionService;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
 import com.persiangulfwiki.core.auth.dto.RegisterRequest;
+import com.persiangulfwiki.core.media.entity.ArticleMedia;
+import com.persiangulfwiki.core.media.entity.MediaKind;
+import com.persiangulfwiki.core.media.entity.MediaMetadataVersion;
+import com.persiangulfwiki.core.media.entity.MetadataVersionStatus;
+import com.persiangulfwiki.core.media.entity.ProcessingStatus;
+import com.persiangulfwiki.core.media.entity.PublicationStatus;
+import com.persiangulfwiki.core.media.repository.ArticleMediaRepository;
+import com.persiangulfwiki.core.media.repository.MediaMetadataVersionRepository;
 import com.persiangulfwiki.core.moderation.dto.DecideRequest;
 import com.persiangulfwiki.core.moderation.entity.Decision;
 import com.persiangulfwiki.core.moderation.entity.ModerationTask;
@@ -32,6 +40,7 @@ import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -40,11 +49,13 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 import static com.persiangulfwiki.core.CsrfTestSupport.xsrf;
@@ -93,6 +104,12 @@ class ModerationFlowIntegrationTests {
 
     @Autowired
     private ArticleRevisionService articleRevisionService;
+
+    @Autowired
+    private ArticleMediaRepository articleMediaRepository;
+
+    @Autowired
+    private MediaMetadataVersionRepository mediaMetadataVersionRepository;
 
     // --- Account / session helpers (same dance as ArticleFlowIntegrationTests) ---
 
@@ -368,8 +385,12 @@ class ModerationFlowIntegrationTests {
         UUID taskId = opened.getId();
         assertThat(queueContains(modAccess, "OPEN", taskId)).isTrue();
 
+        // A revision task still names its revision, and only its revision, now that a task may
+        // judge a media metadata version instead (V18).
         claim(modAccess, modCsrf, taskId)
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.revisionId").value(draft.revisionId().toString()))
+                .andExpect(jsonPath("$.data.mediaMetadataVersionId").value(nullValue()))
                 .andExpect(jsonPath("$.data.id").value(taskId.toString()))
                 .andExpect(jsonPath("$.data.revisionId").value(draft.revisionId().toString()))
                 .andExpect(jsonPath("$.data.state").value("CLAIMED"))
@@ -409,7 +430,7 @@ class ModerationFlowIntegrationTests {
         assertThat(reopened.getId()).isEqualTo(taskId);
         assertThat(reopened.getState()).isEqualTo(ModerationTaskState.OPEN);
         assertThat(moderationTaskRepository.findAll())
-                .filteredOn(task -> task.getRevisionId().equals(draft.revisionId()))
+                .filteredOn(task -> draft.revisionId().equals(task.getRevisionId()))
                 .hasSize(1);
 
         claim(modAccess, modCsrf, taskId)
@@ -879,5 +900,170 @@ class ModerationFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.id").value(approved.articleId().toString()))
                 .andExpect(jsonPath("$.data.entityType").value("ISLAND"))
                 .andExpect(jsonPath("$.data.title").doesNotExist());
+    }
+
+    // --- Media metadata tasks (V18): the second kind of target a task can judge ---
+
+    private record MediaTarget(UUID mediaId, UUID versionId, UUID taskId) {
+    }
+
+    // Seeded straight into the tables: READY is only reachable through the pipeline, which
+    // reports results in a later phase, so there is no API path to an item awaiting review yet.
+    private MediaTarget seedMediaAwaitingReview(UUID articleId, UUID uploaderId, ProcessingStatus processing) {
+        ArticleMedia media = articleMediaRepository.save(ArticleMedia.builder()
+                .articleId(articleId)
+                .type(MediaKind.PANORAMA_360)
+                .uploadedBy(uploaderId)
+                .declaredContentType("image/jpeg")
+                .declaredBytes(1024)
+                .declaredSha256("wuaGgjSJztIBf2BZuLI5MYtjZPbc2DXQpRkQWh6t1uQ=")
+                .processingStatus(processing)
+                .publicationStatus(PublicationStatus.PENDING)
+                .variants(new ArrayList<>())
+                .build());
+        MediaMetadataVersion version = seedVersion(media.getId(), 1, uploaderId);
+        return new MediaTarget(media.getId(), version.getId(), openTaskForVersion(version.getId()));
+    }
+
+    private MediaMetadataVersion seedVersion(UUID mediaId, int number, UUID submittedBy) {
+        return mediaMetadataVersionRepository.save(MediaMetadataVersion.builder()
+                .mediaId(mediaId)
+                .versionNumber(number)
+                .submittedBy(submittedBy)
+                .status(MetadataVersionStatus.PENDING_REVIEW)
+                .build());
+    }
+
+    private UUID openTaskForVersion(UUID versionId) {
+        return moderationTaskRepository.save(ModerationTask.builder()
+                .mediaMetadataVersionId(versionId)
+                .state(ModerationTaskState.OPEN)
+                .build()).getId();
+    }
+
+    @Test
+    void approvingAMediaItemsFirstMetadataPublishesTheItemAndALaterEditSwapsIt() throws Exception {
+        User moderator = seedModerator("mfmedmod1", "mf-medmod1@example.com");
+        Cookie modAccess = loginAccessCookie("mf-medmod1@example.com");
+        Cookie modCsrf = fetchCsrfCookie();
+        Draft draft = createDraft(modAccess, modCsrf, uniqueSlug("media-approve"));
+        MediaTarget target = seedMediaAwaitingReview(draft.articleId(), moderator.getId(), ProcessingStatus.READY);
+
+        claim(modAccess, modCsrf, target.taskId())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.revisionId").value(nullValue()))
+                .andExpect(jsonPath("$.data.mediaMetadataVersionId").value(target.versionId().toString()));
+        decide(modAccess, modCsrf, target.taskId(), Decision.APPROVE, null)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("DECIDED"));
+
+        ArticleMedia published = articleMediaRepository.findById(target.mediaId()).orElseThrow();
+        assertThat(published.getPublicationStatus()).isEqualTo(PublicationStatus.PUBLISHED);
+        assertThat(published.getCurrentMetadataVersionId()).isEqualTo(target.versionId());
+        assertThat(published.getPublishedAt()).isNotNull();
+        assertThat(mediaMetadataVersionRepository.findById(target.versionId()).orElseThrow().getStatus())
+                .isEqualTo(MetadataVersionStatus.APPROVED);
+
+        // A later edit that is rejected changes nothing public...
+        MediaMetadataVersion rejectedEdit = seedVersion(target.mediaId(), 2, moderator.getId());
+        UUID rejectTask = openTaskForVersion(rejectedEdit.getId());
+        claim(modAccess, modCsrf, rejectTask).andExpect(status().isOk());
+        decide(modAccess, modCsrf, rejectTask, Decision.REJECT, "wrong location").andExpect(status().isOk());
+        ArticleMedia afterReject = articleMediaRepository.findById(target.mediaId()).orElseThrow();
+        assertThat(afterReject.getPublicationStatus()).isEqualTo(PublicationStatus.PUBLISHED);
+        assertThat(afterReject.getCurrentMetadataVersionId()).isEqualTo(target.versionId());
+
+        // ...and an approved one becomes current without touching the publication state.
+        MediaMetadataVersion approvedEdit = seedVersion(target.mediaId(), 3, moderator.getId());
+        UUID approveTask = openTaskForVersion(approvedEdit.getId());
+        claim(modAccess, modCsrf, approveTask).andExpect(status().isOk());
+        decide(modAccess, modCsrf, approveTask, Decision.APPROVE, null).andExpect(status().isOk());
+        ArticleMedia afterApprove = articleMediaRepository.findById(target.mediaId()).orElseThrow();
+        assertThat(afterApprove.getCurrentMetadataVersionId()).isEqualTo(approvedEdit.getId());
+        assertThat(afterApprove.getPublishedAt()).isEqualTo(published.getPublishedAt());
+    }
+
+    @Test
+    void rejectingAMediaItemsFirstMetadataRejectsTheItem() throws Exception {
+        User moderator = seedModerator("mfmedmod2", "mf-medmod2@example.com");
+        Cookie modAccess = loginAccessCookie("mf-medmod2@example.com");
+        Cookie modCsrf = fetchCsrfCookie();
+        Draft draft = createDraft(modAccess, modCsrf, uniqueSlug("media-reject"));
+        MediaTarget target = seedMediaAwaitingReview(draft.articleId(), moderator.getId(), ProcessingStatus.READY);
+
+        claim(modAccess, modCsrf, target.taskId()).andExpect(status().isOk());
+        decide(modAccess, modCsrf, target.taskId(), Decision.REJECT, "not the Gulf").andExpect(status().isOk());
+
+        ArticleMedia rejected = articleMediaRepository.findById(target.mediaId()).orElseThrow();
+        assertThat(rejected.getPublicationStatus()).isEqualTo(PublicationStatus.REJECTED);
+        assertThat(rejected.getCurrentMetadataVersionId()).isNull();
+        assertThat(mediaMetadataVersionRepository.findById(target.versionId()).orElseThrow().getStatus())
+                .isEqualTo(MetadataVersionStatus.REJECTED);
+    }
+
+    @Test
+    void mediaTasksRefuseRequestChangesAndRefuseApprovalOfAnUnprocessedFile() throws Exception {
+        User moderator = seedModerator("mfmedmod3", "mf-medmod3@example.com");
+        Cookie modAccess = loginAccessCookie("mf-medmod3@example.com");
+        Cookie modCsrf = fetchCsrfCookie();
+        Draft draft = createDraft(modAccess, modCsrf, uniqueSlug("media-refuse"));
+
+        MediaTarget ready = seedMediaAwaitingReview(draft.articleId(), moderator.getId(), ProcessingStatus.READY);
+        claim(modAccess, modCsrf, ready.taskId()).andExpect(status().isOk());
+        decide(modAccess, modCsrf, ready.taskId(), Decision.REQUEST_CHANGES, "fix the heading")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("REQUEST_CHANGES_NOT_SUPPORTED"));
+        assertThat(moderationTaskRepository.findById(ready.taskId()).orElseThrow().getState())
+                .isEqualTo(ModerationTaskState.CLAIMED);
+
+        // Approving a first version publishes the file with it, so it must be READY first. The
+        // refusal rolls back the whole decision -- no decision row, task still CLAIMED.
+        MediaTarget processing = seedMediaAwaitingReview(draft.articleId(), moderator.getId(),
+                ProcessingStatus.PROCESSING);
+        claim(modAccess, modCsrf, processing.taskId()).andExpect(status().isOk());
+        decide(modAccess, modCsrf, processing.taskId(), Decision.APPROVE, null)
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("MEDIA_NOT_READY_FOR_REVIEW"));
+        assertThat(moderationTaskRepository.findById(processing.taskId()).orElseThrow().getState())
+                .isEqualTo(ModerationTaskState.CLAIMED);
+        assertThat(articleMediaRepository.findById(processing.mediaId()).orElseThrow().getPublicationStatus())
+                .isEqualTo(PublicationStatus.PENDING);
+
+        // A version that is no longer awaiting review cannot be decided.
+        MediaMetadataVersion version = mediaMetadataVersionRepository.findById(ready.versionId()).orElseThrow();
+        version.setStatus(MetadataVersionStatus.REJECTED);
+        mediaMetadataVersionRepository.save(version);
+        decide(modAccess, modCsrf, ready.taskId(), Decision.APPROVE, null)
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("METADATA_VERSION_NOT_PENDING"));
+    }
+
+    // ck_moderation_tasks_exactly_one_target and the per-target UNIQUE both live in the
+    // database, so they hold for every write path, including the dev fixture endpoint.
+    @Test
+    void aTaskMustJudgeExactlyOneTargetAndATargetGetsAtMostOneTask() throws Exception {
+        User moderator = seedModerator("mfmedmod4", "mf-medmod4@example.com");
+        Cookie modAccess = loginAccessCookie("mf-medmod4@example.com");
+        Cookie modCsrf = fetchCsrfCookie();
+        Draft draft = createDraft(modAccess, modCsrf, uniqueSlug("media-target"));
+        MediaTarget target = seedMediaAwaitingReview(draft.articleId(), moderator.getId(), ProcessingStatus.READY);
+
+        assertThatThrownBy(() -> moderationTaskRepository.saveAndFlush(ModerationTask.builder()
+                        .state(ModerationTaskState.OPEN).build()))
+                .isInstanceOf(DataIntegrityViolationException.class);
+        assertThatThrownBy(() -> moderationTaskRepository.saveAndFlush(ModerationTask.builder()
+                        .revisionId(draft.revisionId())
+                        .mediaMetadataVersionId(target.versionId())
+                        .state(ModerationTaskState.OPEN).build()))
+                .isInstanceOf(DataIntegrityViolationException.class);
+        assertThatThrownBy(() -> moderationTaskRepository.saveAndFlush(ModerationTask.builder()
+                        .mediaMetadataVersionId(target.versionId())
+                        .state(ModerationTaskState.OPEN).build()))
+                .isInstanceOf(DataIntegrityViolationException.class);
+
+        // Deleting the item takes its task with it (CASCADE through the version), so a task can
+        // never block the sweeps that delete media.
+        articleMediaRepository.deleteById(target.mediaId());
+        assertThat(moderationTaskRepository.findById(target.taskId())).isEmpty();
     }
 }

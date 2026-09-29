@@ -12,12 +12,22 @@ import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 import com.persiangulfwiki.core.dev.dto.DevTestArticleRequest;
 import com.persiangulfwiki.core.dev.dto.DevTestArticleResponse;
+import com.persiangulfwiki.core.dev.dto.DevTestMediaRequest;
+import com.persiangulfwiki.core.dev.dto.DevTestMediaResponse;
 import com.persiangulfwiki.core.dev.dto.DevTestModerationRequest;
 import com.persiangulfwiki.core.dev.dto.DevTestModerationResponse;
 import com.persiangulfwiki.core.dev.dto.DevTestSourceRequest;
 import com.persiangulfwiki.core.dev.dto.DevTestSubjectRequest;
 import com.persiangulfwiki.core.moderation.entity.Decision;
 import com.persiangulfwiki.core.moderation.entity.ModerationDecision;
+import com.persiangulfwiki.core.media.entity.ArticleMedia;
+import com.persiangulfwiki.core.media.entity.MediaKind;
+import com.persiangulfwiki.core.media.entity.MetadataVersionStatus;
+import com.persiangulfwiki.core.media.entity.ProcessingStatus;
+import com.persiangulfwiki.core.media.entity.PublicationStatus;
+import com.persiangulfwiki.core.media.repository.ArticleMediaRepository;
+import com.persiangulfwiki.core.media.repository.MediaMetadataVersionRepository;
+import com.persiangulfwiki.core.media.repository.PanoramaLinkRepository;
 import com.persiangulfwiki.core.moderation.entity.ModerationTask;
 import com.persiangulfwiki.core.moderation.entity.ModerationTaskState;
 import com.persiangulfwiki.core.moderation.repository.ModerationDecisionRepository;
@@ -40,11 +50,14 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 // Runs under the dev profile, the only profile in which the fixture controllers and
@@ -97,6 +110,18 @@ class DevTestContentEndpointIntegrationTests {
 
     @Autowired
     private DevTestModerationSweeper moderationSweeper;
+
+    @Autowired
+    private ArticleMediaRepository articleMediaRepository;
+
+    @Autowired
+    private MediaMetadataVersionRepository mediaMetadataVersionRepository;
+
+    @Autowired
+    private PanoramaLinkRepository panoramaLinkRepository;
+
+    @Autowired
+    private DevTestMediaSweeper mediaSweeper;
 
     private UUID mintSubject(DevTestSubjectRequest request) throws Exception {
         String body = mockMvc.perform(post("/api/dev/test-subjects")
@@ -311,7 +336,7 @@ class DevTestContentEndpointIntegrationTests {
         UUID revisionId = mintRevisionId();
 
         DevTestModerationResponse minted =
-                mintModerationTask(new DevTestModerationRequest(revisionId, null, null, null, null));
+                mintModerationTask(new DevTestModerationRequest(revisionId, null, null, null, null, null));
 
         ModerationTask task = moderationTaskRepository.findById(minted.taskId()).orElseThrow();
         assertThat(task.getDevMarker()).isNotNull();
@@ -328,7 +353,7 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void mintsAClaimedTaskWithBothClaimColumnsSet() throws Exception {
         DevTestModerationResponse minted = mintModerationTask(
-                new DevTestModerationRequest(mintRevisionId(), ModerationTaskState.CLAIMED, null, null, null));
+                new DevTestModerationRequest(mintRevisionId(), ModerationTaskState.CLAIMED, null, null, null, null));
 
         ModerationTask task = moderationTaskRepository.findById(minted.taskId()).orElseThrow();
         assertThat(task.getState()).isEqualTo(ModerationTaskState.CLAIMED);
@@ -345,7 +370,7 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void mintsADecidedTaskWithASeededDecisionOnItsHistory() throws Exception {
         DevTestModerationResponse minted = mintModerationTask(new DevTestModerationRequest(
-                mintRevisionId(), ModerationTaskState.DECIDED, null, Decision.REJECT, "out of scope"));
+                mintRevisionId(), ModerationTaskState.DECIDED, null, Decision.REJECT, "out of scope", null));
 
         ModerationTask task = moderationTaskRepository.findById(minted.taskId()).orElseThrow();
         assertThat(task.getState()).isEqualTo(ModerationTaskState.DECIDED);
@@ -368,19 +393,34 @@ class DevTestContentEndpointIntegrationTests {
         mockMvc.perform(post("/api/dev/test-moderation-tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new DevTestModerationRequest(UUID.randomUUID(), null, null, null, null))))
+                                new DevTestModerationRequest(UUID.randomUUID(), null, null, null, null, null))))
                 .andExpect(status().isNotFound());
 
-        mockMvc.perform(post("/api/dev/test-moderation-tasks")
+    }
+
+    // The opposite of the refusal above: naming no target at all mints a marked, PENDING article
+    // to judge, so a moderation suite needs no setup call.
+    @Test
+    void mintsAModerationTaskOnAThrowawayArticleWhenNoTargetIsSent() throws Exception {
+        String body = mockMvc.perform(post("/api/dev/test-moderation-tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        UUID taskId = UUID.fromString(objectMapper.readTree(body).get("taskId").asText());
+        UUID revisionId = UUID.fromString(objectMapper.readTree(body).get("revisionId").asText());
+
+        assertThat(articleRevisionRepository.findById(revisionId)).get()
+                .extracting(revision -> revision.getStatus()).isEqualTo(RevisionStatus.PENDING);
+        assertThat(moderationTaskRepository.findById(taskId)).get()
+                .extracting(task -> task.getRevisionId()).isEqualTo(revisionId);
+        mockMvc.perform(delete("/api/dev/test-moderation-tasks/" + taskId)).andExpect(status().isNoContent());
     }
 
     @Test
     void deletesAMintedModerationTaskAndCascadesToItsDecision() throws Exception {
         DevTestModerationResponse minted = mintModerationTask(new DevTestModerationRequest(
-                mintRevisionId(), ModerationTaskState.DECIDED, null, Decision.APPROVE, null));
+                mintRevisionId(), ModerationTaskState.DECIDED, null, Decision.APPROVE, null, null));
 
         mockMvc.perform(delete("/api/dev/test-moderation-tasks/" + minted.taskId()))
                 .andExpect(status().isNoContent());
@@ -412,7 +452,7 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void sweeperReclaimsAgedMintedModerationTasksButSparesHandMadeOnes() throws Exception {
         DevTestModerationResponse minted =
-                mintModerationTask(new DevTestModerationRequest(mintRevisionId(), null, null, null, null));
+                mintModerationTask(new DevTestModerationRequest(mintRevisionId(), null, null, null, null, null));
         ModerationTask handMade = moderationTaskRepository.save(ModerationTask.builder()
                 .revisionId(mintRevisionId())
                 .state(ModerationTaskState.OPEN)
@@ -441,5 +481,212 @@ class DevTestContentEndpointIntegrationTests {
         mockMvc.perform(delete("/api/dev/test-subjects/" + subjectId)).andExpect(status().isNoContent());
         mockMvc.perform(delete("/api/dev/test-sources/" + sourceId)).andExpect(status().isNoContent());
         mockMvc.perform(delete("/api/dev/test-articles/" + article.articleId())).andExpect(status().isNoContent());
+    }
+
+    // --- Media fixtures ---
+
+    private DevTestMediaResponse mintMedia(DevTestMediaRequest request) throws Exception {
+        String body = mockMvc.perform(post("/api/dev/test-media")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readValue(body, DevTestMediaResponse.class);
+    }
+
+    private UUID mintArticleId() throws Exception {
+        return mintArticle(new DevTestArticleRequest(null, null, null, null, null, null, null, null, null)).articleId();
+    }
+
+    private DevTestMediaRequest mediaRequest(UUID articleId, ProcessingStatus processing, PublicationStatus publication) {
+        return new DevTestMediaRequest(articleId, null, processing, publication, null, null, null, null);
+    }
+
+    // Every state the gallery defines, including the ones only the pipeline or a moderator can
+    // reach, each with its first metadata version where the real flow would have left it.
+    @Test
+    void mintsAMarkedMediaItemInEveryStateWithTheImpliedFirstMetadataVersion() throws Exception {
+        UUID articleId = mintArticleId();
+        record Case(ProcessingStatus processing, PublicationStatus publication, MetadataVersionStatus firstVersion) {
+        }
+        List<Case> cases = List.of(
+                new Case(ProcessingStatus.UPLOADING, PublicationStatus.PENDING, MetadataVersionStatus.PENDING_REVIEW),
+                new Case(ProcessingStatus.PROCESSING, PublicationStatus.PENDING, MetadataVersionStatus.PENDING_REVIEW),
+                new Case(ProcessingStatus.READY, PublicationStatus.PENDING, MetadataVersionStatus.PENDING_REVIEW),
+                new Case(ProcessingStatus.READY, PublicationStatus.PUBLISHED, MetadataVersionStatus.APPROVED),
+                new Case(ProcessingStatus.READY, PublicationStatus.REJECTED, MetadataVersionStatus.REJECTED),
+                new Case(ProcessingStatus.FAILED, PublicationStatus.PENDING, MetadataVersionStatus.PENDING_REVIEW),
+                new Case(ProcessingStatus.READY, PublicationStatus.HIDDEN, MetadataVersionStatus.APPROVED));
+
+        for (Case c : cases) {
+            DevTestMediaResponse minted = mintMedia(mediaRequest(articleId, c.processing(), c.publication()));
+            ArticleMedia media = articleMediaRepository.findById(minted.mediaId()).orElseThrow();
+            assertThat(media.getDevMarker()).isEqualTo(DevTestFixtures.MARKER);
+            assertThat(media.getProcessingStatus()).isEqualTo(c.processing());
+            assertThat(media.getPublicationStatus()).isEqualTo(c.publication());
+            assertThat(mediaMetadataVersionRepository.findById(minted.firstMetadataVersionId()).orElseThrow().getStatus())
+                    .isEqualTo(c.firstVersion());
+            boolean approved = c.firstVersion() == MetadataVersionStatus.APPROVED;
+            assertThat(media.getCurrentMetadataVersionId()).isEqualTo(approved ? minted.firstMetadataVersionId() : null);
+            assertThat(media.getVariants()).hasSize(c.processing() == ProcessingStatus.READY ? 1 : 0);
+            assertThat(media.getFailureCode()).isEqualTo(c.processing() == ProcessingStatus.FAILED ? "upload_mismatch" : null);
+        }
+    }
+
+    @Test
+    void mintsLaterMetadataVersionsInAnyStatusAndPanoramaLinksOnAnyVersion() throws Exception {
+        UUID articleId = mintArticleId();
+        DevTestMediaResponse target = mintMedia(new DevTestMediaRequest(articleId, MediaKind.PANORAMA_360,
+                ProcessingStatus.READY, PublicationStatus.PUBLISHED, null, null, null, null));
+        // v2 approved (current), v3 rejected, v4 and v5 pending -- links on the newest by default.
+        DevTestMediaResponse source = mintMedia(new DevTestMediaRequest(articleId, MediaKind.PANORAMA_360,
+                ProcessingStatus.READY, PublicationStatus.PUBLISHED, null,
+                List.of(MetadataVersionStatus.APPROVED, MetadataVersionStatus.REJECTED,
+                        MetadataVersionStatus.PENDING_REVIEW, MetadataVersionStatus.PENDING_REVIEW),
+                List.of(target.mediaId()), null));
+
+        assertThat(source.laterMetadataVersionIds()).hasSize(4);
+        assertThat(source.laterMetadataVersionIds().stream()
+                .map(id -> mediaMetadataVersionRepository.findById(id).orElseThrow())
+                .map(version -> version.getVersionNumber() + ":" + version.getStatus()))
+                .containsExactly("2:APPROVED", "3:REJECTED", "4:PENDING_REVIEW", "5:PENDING_REVIEW");
+        UUID approvedEdit = source.laterMetadataVersionIds().getFirst();
+        assertThat(source.currentMetadataVersionId()).isEqualTo(approvedEdit);
+        assertThat(articleMediaRepository.findById(source.mediaId()).orElseThrow().getCurrentMetadataVersionId())
+                .isEqualTo(approvedEdit);
+        assertThat(source.panoramaLinkIds()).hasSize(1);
+        assertThat(panoramaLinkRepository.findByMetadataVersionId(source.laterMetadataVersionIds().getLast()))
+                .singleElement()
+                .satisfies(link -> assertThat(link.getToMediaId()).isEqualTo(target.mediaId()));
+
+        // Links on a chosen version, here the first.
+        DevTestMediaResponse onFirst = mintMedia(new DevTestMediaRequest(articleId, MediaKind.PANORAMA_360,
+                ProcessingStatus.READY, PublicationStatus.PUBLISHED, null, List.of(MetadataVersionStatus.PENDING_REVIEW),
+                List.of(target.mediaId()), 1));
+        assertThat(panoramaLinkRepository.findByMetadataVersionId(onFirst.firstMetadataVersionId())).hasSize(1);
+        assertThat(onFirst.currentMetadataVersionId()).isEqualTo(onFirst.firstMetadataVersionId());
+
+        // An approved edit on an item never approved is a state nothing reaches: refused.
+        mockMvc.perform(post("/api/dev/test-media")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new DevTestMediaRequest(articleId, null,
+                                ProcessingStatus.READY, PublicationStatus.PENDING, null,
+                                List.of(MetadataVersionStatus.APPROVED), null, null))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_DEV_TEST_MEDIA_REQUEST"));
+        mockMvc.perform(post("/api/dev/test-media")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new DevTestMediaRequest(articleId, null, null, null,
+                                null, null, List.of(target.mediaId()), 2))))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/dev/test-media")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new DevTestMediaRequest(articleId, null, null, null,
+                                null, null, List.of(UUID.randomUUID()), null))))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(post("/api/dev/test-media")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new DevTestMediaRequest(UUID.randomUUID(), null,
+                                null, null, null, null, null, null))))
+                .andExpect(status().isNotFound());
+        // A blank id in the list ("" from an API client's template body) reads as null: 400, not a 500.
+        mockMvc.perform(post("/api/dev/test-media")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"articleId\":\"" + articleId + "\",\"panoramaLinkTargetIds\":[\"\"]}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_DEV_TEST_MEDIA_REQUEST"));
+    }
+
+    // No articleId: the fixture mints its own marked, APPROVED article, and the item is minted
+    // on it. Sending an id still targets that article (covered above).
+    @Test
+    void mintsMediaOnAThrowawayArticleWhenNoArticleIsSent() throws Exception {
+        String body = mockMvc.perform(post("/api/dev/test-media")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        UUID mediaId = UUID.fromString(objectMapper.readTree(body).get("mediaId").asText());
+        UUID articleId = UUID.fromString(objectMapper.readTree(body).get("articleId").asText());
+
+        assertThat(articleRepository.findById(articleId)).get()
+                .extracting(article -> article.getDevMarker()).isEqualTo("e2e");
+        assertThat(articleMediaRepository.findById(mediaId)).get()
+                .extracting(media -> media.getArticleId()).isEqualTo(articleId);
+
+        mockMvc.perform(delete("/api/dev/test-media/" + mediaId)).andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/dev/test-articles/" + articleId)).andExpect(status().isNoContent());
+    }
+
+    @Test
+    void mintsAModerationTaskOnAMediaMetadataVersion() throws Exception {
+        DevTestMediaResponse media = mintMedia(mediaRequest(mintArticleId(), ProcessingStatus.READY, PublicationStatus.PENDING));
+
+        DevTestModerationResponse minted = mintModerationTask(new DevTestModerationRequest(null,
+                ModerationTaskState.CLAIMED, null, null, null, media.firstMetadataVersionId()));
+        assertThat(minted.revisionId()).isNull();
+        assertThat(minted.mediaMetadataVersionId()).isEqualTo(media.firstMetadataVersionId());
+        ModerationTask task = moderationTaskRepository.findById(minted.taskId()).orElseThrow();
+        assertThat(task.getMediaMetadataVersionId()).isEqualTo(media.firstMetadataVersionId());
+        assertThat(task.getClaimedBy()).isNotNull();
+
+        // Both targets at once is refused by the exactly-one CHECK; an unknown version is a 404.
+        mockMvc.perform(post("/api/dev/test-moderation-tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new DevTestModerationRequest(mintRevisionId(), null,
+                                null, null, null, mintMedia(mediaRequest(mintArticleId(), null, null)).firstMetadataVersionId()))))
+                .andExpect(status().isConflict());
+        mockMvc.perform(post("/api/dev/test-moderation-tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new DevTestModerationRequest(null, null, null, null,
+                                null, UUID.randomUUID()))))
+                .andExpect(status().isNotFound());
+
+        // Deleting the minted item takes its task with it.
+        mockMvc.perform(delete("/api/dev/test-media/" + media.mediaId())).andExpect(status().isNoContent());
+        assertThat(moderationTaskRepository.findById(minted.taskId())).isEmpty();
+    }
+
+    @Test
+    void deletesOnlyMediaItMinted() throws Exception {
+        UUID articleId = mintArticleId();
+        DevTestMediaResponse minted = mintMedia(mediaRequest(articleId, null, null));
+        ArticleMedia handMade = articleMediaRepository.save(ArticleMedia.builder()
+                .articleId(articleId)
+                .type(MediaKind.IMAGE)
+                .uploadedBy(minted.uploadedByUserId())
+                .declaredContentType("image/jpeg")
+                .declaredBytes(10)
+                .declaredSha256("wuaGgjSJztIBf2BZuLI5MYtjZPbc2DXQpRkQWh6t1uQ=")
+                .processingStatus(ProcessingStatus.UPLOADING)
+                .publicationStatus(PublicationStatus.PENDING)
+                .variants(new ArrayList<>())
+                .build());
+
+        mockMvc.perform(delete("/api/dev/test-media/" + minted.mediaId())).andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/dev/test-media/" + minted.mediaId())).andExpect(status().isNotFound());
+        mockMvc.perform(delete("/api/dev/test-media/" + handMade.getId())).andExpect(status().isNotFound());
+        assertThat(articleMediaRepository.findById(minted.mediaId())).isEmpty();
+        assertThat(mediaMetadataVersionRepository.findById(minted.firstMetadataVersionId())).isEmpty();
+        assertThat(articleMediaRepository.findById(handMade.getId())).isPresent();
+
+        mediaSweeper.deleteOlderThan(Instant.now().plus(1, ChronoUnit.HOURS));
+        assertThat(articleMediaRepository.findById(handMade.getId())).isPresent();
+    }
+
+    @Test
+    void sweeperReclaimsAgedMintedMediaAndArticleDeletionCascadesToIt() throws Exception {
+        DevTestMediaResponse aged = mintMedia(mediaRequest(mintArticleId(), ProcessingStatus.READY, PublicationStatus.PUBLISHED));
+        mediaSweeper.deleteOlderThan(Instant.now().minus(1, ChronoUnit.HOURS));
+        assertThat(articleMediaRepository.findById(aged.mediaId())).isPresent();
+        mediaSweeper.deleteOlderThan(Instant.now().plus(1, ChronoUnit.HOURS));
+        assertThat(articleMediaRepository.findById(aged.mediaId())).isEmpty();
+
+        // Regression on the article fixture: deleting a minted article still works with gallery
+        // rows hanging off it (article_media.article_id is ON DELETE CASCADE).
+        UUID articleId = mintArticleId();
+        DevTestMediaResponse onArticle = mintMedia(mediaRequest(articleId, null, null));
+        mockMvc.perform(delete("/api/dev/test-articles/" + articleId)).andExpect(status().isNoContent());
+        assertThat(articleMediaRepository.findById(onArticle.mediaId())).isEmpty();
     }
 }

@@ -52,7 +52,68 @@ services:
     volumes:
       - mailpit-data:/data
 
+  # Same image and major as docker-compose.deploy.yml. Core publishes gallery processing jobs
+  # to a stream here, and the upload rate limit counts reservations here -- neither works
+  # without it. No auth locally, which is what .env.example's empty REDIS_PASSWORD assumes.
+  redis:
+    image: redis:7-alpine
+    container_name: pgw-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  # Object storage for the article gallery. A community build of MinIO, not upstream's image:
+  # upstream stopped publishing images (minio/minio is gone from Docker Hub and Quay requires a
+  # login), so pgsty's rebuild of the same source is used. Pinned for the same reason postgis
+  # is -- presigned-upload checksum enforcement is exactly the kind of thing that can change
+  # between releases, and this release was verified to enforce a signed x-amz-checksum-sha256.
+  minio:
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
+    container_name: pgw-minio
+    restart: unless-stopped
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: ${STORAGE_ACCESS_KEY:-pgw-dev}
+      MINIO_ROOT_PASSWORD: ${STORAGE_SECRET_KEY:-pgw-dev-secret}
+      # The browser PUTs straight to this server, so it needs CORS for the frontend origins.
+      # MinIO takes CORS as this server-wide origin list only: it has no per-bucket CORS and no
+      # way to restrict methods or exposed headers, and it exposes ETag by default. On AWS S3
+      # this becomes a PutBucketCors rule instead (GET, PUT, HEAD; expose ETag).
+      MINIO_API_CORS_ALLOW_ORIGIN: ${FRONTEND_ORIGINS:-http://localhost:3000}
+    ports:
+      # 9000 = S3 API (what the app and the browser talk to), 9001 = web console.
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+
+  # One-shot: waits for MinIO, then creates both buckets and makes only the media bucket's
+  # public/ prefix anonymously readable. Everything else, including the whole staging bucket
+  # and pending variants in the media bucket, is reachable only through signed URLs.
+  # Idempotent, so it is safe on every `docker compose up`.
+  minio-init:
+    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z
+    container_name: pgw-minio-init
+    depends_on:
+      - minio
+    environment:
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY:-pgw-dev}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY:-pgw-dev-secret}
+      STORAGE_STAGING_BUCKET: ${STORAGE_STAGING_BUCKET:-submissions-raw}
+      STORAGE_MEDIA_BUCKET: ${STORAGE_MEDIA_BUCKET:-submissions-derived}
+    entrypoint: >
+      sh -c '
+      until mc alias set local http://minio:9000 "$$STORAGE_ACCESS_KEY" "$$STORAGE_SECRET_KEY"; do sleep 1; done &&
+      mc mb --ignore-existing "local/$$STORAGE_STAGING_BUCKET" &&
+      mc mb --ignore-existing "local/$$STORAGE_MEDIA_BUCKET" &&
+      mc anonymous set download "local/$$STORAGE_MEDIA_BUCKET/public"
+      '
+
 volumes:
   postgres-data:
   pgadmin-data:
   mailpit-data:
+  redis-data:
+  minio-data:

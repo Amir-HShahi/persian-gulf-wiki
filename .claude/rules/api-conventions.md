@@ -19,7 +19,9 @@ globs: ["**/*.java"]
 - `401` — missing or invalid authentication.
 - `403` — authenticated but not authorized for the resource or action.
 - `404` — the resource does not exist.
-- `409` — conflict with the current state, such as a duplicate or version mismatch.
+- `409` — conflict with the current state, such as a duplicate or version mismatch. Also a per-account cap or quota already used up (e.g. too many pending uploads, storage quota).
+- `429` — a per-account rate limit was hit. Send `Retry-After` (seconds) when the reset time is known.
+- Oversized uploads that never reach the API (only their declared size does) are `400`, not `413` — there is no oversized request body.
 - These status-code rules are authoritative and constrain the `exception-handling` skill; controllers must not choose different codes ad hoc.
 - If a situation is not covered, ask which status code applies instead of guessing.
 

@@ -16,6 +16,31 @@ import com.persiangulfwiki.core.article.exception.TranslationNotFoundException;
 import com.persiangulfwiki.core.moderation.exception.InvalidModerationTaskStateException;
 import com.persiangulfwiki.core.moderation.exception.MissingDecisionReasonException;
 import com.persiangulfwiki.core.moderation.exception.ModerationTaskNotFoundException;
+import com.persiangulfwiki.core.common.exception.TooManyRequestsException;
+import com.persiangulfwiki.core.dev.exception.InvalidDevTestMediaRequestException;
+import com.persiangulfwiki.core.media.exception.DuplicateMediaException;
+import com.persiangulfwiki.core.media.exception.IncompleteMediaMetadataException;
+import com.persiangulfwiki.core.media.exception.MediaAlreadyRejectedException;
+import com.persiangulfwiki.core.media.exception.MediaFilesMissingException;
+import com.persiangulfwiki.core.media.exception.MediaNotAwaitingUploadException;
+import com.persiangulfwiki.core.media.exception.MediaNotEditableException;
+import com.persiangulfwiki.core.media.exception.MediaNotFoundException;
+import com.persiangulfwiki.core.media.exception.MediaNotReadyForReviewException;
+import com.persiangulfwiki.core.media.exception.MediaStorageQuotaExceededException;
+import com.persiangulfwiki.core.media.exception.MediaTooLargeException;
+import com.persiangulfwiki.core.media.exception.MediaUploadRateLimitedException;
+import com.persiangulfwiki.core.media.exception.MetadataEditRateLimitedException;
+import com.persiangulfwiki.core.media.exception.MetadataVersionSupersededException;
+import com.persiangulfwiki.core.media.exception.NotMediaUploaderException;
+import com.persiangulfwiki.core.media.exception.PanoramaLinkTargetNotFoundException;
+import com.persiangulfwiki.core.media.exception.PanoramaLinkTargetNotPanoramaException;
+import com.persiangulfwiki.core.media.exception.PanoramaLinksNotSupportedException;
+import com.persiangulfwiki.core.media.exception.PendingMediaLimitExceededException;
+import com.persiangulfwiki.core.media.exception.PendingMetadataEditLimitExceededException;
+import com.persiangulfwiki.core.media.exception.SelfPanoramaLinkException;
+import com.persiangulfwiki.core.media.exception.UnsupportedMediaContentTypeException;
+import com.persiangulfwiki.core.moderation.exception.MetadataVersionNotPendingException;
+import com.persiangulfwiki.core.moderation.exception.RequestChangesNotSupportedException;
 import com.persiangulfwiki.core.moderation.exception.NotTaskClaimantException;
 import com.persiangulfwiki.core.moderation.exception.RevisionNotPendingException;
 import com.persiangulfwiki.core.moderation.exception.TaskAlreadyDecidedException;
@@ -60,6 +85,7 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 import java.time.Instant;
@@ -79,6 +105,7 @@ import org.slf4j.MDC;
 // the extension properties code/timestamp/traceId are always present together. `code` is a
 // stable machine-readable discriminator per exception type, so the frontend can branch on it
 // instead of string-matching `detail`.
+@Slf4j
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -285,6 +312,143 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(MissingDecisionReasonException.class)
     public ProblemDetail handleMissingDecisionReason(MissingDecisionReasonException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.missingDecisionReason"), "MISSING_DECISION_REASON", request);
+    }
+
+    @ExceptionHandler(RequestChangesNotSupportedException.class)
+    public ProblemDetail handleRequestChangesNotSupported(RequestChangesNotSupportedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.requestChangesNotSupported"), "REQUEST_CHANGES_NOT_SUPPORTED", request);
+    }
+
+    @ExceptionHandler(MetadataVersionNotPendingException.class)
+    public ProblemDetail handleMetadataVersionNotPending(MetadataVersionNotPendingException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.metadataVersionNotPending"), "METADATA_VERSION_NOT_PENDING", request);
+    }
+
+    @ExceptionHandler(MediaNotFoundException.class)
+    public ProblemDetail handleMediaNotFound(MediaNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.mediaNotFound"), "MEDIA_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(UnsupportedMediaContentTypeException.class)
+    public ProblemDetail handleUnsupportedMediaContentType(UnsupportedMediaContentTypeException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.unsupportedMediaContentType"), "UNSUPPORTED_MEDIA_CONTENT_TYPE", request);
+    }
+
+    @ExceptionHandler(MediaTooLargeException.class)
+    public ProblemDetail handleMediaTooLarge(MediaTooLargeException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.mediaTooLarge"), "MEDIA_TOO_LARGE", request);
+    }
+
+    @ExceptionHandler(IncompleteMediaMetadataException.class)
+    public ProblemDetail handleIncompleteMediaMetadata(IncompleteMediaMetadataException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.incompleteMediaMetadata"), "INCOMPLETE_MEDIA_METADATA", request);
+    }
+
+    @ExceptionHandler(DuplicateMediaException.class)
+    public ProblemDetail handleDuplicateMedia(DuplicateMediaException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.duplicateMedia"), "DUPLICATE_MEDIA", request);
+    }
+
+    @ExceptionHandler(PendingMediaLimitExceededException.class)
+    public ProblemDetail handlePendingMediaLimitExceeded(PendingMediaLimitExceededException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.pendingMediaLimitExceeded"), "PENDING_MEDIA_LIMIT_EXCEEDED", request);
+    }
+
+    @ExceptionHandler(MediaStorageQuotaExceededException.class)
+    public ProblemDetail handleMediaStorageQuotaExceeded(MediaStorageQuotaExceededException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.mediaStorageQuotaExceeded"), "MEDIA_STORAGE_QUOTA_EXCEEDED", request);
+    }
+
+    @ExceptionHandler(NotMediaUploaderException.class)
+    public ProblemDetail handleNotMediaUploader(NotMediaUploaderException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.FORBIDDEN, resolve("error.notMediaUploader"), "NOT_MEDIA_UPLOADER", request);
+    }
+
+    @ExceptionHandler(MediaNotAwaitingUploadException.class)
+    public ProblemDetail handleMediaNotAwaitingUpload(MediaNotAwaitingUploadException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.mediaNotAwaitingUpload"), "MEDIA_NOT_AWAITING_UPLOAD", request);
+    }
+
+    @ExceptionHandler(MediaNotReadyForReviewException.class)
+    public ProblemDetail handleMediaNotReadyForReview(MediaNotReadyForReviewException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.mediaNotReadyForReview"), "MEDIA_NOT_READY_FOR_REVIEW", request);
+    }
+
+    // Logged, unlike the other 409s: nothing the moderator did causes it -- storage and the row
+    // disagree, which someone has to look into.
+    @ExceptionHandler(MediaFilesMissingException.class)
+    public ProblemDetail handleMediaFilesMissing(MediaFilesMissingException ex, HttpServletRequest request) {
+        log.warn("refused to publish media: {}", ex.getMessage());
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.mediaFilesMissing"), "MEDIA_FILES_MISSING", request);
+    }
+
+    @ExceptionHandler(MediaNotEditableException.class)
+    public ProblemDetail handleMediaNotEditable(MediaNotEditableException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.mediaNotEditable"), "MEDIA_NOT_EDITABLE", request);
+    }
+
+    @ExceptionHandler(MetadataVersionSupersededException.class)
+    public ProblemDetail handleMetadataVersionSuperseded(MetadataVersionSupersededException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.metadataVersionSuperseded"), "METADATA_VERSION_SUPERSEDED", request);
+    }
+
+    @ExceptionHandler(MediaAlreadyRejectedException.class)
+    public ProblemDetail handleMediaAlreadyRejected(MediaAlreadyRejectedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.mediaAlreadyRejected"), "MEDIA_ALREADY_REJECTED", request);
+    }
+
+    @ExceptionHandler(PendingMetadataEditLimitExceededException.class)
+    public ProblemDetail handlePendingMetadataEditLimitExceeded(PendingMetadataEditLimitExceededException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.pendingMetadataEditLimitExceeded"), "PENDING_METADATA_EDIT_LIMIT_EXCEEDED", request);
+    }
+
+    @ExceptionHandler(PanoramaLinksNotSupportedException.class)
+    public ProblemDetail handlePanoramaLinksNotSupported(PanoramaLinksNotSupportedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.panoramaLinksNotSupported"), "PANORAMA_LINKS_NOT_SUPPORTED", request);
+    }
+
+    @ExceptionHandler(SelfPanoramaLinkException.class)
+    public ProblemDetail handleSelfPanoramaLink(SelfPanoramaLinkException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.selfPanoramaLink"), "SELF_PANORAMA_LINK", request);
+    }
+
+    @ExceptionHandler(PanoramaLinkTargetNotPanoramaException.class)
+    public ProblemDetail handlePanoramaLinkTargetNotPanorama(PanoramaLinkTargetNotPanoramaException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.panoramaLinkTargetNotPanorama"), "PANORAMA_LINK_TARGET_NOT_PANORAMA", request);
+    }
+
+    @ExceptionHandler(PanoramaLinkTargetNotFoundException.class)
+    public ProblemDetail handlePanoramaLinkTargetNotFound(PanoramaLinkTargetNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.panoramaLinkTargetNotFound"), "PANORAMA_LINK_TARGET_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(InvalidDevTestMediaRequestException.class)
+    public ProblemDetail handleInvalidDevTestMediaRequest(InvalidDevTestMediaRequestException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidDevTestMediaRequest"), "INVALID_DEV_TEST_MEDIA_REQUEST", request);
+    }
+
+    // The one handler that returns a ResponseEntity rather than a bare ProblemDetail: a 429
+    // should tell the client when to come back, and Retry-After is a header, not a body field.
+    // Typed to the leaf exception like every other handler here, so the code stays specific;
+    // a second rate-limited feature adds its own handler through retryAfter() below.
+    @ExceptionHandler(MediaUploadRateLimitedException.class)
+    public ResponseEntity<ProblemDetail> handleMediaUploadRateLimited(MediaUploadRateLimitedException ex, HttpServletRequest request) {
+        return retryAfter(ex, ProblemDetails.of(
+                HttpStatus.TOO_MANY_REQUESTS, resolve("error.mediaUploadRateLimited"), "MEDIA_UPLOAD_RATE_LIMITED", request));
+    }
+
+    @ExceptionHandler(MetadataEditRateLimitedException.class)
+    public ResponseEntity<ProblemDetail> handleMetadataEditRateLimited(MetadataEditRateLimitedException ex, HttpServletRequest request) {
+        return retryAfter(ex, ProblemDetails.of(
+                HttpStatus.TOO_MANY_REQUESTS, resolve("error.metadataEditRateLimited"), "METADATA_EDIT_RATE_LIMITED", request));
+    }
+
+    private static ResponseEntity<ProblemDetail> retryAfter(TooManyRequestsException ex, ProblemDetail body) {
+        ResponseEntity.BodyBuilder response = ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS);
+        if (ex.getRetryAfterSeconds() > 0) {
+            response.header(HttpHeaders.RETRY_AFTER, Long.toString(ex.getRetryAfterSeconds()));
+        }
+        return response.body(body);
     }
 
     // ResponseEntityExceptionHandler's own ~20 built-in handlers (malformed JSON body,
