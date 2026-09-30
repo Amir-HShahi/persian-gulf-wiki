@@ -8,7 +8,6 @@ import com.persiangulfwiki.core.TestcontainersConfiguration;
 import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
 import com.persiangulfwiki.core.article.dto.UpdateRevisionRequest;
 import com.persiangulfwiki.core.article.entity.ArticleRevision;
-import com.persiangulfwiki.core.article.entity.EntityType;
 import com.persiangulfwiki.core.article.entity.RevisionStatus;
 import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
@@ -198,7 +197,7 @@ class ModerationFlowIntegrationTests {
     }
 
     private Draft createDraft(Cookie accessCookie, Cookie csrfCookie, String slug) throws Exception {
-        CreateArticleRequest createArticle = new CreateArticleRequest(null, EntityType.GENERIC, "fa",
+        CreateArticleRequest createArticle = new CreateArticleRequest(null, "fa",
                 slug, "Title", simpleBody("body"), null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
@@ -215,7 +214,7 @@ class ModerationFlowIntegrationTests {
     // the articles table is shared with every other test in the suite.
     private Draft createSubjectBoundDraft(Cookie accessCookie, Cookie csrfCookie, UUID subjectId, String slug,
             String title, String summary) throws Exception {
-        CreateArticleRequest createArticle = new CreateArticleRequest(subjectId, null, "fa", slug, title,
+        CreateArticleRequest createArticle = new CreateArticleRequest(subjectId, "fa", slug, title,
                 simpleBody("body"), summary);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
@@ -354,7 +353,7 @@ class ModerationFlowIntegrationTests {
         Cookie authorAccess = loginAccessCookie("mf-author1@example.com");
         Cookie authorCsrf = fetchCsrfCookie();
 
-        CreateArticleRequest createArticle = new CreateArticleRequest(subjectId, null, "fa",
+        CreateArticleRequest createArticle = new CreateArticleRequest(subjectId, "fa",
                 uniqueSlug("hormuz"), "Hormuz Island", simpleBody("An island."), "Summary.");
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(authorAccess, authorCsrf)
@@ -362,7 +361,7 @@ class ModerationFlowIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createArticle)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.entityType").value("ISLAND"))
+                .andExpect(jsonPath("$.data.subjectKind").value("ISLAND"))
                 .andReturn().getResponse().getContentAsString();
         UUID articleId = UUID.fromString(JsonPath.read(created, "$.data.id"));
         Draft draft = new Draft(articleId, firstRevisionId(articleId, authorAccess));
@@ -848,7 +847,7 @@ class ModerationFlowIntegrationTests {
                 .andExpect(jsonPath("$.data", hasSize(1)))
                 .andExpect(jsonPath("$.data[0].id").value(approved.articleId().toString()))
                 .andExpect(jsonPath("$.data[0].subjectId").value(subjectId.toString()))
-                .andExpect(jsonPath("$.data[0].entityType").value("ISLAND"))
+                .andExpect(jsonPath("$.data[0].subjectKind").value("ISLAND"))
                 .andExpect(jsonPath("$.data[0].language").value("fa"))
                 .andExpect(jsonPath("$.data[0].slug").value(approvedSlug))
                 .andExpect(jsonPath("$.data[0].title").value("First approved title"))
@@ -898,7 +897,7 @@ class ModerationFlowIntegrationTests {
         mockMvc.perform(get("/api/articles/" + approved.articleId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(approved.articleId().toString()))
-                .andExpect(jsonPath("$.data.entityType").value("ISLAND"))
+                .andExpect(jsonPath("$.data.subjectKind").value("ISLAND"))
                 .andExpect(jsonPath("$.data.title").doesNotExist());
     }
 

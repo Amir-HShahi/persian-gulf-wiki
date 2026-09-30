@@ -41,24 +41,27 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/expert-reviewer")
 @RequiredArgsConstructor
-@Tag(name = "Expert Reviewer", description = "Application-based EXPERT_REVIEWER role: any contributor can apply for a "
-        + "given entity type, an admin reviews and approves/rejects")
+@Tag(name = "Expert Reviewer", description = "Application-based EXPERT_REVIEWER role: any contributor can apply for an "
+        + "area of expertise (a subject kind), an admin reviews and approves/rejects")
 @SecurityRequirement(name = "cookieAuth")
 public class ExpertReviewerController {
 
     private final ExpertReviewerService expertReviewerService;
     private final MessageSource messageSource;
 
-    @Operation(summary = "Apply for the Expert Reviewer role", description = "Any authenticated user may apply, stating the entity type they "
-            + "claim expertise in and a justification. Only one PENDING application per "
-            + "(applicant, entityType) is allowed at a time.")
+    @Operation(summary = "Apply for the Expert Reviewer role", description = "Any authenticated user may apply, stating their area of "
+            + "`expertise` -- one of ISLAND, PORT, OIL_FIELD, SPECIES -- and a justification. Only one "
+            + "PENDING application per (applicant, expertise) is allowed at a time.")
     @ApiResponse(responseCode = "201", description = "Application created with status PENDING.")
     @ApiResponse(responseCode = "400", description = "Request failed field validation. `detail` is a fixed summary string "
             + "(\"validation failed\") — the actual failures are in the `errors` array, one entry per field with "
-            + "`field` and `message`. Both `entityType` and `justification` must be non-blank.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+            + "`field` and `message`. `expertise` is required and `justification` must be non-blank. An "
+            + "`expertise` that is not one of ISLAND, PORT, OIL_FIELD, SPECIES (exact, upper case) is also a "
+            + "400, but as an unreadable body: `code` is HTTP_MESSAGE_NOT_READABLE and there is no `errors` "
+            + "array.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "The authenticated account's email address is not yet verified.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    @ApiResponse(responseCode = "409", description = "A PENDING application for this (applicant, entityType) already exists.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "409", description = "A PENDING application for this (applicant, expertise) already exists.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = "CSRF token. Call GET /api/auth/csrf first to receive the XSRF-TOKEN cookie, "
             + "then encode its value and send the encoded result in this header — see the API "
             + "description above for the required encoding algorithm; sending the raw cookie "
@@ -91,7 +94,7 @@ public class ExpertReviewerController {
     }
 
     @Operation(summary = "Approve or reject an expert reviewer application", description = "Admin only. Approving grants the EXPERT_REVIEWER role scoped to the "
-            + "application's entityType, using the same grant mechanism as /api/admin/users/{id}/role. "
+            + "application's expertise, using the same grant mechanism as /api/admin/users/{id}/role. "
             + "Reviewing an application that isn't currently PENDING is a 409.")
     @ApiResponse(responseCode = "200", description = "Review decision applied.")
     @ApiResponse(responseCode = "400", description = "Request failed field validation. `detail` is a fixed summary string "
@@ -104,7 +107,7 @@ public class ExpertReviewerController {
     @ApiResponse(responseCode = "404", description = "Application not found.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "409", description = "Either the application has already been reviewed (is no longer PENDING), or "
             + "this is an APPROVE decision and the applicant already holds the EXPERT_REVIEWER role for this "
-            + "application's entityType (e.g. it was granted separately by an admin while the application was "
+            + "application's expertise (e.g. it was granted separately by an admin while the application was "
             + "still pending) — both cases are indistinguishable from the response's status code alone; read "
             + "`detail` for which one occurred.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = "CSRF token. Call GET /api/auth/csrf first to receive the XSRF-TOKEN cookie, "

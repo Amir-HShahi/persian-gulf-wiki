@@ -7,8 +7,6 @@ import com.persiangulfwiki.core.admin.exception.RoleNotGrantedException;
 import com.persiangulfwiki.core.article.exception.ArticleNotFoundException;
 import com.persiangulfwiki.core.article.exception.DuplicateSlugException;
 import com.persiangulfwiki.core.article.exception.DuplicateTranslationLanguageException;
-import com.persiangulfwiki.core.article.exception.EntityTypeNotDerivableException;
-import com.persiangulfwiki.core.article.exception.InvalidEntityTypeException;
 import com.persiangulfwiki.core.article.exception.NotRevisionAuthorException;
 import com.persiangulfwiki.core.article.exception.RevisionNotEditableException;
 import com.persiangulfwiki.core.article.exception.RevisionNotFoundException;
@@ -267,16 +265,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(NotRevisionAuthorException.class)
     public ProblemDetail handleNotRevisionAuthor(NotRevisionAuthorException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.FORBIDDEN, resolve("error.notRevisionAuthor"), "NOT_REVISION_AUTHOR", request);
-    }
-
-    @ExceptionHandler(EntityTypeNotDerivableException.class)
-    public ProblemDetail handleEntityTypeNotDerivable(EntityTypeNotDerivableException ex, HttpServletRequest request) {
-        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.entityTypeNotDerivable"), "ENTITY_TYPE_NOT_DERIVABLE", request);
-    }
-
-    @ExceptionHandler(InvalidEntityTypeException.class)
-    public ProblemDetail handleInvalidEntityType(InvalidEntityTypeException ex, HttpServletRequest request) {
-        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidEntityType"), "INVALID_ENTITY_TYPE", request);
     }
 
     @ExceptionHandler(ModerationTaskNotFoundException.class)

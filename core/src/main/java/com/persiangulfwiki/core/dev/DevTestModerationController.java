@@ -112,7 +112,7 @@ public class DevTestModerationController {
             // so a suite does not have to set one up first. Marked like any article fixture, so
             // DevTestArticleSweeper reclaims it; the task's revision_id CASCADE takes the task.
             revisionId = articleFixtures.mint(new DevTestArticleRequest(
-                    null, null, null, null, RevisionStatus.PENDING, null, null, null, null)).revisionId();
+                    null, null, null, RevisionStatus.PENDING, null, null, null, null)).revisionId();
         } else if (mediaMetadataVersionId != null) {
             if (!mediaMetadataVersionRepository.existsById(mediaMetadataVersionId)) {
                 throw new MediaNotFoundException();

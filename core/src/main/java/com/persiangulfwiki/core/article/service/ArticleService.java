@@ -6,16 +6,15 @@ import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
 import com.persiangulfwiki.core.article.entity.Article;
 import com.persiangulfwiki.core.article.entity.ArticleRevision;
 import com.persiangulfwiki.core.article.entity.ArticleTranslation;
-import com.persiangulfwiki.core.article.entity.EntityType;
 import com.persiangulfwiki.core.article.entity.TranslationState;
 import com.persiangulfwiki.core.article.exception.ArticleNotFoundException;
 import com.persiangulfwiki.core.article.exception.DuplicateSlugException;
-import com.persiangulfwiki.core.article.exception.EntityTypeNotDerivableException;
-import com.persiangulfwiki.core.article.exception.InvalidEntityTypeException;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
 import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 import com.persiangulfwiki.core.subject.entity.Subject;
+import com.persiangulfwiki.core.subject.entity.SubjectKind;
+import com.persiangulfwiki.core.subject.exception.InvalidSubjectKindException;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 
@@ -28,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -50,7 +50,7 @@ public class ArticleService {
     // unaddressable" reasoning as SubjectService.create.
     @Transactional
     public ArticleResponse create(UUID creatorUserId, CreateArticleRequest request) {
-        EntityType entityType = resolveEntityType(request.subjectId(), request.entityType());
+        SubjectKind subjectKind = request.subjectId() == null ? null : findSubjectKind(request.subjectId());
 
         if (articleTranslationRepository.existsBySlug(request.slug())) {
             throw new DuplicateSlugException();
@@ -58,7 +58,6 @@ public class ArticleService {
 
         Article article = articleRepository.save(Article.builder()
                 .subjectId(request.subjectId())
-                .entityType(entityType)
                 .canonicalLanguage(request.canonicalLanguage())
                 .createdByUserId(creatorUserId)
                 .build());
@@ -81,7 +80,7 @@ public class ArticleService {
         articleRevisionService.createInitialRevision(
                 translation.getId(), request.title(), request.body(), request.summary(), creatorUserId);
 
-        return toResponse(article);
+        return toResponse(article, subjectKind);
     }
 
     // An article nothing has been approved in yet is 404 to anyone but its authors and
@@ -92,19 +91,19 @@ public class ArticleService {
         if (!articleVisibilityService.isArticleReadableBy(article, callerUserId, isCallerModerator)) {
             throw new ArticleNotFoundException();
         }
-        return toResponse(article);
+        return toResponse(article, article.getSubjectId() == null ? null : findSubjectKind(article.getSubjectId()));
     }
 
     // Only translations with an approved revision are listed: title/summary come from
     // currentRevisionId, which only a moderator's APPROVE sets, so unreviewed text never
-    // reaches this public list. One page = three queries (translations, then their articles
-    // and revisions by id) rather than one per row.
+    // reaches this public list. One page = four queries (translations, then their articles,
+    // revisions and subjects by id) rather than one per row.
     @Transactional(readOnly = true)
-    public List<ArticleListItemResponse> list(String language, UUID subjectId, String entityTypeFilter, Pageable pageable) {
-        EntityType entityType = entityTypeFilter == null ? null : parseEntityType(entityTypeFilter);
+    public List<ArticleListItemResponse> list(String language, UUID subjectId, String subjectKindFilter, Pageable pageable) {
+        SubjectKind subjectKind = subjectKindFilter == null ? null : parseSubjectKind(subjectKindFilter);
 
         List<ArticleTranslation> translations = articleTranslationRepository
-                .findPublishedByLanguage(language, subjectId, entityType, pageable)
+                .findPublishedByLanguage(language, subjectId, subjectKind, pageable)
                 .getContent();
 
         Map<UUID, Article> articlesById = articleRepository
@@ -115,51 +114,43 @@ public class ArticleService {
                 .findAllById(translations.stream().map(ArticleTranslation::getCurrentRevisionId).toList())
                 .stream()
                 .collect(Collectors.toMap(ArticleRevision::getId, Function.identity()));
+        Map<UUID, SubjectKind> kindsBySubjectId = subjectRepository
+                .findAllById(articlesById.values().stream().map(Article::getSubjectId).filter(Objects::nonNull).toList())
+                .stream()
+                .collect(Collectors.toMap(Subject::getId, Subject::getKind));
 
         return translations.stream()
-                .map(translation -> toListItemResponse(articlesById.get(translation.getArticleId()), translation,
-                        revisionsById.get(translation.getCurrentRevisionId())))
+                .map(translation -> {
+                    Article article = articlesById.get(translation.getArticleId());
+                    return toListItemResponse(article, kindsBySubjectId.get(article.getSubjectId()), translation,
+                            revisionsById.get(translation.getCurrentRevisionId()));
+                })
                 .toList();
     }
 
-    // Same reasoning as SubjectService.parseKind: a raw String filter parsed here produces a
-    // translated 400 carrying INVALID_ENTITY_TYPE, instead of the generic Spring conversion
-    // failure binding the enum type directly on the controller parameter would give.
-    private EntityType parseEntityType(String entityTypeFilter) {
+    // Same reasoning as SubjectService.parseKind, and the same INVALID_SUBJECT_KIND 400, so a
+    // client filtering articles and subjects by kind handles one error code for both.
+    private SubjectKind parseSubjectKind(String subjectKindFilter) {
         try {
-            return EntityType.valueOf(entityTypeFilter.toUpperCase());
+            return SubjectKind.valueOf(subjectKindFilter.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new InvalidEntityTypeException("invalid entity type filter: " + entityTypeFilter);
+            throw new InvalidSubjectKindException("invalid subject kind filter: " + subjectKindFilter);
         }
     }
 
-    // The derivation invariant: entityType has exactly one source, never both. A subject-bound
-    // article's entityType is read off the Subject's own kind so the two can never disagree;
-    // a subject-less article has no kind to read, so the client must say GENERIC explicitly
-    // rather than leaving it to be inferred from absence.
-    private EntityType resolveEntityType(UUID subjectId, EntityType requestedEntityType) {
-        if (subjectId != null) {
-            if (requestedEntityType != null) {
-                throw new EntityTypeNotDerivableException("entityType must not be supplied when subjectId is set");
-            }
-            Subject subject = subjectRepository.findById(subjectId).orElseThrow(SubjectNotFoundException::new);
-            return EntityType.valueOf(subject.getKind().name());
-        }
-        if (requestedEntityType != EntityType.GENERIC) {
-            throw new EntityTypeNotDerivableException("entityType must be GENERIC when subjectId is not set");
-        }
-        return requestedEntityType;
+    private SubjectKind findSubjectKind(UUID subjectId) {
+        return subjectRepository.findById(subjectId).map(Subject::getKind).orElseThrow(SubjectNotFoundException::new);
     }
 
-    private ArticleResponse toResponse(Article article) {
-        return new ArticleResponse(article.getId(), article.getSubjectId(), article.getEntityType(),
+    private ArticleResponse toResponse(Article article, @Nullable SubjectKind subjectKind) {
+        return new ArticleResponse(article.getId(), article.getSubjectId(), subjectKind,
                 article.getCanonicalLanguage(), article.getCreatedByUserId(), article.getCreatedAt(),
                 article.getUpdatedAt());
     }
 
     private ArticleListItemResponse toListItemResponse(
-            Article article, ArticleTranslation translation, ArticleRevision revision) {
-        return new ArticleListItemResponse(article.getId(), article.getSubjectId(), article.getEntityType(),
+            Article article, @Nullable SubjectKind subjectKind, ArticleTranslation translation, ArticleRevision revision) {
+        return new ArticleListItemResponse(article.getId(), article.getSubjectId(), subjectKind,
                 article.getCanonicalLanguage(), article.getCreatedByUserId(), article.getCreatedAt(),
                 article.getUpdatedAt(), translation.getLanguage(), translation.getSlug(), revision.getTitle(),
                 revision.getSummary(), revision.getId());

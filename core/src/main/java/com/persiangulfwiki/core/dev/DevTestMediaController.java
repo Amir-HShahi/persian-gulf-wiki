@@ -122,7 +122,7 @@ public class DevTestMediaController {
             // DELETE leaves it alone because it cannot know a caller-supplied article from this
             // one, and only ever removes the media it minted.
             articleId = articleFixtures.mint(new DevTestArticleRequest(
-                    null, null, null, null, RevisionStatus.APPROVED, null, null, null, null)).articleId();
+                    null, null, null, RevisionStatus.APPROVED, null, null, null, null)).articleId();
         } else if (!articleRepository.existsById(articleId)) {
             throw new ArticleNotFoundException();
         }

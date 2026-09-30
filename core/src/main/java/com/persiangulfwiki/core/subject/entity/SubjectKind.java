@@ -4,7 +4,9 @@ package com.persiangulfwiki.core.subject.entity;
 // subjects.id (see Island/Port/OilField/Species and V15). Adding a value here without the
 // matching table, entity and SubjectService branch produces a subject that can be created
 // but never carries any of its own data — so the CHECK constraint in V15 deliberately
-// mirrors this list, and a new kind means a migration alongside the enum change.
+// mirrors this list, and a new kind means a migration alongside the enum change. The same
+// migration must widen the expertise CHECKs on user_roles and expert_reviewer_applications
+// (V20), which mirror this list too.
 public enum SubjectKind {
     ISLAND, PORT, OIL_FIELD, SPECIES
 }

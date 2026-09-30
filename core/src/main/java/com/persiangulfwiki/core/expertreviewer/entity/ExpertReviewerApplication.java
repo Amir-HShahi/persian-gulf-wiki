@@ -1,5 +1,7 @@
 package com.persiangulfwiki.core.expertreviewer.entity;
 
+import com.persiangulfwiki.core.subject.entity.SubjectKind;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -36,8 +38,10 @@ public class ExpertReviewerApplication {
     @Column(name = "applicant_user_id", nullable = false)
     private UUID applicantUserId;
 
-    @Column(name = "entity_type", nullable = false, length = 50)
-    private String entityType;
+    // Same CHECK on the SubjectKind names as user_roles.expertise (V20).
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private SubjectKind expertise;
 
     @Column(nullable = false)
     private String justification;

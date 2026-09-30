@@ -41,14 +41,14 @@ public class ExpertReviewerService {
         // (uq_expert_reviewer_applications_pending) to reject it via a raw
         // DataIntegrityViolationException.
         applicationRepository
-                .findByApplicantUserIdAndEntityTypeAndStatus(applicantUserId, request.entityType(), ApplicationStatus.PENDING)
+                .findByApplicantUserIdAndExpertiseAndStatus(applicantUserId, request.expertise(), ApplicationStatus.PENDING)
                 .ifPresent(existing -> {
                     throw new DuplicatePendingApplicationException();
                 });
 
         ExpertReviewerApplication application = ExpertReviewerApplication.builder()
                 .applicantUserId(applicantUserId)
-                .entityType(request.entityType())
+                .expertise(request.expertise())
                 .justification(request.justification())
                 .status(ApplicationStatus.PENDING)
                 .build();
@@ -96,10 +96,10 @@ public class ExpertReviewerService {
             // UserRole-creation logic here — this certifies the exact same EXPERT_REVIEWER
             // role admins can grant manually elsewhere.
             adminService.grantOrRevokeRole(reviewingAdminId, application.getApplicantUserId(),
-                    new RoleGrantRequest(Role.EXPERT_REVIEWER, application.getEntityType(), GrantAction.GRANT));
+                    new RoleGrantRequest(Role.EXPERT_REVIEWER, application.getExpertise(), GrantAction.GRANT));
         }
 
-        String detail = "entityType=" + application.getEntityType() + ", applicationId=" + application.getId();
+        String detail = "expertise=" + application.getExpertise() + ", applicationId=" + application.getId();
         auditLogService.record(reviewingAdminId, "EXPERT_REVIEWER_APPLICATION_" + request.decision(),
                 application.getApplicantUserId(), detail);
 
@@ -110,7 +110,7 @@ public class ExpertReviewerService {
         return new ApplicationResponse(
                 application.getId(),
                 application.getApplicantUserId(),
-                application.getEntityType(),
+                application.getExpertise(),
                 application.getJustification(),
                 application.getStatus().name(),
                 application.getCreatedAt(),

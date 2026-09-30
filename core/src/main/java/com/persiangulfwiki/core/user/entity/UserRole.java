@@ -1,5 +1,7 @@
 package com.persiangulfwiki.core.user.entity;
 
+import com.persiangulfwiki.core.subject.entity.SubjectKind;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -22,7 +24,7 @@ import lombok.Setter;
 import java.util.UUID;
 
 @Entity
-@Table(name = "user_roles", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "role", "entity_type"}))
+@Table(name = "user_roles", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "role", "expertise"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -43,6 +45,9 @@ public class UserRole {
     @Column(nullable = false, length = 50)
     private Role role;
 
-    @Column(name = "entity_type", length = 50)
-    private String entityType;
+    // The subject kind an EXPERT_REVIEWER may verify; null for global roles (MODERATOR, ADMIN).
+    // Guarded by a CHECK on the SubjectKind names (V20), so a new kind needs that widened too.
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50)
+    private SubjectKind expertise;
 }

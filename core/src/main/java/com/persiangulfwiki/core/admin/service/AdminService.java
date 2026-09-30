@@ -50,11 +50,11 @@ public class AdminService {
         User targetUser = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new UserNotFoundException("user not found: " + targetUserId));
 
-        String detail = "role=" + request.role() + ", entityType=" + request.entityType();
+        String detail = "role=" + request.role() + ", expertise=" + request.expertise();
 
         switch (request.action()) {
             case GRANT -> {
-                if (userRoleRepository.findByUserIdAndRoleAndEntityType(targetUserId, request.role(), request.entityType())
+                if (userRoleRepository.findByUserIdAndRoleAndExpertise(targetUserId, request.role(), request.expertise())
                         .isPresent()) {
                     throw new RoleAlreadyGrantedException();
                 }
@@ -62,7 +62,7 @@ public class AdminService {
                 userRoleRepository.save(UserRole.builder()
                         .user(targetUser)
                         .role(request.role())
-                        .entityType(request.entityType())
+                        .expertise(request.expertise())
                         .build());
 
                 auditLogService.record(actingAdminId, "ROLE_GRANT", targetUserId, detail);
@@ -70,7 +70,7 @@ public class AdminService {
             }
             case REVOKE -> {
                 UserRole existing = userRoleRepository
-                        .findByUserIdAndRoleAndEntityType(targetUserId, request.role(), request.entityType())
+                        .findByUserIdAndRoleAndExpertise(targetUserId, request.role(), request.expertise())
                         .orElseThrow(RoleNotGrantedException::new);
 
                 // The highest-trust action this endpoint can take: revoking the system's
@@ -116,7 +116,7 @@ public class AdminService {
 
     private AdminUserResponse toAdminUserResponse(User user) {
         List<RoleAssignment> roles = userRoleRepository.findByUserId(user.getId()).stream()
-                .map(userRole -> new RoleAssignment(userRole.getRole(), userRole.getEntityType()))
+                .map(userRole -> new RoleAssignment(userRole.getRole(), userRole.getExpertise()))
                 .toList();
         return new AdminUserResponse(
                 user.getId(),

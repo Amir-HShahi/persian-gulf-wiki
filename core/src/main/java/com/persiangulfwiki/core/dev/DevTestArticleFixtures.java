@@ -3,7 +3,6 @@ package com.persiangulfwiki.core.dev;
 import com.persiangulfwiki.core.article.entity.Article;
 import com.persiangulfwiki.core.article.entity.ArticleRevision;
 import com.persiangulfwiki.core.article.entity.ArticleTranslation;
-import com.persiangulfwiki.core.article.entity.EntityType;
 import com.persiangulfwiki.core.article.entity.RevisionStatus;
 import com.persiangulfwiki.core.article.entity.TranslationState;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
@@ -11,7 +10,6 @@ import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 import com.persiangulfwiki.core.dev.dto.DevTestArticleRequest;
 import com.persiangulfwiki.core.dev.dto.DevTestArticleResponse;
-import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 import com.persiangulfwiki.core.user.entity.User;
@@ -70,12 +68,15 @@ class DevTestArticleFixtures {
         String title = request.title() != null ? request.title() : "e2e article " + slug;
         String summary = request.summary() != null ? request.summary() : "e2e summary";
 
-        EntityType entityType = resolveEntityType(request.subjectId(), request.entityType());
+        // Checked up front so an unknown subject is the documented 404, not a foreign-key
+        // violation surfacing as a 409 from the insert below.
+        if (request.subjectId() != null && !subjectRepository.existsById(request.subjectId())) {
+            throw new SubjectNotFoundException();
+        }
         UUID authorUserId = resolveAuthorUserId(request.authorUserId());
 
         Article article = articleRepository.save(Article.builder()
                 .subjectId(request.subjectId())
-                .entityType(entityType)
                 .canonicalLanguage(canonicalLanguage)
                 .createdByUserId(authorUserId)
                 .devMarker(DevTestFixtures.MARKER)
@@ -115,23 +116,6 @@ class DevTestArticleFixtures {
 
         return new DevTestArticleResponse(
                 article.getId(), translation.getId(), revision.getId(), canonicalLanguage, slug, revisionStatus);
-    }
-
-    // Derivation mirrors ArticleService.resolveEntityType for the subjectId != null case
-    // (read the bound Subject's kind), but does not reproduce its cross-field rejection: a
-    // caller-supplied entityType alongside subjectId is silently ignored rather than throwing
-    // EntityTypeNotDerivableException, since this endpoint already bypasses the service
-    // layer's other invariants and a fixture caller has no reason to send both. When
-    // subjectId is null, unlike the production path (which only ever accepts GENERIC), any
-    // requested value is honored -- including STRAIT, which EntityType's own comment says is
-    // "selectable directly for a subject-less article" but which the real create endpoint
-    // cannot reach until a STRAIT SubjectKind exists.
-    private EntityType resolveEntityType(UUID subjectId, EntityType requestedEntityType) {
-        if (subjectId != null) {
-            Subject subject = subjectRepository.findById(subjectId).orElseThrow(SubjectNotFoundException::new);
-            return EntityType.valueOf(subject.getKind().name());
-        }
-        return requestedEntityType != null ? requestedEntityType : EntityType.GENERIC;
     }
 
     // article_revisions.author_id is NOT NULL with no ON DELETE action (V16) -- inserting an

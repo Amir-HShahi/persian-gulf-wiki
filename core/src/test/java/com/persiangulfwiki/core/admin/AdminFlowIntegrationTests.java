@@ -8,6 +8,7 @@ import com.persiangulfwiki.core.admin.dto.UserStatusAction;
 import com.persiangulfwiki.core.admin.dto.UserStatusRequest;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
 import com.persiangulfwiki.core.auth.dto.RegisterRequest;
+import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.user.entity.Role;
 import com.persiangulfwiki.core.user.entity.User;
 import com.persiangulfwiki.core.user.entity.UserRole;
@@ -299,7 +300,7 @@ class AdminFlowIntegrationTests {
                 .andExpect(status().isOk());
 
         Cookie csrfCookie2 = fetchCsrfCookie();
-        RoleGrantRequest grantExpertReviewer = new RoleGrantRequest(Role.EXPERT_REVIEWER, "Species", GrantAction.GRANT);
+        RoleGrantRequest grantExpertReviewer = new RoleGrantRequest(Role.EXPERT_REVIEWER, SubjectKind.SPECIES, GrantAction.GRANT);
         mockMvc.perform(patch("/api/admin/users/" + grace.getId() + "/role")
                         .cookie(adminAccessCookie, csrfCookie2)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie2.getValue()))
@@ -409,6 +410,56 @@ class AdminFlowIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(grantSomeoneElse)))
                 .andExpect(status().isNotFound());
+    }
+
+    // expertise scopes an EXPERT_REVIEWER grant to one subject kind: it is stored and listed as
+    // that kind, a revoke has to name the same kind to find the grant, and a value that is not a
+    // subject kind (the free-form strings entityType used to take) is refused before anything
+    // is stored.
+    @Test
+    void expertReviewerGrantIsScopedToItsExpertise() throws Exception {
+        seedAdmin("admin10@example.com", "admin10");
+        Cookie adminAccessCookie = loginAccessCookie("admin10@example.com");
+
+        registerContributor("afjudy", "af-judy@example.com");
+        User judy = userRepository.findByEmail("af-judy@example.com").orElseThrow();
+        String rolePath = "/api/admin/users/" + judy.getId() + "/role";
+
+        Cookie csrfCookie = fetchCsrfCookie();
+        RoleGrantRequest grant = new RoleGrantRequest(Role.EXPERT_REVIEWER, SubjectKind.SPECIES, GrantAction.GRANT);
+        mockMvc.perform(patch(rolePath)
+                        .cookie(adminAccessCookie, csrfCookie)
+                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(grant)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/admin/users").param("size", "1000").cookie(adminAccessCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[?(@.id == '" + judy.getId() + "')].roles[?(@.role == 'EXPERT_REVIEWER')].expertise",
+                        org.hamcrest.Matchers.contains("SPECIES")));
+
+        RoleGrantRequest revokeOtherKind = new RoleGrantRequest(Role.EXPERT_REVIEWER, SubjectKind.PORT, GrantAction.REVOKE);
+        mockMvc.perform(patch(rolePath)
+                        .cookie(adminAccessCookie, csrfCookie)
+                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(revokeOtherKind)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("ROLE_NOT_GRANTED"));
+
+        mockMvc.perform(patch(rolePath)
+                        .cookie(adminAccessCookie, csrfCookie)
+                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"role\":\"EXPERT_REVIEWER\",\"expertise\":\"Species\",\"action\":\"GRANT\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("HTTP_MESSAGE_NOT_READABLE"));
+
+        assertThat(userRoleRepository.findByUserId(judy.getId()))
+                .filteredOn(userRole -> userRole.getRole() == Role.EXPERT_REVIEWER)
+                .extracting(UserRole::getExpertise)
+                .containsExactly(SubjectKind.SPECIES);
     }
 
     @Test

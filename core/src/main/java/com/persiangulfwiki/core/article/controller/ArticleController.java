@@ -68,7 +68,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/articles")
 @RequiredArgsConstructor
-@Tag(name = "Articles", description = "The wiki entries. An article carries identity and typed classification only -- "
+@Tag(name = "Articles", description = "The wiki entries. An article carries identity and the subject it is about only -- "
         + "its actual text lives per language in its translations, and each translation's "
         + "content history lives in its revisions. Nothing here is publish-visible on its own; "
         + "moderation status lives entirely on the revision. Reading is open to everyone, but only "
@@ -92,14 +92,11 @@ public class ArticleController {
 
     @Operation(summary = "Create an article", description = "Creates the article together with its first translation (in `canonicalLanguage`) "
             + "and that translation's first draft revision, in a single step -- there is no "
-            + "separate call to add the initial content afterwards. When `subjectId` is given, "
-            + "`entityType` is derived from that subject and must be omitted; when `subjectId` "
-            + "is omitted, `entityType` must be sent as GENERIC. `slug` must not already be in "
-            + "use by any translation of any article.")
+            + "separate call to add the initial content afterwards. `subjectId` is optional: the "
+            + "article's `subjectKind` is always that subject's kind, and null when no subject is "
+            + "given. `slug` must not already be in use by any translation of any article.")
     @ApiResponse(responseCode = "201", description = "The created article.")
-    @ApiResponse(responseCode = "400", description = "One of: field validation failed (see `errors`); `entityType` was supplied "
-            + "together with `subjectId`; `entityType` is missing or is not GENERIC when "
-            + "`subjectId` is omitted.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "400", description = "Field validation failed (see `errors`).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "Either the account's email address is not yet verified, or the CSRF header is "
             + "missing or does not match the cookie -- both surface as a plain 403; read `detail` "
@@ -144,14 +141,15 @@ public class ArticleController {
             + "language, or whose translation has not been approved yet, are left out. `title` and "
             + "`summary` come from that translation's most recently approved revision -- older "
             + "approved revisions and unreviewed drafts are never shown. Newest article first. "
-            + "Optionally filtered by subject and/or typed classification, and paged.")
+            + "Optionally filtered by subject and/or subject kind, and paged.")
     @ApiResponse(responseCode = "200", description = "One page of articles. An out-of-range page is an empty list, not an error.")
-    @ApiResponse(responseCode = "400", description = "`language` is missing, blank or longer than 20 characters; `entityType` is not "
-            + "one of ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, GENERIC (case-insensitive); or "
-            + "`page`/`size` is outside its allowed range.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "400", description = "`language` is missing, blank or longer than 20 characters; `subjectKind` is not "
+            + "one of ISLAND, PORT, OIL_FIELD, SPECIES (case-insensitive); or `page`/`size` is outside "
+            + "its allowed range.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "language", required = true, description = "BCP-47 language tag of the translation to list, e.g. \"fa\", \"en\", \"ar\". Matched exactly.")
     @Parameter(name = "subjectId", description = "Optional filter: only articles bound to this subject.")
-    @Parameter(name = "entityType", description = "Optional filter: ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, or GENERIC (case-insensitive).")
+    @Parameter(name = "subjectKind", description = "Optional filter: only articles whose subject is of this kind -- ISLAND, PORT, "
+            + "OIL_FIELD or SPECIES (case-insensitive). Articles with no subject never match it.")
     @Parameter(name = "page", description = "Zero-based page index.")
     @Parameter(name = "size", description = "Page size, 1 to 100.")
     @GetMapping
@@ -160,10 +158,10 @@ public class ArticleController {
             @RequestParam @NotBlank(message = "{validation.language.required}")
                     @Size(max = 20, message = "{validation.language.tooLong}") String language,
             @RequestParam(required = false) UUID subjectId,
-            @RequestParam(required = false) String entityType,
+            @RequestParam(required = false) String subjectKind,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(MAX_PAGE_SIZE) int size) {
-        List<ArticleListItemResponse> data = articleService.list(language, subjectId, entityType, PageRequest.of(page, size));
+        List<ArticleListItemResponse> data = articleService.list(language, subjectId, subjectKind, PageRequest.of(page, size));
         String message = messageSource.getMessage("success.articlesList", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }

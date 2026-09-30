@@ -66,7 +66,7 @@ public class DevTestArticleController {
     public DevTestArticleResponse mint(@RequestBody(required = false) DevTestArticleRequest request) {
         return articleFixtures.mint(request != null
                 ? request
-                : new DevTestArticleRequest(null, null, null, null, null, null, null, null, null));
+                : new DevTestArticleRequest(null, null, null, null, null, null, null, null));
     }
 
     @Operation(summary = "Delete a minted test article", description = "Deletes an article previously created by this endpoint. Refuses anything "

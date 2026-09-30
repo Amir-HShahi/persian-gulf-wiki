@@ -7,6 +7,8 @@ import com.persiangulfwiki.core.auth.dto.RegisterRequest;
 import com.persiangulfwiki.core.expertreviewer.dto.ApplicationRequest;
 import com.persiangulfwiki.core.expertreviewer.dto.ReviewDecision;
 import com.persiangulfwiki.core.expertreviewer.dto.ReviewDecisionRequest;
+import com.persiangulfwiki.core.expertreviewer.repository.ExpertReviewerApplicationRepository;
+import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.user.entity.Role;
 import com.persiangulfwiki.core.user.entity.User;
 import com.persiangulfwiki.core.user.entity.UserRole;
@@ -25,6 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,6 +54,9 @@ class ExpertReviewerFlowIntegrationTests {
 
     @Autowired
     private UserRoleRepository userRoleRepository;
+
+    @Autowired
+    private ExpertReviewerApplicationRepository applicationRepository;
 
     private User seedAdmin(String email, String username) throws Exception {
         registerContributor(username, email);
@@ -122,7 +128,7 @@ class ExpertReviewerFlowIntegrationTests {
         Cookie aliceAccessCookie = loginAccessCookie("erf-alice@example.com");
 
         Cookie csrfCookie = fetchCsrfCookie();
-        ApplicationRequest applicationRequest = new ApplicationRequest("SPECIES", "I have a PhD in marine biology.");
+        ApplicationRequest applicationRequest = new ApplicationRequest(SubjectKind.SPECIES, "I have a PhD in marine biology.");
         mockMvc.perform(post("/api/expert-reviewer/applications")
                         .cookie(aliceAccessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -134,16 +140,16 @@ class ExpertReviewerFlowIntegrationTests {
         mockMvc.perform(get("/api/expert-reviewer/applications").cookie(adminAccessCookie))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].status").value("PENDING"))
-                .andExpect(jsonPath("$.data[0].entityType").value("SPECIES"));
+                .andExpect(jsonPath("$.data[0].expertise").value("SPECIES"));
     }
 
     @Test
-    void duplicatePendingApplicationForSameEntityTypeIsConflict() throws Exception {
+    void duplicatePendingApplicationForSameExpertiseIsConflict() throws Exception {
         registerVerifiedContributor("erfbob", "erf-bob@example.com");
         Cookie bobAccessCookie = loginAccessCookie("erf-bob@example.com");
 
         Cookie csrfCookie = fetchCsrfCookie();
-        ApplicationRequest applicationRequest = new ApplicationRequest("PORT", "I've studied Gulf ports for a decade.");
+        ApplicationRequest applicationRequest = new ApplicationRequest(SubjectKind.PORT, "I've studied Gulf ports for a decade.");
         mockMvc.perform(post("/api/expert-reviewer/applications")
                         .cookie(bobAccessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -168,7 +174,7 @@ class ExpertReviewerFlowIntegrationTests {
         Cookie carolAccessCookie = loginAccessCookie("erf-carol@example.com");
 
         Cookie applyCsrfCookie = fetchCsrfCookie();
-        ApplicationRequest applicationRequest = new ApplicationRequest("ISLAND", "I lead island survey expeditions.");
+        ApplicationRequest applicationRequest = new ApplicationRequest(SubjectKind.ISLAND, "I lead island survey expeditions.");
         String applyResponse = mockMvc.perform(post("/api/expert-reviewer/applications")
                         .cookie(carolAccessCookie, applyCsrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(applyCsrfCookie.getValue()))
@@ -189,7 +195,7 @@ class ExpertReviewerFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.status").value("APPROVED"));
 
         assertThat(userRoleRepository.findByUserId(carol.getId()))
-                .anyMatch(userRole -> userRole.getRole() == Role.EXPERT_REVIEWER && "ISLAND".equals(userRole.getEntityType()));
+                .anyMatch(userRole -> userRole.getRole() == Role.EXPERT_REVIEWER && userRole.getExpertise() == SubjectKind.ISLAND);
     }
 
     @Test
@@ -201,7 +207,7 @@ class ExpertReviewerFlowIntegrationTests {
         Cookie daveAccessCookie = loginAccessCookie("erf-dave@example.com");
 
         Cookie applyCsrfCookie = fetchCsrfCookie();
-        ApplicationRequest applicationRequest = new ApplicationRequest("OIL_FIELD", "I audit offshore rigs for a living.");
+        ApplicationRequest applicationRequest = new ApplicationRequest(SubjectKind.OIL_FIELD, "I audit offshore rigs for a living.");
         String applyResponse = mockMvc.perform(post("/api/expert-reviewer/applications")
                         .cookie(daveAccessCookie, applyCsrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(applyCsrfCookie.getValue()))
@@ -234,7 +240,7 @@ class ExpertReviewerFlowIntegrationTests {
         Cookie erinAccessCookie = loginAccessCookie("erf-erin@example.com");
 
         Cookie applyCsrfCookie = fetchCsrfCookie();
-        ApplicationRequest applicationRequest = new ApplicationRequest("SHIPPING_LANE", "I coordinate shipping schedules.");
+        ApplicationRequest applicationRequest = new ApplicationRequest(SubjectKind.SPECIES, "I coordinate shipping schedules.");
         String applyResponse = mockMvc.perform(post("/api/expert-reviewer/applications")
                         .cookie(erinAccessCookie, applyCsrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(applyCsrfCookie.getValue()))
@@ -280,12 +286,44 @@ class ExpertReviewerFlowIntegrationTests {
                 .andExpect(status().isForbidden());
     }
 
+    // expertise is a subject kind, not free text: a missing one -- including a client still
+    // sending the old entityType field -- is a per-field validation failure, and a value that
+    // is not a kind name is refused as unreadable. Nothing is stored either way.
+    @Test
+    void applyWithMissingOrUnknownExpertiseIsBadRequest() throws Exception {
+        User heidi = registerVerifiedContributor("erfheidi", "erf-heidi@example.com");
+        Cookie heidiAccessCookie = loginAccessCookie("erf-heidi@example.com");
+        Cookie csrfCookie = fetchCsrfCookie();
+
+        mockMvc.perform(post("/api/expert-reviewer/applications")
+                        .cookie(heidiAccessCookie, csrfCookie)
+                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"entityType\":\"SPECIES\",\"justification\":\"I study reef fish.\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.errors[0].field").value("expertise"));
+
+        for (String unknown : List.of("SHIPPING_LANE", "species", "GENERIC")) {
+            mockMvc.perform(post("/api/expert-reviewer/applications")
+                            .cookie(heidiAccessCookie, csrfCookie)
+                            .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"expertise\":\"" + unknown + "\",\"justification\":\"I study reef fish.\"}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("HTTP_MESSAGE_NOT_READABLE"));
+        }
+
+        assertThat(applicationRepository.findAll())
+                .noneMatch(application -> application.getApplicantUserId().equals(heidi.getId()));
+    }
+
     @Test
     void missingCsrfTokenOnApplyIsForbidden() throws Exception {
         registerContributor("erfgrace", "erf-grace@example.com");
         Cookie graceAccessCookie = loginAccessCookie("erf-grace@example.com");
 
-        ApplicationRequest applicationRequest = new ApplicationRequest("SPECIES", "I study reef fish.");
+        ApplicationRequest applicationRequest = new ApplicationRequest(SubjectKind.SPECIES, "I study reef fish.");
         mockMvc.perform(post("/api/expert-reviewer/applications")
                         .cookie(graceAccessCookie)
                         .contentType(MediaType.APPLICATION_JSON)

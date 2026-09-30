@@ -1,7 +1,7 @@
 package com.persiangulfwiki.core.article.repository;
 
 import com.persiangulfwiki.core.article.entity.ArticleTranslation;
-import com.persiangulfwiki.core.article.entity.EntityType;
+import com.persiangulfwiki.core.subject.entity.SubjectKind;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,19 +26,22 @@ public interface ArticleTranslationRepository extends JpaRepository<ArticleTrans
     boolean existsByArticleIdAndCurrentRevisionIdIsNotNull(UUID articleId);
 
     // Translations in one language that have an approved revision, filtered by their article's
-    // subject/entityType (either filter null = not applied). Ordered newest article first, with
-    // id as tiebreak so paging is stable.
+    // subject and/or that subject's kind (either filter null = not applied). The left join keeps
+    // subject-less articles when no kind is asked for; a kind filter drops them, since they have
+    // no kind to match. Ordered newest article first, with id as tiebreak so paging is stable.
     @Query(value = """
             select t from ArticleTranslation t join Article a on a.id = t.articleId
+              left join Subject s on s.id = a.subjectId
             where t.language = :language and t.currentRevisionId is not null
               and (:subjectId is null or a.subjectId = :subjectId)
-              and (:entityType is null or a.entityType = :entityType)
+              and (:subjectKind is null or s.kind = :subjectKind)
             order by a.createdAt desc, a.id""",
             countQuery = """
             select count(t) from ArticleTranslation t join Article a on a.id = t.articleId
+              left join Subject s on s.id = a.subjectId
             where t.language = :language and t.currentRevisionId is not null
               and (:subjectId is null or a.subjectId = :subjectId)
-              and (:entityType is null or a.entityType = :entityType)""")
+              and (:subjectKind is null or s.kind = :subjectKind)""")
     Page<ArticleTranslation> findPublishedByLanguage(@Param("language") String language,
-            @Param("subjectId") UUID subjectId, @Param("entityType") EntityType entityType, Pageable pageable);
+            @Param("subjectId") UUID subjectId, @Param("subjectKind") SubjectKind subjectKind, Pageable pageable);
 }
