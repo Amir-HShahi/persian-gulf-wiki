@@ -69,3 +69,8 @@ app:
     # TTL for the gallery fixtures minted by POST /api/dev/test-media, reclaimed hourly by
     # DevTestMediaSweeper at :15 -- ahead of the user sweep at :30, see the cron comment there.
     test-media-ttl-hours: ${DEV_TEST_MEDIA_TTL_HOURS:6}
+
+    # TTL for the field groups and definitions minted by POST /api/dev/test-attribute-groups and
+    # /api/dev/test-attribute-definitions, reclaimed hourly by DevTestAttributeSweeper. Their
+    # options and labels go with them through ON DELETE CASCADE, so they need no TTL of their own.
+    test-attribute-ttl-hours: ${DEV_TEST_ATTRIBUTE_TTL_HOURS:6}

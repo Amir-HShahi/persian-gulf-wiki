@@ -20,11 +20,13 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -123,7 +125,7 @@ class SubjectFlowIntegrationTests {
         Cookie csrfCookie = fetchCsrfCookie();
 
         CreateSubjectRequest request = new CreateSubjectRequest(
-                SubjectKind.ISLAND, new BigDecimal("12.5000"), "POINT(52.1 26.4)", null, null);
+                SubjectKind.ISLAND, new BigDecimal("12.5000"), "POINT(52.1 26.4)", null, null, null);
 
         String created = mockMvc.perform(post("/api/subjects")
                         .cookie(accessCookie, csrfCookie)
@@ -154,7 +156,7 @@ class SubjectFlowIntegrationTests {
         Cookie csrfCookie = fetchCsrfCookie();
 
         CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.OIL_FIELD, null, null,
-                "POLYGON((50 26, 51 26, 51 27, 50 27, 50 26))", null);
+                "POLYGON((50 26, 51 26, 51 27, 50 27, 50 26))", null, null);
 
         mockMvc.perform(post("/api/subjects")
                         .cookie(accessCookie, csrfCookie)
@@ -167,9 +169,89 @@ class SubjectFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.location").doesNotExist());
     }
 
+    // A lone POLYGON boundary is stored as a one-part MULTIPOLYGON, the provinces column type.
+    @Test
+    void moderatorCreatesProvinceWithPolygonBoundaryAndReadsItBackAsMultiPolygon() throws Exception {
+        seedModerator("sfmod31", "sf-mod31@example.com");
+        Cookie accessCookie = loginAccessCookie("sf-mod31@example.com");
+        Cookie csrfCookie = fetchCsrfCookie();
+
+        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.PROVINCE, null, null, null, null,
+                "POLYGON((55 26, 57 26, 57 28, 55 28, 55 26))");
+
+        String created = postSubject(accessCookie, csrfCookie, request)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.kind").value("PROVINCE"))
+                .andExpect(jsonPath("$.data.boundary", startsWith("MULTIPOLYGON")))
+                .andReturn().getResponse().getContentAsString();
+        UUID subjectId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(created, "$.data.id"));
+
+        mockMvc.perform(get("/api/subjects/" + subjectId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.boundary", startsWith("MULTIPOLYGON")))
+                .andExpect(jsonPath("$.data.area").doesNotExist());
+    }
+
+    @Test
+    void moderatorCreatesStraitAndFishingGroundWithAreaPolygons() throws Exception {
+        seedModerator("sfmod32", "sf-mod32@example.com");
+        Cookie accessCookie = loginAccessCookie("sf-mod32@example.com");
+        Cookie csrfCookie = fetchCsrfCookie();
+
+        for (SubjectKind kind : List.of(SubjectKind.STRAIT, SubjectKind.FISHING_GROUND)) {
+            CreateSubjectRequest request = new CreateSubjectRequest(kind, null, null,
+                    "POLYGON((56 26, 57 26, 57 27, 56 27, 56 26))", null, null);
+            postSubject(accessCookie, csrfCookie, request)
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.data.kind").value(kind.name()))
+                    .andExpect(jsonPath("$.data.area", startsWith("POLYGON")));
+        }
+
+        mockMvc.perform(get("/api/subjects").param("kind", "fishing_ground").param("size", "100"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].kind").value("FISHING_GROUND"));
+    }
+
+    @Test
+    void boundaryIsRejectedOnAKindWithoutOne() throws Exception {
+        seedModerator("sfmod33", "sf-mod33@example.com");
+        Cookie accessCookie = loginAccessCookie("sf-mod33@example.com");
+        Cookie csrfCookie = fetchCsrfCookie();
+
+        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.ISLAND, null, null, null, null,
+                "POLYGON((55 26, 57 26, 57 28, 55 28, 55 26))");
+
+        postSubject(accessCookie, csrfCookie, request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("SUBJECT_KIND_MISMATCH"));
+    }
+
+    @Test
+    void provinceBoundaryThatIsNotAPolygonIsRejected() throws Exception {
+        seedModerator("sfmod34", "sf-mod34@example.com");
+        Cookie accessCookie = loginAccessCookie("sf-mod34@example.com");
+        Cookie csrfCookie = fetchCsrfCookie();
+
+        CreateSubjectRequest request =
+                new CreateSubjectRequest(SubjectKind.PROVINCE, null, null, null, null, "POINT(56 27)");
+
+        postSubject(accessCookie, csrfCookie, request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_GEOMETRY"));
+    }
+
+    private ResultActions postSubject(Cookie accessCookie, Cookie csrfCookie, CreateSubjectRequest request)
+            throws Exception {
+        return mockMvc.perform(post("/api/subjects")
+                .cookie(accessCookie, csrfCookie)
+                .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+    }
+
     @Test
     void anonymousCannotCreateSubject() throws Exception {
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.PORT, null, null, null, null);
+        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.PORT, null, null, null, null, null);
         mockMvc.perform(post("/api/subjects")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -182,7 +264,7 @@ class SubjectFlowIntegrationTests {
         Cookie accessCookie = loginAccessCookie("sf-alice@example.com");
         Cookie csrfCookie = fetchCsrfCookie();
 
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.PORT, null, null, null, null);
+        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.PORT, null, null, null, null, null);
         mockMvc.perform(post("/api/subjects")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -196,7 +278,7 @@ class SubjectFlowIntegrationTests {
         seedModerator("sfmod3", "sf-mod3@example.com");
         Cookie accessCookie = loginAccessCookie("sf-mod3@example.com");
 
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.PORT, null, null, null, null);
+        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.PORT, null, null, null, null, null);
         mockMvc.perform(post("/api/subjects")
                         .cookie(accessCookie)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -212,7 +294,7 @@ class SubjectFlowIntegrationTests {
 
         // habitat belongs to SPECIES, not ISLAND — the value must be refused, not dropped.
         CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.ISLAND, null, null, null,
-                "POLYGON((50 26, 51 26, 51 27, 50 27, 50 26))");
+                "POLYGON((50 26, 51 26, 51 27, 50 27, 50 26))", null);
 
         mockMvc.perform(post("/api/subjects")
                         .cookie(accessCookie, csrfCookie)
@@ -230,7 +312,7 @@ class SubjectFlowIntegrationTests {
         Cookie csrfCookie = fetchCsrfCookie();
 
         CreateSubjectRequest request = new CreateSubjectRequest(
-                SubjectKind.PORT, null, "not a geometry at all", null, null);
+                SubjectKind.PORT, null, "not a geometry at all", null, null, null);
 
         mockMvc.perform(post("/api/subjects")
                         .cookie(accessCookie, csrfCookie)
@@ -250,7 +332,7 @@ class SubjectFlowIntegrationTests {
         Cookie csrfCookie = fetchCsrfCookie();
 
         CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.PORT, null,
-                "POLYGON((50 26, 51 26, 51 27, 50 27, 50 26))", null, null);
+                "POLYGON((50 26, 51 26, 51 27, 50 27, 50 26))", null, null, null);
 
         mockMvc.perform(post("/api/subjects")
                         .cookie(accessCookie, csrfCookie)
@@ -281,7 +363,7 @@ class SubjectFlowIntegrationTests {
         Cookie accessCookie = loginAccessCookie("sf-mod7@example.com");
         Cookie csrfCookie = fetchCsrfCookie();
 
-        CreateSubjectRequest species = new CreateSubjectRequest(SubjectKind.SPECIES, null, null, null, null);
+        CreateSubjectRequest species = new CreateSubjectRequest(SubjectKind.SPECIES, null, null, null, null, null);
         mockMvc.perform(post("/api/subjects")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))

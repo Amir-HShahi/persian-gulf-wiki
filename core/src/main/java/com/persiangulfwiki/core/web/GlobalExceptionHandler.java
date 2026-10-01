@@ -4,6 +4,18 @@ import com.persiangulfwiki.core.admin.exception.InvalidPagingParametersException
 import com.persiangulfwiki.core.admin.exception.LastAdminException;
 import com.persiangulfwiki.core.admin.exception.RoleAlreadyGrantedException;
 import com.persiangulfwiki.core.admin.exception.RoleNotGrantedException;
+import com.persiangulfwiki.core.attribute.exception.AttributeDefinitionNotFoundException;
+import com.persiangulfwiki.core.attribute.exception.AttributeGroupNotFoundException;
+import com.persiangulfwiki.core.attribute.exception.AttributeHasOptionsException;
+import com.persiangulfwiki.core.attribute.exception.AttributeOptionNotFoundException;
+import com.persiangulfwiki.core.attribute.exception.AttributeOptionsNotSupportedException;
+import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeGroupKeyException;
+import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeKeyException;
+import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeOptionCodeException;
+import com.persiangulfwiki.core.dev.exception.DevTestAttributeGroupInUseException;
+import com.persiangulfwiki.core.label.exception.InvalidLabelReferentException;
+import com.persiangulfwiki.core.label.exception.LabelNotFoundException;
+import com.persiangulfwiki.core.label.exception.UnsupportedLabelLanguageException;
 import com.persiangulfwiki.core.article.exception.ArticleNotFoundException;
 import com.persiangulfwiki.core.article.exception.DuplicateSlugException;
 import com.persiangulfwiki.core.article.exception.DuplicateTranslationLanguageException;
@@ -232,6 +244,61 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.subjectKindMismatch"), "SUBJECT_KIND_MISMATCH", request);
     }
 
+    @ExceptionHandler(AttributeGroupNotFoundException.class)
+    public ProblemDetail handleAttributeGroupNotFound(AttributeGroupNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.attributeGroupNotFound"), "ATTRIBUTE_GROUP_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(AttributeDefinitionNotFoundException.class)
+    public ProblemDetail handleAttributeDefinitionNotFound(AttributeDefinitionNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.attributeDefinitionNotFound"), "ATTRIBUTE_DEFINITION_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(AttributeOptionNotFoundException.class)
+    public ProblemDetail handleAttributeOptionNotFound(AttributeOptionNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.attributeOptionNotFound"), "ATTRIBUTE_OPTION_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(DuplicateAttributeGroupKeyException.class)
+    public ProblemDetail handleDuplicateAttributeGroupKey(DuplicateAttributeGroupKeyException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.duplicateAttributeGroupKey"), "DUPLICATE_ATTRIBUTE_GROUP_KEY", request);
+    }
+
+    @ExceptionHandler(DuplicateAttributeKeyException.class)
+    public ProblemDetail handleDuplicateAttributeKey(DuplicateAttributeKeyException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.duplicateAttributeKey"), "DUPLICATE_ATTRIBUTE_KEY", request);
+    }
+
+    @ExceptionHandler(DuplicateAttributeOptionCodeException.class)
+    public ProblemDetail handleDuplicateAttributeOptionCode(DuplicateAttributeOptionCodeException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.duplicateAttributeOptionCode"), "DUPLICATE_ATTRIBUTE_OPTION_CODE", request);
+    }
+
+    @ExceptionHandler(AttributeOptionsNotSupportedException.class)
+    public ProblemDetail handleAttributeOptionsNotSupported(AttributeOptionsNotSupportedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.attributeOptionsNotSupported"), "ATTRIBUTE_OPTIONS_NOT_SUPPORTED", request);
+    }
+
+    @ExceptionHandler(AttributeHasOptionsException.class)
+    public ProblemDetail handleAttributeHasOptions(AttributeHasOptionsException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.attributeHasOptions"), "ATTRIBUTE_HAS_OPTIONS", request);
+    }
+
+    @ExceptionHandler(LabelNotFoundException.class)
+    public ProblemDetail handleLabelNotFound(LabelNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.labelNotFound"), "LABEL_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(InvalidLabelReferentException.class)
+    public ProblemDetail handleInvalidLabelReferent(InvalidLabelReferentException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidLabelReferent"), "INVALID_LABEL_REFERENT", request);
+    }
+
+    @ExceptionHandler(UnsupportedLabelLanguageException.class)
+    public ProblemDetail handleUnsupportedLabelLanguage(UnsupportedLabelLanguageException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.unsupportedLabelLanguage"), "UNSUPPORTED_LABEL_LANGUAGE", request);
+    }
+
     @ExceptionHandler(ArticleNotFoundException.class)
     public ProblemDetail handleArticleNotFound(ArticleNotFoundException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.articleNotFound"), "ARTICLE_NOT_FOUND", request);
@@ -413,6 +480,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(InvalidDevTestMediaRequestException.class)
     public ProblemDetail handleInvalidDevTestMediaRequest(InvalidDevTestMediaRequestException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidDevTestMediaRequest"), "INVALID_DEV_TEST_MEDIA_REQUEST", request);
+    }
+
+    @ExceptionHandler(DevTestAttributeGroupInUseException.class)
+    public ProblemDetail handleDevTestAttributeGroupInUse(DevTestAttributeGroupInUseException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestAttributeGroupInUse"), "DEV_TEST_ATTRIBUTE_GROUP_IN_USE", request);
     }
 
     // The one handler that returns a ResponseEntity rather than a bare ProblemDetail: a 429

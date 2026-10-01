@@ -1,6 +1,7 @@
 package com.persiangulfwiki.core.dev;
 
 import com.persiangulfwiki.core.TestcontainersConfiguration;
+import com.persiangulfwiki.core.attribute.repository.AttributeDefinitionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
 import com.persiangulfwiki.core.moderation.repository.ModerationTaskRepository;
 import com.persiangulfwiki.core.source.repository.SourceRepository;
@@ -48,6 +49,9 @@ class DevTestContentEndpointDisabledIntegrationTests {
     private ModerationTaskRepository moderationTaskRepository;
 
     @Autowired
+    private AttributeDefinitionRepository attributeDefinitionRepository;
+
+    @Autowired
     private ApplicationContext applicationContext;
 
     @Test
@@ -56,7 +60,7 @@ class DevTestContentEndpointDisabledIntegrationTests {
         assertThat(applicationContext.getBeanNamesForType(DevTestSourceController.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestArticleController.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestModerationController.class)).isEmpty();
-        // The sweepers matter most of the eight: they are the ones that delete rows, on a
+        // The sweepers matter most: they are the ones that delete rows, on a
         // schedule rather than on a request, so an unprofiled copy would run in production
         // with nothing to trigger it and nothing to notice.
         assertThat(applicationContext.getBeanNamesForType(DevTestSubjectSweeper.class)).isEmpty();
@@ -65,6 +69,9 @@ class DevTestContentEndpointDisabledIntegrationTests {
         assertThat(applicationContext.getBeanNamesForType(DevTestModerationSweeper.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestMediaSweeper.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestMediaController.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestAttributeController.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestLabelController.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestAttributeSweeper.class)).isEmpty();
     }
 
     @Test
@@ -82,6 +89,10 @@ class DevTestContentEndpointDisabledIntegrationTests {
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(delete("/api/dev/test-media/{mediaId}", UUID.randomUUID()))
                 .andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/dev/test-attribute-definitions/{definitionId}", UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/dev/test-labels/{labelId}", UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -90,6 +101,7 @@ class DevTestContentEndpointDisabledIntegrationTests {
         long sourcesBefore = sourceRepository.count();
         long articlesBefore = articleRepository.count();
         long moderationTasksBefore = moderationTaskRepository.count();
+        long definitionsBefore = attributeDefinitionRepository.count();
 
         // 403 rather than 401 for the same reason as the user fixture route: the main chain's
         // CSRF filter runs ahead of authorization and /api/dev/** is not exempt from it, so
@@ -115,10 +127,23 @@ class DevTestContentEndpointDisabledIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/dev/test-attribute-groups")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/dev/test-attribute-definitions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"valueType\": \"BOOL\"}"))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/dev/test-labels")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden());
 
         assertThat(subjectRepository.count()).isEqualTo(subjectsBefore);
         assertThat(sourceRepository.count()).isEqualTo(sourcesBefore);
         assertThat(articleRepository.count()).isEqualTo(articlesBefore);
         assertThat(moderationTaskRepository.count()).isEqualTo(moderationTasksBefore);
+        assertThat(attributeDefinitionRepository.count()).isEqualTo(definitionsBefore);
     }
 }

@@ -144,12 +144,14 @@ public class ArticleController {
             + "Optionally filtered by subject and/or subject kind, and paged.")
     @ApiResponse(responseCode = "200", description = "One page of articles. An out-of-range page is an empty list, not an error.")
     @ApiResponse(responseCode = "400", description = "`language` is missing, blank or longer than 20 characters; `subjectKind` is not "
-            + "one of ISLAND, PORT, OIL_FIELD, SPECIES (case-insensitive); or `page`/`size` is outside "
+            + "one of ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, FISHING_GROUND, PROVINCE "
+            + "(case-insensitive); or `page`/`size` is outside "
             + "its allowed range.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "language", required = true, description = "BCP-47 language tag of the translation to list, e.g. \"fa\", \"en\", \"ar\". Matched exactly.")
     @Parameter(name = "subjectId", description = "Optional filter: only articles bound to this subject.")
     @Parameter(name = "subjectKind", description = "Optional filter: only articles whose subject is of this kind -- ISLAND, PORT, "
-            + "OIL_FIELD or SPECIES (case-insensitive). Articles with no subject never match it.")
+            + "OIL_FIELD, SPECIES, STRAIT, FISHING_GROUND or PROVINCE (case-insensitive). Articles with "
+            + "no subject never match it.")
     @Parameter(name = "page", description = "Zero-based page index.")
     @Parameter(name = "size", description = "Page size, 1 to 100.")
     @GetMapping

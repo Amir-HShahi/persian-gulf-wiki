@@ -185,7 +185,7 @@ class ModerationFlowIntegrationTests {
     }
 
     private UUID createIslandSubject(Cookie accessCookie, Cookie csrfCookie) throws Exception {
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.ISLAND, null, null, null, null);
+        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.ISLAND, null, null, null, null, null);
         String created = mockMvc.perform(post("/api/subjects")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))

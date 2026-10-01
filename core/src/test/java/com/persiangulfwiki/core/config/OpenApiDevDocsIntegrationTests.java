@@ -38,6 +38,8 @@ class OpenApiDevDocsIntegrationTests {
                 "User Management", "Dev Test Users",
                 "Admin", "Expert Reviewer",
                 "Subjects", "Dev Test Subjects",
+                "Attributes", "Dev Test Attributes",
+                "Labels", "Dev Test Labels",
                 "Sources", "Dev Test Sources",
                 "Articles", "Dev Test Articles",
                 "Article Media", "Dev Test Media",

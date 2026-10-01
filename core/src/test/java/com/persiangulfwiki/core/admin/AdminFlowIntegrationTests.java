@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.security.SecureRandom;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -460,6 +461,33 @@ class AdminFlowIntegrationTests {
                 .filteredOn(userRole -> userRole.getRole() == Role.EXPERT_REVIEWER)
                 .extracting(UserRole::getExpertise)
                 .containsExactly(SubjectKind.SPECIES);
+    }
+
+    // V21 widened the expertise CHECK alongside SubjectKind; without that, each grant below would
+    // fail at the insert as a constraint error.
+    @Test
+    void expertReviewerCanBeScopedToTheNewerKinds() throws Exception {
+        seedAdmin("admin11@example.com", "admin11");
+        Cookie adminAccessCookie = loginAccessCookie("admin11@example.com");
+
+        registerContributor("afkate", "af-kate@example.com");
+        User kate = userRepository.findByEmail("af-kate@example.com").orElseThrow();
+        Cookie csrfCookie = fetchCsrfCookie();
+
+        for (SubjectKind kind : List.of(SubjectKind.STRAIT, SubjectKind.FISHING_GROUND, SubjectKind.PROVINCE)) {
+            RoleGrantRequest grant = new RoleGrantRequest(Role.EXPERT_REVIEWER, kind, GrantAction.GRANT);
+            mockMvc.perform(patch("/api/admin/users/" + kate.getId() + "/role")
+                            .cookie(adminAccessCookie, csrfCookie)
+                            .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(grant)))
+                    .andExpect(status().isOk());
+        }
+
+        assertThat(userRoleRepository.findByUserId(kate.getId()))
+                .filteredOn(userRole -> userRole.getRole() == Role.EXPERT_REVIEWER)
+                .extracting(UserRole::getExpertise)
+                .containsExactlyInAnyOrder(SubjectKind.STRAIT, SubjectKind.FISHING_GROUND, SubjectKind.PROVINCE);
     }
 
     @Test

@@ -28,5 +28,6 @@ public record CreateSubjectRequest(
         @PositiveOrZero(message = "{validation.areaKm2.positive}") BigDecimal areaKm2,
         String location,
         String area,
-        String habitat) {
+        String habitat,
+        String boundary) {
 }

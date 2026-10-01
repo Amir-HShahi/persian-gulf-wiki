@@ -23,6 +23,7 @@ public final class PublicRoutes {
     public static final RequestMatcher CONTENT_READS = new OrRequestMatcher(List.of(
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/subjects"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/subjects/**"),
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/subject-kinds/**"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/sources"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/sources/**"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/articles"),

@@ -167,7 +167,7 @@ class ArticleFlowIntegrationTests {
     }
 
     private UUID createSubject(SubjectKind kind, Cookie accessCookie, Cookie csrfCookie) throws Exception {
-        CreateSubjectRequest request = new CreateSubjectRequest(kind, null, null, null, null);
+        CreateSubjectRequest request = new CreateSubjectRequest(kind, null, null, null, null, null);
         String created = mockMvc.perform(post("/api/subjects")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -1117,7 +1117,7 @@ class ArticleFlowIntegrationTests {
         Cookie accessCookie = loginAccessCookie("af-reg1@example.com");
         Cookie csrfCookie = fetchCsrfCookie();
 
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.PORT, null, null, null, null);
+        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.PORT, null, null, null, null, null);
         mockMvc.perform(post("/api/subjects")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))

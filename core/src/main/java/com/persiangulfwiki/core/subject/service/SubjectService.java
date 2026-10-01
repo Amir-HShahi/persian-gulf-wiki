@@ -2,26 +2,33 @@ package com.persiangulfwiki.core.subject.service;
 
 import com.persiangulfwiki.core.subject.dto.CreateSubjectRequest;
 import com.persiangulfwiki.core.subject.dto.SubjectResponse;
+import com.persiangulfwiki.core.subject.entity.FishingGround;
 import com.persiangulfwiki.core.subject.entity.Island;
 import com.persiangulfwiki.core.subject.entity.OilField;
 import com.persiangulfwiki.core.subject.entity.Port;
+import com.persiangulfwiki.core.subject.entity.Province;
 import com.persiangulfwiki.core.subject.entity.Species;
+import com.persiangulfwiki.core.subject.entity.Strait;
 import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.subject.exception.InvalidGeometryException;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectKindException;
 import com.persiangulfwiki.core.subject.exception.SubjectKindMismatchException;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
+import com.persiangulfwiki.core.subject.repository.FishingGroundRepository;
 import com.persiangulfwiki.core.subject.repository.IslandRepository;
 import com.persiangulfwiki.core.subject.repository.OilFieldRepository;
 import com.persiangulfwiki.core.subject.repository.PortRepository;
+import com.persiangulfwiki.core.subject.repository.ProvinceRepository;
 import com.persiangulfwiki.core.subject.repository.SpeciesRepository;
+import com.persiangulfwiki.core.subject.repository.StraitRepository;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 
 import lombok.RequiredArgsConstructor;
 
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.PrecisionModel;
@@ -52,6 +59,9 @@ public class SubjectService {
     private final PortRepository portRepository;
     private final OilFieldRepository oilFieldRepository;
     private final SpeciesRepository speciesRepository;
+    private final StraitRepository straitRepository;
+    private final FishingGroundRepository fishingGroundRepository;
+    private final ProvinceRepository provinceRepository;
 
     // Subject row and subtype row are written together or not at all: a subject whose detail
     // row failed to insert is a subject that can never be given one afterwards, since the
@@ -82,6 +92,18 @@ public class SubjectService {
             case SPECIES -> speciesRepository.save(Species.builder()
                     .subject(subject)
                     .habitat(parsePolygon(request.habitat()))
+                    .build());
+            case STRAIT -> straitRepository.save(Strait.builder()
+                    .subject(subject)
+                    .area(parsePolygon(request.area()))
+                    .build());
+            case FISHING_GROUND -> fishingGroundRepository.save(FishingGround.builder()
+                    .subject(subject)
+                    .area(parsePolygon(request.area()))
+                    .build());
+            case PROVINCE -> provinceRepository.save(Province.builder()
+                    .subject(subject)
+                    .boundary(parseMultiPolygon(request.boundary()))
                     .build());
         }
 
@@ -119,20 +141,21 @@ public class SubjectService {
     // the failure would only surface much later, as a subject mysteriously missing its
     // geometry, with no record of which request lost it.
     private void rejectFieldsForeignToKind(CreateSubjectRequest request) {
-        switch (request.kind()) {
-            case ISLAND -> rejectForeign(request.area() != null || request.habitat() != null, request.kind());
-            case PORT -> rejectForeign(
-                    request.areaKm2() != null || request.area() != null || request.habitat() != null, request.kind());
-            case OIL_FIELD -> rejectForeign(
-                    request.areaKm2() != null || request.location() != null || request.habitat() != null, request.kind());
-            case SPECIES -> rejectForeign(
-                    request.areaKm2() != null || request.location() != null || request.area() != null, request.kind());
-        }
-    }
+        boolean hasAreaKm2 = request.areaKm2() != null;
+        boolean hasLocation = request.location() != null;
+        boolean hasArea = request.area() != null;
+        boolean hasHabitat = request.habitat() != null;
+        boolean hasBoundary = request.boundary() != null;
 
-    private void rejectForeign(boolean foreignFieldPresent, SubjectKind kind) {
-        if (foreignFieldPresent) {
-            throw new SubjectKindMismatchException("field not accepted for subject kind " + kind);
+        boolean isForeignFieldPresent = switch (request.kind()) {
+            case ISLAND -> hasArea || hasHabitat || hasBoundary;
+            case PORT -> hasAreaKm2 || hasArea || hasHabitat || hasBoundary;
+            case OIL_FIELD, STRAIT, FISHING_GROUND -> hasAreaKm2 || hasLocation || hasHabitat || hasBoundary;
+            case SPECIES -> hasAreaKm2 || hasLocation || hasArea || hasBoundary;
+            case PROVINCE -> hasAreaKm2 || hasLocation || hasArea || hasHabitat;
+        };
+        if (isForeignFieldPresent) {
+            throw new SubjectKindMismatchException("field not accepted for subject kind " + request.kind());
         }
     }
 
@@ -156,6 +179,19 @@ public class SubjectService {
             throw new InvalidGeometryException("expected a POLYGON, got " + geometry.getGeometryType());
         }
         return polygon;
+    }
+
+    // A lone POLYGON is accepted and stored as a one-part MULTIPOLYGON: a province with a single
+    // ring is common, and making the caller wrap it themselves would only add a way to fail.
+    private MultiPolygon parseMultiPolygon(String wkt) {
+        Geometry geometry = parseGeometry(wkt);
+        return switch (geometry) {
+            case null -> null;
+            case MultiPolygon multiPolygon -> multiPolygon;
+            case Polygon polygon -> polygon.getFactory().createMultiPolygon(new Polygon[] {polygon});
+            default -> throw new InvalidGeometryException(
+                    "expected a POLYGON or MULTIPOLYGON, got " + geometry.getGeometryType());
+        };
     }
 
     // Null in, null out — every geometry column in V15 is nullable, so an omitted geometry is
@@ -183,11 +219,12 @@ public class SubjectService {
         String location = null;
         String area = null;
         String habitat = null;
+        String boundary = null;
 
         // Read back through the subtype repositories rather than through a mapped association
-        // on Subject: an @OneToOne back-reference per kind would put four mostly-null
-        // associations on every Subject and make each read a four-way outer join, when only
-        // one of them can ever be populated.
+        // on Subject: an @OneToOne back-reference per kind would put one mostly-null
+        // association per kind on every Subject and make each read a many-way outer join, when
+        // only one of them can ever be populated.
         switch (subject.getKind()) {
             case ISLAND -> {
                 Island island = islandRepository.findById(subject.getId()).orElse(null);
@@ -214,10 +251,19 @@ public class SubjectService {
                     habitat = toWkt(species.getHabitat());
                 }
             }
+            case STRAIT -> area = straitRepository.findById(subject.getId())
+                    .map(strait -> toWkt(strait.getArea()))
+                    .orElse(null);
+            case FISHING_GROUND -> area = fishingGroundRepository.findById(subject.getId())
+                    .map(fishingGround -> toWkt(fishingGround.getArea()))
+                    .orElse(null);
+            case PROVINCE -> boundary = provinceRepository.findById(subject.getId())
+                    .map(province -> toWkt(province.getBoundary()))
+                    .orElse(null);
         }
 
         return new SubjectResponse(subject.getId(), subject.getKind(), subject.getCreatedAt(),
-                areaKm2, location, area, habitat);
+                areaKm2, location, area, habitat, boundary);
     }
 
     private String toWkt(Geometry geometry) {

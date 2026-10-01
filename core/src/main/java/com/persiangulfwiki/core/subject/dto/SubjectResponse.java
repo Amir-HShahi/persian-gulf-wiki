@@ -10,9 +10,9 @@ import java.util.UUID;
 // can round-trip a subject without a second representation to reconcile.
 //
 // Detail fields are null for every kind that doesn't define them — a PORT response carries
-// `location` and leaves `areaKm2`/`area`/`habitat` null. Carrying all four keeps one
-// response type for one resource instead of four near-identical ones the caller would have
-// to switch on before it can read anything.
+// `location` and leaves `areaKm2`/`area`/`habitat`/`boundary` null. Carrying all of them keeps
+// one response type for one resource instead of near-identical per-kind ones the caller would
+// have to switch on before it can read anything.
 public record SubjectResponse(
         UUID id,
         SubjectKind kind,
@@ -20,5 +20,6 @@ public record SubjectResponse(
         BigDecimal areaKm2,
         String location,
         String area,
-        String habitat) {
+        String habitat,
+        String boundary) {
 }

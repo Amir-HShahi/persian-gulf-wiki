@@ -46,7 +46,8 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/subjects")
 @RequiredArgsConstructor
-@Tag(name = "Subjects", description = "The things the wiki is about — islands, ports, oil fields and species. "
+@Tag(name = "Subjects", description = "The things the wiki is about — islands, ports, oil fields, species, straits, "
+        + "fishing grounds and provinces. "
         + "A subject carries only its identity, its kind and the typed detail belonging to that "
         + "kind; its names are per-language and come from the labels endpoints, and its prose "
         + "comes from the articles bound to it. Reading is open to everyone; creating requires "
@@ -61,13 +62,16 @@ public class SubjectController {
     @Operation(summary = "Create a subject", description = "Creates the subject and its kind-specific detail together, in a single step — "
             + "there is no separate call to fill in the detail afterwards. Only the fields "
             + "belonging to the given kind may be sent: `areaKm2` and `location` for ISLAND, "
-            + "`location` for PORT, `area` for OIL_FIELD, `habitat` for SPECIES. Sending a field "
+            + "`location` for PORT, `area` for OIL_FIELD, STRAIT and FISHING_GROUND, `habitat` for "
+            + "SPECIES, `boundary` for PROVINCE. `boundary` accepts a POLYGON or a MULTIPOLYGON and "
+            + "is always returned as a MULTIPOLYGON. Sending a field "
             + "that belongs to a different kind is rejected rather than ignored, so a value is "
             + "never silently dropped. Every detail field is optional — a subject whose shape or "
             + "size isn't known yet is valid. Geometries are WKT strings with longitude/latitude "
             + "coordinates in WGS84, e.g. `POINT(52.1 26.4)`.")
     @ApiResponse(responseCode = "201", description = "The created subject, including any detail supplied for its kind.")
-    @ApiResponse(responseCode = "400", description = "One of: `kind` is missing or is not one of ISLAND, PORT, OIL_FIELD, SPECIES; "
+    @ApiResponse(responseCode = "400", description = "One of: `kind` is missing or is not one of ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, "
+            + "FISHING_GROUND, PROVINCE; "
             + "`areaKm2` is negative; a detail field was sent that does not belong to the given "
             + "kind; or a geometry string is not valid WKT, or is a different geometry type than "
             + "the field accepts (a point where a polygon is required, or the reverse). When the "
@@ -108,9 +112,11 @@ public class SubjectController {
 
     @Operation(summary = "List subjects", description = "Open to everyone; no account is required. Optionally filtered by kind and paged.")
     @ApiResponse(responseCode = "200", description = "One page of subjects. An out-of-range page is an empty list, not an error.")
-    @ApiResponse(responseCode = "400", description = "`kind` is not one of ISLAND, PORT, OIL_FIELD, SPECIES (case-insensitive), or "
+    @ApiResponse(responseCode = "400", description = "`kind` is not one of ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, FISHING_GROUND, "
+            + "PROVINCE (case-insensitive), or "
             + "`page`/`size` is outside its allowed range.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    @Parameter(name = "kind", description = "Optional filter: ISLAND, PORT, OIL_FIELD, or SPECIES (case-insensitive). Omit to return every kind.")
+    @Parameter(name = "kind", description = "Optional filter: ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, FISHING_GROUND or "
+            + "PROVINCE (case-insensitive). Omit to return every kind.")
     @Parameter(name = "page", description = "Zero-based page index.")
     @Parameter(name = "size", description = "Page size, 1 to 100.")
     @GetMapping

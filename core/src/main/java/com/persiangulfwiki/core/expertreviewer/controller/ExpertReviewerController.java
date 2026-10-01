@@ -50,13 +50,15 @@ public class ExpertReviewerController {
     private final MessageSource messageSource;
 
     @Operation(summary = "Apply for the Expert Reviewer role", description = "Any authenticated user may apply, stating their area of "
-            + "`expertise` -- one of ISLAND, PORT, OIL_FIELD, SPECIES -- and a justification. Only one "
+            + "`expertise` -- one of ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, FISHING_GROUND, "
+            + "PROVINCE -- and a justification. Only one "
             + "PENDING application per (applicant, expertise) is allowed at a time.")
     @ApiResponse(responseCode = "201", description = "Application created with status PENDING.")
     @ApiResponse(responseCode = "400", description = "Request failed field validation. `detail` is a fixed summary string "
             + "(\"validation failed\") — the actual failures are in the `errors` array, one entry per field with "
             + "`field` and `message`. `expertise` is required and `justification` must be non-blank. An "
-            + "`expertise` that is not one of ISLAND, PORT, OIL_FIELD, SPECIES (exact, upper case) is also a "
+            + "`expertise` that is not one of ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, "
+            + "FISHING_GROUND, PROVINCE (exact, upper case) is also a "
             + "400, but as an unreadable body: `code` is HTTP_MESSAGE_NOT_READABLE and there is no `errors` "
             + "array.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))

@@ -78,7 +78,8 @@ public class AdminController {
     @ApiResponse(responseCode = "400", description = "Request failed field validation. `detail` is a fixed summary string "
             + "(\"validation failed\") — the actual failures are in the `errors` array, one entry per field with "
             + "`field` and `message`. `role` and `action` are required; `expertise` is one of ISLAND, PORT, "
-            + "OIL_FIELD, SPECIES and only meaningful for an EXPERT_REVIEWER role — leave it null for a global "
+            + "OIL_FIELD, SPECIES, STRAIT, FISHING_GROUND, PROVINCE and only meaningful for an "
+            + "EXPERT_REVIEWER role — leave it null for a global "
             + "role such as MODERATOR or ADMIN. A `role`, `action` or `expertise` value outside its allowed set "
             + "(exact, upper case) is also a 400, but as an unreadable body: `code` is "
             + "HTTP_MESSAGE_NOT_READABLE and there is no `errors` array.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))

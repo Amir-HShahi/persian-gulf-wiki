@@ -2,17 +2,23 @@ package com.persiangulfwiki.core.dev;
 
 import com.persiangulfwiki.core.dev.dto.DevTestSubjectRequest;
 import com.persiangulfwiki.core.dev.dto.DevTestSubjectResponse;
+import com.persiangulfwiki.core.subject.entity.FishingGround;
 import com.persiangulfwiki.core.subject.entity.Island;
 import com.persiangulfwiki.core.subject.entity.OilField;
 import com.persiangulfwiki.core.subject.entity.Port;
+import com.persiangulfwiki.core.subject.entity.Province;
 import com.persiangulfwiki.core.subject.entity.Species;
+import com.persiangulfwiki.core.subject.entity.Strait;
 import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
+import com.persiangulfwiki.core.subject.repository.FishingGroundRepository;
 import com.persiangulfwiki.core.subject.repository.IslandRepository;
 import com.persiangulfwiki.core.subject.repository.OilFieldRepository;
 import com.persiangulfwiki.core.subject.repository.PortRepository;
+import com.persiangulfwiki.core.subject.repository.ProvinceRepository;
 import com.persiangulfwiki.core.subject.repository.SpeciesRepository;
+import com.persiangulfwiki.core.subject.repository.StraitRepository;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,6 +64,9 @@ public class DevTestSubjectController {
     private final PortRepository portRepository;
     private final OilFieldRepository oilFieldRepository;
     private final SpeciesRepository speciesRepository;
+    private final StraitRepository straitRepository;
+    private final FishingGroundRepository fishingGroundRepository;
+    private final ProvinceRepository provinceRepository;
 
     @Operation(summary = "Mint a disposable test subject", description = "Creates a subject marked as machine-minted. Every field of the request body is "
             + "optional; the default is an ISLAND with an empty detail row. Set `withDetailRow` "
@@ -88,6 +97,9 @@ public class DevTestSubjectController {
                 case PORT -> portRepository.save(Port.builder().subject(subject).build());
                 case OIL_FIELD -> oilFieldRepository.save(OilField.builder().subject(subject).build());
                 case SPECIES -> speciesRepository.save(Species.builder().subject(subject).build());
+                case STRAIT -> straitRepository.save(Strait.builder().subject(subject).build());
+                case FISHING_GROUND -> fishingGroundRepository.save(FishingGround.builder().subject(subject).build());
+                case PROVINCE -> provinceRepository.save(Province.builder().subject(subject).build());
             }
         }
 
