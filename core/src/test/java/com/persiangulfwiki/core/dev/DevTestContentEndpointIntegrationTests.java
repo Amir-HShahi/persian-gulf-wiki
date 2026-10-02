@@ -371,7 +371,7 @@ class DevTestContentEndpointIntegrationTests {
         UUID revisionId = mintRevisionId();
 
         DevTestModerationResponse minted =
-                mintModerationTask(new DevTestModerationRequest(revisionId, null, null, null, null, null));
+                mintModerationTask(new DevTestModerationRequest(revisionId, null, null, null, null, null, null));
 
         ModerationTask task = moderationTaskRepository.findById(minted.taskId()).orElseThrow();
         assertThat(task.getDevMarker()).isNotNull();
@@ -388,7 +388,7 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void mintsAClaimedTaskWithBothClaimColumnsSet() throws Exception {
         DevTestModerationResponse minted = mintModerationTask(
-                new DevTestModerationRequest(mintRevisionId(), ModerationTaskState.CLAIMED, null, null, null, null));
+                new DevTestModerationRequest(mintRevisionId(), ModerationTaskState.CLAIMED, null, null, null, null, null));
 
         ModerationTask task = moderationTaskRepository.findById(minted.taskId()).orElseThrow();
         assertThat(task.getState()).isEqualTo(ModerationTaskState.CLAIMED);
@@ -405,7 +405,7 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void mintsADecidedTaskWithASeededDecisionOnItsHistory() throws Exception {
         DevTestModerationResponse minted = mintModerationTask(new DevTestModerationRequest(
-                mintRevisionId(), ModerationTaskState.DECIDED, null, Decision.REJECT, "out of scope", null));
+                mintRevisionId(), ModerationTaskState.DECIDED, null, Decision.REJECT, "out of scope", null, null));
 
         ModerationTask task = moderationTaskRepository.findById(minted.taskId()).orElseThrow();
         assertThat(task.getState()).isEqualTo(ModerationTaskState.DECIDED);
@@ -428,7 +428,7 @@ class DevTestContentEndpointIntegrationTests {
         mockMvc.perform(post("/api/dev/test-moderation-tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new DevTestModerationRequest(UUID.randomUUID(), null, null, null, null, null))))
+                                new DevTestModerationRequest(UUID.randomUUID(), null, null, null, null, null, null))))
                 .andExpect(status().isNotFound());
 
     }
@@ -455,7 +455,7 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void deletesAMintedModerationTaskAndCascadesToItsDecision() throws Exception {
         DevTestModerationResponse minted = mintModerationTask(new DevTestModerationRequest(
-                mintRevisionId(), ModerationTaskState.DECIDED, null, Decision.APPROVE, null, null));
+                mintRevisionId(), ModerationTaskState.DECIDED, null, Decision.APPROVE, null, null, null));
 
         mockMvc.perform(delete("/api/dev/test-moderation-tasks/" + minted.taskId()))
                 .andExpect(status().isNoContent());
@@ -487,7 +487,7 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void sweeperReclaimsAgedMintedModerationTasksButSparesHandMadeOnes() throws Exception {
         DevTestModerationResponse minted =
-                mintModerationTask(new DevTestModerationRequest(mintRevisionId(), null, null, null, null, null));
+                mintModerationTask(new DevTestModerationRequest(mintRevisionId(), null, null, null, null, null, null));
         ModerationTask handMade = moderationTaskRepository.save(ModerationTask.builder()
                 .revisionId(mintRevisionId())
                 .state(ModerationTaskState.OPEN)
@@ -658,7 +658,7 @@ class DevTestContentEndpointIntegrationTests {
         DevTestMediaResponse media = mintMedia(mediaRequest(mintArticleId(), ProcessingStatus.READY, PublicationStatus.PENDING));
 
         DevTestModerationResponse minted = mintModerationTask(new DevTestModerationRequest(null,
-                ModerationTaskState.CLAIMED, null, null, null, media.firstMetadataVersionId()));
+                ModerationTaskState.CLAIMED, null, null, null, media.firstMetadataVersionId(), null));
         assertThat(minted.revisionId()).isNull();
         assertThat(minted.mediaMetadataVersionId()).isEqualTo(media.firstMetadataVersionId());
         ModerationTask task = moderationTaskRepository.findById(minted.taskId()).orElseThrow();
@@ -669,12 +669,12 @@ class DevTestContentEndpointIntegrationTests {
         mockMvc.perform(post("/api/dev/test-moderation-tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new DevTestModerationRequest(mintRevisionId(), null,
-                                null, null, null, mintMedia(mediaRequest(mintArticleId(), null, null)).firstMetadataVersionId()))))
+                                null, null, null, mintMedia(mediaRequest(mintArticleId(), null, null)).firstMetadataVersionId(), null))))
                 .andExpect(status().isConflict());
         mockMvc.perform(post("/api/dev/test-moderation-tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new DevTestModerationRequest(null, null, null, null,
-                                null, UUID.randomUUID()))))
+                                null, UUID.randomUUID(), null))))
                 .andExpect(status().isNotFound());
 
         // Deleting the minted item takes its task with it.

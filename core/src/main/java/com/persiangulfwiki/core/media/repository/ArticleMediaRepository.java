@@ -100,6 +100,17 @@ public interface ArticleMediaRepository extends JpaRepository<ArticleMedia, UUID
     int failProcessingUpdatedBefore(@Param("threshold") Instant threshold, @Param("failureCode") String failureCode,
             @Param("now") Instant now);
 
+    // A subject's main image candidate: a public IMAGE (READY and PUBLISHED) in the gallery of
+    // any article bound to that subject.
+    @Query("""
+            select count(m) > 0 from ArticleMedia m, Article a
+            where m.id = :mediaId and a.id = m.articleId and a.subjectId = :subjectId
+              and m.type = com.persiangulfwiki.core.media.entity.MediaKind.IMAGE
+              and m.processingStatus = com.persiangulfwiki.core.media.entity.ProcessingStatus.READY
+              and m.publicationStatus = com.persiangulfwiki.core.media.entity.PublicationStatus.PUBLISHED
+            """)
+    boolean existsPublishedImageOfSubject(@Param("mediaId") UUID mediaId, @Param("subjectId") UUID subjectId);
+
     List<ArticleMedia> findByProcessingStatusAndCreatedAtBefore(ProcessingStatus processingStatus, Instant threshold);
 
     List<ArticleMedia> findByProcessingStatusAndUpdatedAtBefore(ProcessingStatus processingStatus, Instant threshold);

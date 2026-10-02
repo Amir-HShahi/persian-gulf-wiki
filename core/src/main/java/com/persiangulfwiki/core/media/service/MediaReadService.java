@@ -122,6 +122,12 @@ public class MediaReadService {
         return toResponse(media, null, new Caller(callerUserId, isCallerModerator));
     }
 
+    /** False for anything but a public image (processed and approved) in an article bound to the subject. */
+    @Transactional(readOnly = true)
+    public boolean isPublishedImageOfSubject(UUID mediaId, UUID subjectId) {
+        return articleMediaRepository.existsPublishedImageOfSubject(mediaId, subjectId);
+    }
+
     // Moderators only; the caller (ModerationService, behind the moderator-only route) is the
     // authorization check.
     @Transactional(readOnly = true)

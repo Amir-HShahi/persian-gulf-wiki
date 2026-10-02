@@ -12,8 +12,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +43,19 @@ public class SourceService {
     @Transactional(readOnly = true)
     public List<SourceResponse> list(Pageable pageable) {
         return sourceRepository.findAll(pageable).getContent().stream().map(this::toResponse).toList();
+    }
+
+    /** Unknown ids are left out rather than reported. */
+    @Transactional(readOnly = true)
+    public List<SourceResponse> findAll(Collection<UUID> sourceIds) {
+        return sourceIds.isEmpty() ? List.of()
+                : sourceRepository.findAllById(sourceIds).stream().map(this::toResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Set<UUID> findExistingIds(Collection<UUID> sourceIds) {
+        return sourceIds.isEmpty() ? Set.of()
+                : sourceRepository.findAllById(sourceIds).stream().map(Source::getId).collect(Collectors.toSet());
     }
 
     private SourceResponse toResponse(Source source) {

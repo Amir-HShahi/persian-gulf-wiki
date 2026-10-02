@@ -148,7 +148,10 @@ public class AttributeAdminController {
             + "merging: an omitted `unit`, `refKind`, `minValue` or `maxValue` is cleared, an omitted flag is false and "
             + "an omitted `sort` is 0. Same type-dependent rules as on create. Set `isDeprecated` to retire the field. "
             + "The key cannot change, and labels change through the labels endpoint. An ENUM field that already has "
-            + "choice values cannot change to another type.")
+            + "choice values cannot change to another type. Once published subjects hold values for the field, the "
+            + "change must not leave any of them unfit: `valueType` and `refKind` can no longer change, `isMulti` "
+            + "cannot turn off while a subject shows more than one value for it, and a kind cannot be removed while "
+            + "subjects of that kind hold values for it.")
     @ApiResponse(responseCode = "200", description = "The updated definition.")
     @ApiResponse(responseCode = "400", description = "The id in the path is not a valid UUID, or the body fails the same "
             + "validation as on create (`errors` array), or is malformed (`code` HTTP_MESSAGE_NOT_READABLE).",
@@ -158,8 +161,11 @@ public class AttributeAdminController {
             + "verified, or the CSRF header is missing or does not match the cookie; read `detail` for which one "
             + "occurred.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "404", description = "No definition with this id, or no group with the given `groupId`.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    @ApiResponse(responseCode = "409", description = "The field is an ENUM with choice values and `valueType` would change it "
-            + "to another type.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "409", description = "One of: the field is an ENUM with choice values and `valueType` would "
+            + "change it to another type (code ATTRIBUTE_HAS_OPTIONS); or published subjects hold values for the field "
+            + "and the change would no longer fit them -- a new `valueType` or `refKind`, `isMulti` turned off while a "
+            + "subject shows several values, or a kind removed while its subjects hold values (code "
+            + "ATTRIBUTE_HAS_FACTS).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = "CSRF token. Call GET /api/auth/csrf first to receive the XSRF-TOKEN cookie, "
             + "then encode its value and send the encoded result in this header — see the API "
             + "description above for the required encoding algorithm; sending the raw cookie "

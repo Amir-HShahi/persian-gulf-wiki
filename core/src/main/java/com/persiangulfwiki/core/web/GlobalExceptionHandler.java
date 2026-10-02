@@ -6,6 +6,7 @@ import com.persiangulfwiki.core.admin.exception.RoleAlreadyGrantedException;
 import com.persiangulfwiki.core.admin.exception.RoleNotGrantedException;
 import com.persiangulfwiki.core.attribute.exception.AttributeDefinitionNotFoundException;
 import com.persiangulfwiki.core.attribute.exception.AttributeGroupNotFoundException;
+import com.persiangulfwiki.core.attribute.exception.AttributeHasFactsException;
 import com.persiangulfwiki.core.attribute.exception.AttributeHasOptionsException;
 import com.persiangulfwiki.core.attribute.exception.AttributeOptionNotFoundException;
 import com.persiangulfwiki.core.attribute.exception.AttributeOptionsNotSupportedException;
@@ -13,6 +14,7 @@ import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeGroupKeyEx
 import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeKeyException;
 import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeOptionCodeException;
 import com.persiangulfwiki.core.dev.exception.DevTestAttributeGroupInUseException;
+import com.persiangulfwiki.core.dev.exception.DevTestSubjectRevisionLiveException;
 import com.persiangulfwiki.core.label.exception.InvalidLabelReferentException;
 import com.persiangulfwiki.core.label.exception.LabelNotFoundException;
 import com.persiangulfwiki.core.label.exception.UnsupportedLabelLanguageException;
@@ -67,10 +69,13 @@ import com.persiangulfwiki.core.expertreviewer.exception.InvalidApplicationStatu
 import com.persiangulfwiki.core.oauth2.exception.PasswordAlreadySetException;
 import com.persiangulfwiki.core.password.exception.InvalidPasswordResetTokenException;
 import com.persiangulfwiki.core.source.exception.SourceNotFoundException;
-import com.persiangulfwiki.core.subject.exception.InvalidGeometryException;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectKindException;
-import com.persiangulfwiki.core.subject.exception.SubjectKindMismatchException;
+import com.persiangulfwiki.core.subject.exception.InvalidSubjectPayloadException;
+import com.persiangulfwiki.core.subject.exception.NotSubjectRevisionAuthorException;
+import com.persiangulfwiki.core.subject.exception.StaleSubjectRevisionException;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
+import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotEditableException;
+import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotFoundException;
 import com.persiangulfwiki.core.user.exception.SessionAlreadyRevokedException;
 import com.persiangulfwiki.core.user.exception.SessionNotFoundException;
 import com.persiangulfwiki.core.user.exception.UserNotFoundException;
@@ -234,14 +239,46 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidSubjectKind"), "INVALID_SUBJECT_KIND", request);
     }
 
-    @ExceptionHandler(InvalidGeometryException.class)
-    public ProblemDetail handleInvalidGeometry(InvalidGeometryException ex, HttpServletRequest request) {
-        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidGeometry"), "INVALID_GEOMETRY", request);
+    @ExceptionHandler(SubjectRevisionNotFoundException.class)
+    public ProblemDetail handleSubjectRevisionNotFound(SubjectRevisionNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.subjectRevisionNotFound"), "SUBJECT_REVISION_NOT_FOUND", request);
     }
 
-    @ExceptionHandler(SubjectKindMismatchException.class)
-    public ProblemDetail handleSubjectKindMismatch(SubjectKindMismatchException ex, HttpServletRequest request) {
-        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.subjectKindMismatch"), "SUBJECT_KIND_MISMATCH", request);
+    @ExceptionHandler(SubjectRevisionNotEditableException.class)
+    public ProblemDetail handleSubjectRevisionNotEditable(SubjectRevisionNotEditableException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectRevisionNotEditable"), "SUBJECT_REVISION_NOT_EDITABLE", request);
+    }
+
+    @ExceptionHandler(NotSubjectRevisionAuthorException.class)
+    public ProblemDetail handleNotSubjectRevisionAuthor(NotSubjectRevisionAuthorException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.FORBIDDEN, resolve("error.notSubjectRevisionAuthor"), "NOT_SUBJECT_REVISION_AUTHOR", request);
+    }
+
+    // Names both revision numbers when it can ("based on r3, live is r4"), which is what tells the
+    // author their edit was overtaken rather than broken.
+    @ExceptionHandler(StaleSubjectRevisionException.class)
+    public ProblemDetail handleStaleSubjectRevision(StaleSubjectRevisionException ex, HttpServletRequest request) {
+        String detail = ex.getBaseRevisionNumber() != null && ex.getLiveRevisionNumber() != null
+                ? resolve("error.staleSubjectRevision", String.valueOf(ex.getBaseRevisionNumber()),
+                        String.valueOf(ex.getLiveRevisionNumber()))
+                : resolve("error.staleSubjectRevision.generic");
+        return ProblemDetails.of(HttpStatus.CONFLICT, detail, "STALE_SUBJECT_REVISION", request);
+    }
+
+    // VALIDATION_FAILED with an `errors` list, not a code of its own: to a client a payload rule
+    // the service checks against the field vocabulary is the same kind of failure as a constraint
+    // on the request body, and both render per field. Keeping the code also keeps the error
+    // contract unchanged -- `errors` still appears only on VALIDATION_FAILED.
+    @ExceptionHandler(InvalidSubjectPayloadException.class)
+    public ProblemDetail handleInvalidSubjectPayload(InvalidSubjectPayloadException ex, HttpServletRequest request) {
+        List<FieldViolation> errors = ex.getViolations().stream()
+                .map(violation -> new FieldViolation(violation.field(),
+                        resolve(violation.messageKey(), violation.args().toArray())))
+                .toList();
+        ProblemDetail problemDetail = ProblemDetails.of(
+                HttpStatus.BAD_REQUEST, resolve("error.validationFailed"), "VALIDATION_FAILED", request);
+        problemDetail.setProperty("errors", errors);
+        return problemDetail;
     }
 
     @ExceptionHandler(AttributeGroupNotFoundException.class)
@@ -282,6 +319,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AttributeHasOptionsException.class)
     public ProblemDetail handleAttributeHasOptions(AttributeHasOptionsException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.attributeHasOptions"), "ATTRIBUTE_HAS_OPTIONS", request);
+    }
+
+    @ExceptionHandler(AttributeHasFactsException.class)
+    public ProblemDetail handleAttributeHasFacts(AttributeHasFactsException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.attributeHasFacts"), "ATTRIBUTE_HAS_FACTS", request);
     }
 
     @ExceptionHandler(LabelNotFoundException.class)
@@ -485,6 +527,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DevTestAttributeGroupInUseException.class)
     public ProblemDetail handleDevTestAttributeGroupInUse(DevTestAttributeGroupInUseException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestAttributeGroupInUse"), "DEV_TEST_ATTRIBUTE_GROUP_IN_USE", request);
+    }
+
+    @ExceptionHandler(DevTestSubjectRevisionLiveException.class)
+    public ProblemDetail handleDevTestSubjectRevisionLive(DevTestSubjectRevisionLiveException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestSubjectRevisionLive"), "DEV_TEST_SUBJECT_REVISION_LIVE", request);
     }
 
     // The one handler that returns a ResponseEntity rather than a bare ProblemDetail: a 429

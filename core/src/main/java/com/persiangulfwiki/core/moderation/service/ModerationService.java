@@ -26,6 +26,9 @@ import com.persiangulfwiki.core.moderation.exception.TaskAlreadyDecidedException
 import com.persiangulfwiki.core.moderation.exception.TaskNotClaimableException;
 import com.persiangulfwiki.core.moderation.repository.ModerationDecisionRepository;
 import com.persiangulfwiki.core.moderation.repository.ModerationTaskRepository;
+import com.persiangulfwiki.core.subject.entity.SubjectRevisionStatus;
+import com.persiangulfwiki.core.subject.event.SubjectRevisionSubmittedEvent;
+import com.persiangulfwiki.core.subject.service.SubjectRevisionService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,8 +64,8 @@ import java.util.UUID;
 //                      more than one decision row on one task, and it is why
 //                      ModerationDecision is a table rather than three columns on the task.
 //
-// A task judges one of two kinds of target (V18): an article revision, as above, or a gallery
-// item's metadata version. A media task takes APPROVE and REJECT only -- a contributor revises
+// A task judges one of three kinds of target: an article revision, as above, a gallery item's
+// metadata version (V18), or a subject revision (V24, below). A media task takes APPROVE and REJECT only -- a contributor revises
 // media metadata by proposing a new version, which gets its own task, so there is nothing for
 // REQUEST_CHANGES to send back. What each outcome means for the item is MediaModerationService's
 // call, the same way ArticleRevisionService owns what it means for a revision -- including which
@@ -70,6 +73,15 @@ import java.util.UUID;
 // item's rejection takes every other one with it). Their tasks are closed here, in the same
 // transaction, with a REJECT recorded against the deciding moderator, so the queue never offers
 // a task whose version can no longer be decided.
+//
+// The third target (V24) is a subject revision: a proposed new subject or an edit of one. It runs
+// the article revision lifecycle exactly -- all three decisions, REQUEST_CHANGES reopening the
+// same task -- and SubjectRevisionService owns what APPROVE means for it (creating the subject
+// for a proposal, rewriting the read model, moving the live pointer), including refusing with a
+// 409 an edit whose base another approval has since replaced.
+//
+// None of the three checks whether the moderator is the target's author: a moderator may decide
+// their own revision, for subjects as for articles.
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -82,6 +94,7 @@ public class ModerationService {
     private final ArticleRevisionService articleRevisionService;
     private final MediaModerationService mediaModerationService;
     private final MediaReadService mediaReadService;
+    private final SubjectRevisionService subjectRevisionService;
     private final MessageSource messageSource;
 
     // The article package's half of the submit endpoint, joined here rather than by a direct
@@ -110,6 +123,25 @@ public class ModerationService {
         }
 
         existing.ifPresentOrElse(this::reopen, () -> open(event.revisionId()));
+    }
+
+    // The subject package's counterpart of onRevisionSubmitted, with the same open-or-reopen
+    // shape: a subject revision goes through REQUEST_CHANGES like an article revision does.
+    @EventListener
+    @Transactional
+    public void onSubjectRevisionSubmitted(SubjectRevisionSubmittedEvent event) {
+        Optional<ModerationTask> existing = moderationTaskRepository.findBySubjectRevisionId(event.revisionId());
+        if (existing.isPresent() == event.firstSubmission()) {
+            log.warn("subject revision {} submitted as firstSubmission={} but {} an existing moderation task",
+                    event.revisionId(), event.firstSubmission(), existing.isPresent() ? "has" : "has no");
+        }
+        existing.ifPresentOrElse(this::reopen, () -> {
+            moderationTaskRepository.save(ModerationTask.builder()
+                    .subjectRevisionId(event.revisionId())
+                    .state(ModerationTaskState.OPEN)
+                    .build());
+            log.debug("opened moderation task for subject revision {}", event.revisionId());
+        });
     }
 
     // The media package's counterpart of onRevisionSubmitted, fired when a gallery item's file
@@ -149,7 +181,7 @@ public class ModerationService {
         task.setState(ModerationTaskState.OPEN);
         releaseClaim(task);
         moderationTaskRepository.save(task);
-        log.debug("reopened moderation task {} for revision {}", task.getId(), task.getRevisionId());
+        log.debug("reopened moderation task {}", task.getId());
     }
 
     @Transactional
@@ -185,9 +217,10 @@ public class ModerationService {
     //                  state-machine one. This also means TaskNotClaimableException belongs
     //                  to claim() alone and can never compete with this.
     //   3. PENDING  -> 409. Last, because it is about the revision rather than the task.
-    //                  For a media task: PENDING_REVIEW -> 409, and then REQUEST_CHANGES ->
-    //                  400, which comes after it so a decided-elsewhere version reports its
-    //                  state rather than a complaint about the decision chosen.
+    //                  A subject revision is held to the same rule. For a media task:
+    //                  PENDING_REVIEW -> 409, and then REQUEST_CHANGES -> 400, which comes after
+    //                  it so a decided-elsewhere version reports its state rather than a
+    //                  complaint about the decision chosen.
     //
     // That third guard is what closes the window REQUEST_CHANGES opens. Sending a revision
     // back leaves the task OPEN while the revision sits at CHANGES_REQUESTED, so the task is
@@ -207,6 +240,10 @@ public class ModerationService {
         }
         if (task.getRevisionId() != null) {
             if (articleRevisionService.getStatus(task.getRevisionId()) != RevisionStatus.PENDING) {
+                throw new RevisionNotPendingException();
+            }
+        } else if (task.getSubjectRevisionId() != null) {
+            if (subjectRevisionService.getStatus(task.getSubjectRevisionId()) != SubjectRevisionStatus.PENDING) {
                 throw new RevisionNotPendingException();
             }
         } else {
@@ -232,6 +269,9 @@ public class ModerationService {
         // (revision moves on, task goes back in the queue).
         if (task.getRevisionId() != null) {
             articleRevisionService.applyModerationOutcome(task.getRevisionId(), outcomeFor(request.decision()));
+        } else if (task.getSubjectRevisionId() != null) {
+            subjectRevisionService.applyModerationOutcome(task.getSubjectRevisionId(),
+                    subjectOutcomeFor(request.decision()));
         } else {
             List<UUID> closed = mediaModerationService.applyModerationOutcome(task.getMediaMetadataVersionId(),
                     request.decision() == Decision.APPROVE ? MetadataVersionStatus.APPROVED : MetadataVersionStatus.REJECTED);
@@ -276,13 +316,18 @@ public class ModerationService {
 
     // Readable in any state, including DECIDED, so a moderator can look back at what was
     // judged. The media half is only as current as the item: an item since deleted (rejected
-    // and swept) takes its task with it (V18 CASCADE), so this never points at nothing.
+    // and swept) takes its task with it (V18 CASCADE), so this never points at nothing. The same
+    // CASCADE holds for a subject revision (V24).
     @Transactional(readOnly = true)
     public ModerationTaskDetailResponse get(UUID taskId) {
         ModerationTask task = getTask(taskId);
-        return new ModerationTaskDetailResponse(toResponse(task), task.getMediaMetadataVersionId() != null
-                ? mediaReadService.getForReview(task.getMediaMetadataVersionId())
-                : null);
+        return new ModerationTaskDetailResponse(toResponse(task),
+                task.getMediaMetadataVersionId() != null
+                        ? mediaReadService.getForReview(task.getMediaMetadataVersionId())
+                        : null,
+                task.getSubjectRevisionId() != null
+                        ? subjectRevisionService.getForReview(task.getSubjectRevisionId())
+                        : null);
     }
 
     // stateFilter is the raw query-parameter string, not a bound enum -- see DecideRequest
@@ -326,6 +371,14 @@ public class ModerationService {
         };
     }
 
+    private SubjectRevisionStatus subjectOutcomeFor(Decision decision) {
+        return switch (decision) {
+            case APPROVE -> SubjectRevisionStatus.APPROVED;
+            case REJECT -> SubjectRevisionStatus.REJECTED;
+            case REQUEST_CHANGES -> SubjectRevisionStatus.CHANGES_REQUESTED;
+        };
+    }
+
     // Cleared as a pair, always -- ck_moderation_tasks_claim_pair (V17) rejects a row with
     // one of the two set and the other null.
     private void releaseClaim(ModerationTask task) {
@@ -353,7 +406,7 @@ public class ModerationService {
                                 decision.getCreatedAt()))
                         .toList();
         return new ModerationTaskResponse(task.getId(), task.getRevisionId(), task.getMediaMetadataVersionId(),
-                task.getState(), task.getClaimedBy(),
+                task.getSubjectRevisionId(), task.getState(), task.getClaimedBy(),
                 task.getClaimedAt(), task.getCreatedAt(), task.getUpdatedAt(), decisions);
     }
 }

@@ -44,6 +44,8 @@ public class OpenApiConfig {
             "Expert Reviewer",
             "Subjects",
             "Dev Test Subjects",
+            "Subject Revisions",
+            "Dev Test Subject Revisions",
             "Attributes",
             "Dev Test Attributes",
             "Labels",

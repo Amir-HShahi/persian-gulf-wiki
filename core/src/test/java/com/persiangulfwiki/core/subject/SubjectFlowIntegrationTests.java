@@ -4,46 +4,60 @@ import tools.jackson.databind.ObjectMapper;
 import com.persiangulfwiki.core.TestcontainersConfiguration;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
 import com.persiangulfwiki.core.auth.dto.RegisterRequest;
-import com.persiangulfwiki.core.subject.dto.CreateSubjectRequest;
+import com.persiangulfwiki.core.subject.entity.FishingGround;
+import com.persiangulfwiki.core.subject.entity.Island;
+import com.persiangulfwiki.core.subject.entity.Province;
+import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
+import com.persiangulfwiki.core.subject.repository.FishingGroundRepository;
+import com.persiangulfwiki.core.subject.repository.IslandRepository;
+import com.persiangulfwiki.core.subject.repository.ProvinceRepository;
+import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 import com.persiangulfwiki.core.user.entity.Role;
 import com.persiangulfwiki.core.user.entity.User;
 import com.persiangulfwiki.core.user.entity.UserRole;
 import com.persiangulfwiki.core.user.repository.UserRepository;
 import com.persiangulfwiki.core.user.repository.UserRoleRepository;
 
+import com.jayway.jsonpath.JsonPath;
+
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 
-import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
+import static com.persiangulfwiki.core.CsrfTestSupport.maskCsrfToken;
 import static com.persiangulfwiki.core.CsrfTestSupport.xsrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+// The subject read path. Subjects are created only by approving a proposal since phase 3 --
+// SubjectRevisionFlowIntegrationTests drives that end to end, geometry round trip included -- so
+// the subjects read here are seeded straight through the repositories.
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 class SubjectFlowIntegrationTests {
 
     private static final String PASSWORD = "Correct-Horse1!";
+    private static final GeometryFactory WGS84 = new GeometryFactory(new PrecisionModel(), 4326);
 
     @Autowired
     private MockMvc mockMvc;
@@ -57,37 +71,36 @@ class SubjectFlowIntegrationTests {
     @Autowired
     private UserRoleRepository userRoleRepository;
 
-    private void registerContributor(String username, String email) throws Exception {
-        RegisterRequest register = new RegisterRequest(username, email, PASSWORD);
+    @Autowired
+    private SubjectRepository subjectRepository;
+
+    @Autowired
+    private IslandRepository islandRepository;
+
+    @Autowired
+    private ProvinceRepository provinceRepository;
+
+    @Autowired
+    private FishingGroundRepository fishingGroundRepository;
+
+    private User seedModerator(String username, String email) throws Exception {
         mockMvc.perform(post("/api/auth/register")
                         .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(register)))
+                        .content(objectMapper.writeValueAsString(new RegisterRequest(username, email, PASSWORD))))
                 .andExpect(status().isCreated());
-    }
-
-    // EmailVerificationRequiredFilter blocks an unverified session from everything outside a
-    // small allowlist, so any account that has to actually reach these endpoints is verified
-    // here first.
-    private User registerVerifiedContributor(String username, String email) throws Exception {
-        registerContributor(username, email);
         User user = userRepository.findByEmail(email).orElseThrow();
         user.setEmailVerified(true);
-        return userRepository.save(user);
-    }
-
-    private User seedModerator(String username, String email) throws Exception {
-        User user = registerVerifiedContributor(username, email);
+        user = userRepository.save(user);
         userRoleRepository.save(UserRole.builder().user(user).role(Role.MODERATOR).build());
         return user;
     }
 
     private Cookie loginAccessCookie(String email) throws Exception {
-        LoginRequest login = new LoginRequest(email, PASSWORD);
         return mockMvc.perform(post("/api/auth/login")
                         .with(xsrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(login)))
+                        .content(objectMapper.writeValueAsString(new LoginRequest(email, PASSWORD))))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getCookie("access_token");
     }
@@ -100,247 +113,66 @@ class SubjectFlowIntegrationTests {
         return csrfCookie;
     }
 
-    private String maskCsrfToken(String rawToken) {
-        byte[] tokenBytes = rawToken.getBytes(StandardCharsets.UTF_8);
-        byte[] random = new byte[tokenBytes.length];
-        new SecureRandom().nextBytes(random);
-        byte[] xored = new byte[tokenBytes.length];
-        for (int i = 0; i < tokenBytes.length; i++) {
-            xored[i] = (byte) (random[i] ^ tokenBytes[i]);
-        }
-        byte[] combined = new byte[random.length + xored.length];
-        System.arraycopy(random, 0, combined, 0, random.length);
-        System.arraycopy(xored, 0, combined, random.length, xored.length);
-        return Base64.getUrlEncoder().encodeToString(combined);
+    private Subject seedSubject(SubjectKind kind) {
+        return subjectRepository.save(Subject.builder().kind(kind).build());
     }
 
-    // The main smoke check: a moderator creates an island with a real point geometry, and the
-    // geometry survives a round trip through PostGIS and comes back readable — by an entirely
-    // anonymous caller, which is what proves the public-read rule is actually in effect rather
-    // than the request merely reusing the creator's session.
+    private static Polygon square(double lon, double lat) {
+        LinearRing ring = WGS84.createLinearRing(new Coordinate[] {
+                new Coordinate(lon, lat), new Coordinate(lon + 1, lat), new Coordinate(lon + 1, lat + 1),
+                new Coordinate(lon, lat + 1), new Coordinate(lon, lat)});
+        return WGS84.createPolygon(ring);
+    }
+
+    // The point survives a round trip through PostGIS and is readable by a caller with no account.
+    // areaKm2 is gone from the response (V25): an island's area is the `area` fact now.
     @Test
-    void moderatorCreatesIslandAndAnonymousReadsItBack() throws Exception {
-        seedModerator("sfmod1", "sf-mod1@example.com");
-        Cookie accessCookie = loginAccessCookie("sf-mod1@example.com");
-        Cookie csrfCookie = fetchCsrfCookie();
+    void anonymousReadsIslandWithItsPointAndNoAreaKm2() throws Exception {
+        Subject island = seedSubject(SubjectKind.ISLAND);
+        islandRepository.save(Island.builder().subject(island)
+                .location(WGS84.createPoint(new Coordinate(52.1, 26.4))).build());
 
-        CreateSubjectRequest request = new CreateSubjectRequest(
-                SubjectKind.ISLAND, new BigDecimal("12.5000"), "POINT(52.1 26.4)", null, null, null);
-
-        String created = mockMvc.perform(post("/api/subjects")
-                        .cookie(accessCookie, csrfCookie)
-                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.kind").value("ISLAND"))
-                .andExpect(jsonPath("$.data.areaKm2").value(12.5))
-                .andExpect(jsonPath("$.data.location", startsWith("POINT")))
-                .andReturn().getResponse().getContentAsString();
-
-        UUID subjectId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(created, "$.data.id"));
-
-        // No cookie at all — the read must work for a caller with no account.
-        mockMvc.perform(get("/api/subjects/" + subjectId))
+        mockMvc.perform(get("/api/subjects/" + island.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.kind").value("ISLAND"))
-                .andExpect(jsonPath("$.data.areaKm2").value(12.5))
                 .andExpect(jsonPath("$.data.location", containsString("52.1")))
-                .andExpect(jsonPath("$.data.location", containsString("26.4")));
+                .andExpect(jsonPath("$.data.location", containsString("26.4")))
+                .andExpect(jsonPath("$.data.areaKm2").doesNotExist());
     }
 
     @Test
-    void moderatorCreatesOilFieldWithPolygonAndReadsItBack() throws Exception {
-        seedModerator("sfmod2", "sf-mod2@example.com");
-        Cookie accessCookie = loginAccessCookie("sf-mod2@example.com");
-        Cookie csrfCookie = fetchCsrfCookie();
+    void provinceBoundaryIsReadBackAsMultiPolygon() throws Exception {
+        Subject province = seedSubject(SubjectKind.PROVINCE);
+        provinceRepository.save(Province.builder().subject(province)
+                .boundary(WGS84.createMultiPolygon(new Polygon[] {square(55, 26)})).build());
 
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.OIL_FIELD, null, null,
-                "POLYGON((50 26, 51 26, 51 27, 50 27, 50 26))", null, null);
-
-        mockMvc.perform(post("/api/subjects")
-                        .cookie(accessCookie, csrfCookie)
-                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.kind").value("OIL_FIELD"))
-                .andExpect(jsonPath("$.data.area", startsWith("POLYGON")))
-                .andExpect(jsonPath("$.data.location").doesNotExist());
-    }
-
-    // A lone POLYGON boundary is stored as a one-part MULTIPOLYGON, the provinces column type.
-    @Test
-    void moderatorCreatesProvinceWithPolygonBoundaryAndReadsItBackAsMultiPolygon() throws Exception {
-        seedModerator("sfmod31", "sf-mod31@example.com");
-        Cookie accessCookie = loginAccessCookie("sf-mod31@example.com");
-        Cookie csrfCookie = fetchCsrfCookie();
-
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.PROVINCE, null, null, null, null,
-                "POLYGON((55 26, 57 26, 57 28, 55 28, 55 26))");
-
-        String created = postSubject(accessCookie, csrfCookie, request)
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.kind").value("PROVINCE"))
-                .andExpect(jsonPath("$.data.boundary", startsWith("MULTIPOLYGON")))
-                .andReturn().getResponse().getContentAsString();
-        UUID subjectId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(created, "$.data.id"));
-
-        mockMvc.perform(get("/api/subjects/" + subjectId))
+        mockMvc.perform(get("/api/subjects/" + province.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.boundary", startsWith("MULTIPOLYGON")))
                 .andExpect(jsonPath("$.data.area").doesNotExist());
     }
 
+    // A subject with no detail row reads as one with empty detail fields, not a failure.
     @Test
-    void moderatorCreatesStraitAndFishingGroundWithAreaPolygons() throws Exception {
-        seedModerator("sfmod32", "sf-mod32@example.com");
-        Cookie accessCookie = loginAccessCookie("sf-mod32@example.com");
-        Cookie csrfCookie = fetchCsrfCookie();
+    void subjectWithoutDetailRowReadsWithEmptyDetail() throws Exception {
+        Subject port = seedSubject(SubjectKind.PORT);
 
-        for (SubjectKind kind : List.of(SubjectKind.STRAIT, SubjectKind.FISHING_GROUND)) {
-            CreateSubjectRequest request = new CreateSubjectRequest(kind, null, null,
-                    "POLYGON((56 26, 57 26, 57 27, 56 27, 56 26))", null, null);
-            postSubject(accessCookie, csrfCookie, request)
-                    .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.data.kind").value(kind.name()))
-                    .andExpect(jsonPath("$.data.area", startsWith("POLYGON")));
-        }
-
-        mockMvc.perform(get("/api/subjects").param("kind", "fishing_ground").param("size", "100"))
+        mockMvc.perform(get("/api/subjects/" + port.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].kind").value("FISHING_GROUND"));
+                .andExpect(jsonPath("$.data.kind").value("PORT"))
+                .andExpect(jsonPath("$.data.location").doesNotExist());
     }
 
     @Test
-    void boundaryIsRejectedOnAKindWithoutOne() throws Exception {
-        seedModerator("sfmod33", "sf-mod33@example.com");
-        Cookie accessCookie = loginAccessCookie("sf-mod33@example.com");
-        Cookie csrfCookie = fetchCsrfCookie();
+    void listFilteredByKindIsCaseInsensitiveAndReturnsOnlyThatKind() throws Exception {
+        Subject fishingGround = seedSubject(SubjectKind.FISHING_GROUND);
+        fishingGroundRepository.save(FishingGround.builder().subject(fishingGround).area(square(56, 26)).build());
 
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.ISLAND, null, null, null, null,
-                "POLYGON((55 26, 57 26, 57 28, 55 28, 55 26))");
-
-        postSubject(accessCookie, csrfCookie, request)
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("SUBJECT_KIND_MISMATCH"));
-    }
-
-    @Test
-    void provinceBoundaryThatIsNotAPolygonIsRejected() throws Exception {
-        seedModerator("sfmod34", "sf-mod34@example.com");
-        Cookie accessCookie = loginAccessCookie("sf-mod34@example.com");
-        Cookie csrfCookie = fetchCsrfCookie();
-
-        CreateSubjectRequest request =
-                new CreateSubjectRequest(SubjectKind.PROVINCE, null, null, null, null, "POINT(56 27)");
-
-        postSubject(accessCookie, csrfCookie, request)
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_GEOMETRY"));
-    }
-
-    private ResultActions postSubject(Cookie accessCookie, Cookie csrfCookie, CreateSubjectRequest request)
-            throws Exception {
-        return mockMvc.perform(post("/api/subjects")
-                .cookie(accessCookie, csrfCookie)
-                .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
-    }
-
-    @Test
-    void anonymousCannotCreateSubject() throws Exception {
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.PORT, null, null, null, null, null);
-        mockMvc.perform(post("/api/subjects")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void contributorWithoutModeratorRoleCannotCreateSubject() throws Exception {
-        registerVerifiedContributor("sfalice", "sf-alice@example.com");
-        Cookie accessCookie = loginAccessCookie("sf-alice@example.com");
-        Cookie csrfCookie = fetchCsrfCookie();
-
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.PORT, null, null, null, null, null);
-        mockMvc.perform(post("/api/subjects")
-                        .cookie(accessCookie, csrfCookie)
-                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void createWithoutCsrfTokenIsRejected() throws Exception {
-        seedModerator("sfmod3", "sf-mod3@example.com");
-        Cookie accessCookie = loginAccessCookie("sf-mod3@example.com");
-
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.PORT, null, null, null, null, null);
-        mockMvc.perform(post("/api/subjects")
-                        .cookie(accessCookie)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void fieldBelongingToAnotherKindIsRejected() throws Exception {
-        seedModerator("sfmod4", "sf-mod4@example.com");
-        Cookie accessCookie = loginAccessCookie("sf-mod4@example.com");
-        Cookie csrfCookie = fetchCsrfCookie();
-
-        // habitat belongs to SPECIES, not ISLAND — the value must be refused, not dropped.
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.ISLAND, null, null, null,
-                "POLYGON((50 26, 51 26, 51 27, 50 27, 50 26))", null);
-
-        mockMvc.perform(post("/api/subjects")
-                        .cookie(accessCookie, csrfCookie)
-                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("SUBJECT_KIND_MISMATCH"));
-    }
-
-    @Test
-    void malformedGeometryIsRejected() throws Exception {
-        seedModerator("sfmod5", "sf-mod5@example.com");
-        Cookie accessCookie = loginAccessCookie("sf-mod5@example.com");
-        Cookie csrfCookie = fetchCsrfCookie();
-
-        CreateSubjectRequest request = new CreateSubjectRequest(
-                SubjectKind.PORT, null, "not a geometry at all", null, null, null);
-
-        mockMvc.perform(post("/api/subjects")
-                        .cookie(accessCookie, csrfCookie)
-                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_GEOMETRY"));
-    }
-
-    // Structurally valid WKT, wrong geometry type for the field. Without the explicit type
-    // check this would reach the database and fail as a 500 on the column's type constraint.
-    @Test
-    void geometryOfTheWrongTypeForTheFieldIsRejected() throws Exception {
-        seedModerator("sfmod6", "sf-mod6@example.com");
-        Cookie accessCookie = loginAccessCookie("sf-mod6@example.com");
-        Cookie csrfCookie = fetchCsrfCookie();
-
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.PORT, null,
-                "POLYGON((50 26, 51 26, 51 27, 50 27, 50 26))", null, null, null);
-
-        mockMvc.perform(post("/api/subjects")
-                        .cookie(accessCookie, csrfCookie)
-                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_GEOMETRY"));
+        String body = mockMvc.perform(get("/api/subjects").param("kind", "fishing_ground").param("size", "100"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        List<String> kinds = JsonPath.read(body, "$.data[*].kind");
+        assertThat(kinds).isNotEmpty().containsOnly("FISHING_GROUND");
     }
 
     @Test
@@ -358,25 +190,6 @@ class SubjectFlowIntegrationTests {
     }
 
     @Test
-    void listFilteredByKindReturnsOnlyThatKind() throws Exception {
-        seedModerator("sfmod7", "sf-mod7@example.com");
-        Cookie accessCookie = loginAccessCookie("sf-mod7@example.com");
-        Cookie csrfCookie = fetchCsrfCookie();
-
-        CreateSubjectRequest species = new CreateSubjectRequest(SubjectKind.SPECIES, null, null, null, null, null);
-        mockMvc.perform(post("/api/subjects")
-                        .cookie(accessCookie, csrfCookie)
-                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(species)))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(get("/api/subjects").param("kind", "species").param("size", "100"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].kind").value("SPECIES"));
-    }
-
-    @Test
     void pageSizeAboveTheMaximumIsRejected() throws Exception {
         mockMvc.perform(get("/api/subjects").param("size", "101"))
                 .andExpect(status().isBadRequest())
@@ -385,8 +198,26 @@ class SubjectFlowIntegrationTests {
 
     // --- Regression coverage for what this change could plausibly have broken ---
 
-    // The public-read rule names GET explicitly. If it were ever widened to the whole path,
-    // this would start returning 201 instead of 403.
+    // The moderator direct create is gone: not even a moderator can mint a subject without a
+    // proposal, and nothing is written.
+    @Test
+    void directSubjectCreateIsGoneEvenForAModerator() throws Exception {
+        seedModerator("sfmod1", "sf-mod1@example.com");
+        Cookie accessCookie = loginAccessCookie("sf-mod1@example.com");
+        Cookie csrfCookie = fetchCsrfCookie();
+        long before = subjectRepository.count();
+
+        mockMvc.perform(post("/api/subjects")
+                        .cookie(accessCookie, csrfCookie)
+                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"kind\":\"PORT\"}"))
+                .andExpect(status().isMethodNotAllowed());
+        assertThat(subjectRepository.count()).isEqualTo(before);
+    }
+
+    // The public-read rule names GET explicitly, and phase 3 added GET /api/subject-revisions/**
+    // to it. Neither may have opened anything else.
     @Test
     void openingPublicReadsDidNotOpenAnyOtherProtectedRoute() throws Exception {
         mockMvc.perform(get("/api/users/me"))
@@ -396,8 +227,6 @@ class SubjectFlowIntegrationTests {
                 .andExpect(status().isUnauthorized());
     }
 
-    // Five handlers were added to the shared error advice. This proves an existing, unrelated
-    // one still maps to its own status and code rather than being shadowed by them.
     @Test
     void existingErrorHandlersStillMapToTheirOwnCodes() throws Exception {
         LoginRequest badLogin = new LoginRequest("sf-nobody@example.com", "Wrong-Horse1!");
@@ -407,23 +236,5 @@ class SubjectFlowIntegrationTests {
                         .content(objectMapper.writeValueAsString(badLogin)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"));
-    }
-
-    // The per-field validation breakdown is shared by every endpoint; adding handlers above it
-    // must not have displaced it.
-    @Test
-    void missingKindStillProducesThePerFieldValidationBreakdown() throws Exception {
-        seedModerator("sfmod8", "sf-mod8@example.com");
-        Cookie accessCookie = loginAccessCookie("sf-mod8@example.com");
-        Cookie csrfCookie = fetchCsrfCookie();
-
-        mockMvc.perform(post("/api/subjects")
-                        .cookie(accessCookie, csrfCookie)
-                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
-                .andExpect(jsonPath("$.errors[0].field").value("kind"));
     }
 }

@@ -27,8 +27,9 @@ import com.persiangulfwiki.core.moderation.entity.Decision;
 import com.persiangulfwiki.core.moderation.entity.ModerationTask;
 import com.persiangulfwiki.core.moderation.entity.ModerationTaskState;
 import com.persiangulfwiki.core.moderation.repository.ModerationTaskRepository;
-import com.persiangulfwiki.core.subject.dto.CreateSubjectRequest;
+import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
+import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 import com.persiangulfwiki.core.user.entity.Role;
 import com.persiangulfwiki.core.user.entity.User;
 import com.persiangulfwiki.core.user.entity.UserRole;
@@ -110,6 +111,9 @@ class ModerationFlowIntegrationTests {
     @Autowired
     private MediaMetadataVersionRepository mediaMetadataVersionRepository;
 
+    @Autowired
+    private SubjectRepository subjectRepository;
+
     // --- Account / session helpers (same dance as ArticleFlowIntegrationTests) ---
 
     private void registerContributor(String username, String email) throws Exception {
@@ -184,16 +188,10 @@ class ModerationFlowIntegrationTests {
         return prefix + "-" + UUID.randomUUID();
     }
 
-    private UUID createIslandSubject(Cookie accessCookie, Cookie csrfCookie) throws Exception {
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.ISLAND, null, null, null, null, null);
-        String created = mockMvc.perform(post("/api/subjects")
-                        .cookie(accessCookie, csrfCookie)
-                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
-        return UUID.fromString(JsonPath.read(created, "$.data.id"));
+    // Seeded directly: the only API path to a subject is now a moderated proposal, which
+    // SubjectRevisionFlowIntegrationTests covers; these tests only need an id to bind to.
+    private UUID createIslandSubject() {
+        return subjectRepository.save(Subject.builder().kind(SubjectKind.ISLAND).build()).getId();
     }
 
     private Draft createDraft(Cookie accessCookie, Cookie csrfCookie, String slug) throws Exception {
@@ -347,7 +345,7 @@ class ModerationFlowIntegrationTests {
         User moderator = seedModerator("mfmod1", "mf-mod1@example.com");
         Cookie modAccess = loginAccessCookie("mf-mod1@example.com");
         Cookie modCsrf = fetchCsrfCookie();
-        UUID subjectId = createIslandSubject(modAccess, modCsrf);
+        UUID subjectId = createIslandSubject();
 
         registerVerifiedContributor("mfauth1", "mf-author1@example.com");
         Cookie authorAccess = loginAccessCookie("mf-author1@example.com");
@@ -826,7 +824,7 @@ class ModerationFlowIntegrationTests {
         seedModerator("mfmod16", "mf-mod16@example.com");
         Cookie modAccess = loginAccessCookie("mf-mod16@example.com");
         Cookie modCsrf = fetchCsrfCookie();
-        UUID subjectId = createIslandSubject(modAccess, modCsrf);
+        UUID subjectId = createIslandSubject();
 
         User author = registerVerifiedContributor("mfauth16", "mf-author16@example.com");
         Cookie authorAccess = loginAccessCookie("mf-author16@example.com");

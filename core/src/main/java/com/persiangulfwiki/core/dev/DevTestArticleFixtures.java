@@ -140,7 +140,7 @@ class DevTestArticleFixtures {
     // The disposable-mint path below survives only for the case where the seeded account is
     // genuinely absent (someone deleted it by hand), so this endpoint still works rather than
     // failing on a missing fixture.
-    private UUID resolveAuthorUserId(UUID requestedAuthorUserId) {
+    UUID resolveAuthorUserId(UUID requestedAuthorUserId) {
         if (requestedAuthorUserId != null) {
             return requestedAuthorUserId;
         }

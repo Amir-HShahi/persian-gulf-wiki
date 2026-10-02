@@ -1,20 +1,16 @@
 package com.persiangulfwiki.core.subject.controller;
 
 import com.persiangulfwiki.core.common.dto.ApiResult;
-import com.persiangulfwiki.core.subject.dto.CreateSubjectRequest;
 import com.persiangulfwiki.core.subject.dto.SubjectResponse;
 import com.persiangulfwiki.core.subject.service.SubjectService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +20,8 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -50,53 +43,15 @@ import java.util.UUID;
         + "fishing grounds and provinces. "
         + "A subject carries only its identity, its kind and the typed detail belonging to that "
         + "kind; its names are per-language and come from the labels endpoints, and its prose "
-        + "comes from the articles bound to it. Reading is open to everyone; creating requires "
-        + "moderator rights.")
+        + "comes from the articles bound to it. Reading is open to everyone. There is no direct "
+        + "create or edit: a new subject is proposed, and an existing one changed, through a "
+        + "subject revision that a moderator approves (see Subject Revisions).")
 public class SubjectController {
 
     private static final int MAX_PAGE_SIZE = 100;
 
     private final SubjectService subjectService;
     private final MessageSource messageSource;
-
-    @Operation(summary = "Create a subject", description = "Creates the subject and its kind-specific detail together, in a single step — "
-            + "there is no separate call to fill in the detail afterwards. Only the fields "
-            + "belonging to the given kind may be sent: `areaKm2` and `location` for ISLAND, "
-            + "`location` for PORT, `area` for OIL_FIELD, STRAIT and FISHING_GROUND, `habitat` for "
-            + "SPECIES, `boundary` for PROVINCE. `boundary` accepts a POLYGON or a MULTIPOLYGON and "
-            + "is always returned as a MULTIPOLYGON. Sending a field "
-            + "that belongs to a different kind is rejected rather than ignored, so a value is "
-            + "never silently dropped. Every detail field is optional — a subject whose shape or "
-            + "size isn't known yet is valid. Geometries are WKT strings with longitude/latitude "
-            + "coordinates in WGS84, e.g. `POINT(52.1 26.4)`.")
-    @ApiResponse(responseCode = "201", description = "The created subject, including any detail supplied for its kind.")
-    @ApiResponse(responseCode = "400", description = "One of: `kind` is missing or is not one of ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, "
-            + "FISHING_GROUND, PROVINCE; "
-            + "`areaKm2` is negative; a detail field was sent that does not belong to the given "
-            + "kind; or a geometry string is not valid WKT, or is a different geometry type than "
-            + "the field accepts (a point where a polygon is required, or the reverse). When the "
-            + "failure is field validation, `detail` is the fixed summary \"validation failed\" and "
-            + "the specific failures are in the `errors` array, one entry per field with `field` "
-            + "and `message`; the other cases carry the reason in `detail` and a `code` of "
-            + "SUBJECT_KIND_MISMATCH or INVALID_GEOMETRY.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    @ApiResponse(responseCode = "403", description = "Either the account is authenticated but lacks moderator rights, its email address is "
-            + "not yet verified, or the CSRF header is missing or does not match the cookie — all "
-            + "three surface as a plain 403 with no way to tell them apart from the status code "
-            + "alone; read `detail` for which one occurred.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = "CSRF token. Call GET /api/auth/csrf first to receive the XSRF-TOKEN cookie, "
-            + "then encode its value and send the encoded result in this header — see the API "
-            + "description above for the required encoding algorithm; sending the raw cookie "
-            + "value here is rejected.")
-    @SecurityRequirement(name = "cookieAuth")
-    @PreAuthorize("hasRole('MODERATOR')")
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ApiResult<SubjectResponse> create(@Valid @RequestBody CreateSubjectRequest request) {
-        SubjectResponse data = subjectService.create(request);
-        String message = messageSource.getMessage("success.subjectCreated", null, LocaleContextHolder.getLocale());
-        return ApiResult.of(data, message);
-    }
 
     @Operation(summary = "Get a subject by id", description = "Open to everyone; no account is required.")
     @ApiResponse(responseCode = "200", description = "The subject, including any detail recorded for its kind.")

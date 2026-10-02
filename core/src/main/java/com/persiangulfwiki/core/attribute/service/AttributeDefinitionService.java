@@ -11,6 +11,7 @@ import com.persiangulfwiki.core.attribute.entity.AttributeOption;
 import com.persiangulfwiki.core.attribute.entity.AttributeValueType;
 import com.persiangulfwiki.core.attribute.exception.AttributeDefinitionNotFoundException;
 import com.persiangulfwiki.core.attribute.exception.AttributeGroupNotFoundException;
+import com.persiangulfwiki.core.attribute.exception.AttributeHasFactsException;
 import com.persiangulfwiki.core.attribute.exception.AttributeHasOptionsException;
 import com.persiangulfwiki.core.attribute.exception.AttributeOptionNotFoundException;
 import com.persiangulfwiki.core.attribute.exception.AttributeOptionsNotSupportedException;
@@ -22,13 +23,17 @@ import com.persiangulfwiki.core.attribute.repository.AttributeOptionRepository;
 import com.persiangulfwiki.core.audit.service.AuditLogService;
 import com.persiangulfwiki.core.label.service.LabelReferent;
 import com.persiangulfwiki.core.label.service.LabelService;
+import com.persiangulfwiki.core.subject.entity.SubjectKind;
+import com.persiangulfwiki.core.subject.service.SubjectFactService;
 
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.EnumSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 // Admin-only writes to field definitions and their ENUM options; every one is audit-logged and
@@ -42,6 +47,7 @@ public class AttributeDefinitionService {
     private final AttributeGroupRepository attributeGroupRepository;
     private final AttributeOptionRepository attributeOptionRepository;
     private final LabelService labelService;
+    private final SubjectFactService subjectFactService;
     private final AuditLogService auditLogService;
 
     @Transactional
@@ -83,6 +89,7 @@ public class AttributeDefinitionService {
                 && attributeOptionRepository.existsByAttributeId(definitionId)) {
             throw new AttributeHasOptionsException("definition " + definitionId + " has options");
         }
+        requireFactsStillFit(definition, request);
         String before = describe(definition);
 
         definition.setValueType(request.valueType());
@@ -144,6 +151,30 @@ public class AttributeDefinitionService {
         auditLogService.record(actingAdminId, "ATTRIBUTE_OPTION_UPDATE", null,
                 "before={" + before + "}, after={" + describe(definition, option) + "}");
         return toResponse(option);
+    }
+
+    // Published facts were checked against the definition as it was; a change that would make
+    // any of them unfit is refused rather than left to surface as a broken infobox or a facet
+    // that miscounts. Pending revisions are not checked here -- their submit and approval
+    // re-validate against the definition as it is then.
+    private void requireFactsStillFit(AttributeDefinition definition, UpdateAttributeDefinitionRequest request) {
+        UUID definitionId = definition.getId();
+        boolean isRetyped = definition.getValueType() != request.valueType()
+                || !Objects.equals(definition.getRefKind(), request.refKind());
+        if (isRetyped && subjectFactService.hasFacts(definitionId)) {
+            throw new AttributeHasFactsException("definition " + definitionId + " has facts; its type cannot change");
+        }
+        if (definition.isMulti() && !Boolean.TRUE.equals(request.isMulti())
+                && subjectFactService.hasSubjectWithSeveralPreferredValues(definitionId)) {
+            throw new AttributeHasFactsException("definition " + definitionId + " has subjects with several values");
+        }
+        Set<SubjectKind> removedKinds = definition.getKinds().isEmpty()
+                ? EnumSet.noneOf(SubjectKind.class) : EnumSet.copyOf(definition.getKinds());
+        removedKinds.removeAll(request.kinds());
+        if (subjectFactService.hasFactsOnKinds(definitionId, removedKinds)) {
+            throw new AttributeHasFactsException(
+                    "definition " + definitionId + " has facts on removed kinds " + removedKinds);
+        }
     }
 
     private AttributeDefinition requireDefinition(UUID definitionId) {

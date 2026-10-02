@@ -108,10 +108,11 @@ public class ModerationController {
             + "caption in every language and every hotspot, including hotspots to panoramas that are not "
             + "public yet (which the public never sees until their target is approved). For an edit, "
             + "`mediaReview.current` is the item's approved version in the same full form, to compare the "
-            + "proposal against; it is null while the item has never been approved. For an article "
-            + "revision task `mediaReview` is null. The response is never cacheable and asks browsers not "
-            + "to send it as a referrer.")
-    @ApiResponse(responseCode = "200", description = "The task and, for a gallery item task, what it judges.")
+            + "proposal against; it is null while the item has never been approved. For a subject revision "
+            + "task (`subjectRevisionId` set) it is `subjectReview`: the revision, each field it changes with "
+            + "the value before and after, and the sources those values cite. For an article revision task "
+            + "both are null. The response is never cacheable and asks browsers not to send it as a referrer.")
+    @ApiResponse(responseCode = "200", description = "The task and, for a gallery item or subject revision task, what it judges.")
     @ApiResponse(responseCode = "400", description = "The id in the path is not a valid UUID.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "The account does not hold the moderator role, or its email address is not yet verified.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
@@ -166,12 +167,18 @@ public class ModerationController {
             + "after a grace period, and closes every other pending edit of it. Approving a later metadata "
             + "edit makes it the item's current metadata and closes every older pending edit of the same "
             + "item; rejecting one changes nothing that the public sees. A closed edit is marked rejected "
-            + "and its task decided, with a rejection in the caller's name explaining why.")
+            + "and its task decided, with a rejection in the caller's name explaining why. A subject revision "
+            + "task (`subjectRevisionId` set) takes all three decisions, like an article revision. Approving a "
+            + "proposal creates the subject; approving any subject revision makes its names, aliases, facts, "
+            + "geometry and main image what readers see. An edit can only be approved while the revision it was "
+            + "copied from is still the live one.")
     @ApiResponse(responseCode = "200", description = "The task, with this decision appended to its history.")
     @ApiResponse(responseCode = "400", description = "One of: field validation failed (see `errors`); the id in the path is not a valid "
             + "UUID; `reason` was omitted for a REJECT or REQUEST_CHANGES decision, where it is "
-            + "required; or REQUEST_CHANGES was sent for a gallery item task, which accepts only "
-            + "APPROVE and REJECT.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+            + "required; REQUEST_CHANGES was sent for a gallery item task, which accepts only "
+            + "APPROVE and REJECT; or APPROVE was sent for a subject revision that no longer fits its kind's "
+            + "fields, because they changed after it was submitted (code VALIDATION_FAILED, with the failures in "
+            + "`errors`; nothing is published, and the task can still be sent back or rejected).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "One of: the caller is not the moderator holding this task (including the case where "
             + "nobody has claimed it yet); the account does not hold the moderator role; its email "
@@ -186,7 +193,10 @@ public class ModerationController {
             + "and the task can still be rejected); APPROVE was sent for gallery item metadata older than "
             + "the item's current metadata, or closed by another decision meanwhile (code "
             + "METADATA_VERSION_SUPERSEDED); or APPROVE was sent for metadata of a gallery item that has "
-            + "been rejected (code MEDIA_ALREADY_REJECTED). Read `code` for which one occurred.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+            + "been rejected (code MEDIA_ALREADY_REJECTED); or APPROVE was sent for a subject revision copied from "
+            + "a revision that is no longer the live one, because another edit was approved meanwhile (code "
+            + "STALE_SUBJECT_REVISION; reject it so its author starts again from the current revision). Read "
+            + "`code` for which one occurred.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = "CSRF token. Call GET /api/auth/csrf first to receive the XSRF-TOKEN cookie, "
             + "then encode its value and send the encoded result in this header — see the API "
             + "description above for the required encoding algorithm; sending the raw cookie "

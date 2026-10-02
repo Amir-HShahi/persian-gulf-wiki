@@ -92,6 +92,37 @@ public class LabelService {
         byLanguage.forEach((language, value) -> labelRepository.save(newLabel(referent, language, value)));
     }
 
+    /**
+     * Makes the subject's names exactly these: a language passed as null loses its label. Not
+     * audit-logged, unlike {@link #upsert} -- it runs only on approving a subject revision, whose
+     * moderation decision is the record.
+     */
+    @Transactional
+    public void replaceSubjectNames(UUID subjectId, String fa, @Nullable String en, @Nullable String ar) {
+        LabelReferent referent = LabelReferent.subject(subjectId);
+        Map<String, String> wanted = new HashMap<>();
+        wanted.put(CANONICAL_LANGUAGE, fa);
+        wanted.put(ENGLISH, en);
+        wanted.put(ARABIC, ar);
+        Map<String, Label> existing = findAll(referent).stream()
+                .collect(Collectors.toMap(Label::getLanguage, Function.identity()));
+
+        // Updated in place rather than deleted and re-inserted: uq_labels_subject_language would
+        // reject the insert, which Hibernate flushes before the delete.
+        wanted.forEach((language, value) -> {
+            Label label = existing.get(language);
+            if (value == null) {
+                if (label != null) {
+                    labelRepository.delete(label);
+                }
+            } else if (label == null) {
+                labelRepository.save(newLabel(referent, language, value));
+            } else if (!label.getValue().equals(value)) {
+                label.setValue(value);
+            }
+        });
+    }
+
     @Transactional(readOnly = true)
     public LabelValuesResponse values(LabelReferent referent) {
         Map<String, String> byLanguage = findAll(referent).stream()

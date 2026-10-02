@@ -17,8 +17,9 @@ import com.persiangulfwiki.core.article.service.ArticleRevisionService;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
 import com.persiangulfwiki.core.auth.dto.RegisterRequest;
 import com.persiangulfwiki.core.security.JwtService;
-import com.persiangulfwiki.core.subject.dto.CreateSubjectRequest;
+import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
+import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 import com.persiangulfwiki.core.user.entity.Role;
 import com.persiangulfwiki.core.user.entity.User;
 import com.persiangulfwiki.core.user.entity.UserRole;
@@ -56,7 +57,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 // Phase 2 (article core): article -> translation -> revision. Every GET is reachable without an
 // account, but shows an anonymous caller only approved content; every mutation needs an authenticated, email-verified account (any contributor, not
-// hasRole('MODERATOR') -- deliberately different from /api/subjects). See
+// hasRole('MODERATOR')). See
 // ArticleController's class comment and SecurityConfig's articles requestMatchers entry for
 // why. Structured the same way as SubjectFlowIntegrationTests: helpers first, then the new
 // behavior, then regression coverage for what this change could plausibly have broken
@@ -94,6 +95,9 @@ class ArticleFlowIntegrationTests {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private SubjectRepository subjectRepository;
 
     private void registerContributor(String username, String email) throws Exception {
         RegisterRequest register = new RegisterRequest(username, email, PASSWORD);
@@ -160,22 +164,15 @@ class ArticleFlowIntegrationTests {
         return Base64.getUrlEncoder().encodeToString(combined);
     }
 
-    // Creates an ISLAND subject through the real moderator-gated path so article tests can
-    // bind to a real subject id rather than a made-up one.
-    private UUID createIslandSubject(Cookie accessCookie, Cookie csrfCookie) throws Exception {
-        return createSubject(SubjectKind.ISLAND, accessCookie, csrfCookie);
+    // Seeded directly: since phase 3 the only API path to a subject is a moderated proposal
+    // (covered by SubjectRevisionFlowIntegrationTests), and these tests only need a real subject
+    // id to bind an article to.
+    private UUID createIslandSubject() {
+        return createSubject(SubjectKind.ISLAND);
     }
 
-    private UUID createSubject(SubjectKind kind, Cookie accessCookie, Cookie csrfCookie) throws Exception {
-        CreateSubjectRequest request = new CreateSubjectRequest(kind, null, null, null, null, null);
-        String created = mockMvc.perform(post("/api/subjects")
-                        .cookie(accessCookie, csrfCookie)
-                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
-        return UUID.fromString(com.jayway.jsonpath.JsonPath.read(created, "$.data.id"));
+    private UUID createSubject(SubjectKind kind) {
+        return subjectRepository.save(Subject.builder().kind(kind).build()).getId();
     }
 
     private JsonNode simpleBody(String text) {
@@ -204,10 +201,7 @@ class ArticleFlowIntegrationTests {
     // account at all -- proving the public-read rule, not merely session reuse.
     @Test
     void contributorCreatesSubjectBoundArticleAndAnonymousReadsItBack() throws Exception {
-        seedModerator("afmod1", "af-mod1@example.com");
-        Cookie modAccess = loginAccessCookie("af-mod1@example.com");
-        Cookie modCsrf = fetchCsrfCookie();
-        UUID subjectId = createIslandSubject(modAccess, modCsrf);
+        UUID subjectId = createIslandSubject();
 
         registerVerifiedContributor("afauth1", "af-author1@example.com");
         Cookie accessCookie = loginAccessCookie("af-author1@example.com");
@@ -293,11 +287,8 @@ class ArticleFlowIntegrationTests {
     // keeps other tests' published articles out of the counts.
     @Test
     void listFilterBySubjectKindKeepsOnlyThatKindAndUnfilteredListKeepsSubjectLessArticles() throws Exception {
-        seedModerator("afmod5", "af-mod5@example.com");
-        Cookie modAccess = loginAccessCookie("af-mod5@example.com");
-        Cookie modCsrf = fetchCsrfCookie();
-        UUID islandId = createSubject(SubjectKind.ISLAND, modAccess, modCsrf);
-        UUID portId = createSubject(SubjectKind.PORT, modAccess, modCsrf);
+        UUID islandId = createSubject(SubjectKind.ISLAND);
+        UUID portId = createSubject(SubjectKind.PORT);
 
         registerVerifiedContributor("afauth5k", "af-author5k@example.com");
         Cookie accessCookie = loginAccessCookie("af-author5k@example.com");
@@ -1104,12 +1095,12 @@ class ArticleFlowIntegrationTests {
     // --- Regression coverage for what this change could plausibly have broken ---
 
     // SecurityConfig gained a new permitAll entry for GET /api/articles/** and a comment
-    // explaining articles carry no role check at all, unlike subjects. This proves that
-    // change didn't leak into the subject chain: subjects/sources reads are still public,
-    // and POST /api/subjects is still moderator-gated -- a plain verified contributor (which
-    // is now enough to write an article) still gets 403 there.
+    // explaining articles carry no role check at all. This proves that change didn't leak into
+    // the subject chain: subjects/sources reads are still public, and there is no direct subject
+    // create for a verified contributor (who can write an article) to reach -- POST /api/subjects
+    // was removed in favour of moderated proposals, so it answers 405 rather than creating one.
     @Test
-    void subjectsAndSourcesReadsStillPublicAndSubjectCreateStillModeratorGated() throws Exception {
+    void subjectsAndSourcesReadsStillPublicAndThereIsNoDirectSubjectCreate() throws Exception {
         mockMvc.perform(get("/api/subjects")).andExpect(status().isOk());
         mockMvc.perform(get("/api/sources")).andExpect(status().isOk());
 
@@ -1117,13 +1108,14 @@ class ArticleFlowIntegrationTests {
         Cookie accessCookie = loginAccessCookie("af-reg1@example.com");
         Cookie csrfCookie = fetchCsrfCookie();
 
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.PORT, null, null, null, null, null);
+        long subjectsBefore = subjectRepository.count();
         mockMvc.perform(post("/api/subjects")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
+                        .content("{\"kind\":\"PORT\"}"))
+                .andExpect(status().isMethodNotAllowed());
+        assertThat(subjectRepository.count()).isEqualTo(subjectsBefore);
     }
 
     // Nine new handlers were added to the shared GlobalExceptionHandler. This proves an
