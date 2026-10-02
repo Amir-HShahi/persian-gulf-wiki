@@ -165,7 +165,7 @@ public class SubjectPayloadValidationService {
         Map<String, List<SubjectFactValueRequest>> liveValues = liveFacts.stream()
                 .filter(fact -> fact.attribute() != null && fact.values() != null)
                 .collect(Collectors.toMap(SubjectFactRequest::attribute, SubjectFactRequest::values,
-                        (first, second) -> first));
+                        (first, _) -> first));
 
         // Looked up once for the whole payload rather than per value.
         List<SubjectFactValueRequest> allValues = facts.stream()

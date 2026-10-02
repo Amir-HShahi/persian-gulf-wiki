@@ -234,6 +234,8 @@ class MediaUploadFlowIntegrationTests {
     }
 
     private List<MapRecord<String, Object, Object>> jobsFor(UUID mediaId) {
+        // read(...) takes generic varargs and is not @SafeVarargs; the array holds one offset.
+        @SuppressWarnings("unchecked")
         List<MapRecord<String, Object, Object>> all = redisTemplate.opsForStream().read(StreamOffset.fromStart(jobStream));
         return all == null ? List.of() : all.stream()
                 .filter(record -> mediaId.toString().equals(record.getValue().get("submission_id")))

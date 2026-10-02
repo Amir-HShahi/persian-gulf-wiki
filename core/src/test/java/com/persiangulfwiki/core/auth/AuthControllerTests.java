@@ -1,5 +1,6 @@
 package com.persiangulfwiki.core.auth;
 
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import com.persiangulfwiki.core.TestcontainersConfiguration;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
@@ -12,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.not;
@@ -228,8 +231,9 @@ class AuthControllerTests {
                 assertThat(wrongPasswordBody).isNotBlank();
         }
 
-        private java.util.Map<String, Object> withoutPerRequestFields(String body) {
-                java.util.Map<String, Object> map = objectMapper.readValue(body, java.util.Map.class);
+        private Map<String, Object> withoutPerRequestFields(String body) {
+                Map<String, Object> map = objectMapper.readValue(body, new TypeReference<Map<String, Object>>() {
+                });
                 map.remove("timestamp");
                 map.remove("traceId");
                 return map;

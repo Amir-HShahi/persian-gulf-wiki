@@ -442,8 +442,8 @@ class DevTestContentEndpointIntegrationTests {
                         .content("{}"))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
-        UUID taskId = UUID.fromString(objectMapper.readTree(body).get("taskId").asText());
-        UUID revisionId = UUID.fromString(objectMapper.readTree(body).get("revisionId").asText());
+        UUID taskId = UUID.fromString(objectMapper.readTree(body).get("taskId").asString());
+        UUID revisionId = UUID.fromString(objectMapper.readTree(body).get("revisionId").asString());
 
         assertThat(articleRevisionRepository.findById(revisionId)).get()
                 .extracting(revision -> revision.getStatus()).isEqualTo(RevisionStatus.PENDING);
@@ -641,8 +641,8 @@ class DevTestContentEndpointIntegrationTests {
                         .content("{}"))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
-        UUID mediaId = UUID.fromString(objectMapper.readTree(body).get("mediaId").asText());
-        UUID articleId = UUID.fromString(objectMapper.readTree(body).get("articleId").asText());
+        UUID mediaId = UUID.fromString(objectMapper.readTree(body).get("mediaId").asString());
+        UUID articleId = UUID.fromString(objectMapper.readTree(body).get("articleId").asString());
 
         assertThat(articleRepository.findById(articleId)).get()
                 .extracting(article -> article.getDevMarker()).isEqualTo("e2e");

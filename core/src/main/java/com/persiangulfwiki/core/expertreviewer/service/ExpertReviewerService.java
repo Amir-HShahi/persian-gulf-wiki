@@ -42,7 +42,7 @@ public class ExpertReviewerService {
         // DataIntegrityViolationException.
         applicationRepository
                 .findByApplicantUserIdAndExpertiseAndStatus(applicantUserId, request.expertise(), ApplicationStatus.PENDING)
-                .ifPresent(existing -> {
+                .ifPresent(_ -> {
                     throw new DuplicatePendingApplicationException();
                 });
 

@@ -1,10 +1,15 @@
 package com.persiangulfwiki.core.common.exception;
 
+import java.io.Serial;
+
 // Base for 429, added with the article gallery's upload rate limit (api-conventions.md lists
 // 429 for rate limits). Carries retryAfterSeconds because the Retry-After header it becomes is
 // only knowable where the limit was evaluated, not in GlobalExceptionHandler. Zero means
 // "unknown", and the header is then omitted.
 public class TooManyRequestsException extends RuntimeException {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private final long retryAfterSeconds;
 

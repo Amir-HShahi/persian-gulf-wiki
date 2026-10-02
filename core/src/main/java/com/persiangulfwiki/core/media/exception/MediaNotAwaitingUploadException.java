@@ -2,9 +2,14 @@ package com.persiangulfwiki.core.media.exception;
 
 import com.persiangulfwiki.core.common.exception.ConflictException;
 
+import java.io.Serial;
+
 // /complete on an item that has already left UPLOADING -- a repeated call, or one after the
 // abandoned-upload sweep or a failed verification already moved it on.
 public class MediaNotAwaitingUploadException extends ConflictException {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private static final String DEFAULT_MESSAGE = "media item is not awaiting an upload";
 
