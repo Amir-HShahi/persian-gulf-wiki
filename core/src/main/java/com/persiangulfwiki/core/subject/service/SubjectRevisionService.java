@@ -351,8 +351,9 @@ public class SubjectRevisionService {
 
     // Only APPROVED revisions are public; the rest are their author's and moderators' (ADMIN
     // included, resolved by the caller through the role hierarchy). Fails closed like
-    // ArticleRevisionService.isReadableBy: an anonymous caller matches no author.
-    private boolean isReadableBy(SubjectRevision revision, @Nullable UUID callerUserId, boolean isCallerModerator) {
+    // ArticleRevisionService.isReadableBy: an anonymous caller matches no author. Shared with
+    // ExpertVerificationService, so a revision hidden here is a 404 there too.
+    static boolean isReadableBy(SubjectRevision revision, @Nullable UUID callerUserId, boolean isCallerModerator) {
         return revision.getStatus() == SubjectRevisionStatus.APPROVED
                 || isCallerModerator
                 || revision.getAuthorId().equals(callerUserId);

@@ -71,11 +71,15 @@ import com.persiangulfwiki.core.password.exception.InvalidPasswordResetTokenExce
 import com.persiangulfwiki.core.source.exception.SourceNotFoundException;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectKindException;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectPayloadException;
+import com.persiangulfwiki.core.subject.exception.NotSubjectKindExpertException;
 import com.persiangulfwiki.core.subject.exception.NotSubjectRevisionAuthorException;
+import com.persiangulfwiki.core.subject.exception.SelfVerificationNotAllowedException;
 import com.persiangulfwiki.core.subject.exception.StaleSubjectRevisionException;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
+import com.persiangulfwiki.core.subject.exception.SubjectRevisionAlreadyVerifiedException;
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotEditableException;
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotFoundException;
+import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotLiveException;
 import com.persiangulfwiki.core.user.exception.SessionAlreadyRevokedException;
 import com.persiangulfwiki.core.user.exception.SessionNotFoundException;
 import com.persiangulfwiki.core.user.exception.UserNotFoundException;
@@ -279,6 +283,26 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 HttpStatus.BAD_REQUEST, resolve("error.validationFailed"), "VALIDATION_FAILED", request);
         problemDetail.setProperty("errors", errors);
         return problemDetail;
+    }
+
+    @ExceptionHandler(NotSubjectKindExpertException.class)
+    public ProblemDetail handleNotSubjectKindExpert(NotSubjectKindExpertException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.FORBIDDEN, resolve("error.notSubjectKindExpert"), "NOT_SUBJECT_KIND_EXPERT", request);
+    }
+
+    @ExceptionHandler(SelfVerificationNotAllowedException.class)
+    public ProblemDetail handleSelfVerificationNotAllowed(SelfVerificationNotAllowedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.FORBIDDEN, resolve("error.selfVerificationNotAllowed"), "SELF_VERIFICATION_NOT_ALLOWED", request);
+    }
+
+    @ExceptionHandler(SubjectRevisionNotLiveException.class)
+    public ProblemDetail handleSubjectRevisionNotLive(SubjectRevisionNotLiveException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectRevisionNotLive"), "SUBJECT_REVISION_NOT_LIVE", request);
+    }
+
+    @ExceptionHandler(SubjectRevisionAlreadyVerifiedException.class)
+    public ProblemDetail handleSubjectRevisionAlreadyVerified(SubjectRevisionAlreadyVerifiedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectRevisionAlreadyVerified"), "SUBJECT_REVISION_ALREADY_VERIFIED", request);
     }
 
     @ExceptionHandler(AttributeGroupNotFoundException.class)

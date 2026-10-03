@@ -61,7 +61,7 @@ public class SubjectService {
     // directly on the controller parameter: binding the enum gives a generic, case-sensitive
     // Spring conversion failure, where this produces a translated 400 carrying the
     // INVALID_SUBJECT_KIND code the frontend can branch on.
-    private SubjectKind parseKind(String kindFilter) {
+    static SubjectKind parseKind(String kindFilter) {
         try {
             return SubjectKind.valueOf(kindFilter.toUpperCase());
         } catch (IllegalArgumentException e) {
