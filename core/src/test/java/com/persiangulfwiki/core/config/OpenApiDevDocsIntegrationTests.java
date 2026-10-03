@@ -39,7 +39,7 @@ class OpenApiDevDocsIntegrationTests {
                 "Admin", "Expert Reviewer",
                 "Subjects", "Dev Test Subjects",
                 "Subject Revisions", "Dev Test Subject Revisions",
-                "Expert Verifications",
+                "Expert Verifications", "Dev Test Expert Verifications",
                 "Attributes", "Dev Test Attributes",
                 "Labels", "Dev Test Labels",
                 "Sources", "Dev Test Sources",

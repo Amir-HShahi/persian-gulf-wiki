@@ -5,6 +5,7 @@ import com.persiangulfwiki.core.attribute.repository.AttributeDefinitionReposito
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
 import com.persiangulfwiki.core.moderation.repository.ModerationTaskRepository;
 import com.persiangulfwiki.core.source.repository.SourceRepository;
+import com.persiangulfwiki.core.subject.repository.ExpertVerificationRepository;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 import com.persiangulfwiki.core.subject.repository.SubjectRevisionRepository;
 
@@ -56,6 +57,9 @@ class DevTestContentEndpointDisabledIntegrationTests {
     private SubjectRevisionRepository subjectRevisionRepository;
 
     @Autowired
+    private ExpertVerificationRepository expertVerificationRepository;
+
+    @Autowired
     private ApplicationContext applicationContext;
 
     @Test
@@ -78,6 +82,7 @@ class DevTestContentEndpointDisabledIntegrationTests {
         assertThat(applicationContext.getBeanNamesForType(DevTestAttributeSweeper.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestSubjectRevisionController.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestSubjectRevisionSweeper.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestExpertVerificationController.class)).isEmpty();
     }
 
     @Test
@@ -101,6 +106,8 @@ class DevTestContentEndpointDisabledIntegrationTests {
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(get("/api/dev/test-subject-revisions/{revisionId}", UUID.randomUUID()))
                 .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/dev/test-expert-verifications/{verificationId}", UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -111,6 +118,7 @@ class DevTestContentEndpointDisabledIntegrationTests {
         long moderationTasksBefore = moderationTaskRepository.count();
         long definitionsBefore = attributeDefinitionRepository.count();
         long subjectRevisionsBefore = subjectRevisionRepository.count();
+        long expertVerificationsBefore = expertVerificationRepository.count();
 
         // 403 rather than 401 for the same reason as the user fixture route: the main chain's
         // CSRF filter runs ahead of authorization and /api/dev/** is not exempt from it, so
@@ -152,6 +160,10 @@ class DevTestContentEndpointDisabledIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/dev/test-expert-verifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"subjectRevisionId\": \"%s\"}".formatted(UUID.randomUUID())))
+                .andExpect(status().isForbidden());
 
         assertThat(subjectRepository.count()).isEqualTo(subjectsBefore);
         assertThat(sourceRepository.count()).isEqualTo(sourcesBefore);
@@ -159,5 +171,6 @@ class DevTestContentEndpointDisabledIntegrationTests {
         assertThat(moderationTaskRepository.count()).isEqualTo(moderationTasksBefore);
         assertThat(attributeDefinitionRepository.count()).isEqualTo(definitionsBefore);
         assertThat(subjectRevisionRepository.count()).isEqualTo(subjectRevisionsBefore);
+        assertThat(expertVerificationRepository.count()).isEqualTo(expertVerificationsBefore);
     }
 }

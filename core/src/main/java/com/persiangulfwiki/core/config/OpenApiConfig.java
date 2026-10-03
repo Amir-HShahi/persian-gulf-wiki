@@ -47,6 +47,7 @@ public class OpenApiConfig {
             "Subject Revisions",
             "Dev Test Subject Revisions",
             "Expert Verifications",
+            "Dev Test Expert Verifications",
             "Attributes",
             "Dev Test Attributes",
             "Labels",

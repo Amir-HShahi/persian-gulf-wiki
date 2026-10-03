@@ -69,6 +69,7 @@ import com.persiangulfwiki.core.expertreviewer.exception.InvalidApplicationStatu
 import com.persiangulfwiki.core.oauth2.exception.PasswordAlreadySetException;
 import com.persiangulfwiki.core.password.exception.InvalidPasswordResetTokenException;
 import com.persiangulfwiki.core.source.exception.SourceNotFoundException;
+import com.persiangulfwiki.core.subject.exception.ExpertVerificationNotFoundException;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectKindException;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectPayloadException;
 import com.persiangulfwiki.core.subject.exception.NotSubjectKindExpertException;
@@ -303,6 +304,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(SubjectRevisionAlreadyVerifiedException.class)
     public ProblemDetail handleSubjectRevisionAlreadyVerified(SubjectRevisionAlreadyVerifiedException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectRevisionAlreadyVerified"), "SUBJECT_REVISION_ALREADY_VERIFIED", request);
+    }
+
+    @ExceptionHandler(ExpertVerificationNotFoundException.class)
+    public ProblemDetail handleExpertVerificationNotFound(ExpertVerificationNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.expertVerificationNotFound"), "EXPERT_VERIFICATION_NOT_FOUND", request);
     }
 
     @ExceptionHandler(AttributeGroupNotFoundException.class)
