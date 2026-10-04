@@ -62,6 +62,7 @@ public class ExpertVerificationService {
     private final SubjectLiveRevisionRepository subjectLiveRevisionRepository;
     private final SubjectRepository subjectRepository;
     private final UserRoleRepository userRoleRepository;
+    private final SubjectInfoboxCacheService subjectInfoboxCacheService;
     private final ObjectMapper objectMapper;
 
     /**
@@ -103,6 +104,8 @@ public class ExpertVerificationService {
                 .subjectRevisionId(revisionId)
                 .expertId(expertId)
                 .build());
+        // The infobox shows the verification state.
+        subjectInfoboxCacheService.evictAll();
         return new ExpertVerificationResponse(verification.getId(), revisionId, subjectId,
                 revision.getRevisionNumber(), expertId, verification.getVerifiedAt());
     }
@@ -143,6 +146,16 @@ public class ExpertVerificationService {
                             verificationOf(revision.getRevisionNumber(), latestVerifiedBySubject.get(live.getSubjectId())));
                 })
                 .toList();
+    }
+
+    /** The verification state of the subject whose live revision is {@code liveRevisionNumber}. */
+    @Transactional(readOnly = true)
+    public SubjectVerificationResponse verificationOf(UUID subjectId, int liveRevisionNumber) {
+        Integer latestVerified = expertVerificationRepository.findLatestVerifiedRevisions(List.of(subjectId)).stream()
+                .findFirst()
+                .map(LatestVerifiedRevision::getRevisionNumber)
+                .orElse(null);
+        return verificationOf(liveRevisionNumber, latestVerified);
     }
 
     private Set<SubjectKind> expertiseOf(UUID userId) {

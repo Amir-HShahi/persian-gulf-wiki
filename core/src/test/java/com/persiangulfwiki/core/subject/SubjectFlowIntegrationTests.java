@@ -171,7 +171,7 @@ class SubjectFlowIntegrationTests {
         String body = mockMvc.perform(get("/api/subjects").param("kind", "fishing_ground").param("size", "100"))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
-        List<String> kinds = JsonPath.read(body, "$.data[*].kind");
+        List<String> kinds = JsonPath.read(body, "$.data.items[*].kind");
         assertThat(kinds).isNotEmpty().containsOnly("FISHING_GROUND");
     }
 

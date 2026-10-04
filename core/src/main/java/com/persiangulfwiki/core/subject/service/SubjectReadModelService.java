@@ -72,6 +72,7 @@ public class SubjectReadModelService {
     private final SubjectLiveRevisionRepository subjectLiveRevisionRepository;
     private final SubjectService subjectService;
     private final LabelService labelService;
+    private final SubjectInfoboxCacheService subjectInfoboxCacheService;
     private final ObjectMapper objectMapper;
 
     // For an approved proposal. The dev marker is carried over from the revision so that a fixture
@@ -92,8 +93,8 @@ public class SubjectReadModelService {
     }
 
     // Replaces everything the read model holds for the subject with the validated payload, then
-    // points the subject at the revision. The infobox cache this should also evict arrives with
-    // the infobox itself (phase 5).
+    // points the subject at the revision. Clears every cached infobox, not just this subject's:
+    // other subjects' infoboxes show its name.
     void publish(Subject subject, UUID revisionId, ValidatedSubjectPayload validated) {
         UUID subjectId = subject.getId();
         SubjectPayloadRequest payload = validated.payload();
@@ -138,6 +139,8 @@ public class SubjectReadModelService {
                 .revisionId(revisionId)
                 .approvedAt(Instant.now())
                 .build());
+
+        subjectInfoboxCacheService.evictAll();
     }
 
     // What the read model currently says, in payload form: the starting point for editing a

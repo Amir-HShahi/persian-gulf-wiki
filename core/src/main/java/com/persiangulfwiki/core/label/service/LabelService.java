@@ -18,6 +18,7 @@ import com.persiangulfwiki.core.label.exception.InvalidLabelReferentException;
 import com.persiangulfwiki.core.label.exception.UnsupportedLabelLanguageException;
 import com.persiangulfwiki.core.label.repository.LabelRepository;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
+import com.persiangulfwiki.core.subject.service.SubjectInfoboxCacheService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -48,6 +49,7 @@ public class LabelService {
     private final AttributeDefinitionRepository attributeDefinitionRepository;
     private final AttributeOptionRepository attributeOptionRepository;
     private final AuditLogService auditLogService;
+    private final SubjectInfoboxCacheService subjectInfoboxCacheService;
 
     /**
      * Admin write of one label. Only the vocabulary — GROUP, ATTRIBUTE, OPTION and KIND — is writable here;
@@ -72,6 +74,8 @@ public class LabelService {
         // Flushed so @PreUpdate has stamped updated_at before it is read back below.
         label = labelRepository.saveAndFlush(label);
 
+        // Any vocabulary label may be on show in any cached infobox.
+        subjectInfoboxCacheService.evictAll();
         auditLogService.record(actingAdminId, "LABEL_UPSERT", null,
                 "referent=" + referent.describe() + ", language=" + language + ", before=" + before + ", after=" + value);
         return new LabelResponse(referent.type(), referentIdRaw(referent), language, label.getValue(),
@@ -150,6 +154,19 @@ public class LabelService {
     public Map<UUID, LocalizedLabelResponse> resolveOptions(Collection<UUID> optionIds, String language) {
         return optionIds.isEmpty() ? Map.of()
                 : resolve(labelRepository.findByOptionIdIn(optionIds), Label::getOptionId, language);
+    }
+
+    /** Ids with no label in the language or in Farsi are absent from the map. */
+    @Transactional(readOnly = true)
+    public Map<UUID, LocalizedLabelResponse> resolveSubjects(Collection<UUID> subjectIds, String language) {
+        return subjectIds.isEmpty() ? Map.of()
+                : resolve(labelRepository.findBySubjectIdIn(subjectIds), Label::getSubjectId, language);
+    }
+
+    /** Kinds with no label in the language or in Farsi are absent from the map. */
+    @Transactional(readOnly = true)
+    public Map<SubjectKind, LocalizedLabelResponse> resolveKinds(Collection<SubjectKind> kinds, String language) {
+        return kinds.isEmpty() ? Map.of() : resolve(labelRepository.findByKindIn(kinds), Label::getKind, language);
     }
 
     /** Empty when the kind has no label in the language or in Farsi. */

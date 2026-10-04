@@ -10,6 +10,7 @@ import com.persiangulfwiki.core.attribute.repository.AttributeGroupRepository;
 import com.persiangulfwiki.core.audit.service.AuditLogService;
 import com.persiangulfwiki.core.label.service.LabelReferent;
 import com.persiangulfwiki.core.label.service.LabelService;
+import com.persiangulfwiki.core.subject.service.SubjectInfoboxCacheService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Objects;
 import java.util.UUID;
 
-// Admin-only writes; every one is audit-logged and none is moderated.
+// Admin-only writes; every one is audit-logged and none is moderated. Each clears the cached
+// infoboxes, which show group labels and order.
 @Service
 @RequiredArgsConstructor
 public class AttributeGroupService {
@@ -27,6 +29,7 @@ public class AttributeGroupService {
     private final AttributeGroupRepository attributeGroupRepository;
     private final LabelService labelService;
     private final AuditLogService auditLogService;
+    private final SubjectInfoboxCacheService subjectInfoboxCacheService;
 
     @Transactional
     public AttributeGroupResponse create(UUID actingAdminId, CreateAttributeGroupRequest request) {
@@ -39,6 +42,7 @@ public class AttributeGroupService {
                 .build());
         labelService.createAll(LabelReferent.group(group.getId()), request.labels());
 
+        subjectInfoboxCacheService.evictAll();
         auditLogService.record(actingAdminId, "ATTRIBUTE_GROUP_CREATE", null, describe(group));
         return toResponse(group);
     }
@@ -50,6 +54,7 @@ public class AttributeGroupService {
         String before = describe(group);
         group.setSort(Objects.requireNonNullElse(request.sort(), 0));
 
+        subjectInfoboxCacheService.evictAll();
         auditLogService.record(actingAdminId, "ATTRIBUTE_GROUP_UPDATE", null,
                 "before={" + before + "}, after={" + describe(group) + "}");
         return toResponse(group);

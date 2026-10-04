@@ -71,6 +71,7 @@ import com.persiangulfwiki.core.oauth2.exception.PasswordAlreadySetException;
 import com.persiangulfwiki.core.password.exception.InvalidPasswordResetTokenException;
 import com.persiangulfwiki.core.source.exception.SourceNotFoundException;
 import com.persiangulfwiki.core.subject.exception.ExpertVerificationNotFoundException;
+import com.persiangulfwiki.core.subject.exception.InvalidSubjectFilterException;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectKindException;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectPayloadException;
 import com.persiangulfwiki.core.subject.exception.NotSubjectKindExpertException;
@@ -279,6 +280,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ProblemDetail handleInvalidSubjectPayload(InvalidSubjectPayloadException ex, HttpServletRequest request) {
         List<FieldViolation> errors = ex.getViolations().stream()
                 .map(violation -> new FieldViolation(violation.field(),
+                        resolve(violation.messageKey(), violation.args().toArray())))
+                .toList();
+        ProblemDetail problemDetail = ProblemDetails.of(
+                HttpStatus.BAD_REQUEST, resolve("error.validationFailed"), "VALIDATION_FAILED", request);
+        problemDetail.setProperty("errors", errors);
+        return problemDetail;
+    }
+
+    // VALIDATION_FAILED with an `errors` list, for the same reason as the payload handler above: a
+    // filter naming an unknown field or code is a per-parameter input error like any other.
+    @ExceptionHandler(InvalidSubjectFilterException.class)
+    public ProblemDetail handleInvalidSubjectFilter(InvalidSubjectFilterException ex, HttpServletRequest request) {
+        List<FieldViolation> errors = ex.getViolations().stream()
+                .map(violation -> new FieldViolation(violation.parameter(),
                         resolve(violation.messageKey(), violation.args().toArray())))
                 .toList();
         ProblemDetail problemDetail = ProblemDetails.of(

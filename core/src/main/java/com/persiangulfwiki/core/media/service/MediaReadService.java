@@ -128,6 +128,27 @@ public class MediaReadService {
         return articleMediaRepository.existsPublishedImageOfSubject(mediaId, subjectId);
     }
 
+    /**
+     * The entries of {@code mediaIdBySubject} (subject id to media id) that pass
+     * {@link #isPublishedImageOfSubject}, in one query.
+     */
+    @Transactional(readOnly = true)
+    public Map<UUID, UUID> retainPublishedImagesOfSubjects(Map<UUID, UUID> mediaIdBySubject) {
+        if (mediaIdBySubject.isEmpty()) {
+            return Map.of();
+        }
+        Map<UUID, UUID> subjectByMedia = new HashMap<>();
+        articleMediaRepository.findPublishedImages(mediaIdBySubject.values())
+                .forEach(image -> subjectByMedia.put(image.getMediaId(), image.getSubjectId()));
+        Map<UUID, UUID> retained = new HashMap<>();
+        mediaIdBySubject.forEach((subjectId, mediaId) -> {
+            if (subjectId.equals(subjectByMedia.get(mediaId))) {
+                retained.put(subjectId, mediaId);
+            }
+        });
+        return retained;
+    }
+
     // Moderators only; the caller (ModerationService, behind the moderator-only route) is the
     // authorization check.
     @Transactional(readOnly = true)

@@ -12,6 +12,7 @@ import com.persiangulfwiki.core.article.exception.RevisionNotFoundException;
 import com.persiangulfwiki.core.article.exception.TranslationNotFoundException;
 import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
+import com.persiangulfwiki.core.subject.service.SubjectInfoboxCacheService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,6 +34,7 @@ public class ArticleRevisionService {
     private final ArticleTranslationRepository articleTranslationRepository;
     private final ArticleRevisionRepository articleRevisionRepository;
     private final ArticleVisibilityService articleVisibilityService;
+    private final SubjectInfoboxCacheService subjectInfoboxCacheService;
 
     // Converts JsonNode (every DTO's shape for `body`) to/from the pre-serialized JSON-text
     // String the entity actually stores. See the JSON-mapping decision comment on
@@ -186,8 +188,14 @@ public class ArticleRevisionService {
 
         ArticleTranslation translation = articleTranslationRepository.findById(revision.getTranslationId())
                 .orElseThrow(TranslationNotFoundException::new);
+        // A translation's first approval can make its article a subject's main article, or give it
+        // a slug in another language; cached infoboxes link subjects by that slug.
+        boolean isFirstApproval = translation.getCurrentRevisionId() == null;
         translation.setCurrentRevisionId(revision.getId());
         articleTranslationRepository.save(translation);
+        if (isFirstApproval) {
+            subjectInfoboxCacheService.evictAll();
+        }
     }
 
     // The read-authorization rule for revision content: only APPROVED revisions are public;

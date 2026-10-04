@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,6 +20,9 @@ public interface AttributeDefinitionRepository extends JpaRepository<AttributeDe
 
     @Query("select d from AttributeDefinition d join d.kinds k where k = :kind")
     List<AttributeDefinition> findByKind(@Param("kind") SubjectKind kind);
+
+    @Query("select distinct d from AttributeDefinition d join d.kinds k where k in :kinds")
+    List<AttributeDefinition> findByKindIn(@Param("kinds") Collection<SubjectKind> kinds);
 
     // Derived deletes load and remove each row, so the kinds collection goes through JPA;
     // options and labels go through V22's ON DELETE CASCADE.

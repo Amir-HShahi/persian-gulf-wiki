@@ -22,12 +22,9 @@ import lombok.RequiredArgsConstructor;
 
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTWriter;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -48,17 +45,8 @@ public class SubjectService {
         return toResponse(subjectRepository.findById(subjectId).orElseThrow(SubjectNotFoundException::new));
     }
 
-    @Transactional(readOnly = true)
-    public List<SubjectResponse> list(String kindFilter, Pageable pageable) {
-        Page<Subject> subjects = kindFilter == null
-                ? subjectRepository.findAll(pageable)
-                : subjectRepository.findByKind(parseKind(kindFilter), pageable);
-
-        return subjects.getContent().stream().map(this::toResponse).toList();
-    }
-
     // Accepts the filter as a raw String and parses it here rather than binding SubjectKind
-    // directly on the controller parameter: binding the enum gives a generic, case-sensitive
+    // directly on a controller parameter: binding the enum gives a generic, case-sensitive
     // Spring conversion failure, where this produces a translated 400 carrying the
     // INVALID_SUBJECT_KIND code the frontend can branch on.
     static SubjectKind parseKind(String kindFilter) {

@@ -26,6 +26,7 @@ import com.persiangulfwiki.core.label.service.LabelReferent;
 import com.persiangulfwiki.core.label.service.LabelService;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.subject.service.SubjectFactService;
+import com.persiangulfwiki.core.subject.service.SubjectInfoboxCacheService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,7 +40,7 @@ import java.util.UUID;
 
 // Admin-only writes to field definitions and their ENUM options; every one is audit-logged and
 // none is moderated. Codes (a definition's key, an option's code) are never changed or deleted
-// here — see V22.
+// here — see V22. Every write clears the cached infoboxes, which show the vocabulary.
 @Service
 @RequiredArgsConstructor
 public class AttributeDefinitionService {
@@ -50,6 +51,7 @@ public class AttributeDefinitionService {
     private final LabelService labelService;
     private final SubjectFactService subjectFactService;
     private final AuditLogService auditLogService;
+    private final SubjectInfoboxCacheService subjectInfoboxCacheService;
 
     @Transactional
     public AttributeDefinitionResponse create(UUID actingAdminId, CreateAttributeDefinitionRequest request) {
@@ -77,6 +79,7 @@ public class AttributeDefinitionService {
         definition = attributeDefinitionRepository.save(definition);
         labelService.createAll(LabelReferent.attribute(definition.getId()), request.labels());
 
+        subjectInfoboxCacheService.evictAll();
         auditLogService.record(actingAdminId, "ATTRIBUTE_DEFINITION_CREATE", null, describe(definition));
         return toResponse(definition);
     }
@@ -117,6 +120,7 @@ public class AttributeDefinitionService {
         // Flushed so updated_at and any constraint failure surface inside this call.
         definition = attributeDefinitionRepository.saveAndFlush(definition);
 
+        subjectInfoboxCacheService.evictAll();
         auditLogService.record(actingAdminId, "ATTRIBUTE_DEFINITION_UPDATE", null,
                 "before={" + before + "}, after={" + describe(definition) + "}");
         return toResponse(definition);
@@ -142,6 +146,7 @@ public class AttributeDefinitionService {
                 .build());
         labelService.createAll(LabelReferent.option(option.getId()), request.labels());
 
+        subjectInfoboxCacheService.evictAll();
         auditLogService.record(actingAdminId, "ATTRIBUTE_OPTION_CREATE", null, describe(definition, option));
         return toResponse(option);
     }
@@ -157,6 +162,7 @@ public class AttributeDefinitionService {
         option.setSort(Objects.requireNonNullElse(request.sort(), 0));
         option.setDeprecated(Boolean.TRUE.equals(request.isDeprecated()));
 
+        subjectInfoboxCacheService.evictAll();
         auditLogService.record(actingAdminId, "ATTRIBUTE_OPTION_UPDATE", null,
                 "before={" + before + "}, after={" + describe(definition, option) + "}");
         return toResponse(option);

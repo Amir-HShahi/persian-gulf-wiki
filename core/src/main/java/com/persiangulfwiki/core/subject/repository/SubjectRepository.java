@@ -5,20 +5,22 @@ import com.persiangulfwiki.core.subject.entity.SubjectKind;
 
 import jakarta.persistence.LockModeType;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface SubjectRepository extends JpaRepository<Subject, UUID> {
+public interface SubjectRepository extends JpaRepository<Subject, UUID>, SubjectFacetRepository {
 
-    Page<Subject> findByKind(SubjectKind kind, Pageable pageable);
+    List<Subject> findByKind(SubjectKind kind);
+
+    @Query(value = "select " + HAS_360_TOUR_OF_S + " from subjects s where s.id = :subjectId", nativeQuery = true)
+    boolean hasPublished360Tour(@Param("subjectId") UUID subjectId);
 
     // Serializes everything that reads and then moves a subject's revision state: allocating the
     // next revision number, and approval's stale-base check followed by the read model rewrite.
