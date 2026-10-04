@@ -94,7 +94,8 @@ public class AttributeVocabularyService {
         return new KindAttributeResponse(definition.getKey(), definitionLabels.get(definition.getId()),
                 definition.getValueType(), definition.getUnit(), definition.getSort(), definition.isMulti(),
                 definition.isRequired(), definition.isInfobox(), definition.isFilterable(), definition.getRefKind(),
-                definition.getMinValue(), definition.getMaxValue(), definition.isDeprecated(), optionResponses);
+                definition.getMinValue(), definition.getMaxValue(), definition.isDeprecated(), definition.isDerived(),
+                definition.isBadge(), optionResponses);
     }
 
     // Raw String parsed here, as SubjectService.parseKind does, so a bad kind is a translated

@@ -8,6 +8,7 @@ import com.persiangulfwiki.core.attribute.exception.AttributeDefinitionNotFoundE
 import com.persiangulfwiki.core.attribute.exception.AttributeGroupNotFoundException;
 import com.persiangulfwiki.core.attribute.exception.AttributeHasFactsException;
 import com.persiangulfwiki.core.attribute.exception.AttributeHasOptionsException;
+import com.persiangulfwiki.core.attribute.exception.AttributeIsDerivedException;
 import com.persiangulfwiki.core.attribute.exception.AttributeOptionNotFoundException;
 import com.persiangulfwiki.core.attribute.exception.AttributeOptionsNotSupportedException;
 import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeGroupKeyException;
@@ -354,6 +355,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AttributeHasFactsException.class)
     public ProblemDetail handleAttributeHasFacts(AttributeHasFactsException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.attributeHasFacts"), "ATTRIBUTE_HAS_FACTS", request);
+    }
+
+    @ExceptionHandler(AttributeIsDerivedException.class)
+    public ProblemDetail handleAttributeIsDerived(AttributeIsDerivedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.attributeIsDerived"), "ATTRIBUTE_IS_DERIVED", request);
     }
 
     @ExceptionHandler(LabelNotFoundException.class)

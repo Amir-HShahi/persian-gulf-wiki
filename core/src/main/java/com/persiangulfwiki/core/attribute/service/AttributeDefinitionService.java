@@ -13,6 +13,7 @@ import com.persiangulfwiki.core.attribute.exception.AttributeDefinitionNotFoundE
 import com.persiangulfwiki.core.attribute.exception.AttributeGroupNotFoundException;
 import com.persiangulfwiki.core.attribute.exception.AttributeHasFactsException;
 import com.persiangulfwiki.core.attribute.exception.AttributeHasOptionsException;
+import com.persiangulfwiki.core.attribute.exception.AttributeIsDerivedException;
 import com.persiangulfwiki.core.attribute.exception.AttributeOptionNotFoundException;
 import com.persiangulfwiki.core.attribute.exception.AttributeOptionsNotSupportedException;
 import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeKeyException;
@@ -67,6 +68,7 @@ public class AttributeDefinitionService {
                 .isRequired(Boolean.TRUE.equals(request.isRequired()))
                 .isInfobox(Boolean.TRUE.equals(request.isInfobox()))
                 .isFilterable(Boolean.TRUE.equals(request.isFilterable()))
+                .isBadge(Boolean.TRUE.equals(request.isBadge()))
                 .refKind(request.refKind())
                 .minValue(request.minValue())
                 .maxValue(request.maxValue())
@@ -84,6 +86,12 @@ public class AttributeDefinitionService {
             UpdateAttributeDefinitionRequest request) {
         AttributeDefinition definition = requireDefinition(definitionId);
         requireGroup(request.groupId());
+        // The code computing a derived value relies on its type, and no payload can carry it, so
+        // making it required would refuse every revision of its kinds.
+        if (definition.isDerived() && (definition.getValueType() != request.valueType()
+                || Boolean.TRUE.equals(request.isRequired()))) {
+            throw new AttributeIsDerivedException("definition " + definitionId + " is derived");
+        }
         // An ENUM's options would be left describing a field that no longer has options.
         if (definition.getValueType() == AttributeValueType.ENUM && request.valueType() != AttributeValueType.ENUM
                 && attributeOptionRepository.existsByAttributeId(definitionId)) {
@@ -100,6 +108,7 @@ public class AttributeDefinitionService {
         definition.setRequired(Boolean.TRUE.equals(request.isRequired()));
         definition.setInfobox(Boolean.TRUE.equals(request.isInfobox()));
         definition.setFilterable(Boolean.TRUE.equals(request.isFilterable()));
+        definition.setBadge(Boolean.TRUE.equals(request.isBadge()));
         definition.setRefKind(request.refKind());
         definition.setMinValue(request.minValue());
         definition.setMaxValue(request.maxValue());
@@ -193,8 +202,8 @@ public class AttributeDefinitionService {
         return new AttributeDefinitionResponse(definition.getId(), definition.getKey(), definition.getValueType(),
                 definition.getUnit(), definition.getGroupId(), definition.getSort(), definition.isMulti(),
                 definition.isRequired(), definition.isInfobox(), definition.isFilterable(), definition.getRefKind(),
-                definition.getMinValue(), definition.getMaxValue(), definition.isDeprecated(),
-                definition.getKinds().stream().sorted().toList(),
+                definition.getMinValue(), definition.getMaxValue(), definition.isDeprecated(), definition.isDerived(),
+                definition.isBadge(), definition.getKinds().stream().sorted().toList(),
                 labelService.values(LabelReferent.attribute(definition.getId())));
     }
 
@@ -210,7 +219,7 @@ public class AttributeDefinitionService {
                 + ", isRequired=" + definition.isRequired() + ", isInfobox=" + definition.isInfobox()
                 + ", isFilterable=" + definition.isFilterable() + ", refKind=" + definition.getRefKind()
                 + ", minValue=" + definition.getMinValue() + ", maxValue=" + definition.getMaxValue()
-                + ", isDeprecated=" + definition.isDeprecated()
+                + ", isDeprecated=" + definition.isDeprecated() + ", isBadge=" + definition.isBadge()
                 + ", kinds=" + definition.getKinds().stream().sorted().toList();
     }
 

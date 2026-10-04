@@ -33,6 +33,7 @@ public record DevTestAttributeDefinitionRequest(
         @Nullable Boolean isRequired,
         @Nullable Boolean isInfobox,
         @Nullable Boolean isFilterable,
+        @Nullable Boolean isBadge,
         @Nullable SubjectKind refKind,
         @Nullable BigDecimal minValue,
         @Nullable BigDecimal maxValue,

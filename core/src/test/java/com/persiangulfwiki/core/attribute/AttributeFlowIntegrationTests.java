@@ -2,7 +2,9 @@ package com.persiangulfwiki.core.attribute;
 
 import com.jayway.jsonpath.JsonPath;
 import com.persiangulfwiki.core.TestcontainersConfiguration;
+import com.persiangulfwiki.core.attribute.entity.AttributeDefinition;
 import com.persiangulfwiki.core.attribute.entity.AttributeGroup;
+import com.persiangulfwiki.core.attribute.repository.AttributeDefinitionRepository;
 import com.persiangulfwiki.core.attribute.repository.AttributeGroupRepository;
 import com.persiangulfwiki.core.audit.entity.AuditLog;
 import com.persiangulfwiki.core.audit.repository.AuditLogRepository;
@@ -71,6 +73,9 @@ class AttributeFlowIntegrationTests {
     private AttributeGroupRepository attributeGroupRepository;
 
     @Autowired
+    private AttributeDefinitionRepository attributeDefinitionRepository;
+
+    @Autowired
     private AuditLogRepository auditLogRepository;
 
     // --- public read ------------------------------------------------------------------------
@@ -83,7 +88,7 @@ class AttributeFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.label.value").value("Species"))
                 .andExpect(jsonPath("$.data.label.isFallback").value(false))
                 .andExpect(jsonPath("$.data.groups[*].key")
-                        .value(contains("classification", "conservation", "ecology", "morphology")))
+                        .value(contains("classification", "conservation", "ecology", "morphology", "media")))
                 .andExpect(jsonPath("$.data.groups[0].attributes[*].key").value(contains("scientific_name", "category")))
                 .andExpect(jsonPath("$.data.groups[0].attributes[0].valueType").value("PLAIN_TEXT"))
                 .andExpect(jsonPath("$.data.groups[0].attributes[0].isRequired").value(true))
@@ -97,7 +102,15 @@ class AttributeFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.groups[2].attributes[*].key").value(contains("habitat", "species_features")))
                 .andExpect(jsonPath("$.data.groups[2].attributes[0].isMulti").value(true))
                 .andExpect(jsonPath("$.data.groups[3].attributes[0].key").value("max_length"))
-                .andExpect(jsonPath("$.data.groups[3].attributes[0].unit").value("cm"));
+                .andExpect(jsonPath("$.data.groups[3].attributes[0].unit").value("cm"))
+                .andExpect(jsonPath("$.data.groups[1].attributes[0].isBadge").value(true))
+                .andExpect(jsonPath("$.data.groups[1].attributes[0].isDerived").value(false))
+                .andExpect(jsonPath("$.data.groups[4].label.value").value("Media"))
+                .andExpect(jsonPath("$.data.groups[4].attributes[*].key").value(contains("has_360_tour")))
+                .andExpect(jsonPath("$.data.groups[4].attributes[0].valueType").value("BOOL"))
+                .andExpect(jsonPath("$.data.groups[4].attributes[0].isDerived").value(true))
+                .andExpect(jsonPath("$.data.groups[4].attributes[0].isFilterable").value(true))
+                .andExpect(jsonPath("$.data.groups[4].attributes[0].label.value").value("Has a 360° tour"));
     }
 
     @Test
@@ -330,6 +343,54 @@ class AttributeFlowIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(fieldPath + ".isDeprecated").value(contains(true)))
                 .andExpect(jsonPath(fieldPath + ".options[0].isDeprecated").value(contains(true)));
+    }
+
+    // A derived field keeps the type its computation relies on and can never be required; a badge
+    // is a single-valued choice field.
+    @Test
+    void derivedFieldsKeepTheirTypeAndBadgesMustBeSingleValuedChoices() throws Exception {
+        seedAdmin("atfadmin7", "atf-admin7@example.com");
+        Cookie accessCookie = loginAccessCookie("atf-admin7@example.com");
+        AttributeDefinition tour = attributeDefinitionRepository.findAll().stream()
+                .filter(definition -> definition.getKey().equals("has_360_tour"))
+                .findFirst()
+                .orElseThrow();
+        String tourPatch = """
+                {"valueType": "%s", "groupId": "%s", "sort": 10, "isFilterable": true, "isRequired": %s,
+                 "kinds": ["ISLAND", "PORT", "OIL_FIELD", "SPECIES", "STRAIT", "FISHING_GROUND", "PROVINCE"]}""";
+
+        adminWrite(patch("/api/admin/attribute-definitions/" + tour.getId()), accessCookie,
+                tourPatch.formatted("DATE", tour.getGroupId(), false))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("ATTRIBUTE_IS_DERIVED"));
+        adminWrite(patch("/api/admin/attribute-definitions/" + tour.getId()), accessCookie,
+                tourPatch.formatted("BOOL", tour.getGroupId(), true))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("ATTRIBUTE_IS_DERIVED"));
+        // The seeded state written back, which is allowed: only the type and the required flag are
+        // held, so an admin may still move or re-sort a derived field.
+        adminWrite(patch("/api/admin/attribute-definitions/" + tour.getId()), accessCookie,
+                tourPatch.formatted("BOOL", tour.getGroupId(), false))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.isDerived").value(true));
+
+        UUID groupId = seededGroupId("geography");
+        adminWrite(post("/api/admin/attribute-definitions"), accessCookie, """
+                {"key": "%s", "valueType": "ENUM", "isMulti": true, "isBadge": true, "groupId": "%s",
+                 "kinds": ["PROVINCE"], "labels": {"fa": "x"}}""".formatted(uniqueKey(), groupId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[*].field").value(contains("isBadge")));
+        adminWrite(post("/api/admin/attribute-definitions"), accessCookie, """
+                {"key": "%s", "valueType": "NUMBER", "isBadge": true, "groupId": "%s",
+                 "kinds": ["PROVINCE"], "labels": {"fa": "x"}}""".formatted(uniqueKey(), groupId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[*].field").value(contains("isBadge")));
+        adminWrite(post("/api/admin/attribute-definitions"), accessCookie, """
+                {"key": "%s", "valueType": "ENUM", "isBadge": true, "groupId": "%s",
+                 "kinds": ["PROVINCE"], "labels": {"fa": "x"}}""".formatted(uniqueKey(), groupId))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.isBadge").value(true))
+                .andExpect(jsonPath("$.data.isDerived").value(false));
     }
 
     @Test

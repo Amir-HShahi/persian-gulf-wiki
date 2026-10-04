@@ -25,6 +25,8 @@ public record AttributeDefinitionResponse(
         @Nullable BigDecimal minValue,
         @Nullable BigDecimal maxValue,
         boolean isDeprecated,
+        boolean isDerived,
+        boolean isBadge,
         List<SubjectKind> kinds,
         LabelValuesResponse labels) {
 }

@@ -135,6 +135,7 @@ public class DevTestAttributeController {
                 .isRequired(Boolean.TRUE.equals(request.isRequired()))
                 .isInfobox(Boolean.TRUE.equals(request.isInfobox()))
                 .isFilterable(Boolean.TRUE.equals(request.isFilterable()))
+                .isBadge(Boolean.TRUE.equals(request.isBadge()))
                 .refKind(request.refKind())
                 .minValue(request.minValue())
                 .maxValue(request.maxValue())

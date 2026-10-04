@@ -22,4 +22,8 @@ public interface AttributeTypeSpec {
     @Nullable BigDecimal maxValue();
 
     @Nullable Boolean isFilterable();
+
+    @Nullable Boolean isMulti();
+
+    @Nullable Boolean isBadge();
 }

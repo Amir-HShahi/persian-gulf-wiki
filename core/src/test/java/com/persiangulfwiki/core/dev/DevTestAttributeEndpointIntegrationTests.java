@@ -82,6 +82,22 @@ class DevTestAttributeEndpointIntegrationTests {
         }
     }
 
+    // The badge flag phase 5 added, under the same type rule as the admin endpoint.
+    @Test
+    void mintsABadgeDefinitionOnlyOnASingleValuedChoiceField() throws Exception {
+        String body = mintDefinition("{\"valueType\": \"ENUM\", \"isBadge\": true, \"kinds\": [\"FISHING_GROUND\"]}")
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        AttributeDefinition minted = attributeDefinitionRepository
+                .findById(UUID.fromString(JsonPath.read(body, "$.definitionId"))).orElseThrow();
+        assertThat(minted.isBadge()).isTrue();
+        assertThat(minted.isDerived()).isFalse();
+
+        mintDefinition("{\"valueType\": \"ENUM\", \"isMulti\": true, \"isBadge\": true}")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[*].field").value(contains("isBadge")));
+    }
+
     @Test
     void mintsDefinitionsWithTypeRulesStillEnforced() throws Exception {
         mintDefinition("{}")

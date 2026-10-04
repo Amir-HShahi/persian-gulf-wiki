@@ -101,6 +101,16 @@ public class AttributeDefinition {
     @Column(name = "is_deprecated", nullable = false)
     private boolean isDeprecated;
 
+    // Computed at read time from other data, never carried by a revision; set only by migrations,
+    // since the code computing it is keyed by `key` (see V27 and DerivedAttributes).
+    @Column(name = "is_derived", nullable = false, updatable = false)
+    private boolean isDerived;
+
+    // Shown as a code on the subject's listing card. Only on a single-valued ENUM (V27).
+    @Setter
+    @Column(name = "is_badge", nullable = false)
+    private boolean isBadge;
+
     // The kinds this field applies to; a field such as `province` is shared across several.
     @ElementCollection
     @CollectionTable(name = "attribute_definition_kinds", joinColumns = @JoinColumn(name = "attribute_id"))

@@ -199,11 +199,16 @@ public class SubjectPayloadValidationService {
                 violations.add(violation(path + ".attribute", "attributeDuplicate"));
                 continue;
             }
+            // Decision 14: a derived value is computed at read time, never typed in.
+            if (definition.isDerived()) {
+                violations.add(violation(path + ".attribute", "attributeDerived", fact.attribute()));
+                continue;
+            }
             resolved.addAll(checkFact(definition, fact, path, context, violations));
         }
 
         definitions.values().stream()
-                .filter(definition -> definition.isRequired() && !definition.isDeprecated())
+                .filter(definition -> definition.isRequired() && !definition.isDeprecated() && !definition.isDerived())
                 .filter(definition -> !seenKeys.contains(definition.getKey()))
                 .map(AttributeDefinition::getKey)
                 .sorted()

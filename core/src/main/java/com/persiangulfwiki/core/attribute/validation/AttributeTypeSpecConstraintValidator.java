@@ -8,7 +8,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-// Mirrors the cross-column CHECKs on attribute_definitions (V22). Without it a violation would
+// Mirrors the cross-column CHECKs on attribute_definitions (V22, V27). Without it a violation would
 // reach the database and come back as a generic 409 constraint error instead of a 400 naming the
 // field. Reports every unmet rule in one pass.
 public class AttributeTypeSpecConstraintValidator
@@ -42,6 +42,11 @@ public class AttributeTypeSpecConstraintValidator
         }
         if (Boolean.TRUE.equals(spec.isFilterable()) && !spec.valueType().canBeFiltered()) {
             violations.put("isFilterable", "{validation.attributeFilterable.type}");
+        }
+        // Mirrors ck_attribute_definitions_badge_single_enum (V27): a card shows one code per badge.
+        if (Boolean.TRUE.equals(spec.isBadge())
+                && (spec.valueType() != AttributeValueType.ENUM || Boolean.TRUE.equals(spec.isMulti()))) {
+            violations.put("isBadge", "{validation.attributeBadge.type}");
         }
 
         if (violations.isEmpty()) {
