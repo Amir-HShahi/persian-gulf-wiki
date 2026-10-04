@@ -2,6 +2,7 @@ package com.persiangulfwiki.core.dev;
 
 import com.persiangulfwiki.core.attribute.repository.AttributeDefinitionRepository;
 import com.persiangulfwiki.core.attribute.repository.AttributeGroupRepository;
+import com.persiangulfwiki.core.subject.service.SubjectInfoboxCacheService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ public class DevTestAttributeSweeper {
 
     private final AttributeDefinitionRepository attributeDefinitionRepository;
     private final AttributeGroupRepository attributeGroupRepository;
+    private final SubjectInfoboxCacheService subjectInfoboxCacheService;
 
     @Value("${app.dev.test-attribute-ttl-hours}")
     private final long testAttributeTtlHours;
@@ -53,6 +55,8 @@ public class DevTestAttributeSweeper {
         if (definitions + groups > 0) {
             log.info("swept {} minted test definition(s) and {} group(s) older than the {}h TTL",
                     definitions, groups, testAttributeTtlHours);
+            // Cached infoboxes may show what was just deleted.
+            subjectInfoboxCacheService.evictAll();
         }
         return definitions + groups;
     }

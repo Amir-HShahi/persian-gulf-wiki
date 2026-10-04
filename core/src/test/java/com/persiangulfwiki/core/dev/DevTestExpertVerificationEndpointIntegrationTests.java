@@ -24,6 +24,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -157,5 +158,27 @@ class DevTestExpertVerificationEndpointIntegrationTests {
         mockMvc.perform(delete("/api/dev/test-subjects/{id}", id(live, "$.subjectId")))
                 .andExpect(status().isNoContent());
         assertThat(expertVerificationRepository.existsById(handMadeId)).isFalse();
+    }
+
+    // The fixture routes write past the services that clear the cached infoboxes, so the dev
+    // profile clears them after every fixture write: a mark minted here, and a test subject deleted
+    // here, both show on the very next read.
+    @Test
+    void fixtureWritesReachACachedInfobox() throws Exception {
+        String live = mintRevision("""
+                {"status": "APPROVED", "payload": %s}""".formatted(NAMED.formatted("جزیرهٔ کش‌شده")));
+        UUID subjectId = id(live, "$.subjectId");
+
+        mockMvc.perform(get("/api/subjects/{id}/infobox", subjectId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.revision.verification.state").value("NONE"));
+        mintVerificationOf(id(live, "$.revisionId")).andExpect(status().isCreated());
+        mockMvc.perform(get("/api/subjects/{id}/infobox", subjectId))
+                .andExpect(jsonPath("$.data.revision.verification.state").value("VERIFIED"));
+
+        mockMvc.perform(delete("/api/dev/test-subjects/{id}", subjectId)).andExpect(status().isNoContent());
+        mockMvc.perform(get("/api/subjects/{id}/infobox", subjectId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("SUBJECT_NOT_FOUND"));
     }
 }
