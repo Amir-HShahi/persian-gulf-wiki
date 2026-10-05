@@ -5,6 +5,8 @@ import com.persiangulfwiki.core.article.entity.TranslationState;
 
 import java.util.UUID;
 
+import tools.jackson.databind.JsonNode;
+
 // Every field optional, so the common case is a bare `{}` (or no body at all): a subject-less
 // article in "fa" with a generated slug, a DRAFT first revision, and an auto-minted author.
 //
@@ -18,6 +20,10 @@ import java.util.UUID;
 //
 // authorUserId is nullable; see DevTestArticleController.resolveAuthorUserId for what
 // happens when it's omitted.
+//
+// isMain null follows the real rule (an APPROVED article becomes main when its subject has none);
+// false never makes it main, so "published but not main" is reachable on a subject with no main.
+// body is stored as given, unvalidated, so a subject link to a missing subject is reachable too.
 public record DevTestArticleRequest(
         UUID subjectId,
         String canonicalLanguage,
@@ -26,5 +32,7 @@ public record DevTestArticleRequest(
         String title,
         String summary,
         UUID authorUserId,
-        TranslationState translationState) {
+        TranslationState translationState,
+        Boolean isMain,
+        JsonNode body) {
 }

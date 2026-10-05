@@ -3,6 +3,7 @@ package com.persiangulfwiki.core.dev;
 import com.persiangulfwiki.core.article.entity.Article;
 import com.persiangulfwiki.core.article.exception.ArticleNotFoundException;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
+import com.persiangulfwiki.core.article.service.SubjectArticleService;
 import com.persiangulfwiki.core.dev.dto.DevTestArticleRequest;
 import com.persiangulfwiki.core.dev.dto.DevTestArticleResponse;
 
@@ -50,14 +51,20 @@ public class DevTestArticleController {
 
     private final ArticleRepository articleRepository;
     private final DevTestArticleFixtures articleFixtures;
+    private final SubjectArticleService subjectArticleService;
 
     @Operation(summary = "Mint a disposable test article", description = "Creates an article, its canonical translation and that translation's first "
             + "revision, all marked as machine-minted. Every field of the request body is "
             + "optional. revisionStatus defaults to DRAFT but accepts any status, including "
             + "APPROVED with no prior moderation history -- a state the real submit/review "
-            + "flow cannot produce.")
+            + "flow cannot produce. isMain defaults to the real rule (an APPROVED article bound to a subject "
+            + "with no main article becomes main); false keeps it from being main, true makes it main whatever "
+            + "its status. body is stored as given, unchecked, so it may link to a subject that does not exist.")
     @ApiResponse(responseCode = "201", description = "The created article, translation and revision.")
+    @ApiResponse(responseCode = "400", description = "isMain is true but no subjectId was given.")
     @ApiResponse(responseCode = "404", description = "subjectId was supplied but does not name an existing subject.")
+    @ApiResponse(responseCode = "409", description = "isMain is true but the subject already has a main article; this "
+            + "endpoint does not demote it.")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Transactional
@@ -66,13 +73,14 @@ public class DevTestArticleController {
     public DevTestArticleResponse mint(@RequestBody(required = false) DevTestArticleRequest request) {
         return articleFixtures.mint(request != null
                 ? request
-                : new DevTestArticleRequest(null, null, null, null, null, null, null, null));
+                : new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null));
     }
 
     @Operation(summary = "Delete a minted test article", description = "Deletes an article previously created by this endpoint. Refuses anything "
             + "else -- an article created through the normal endpoint is reported as 404 "
             + "rather than deleted. Idempotent: deleting an id twice returns 404 the second "
-            + "time. The canonical translation and its revisions are removed along with it.")
+            + "time. The canonical translation and its revisions are removed along with it. If it was its "
+            + "subject's main article, the subject's oldest remaining published article becomes main.")
     @ApiResponse(responseCode = "204", description = "The article was deleted.")
     @ApiResponse(responseCode = "404", description = "No such article, or the id names one this endpoint did not mint.")
     @DeleteMapping("/{articleId}")
@@ -91,5 +99,8 @@ public class DevTestArticleController {
         // ON DELETE CASCADE on their parents (see V16) -- so the canonical translation and
         // its revision(s) go with it without an explicit cleanup pass here.
         articleRepository.delete(article);
+        if (article.isMain()) {
+            subjectArticleService.promoteWhereMissing();
+        }
     }
 }

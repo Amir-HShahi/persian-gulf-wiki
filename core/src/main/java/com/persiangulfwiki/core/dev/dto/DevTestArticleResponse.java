@@ -8,5 +8,6 @@ import java.util.UUID;
 // translation's first revision -- that a test can drive the real /api/articles endpoints
 // afterward (e.g. PATCH .../revisions/{revisionId}) without a second lookup.
 public record DevTestArticleResponse(
-        UUID articleId, UUID translationId, UUID revisionId, String language, String slug, RevisionStatus status) {
+        UUID articleId, UUID translationId, UUID revisionId, String language, String slug, RevisionStatus status,
+        boolean isMain) {
 }

@@ -15,6 +15,7 @@ import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeGroupKeyEx
 import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeKeyException;
 import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeOptionCodeException;
 import com.persiangulfwiki.core.dev.exception.DevTestAttributeGroupInUseException;
+import com.persiangulfwiki.core.dev.exception.DevTestMainArticleTakenException;
 import com.persiangulfwiki.core.dev.exception.DevTestSubjectRevisionLiveException;
 import com.persiangulfwiki.core.label.exception.InvalidLabelReferentException;
 import com.persiangulfwiki.core.label.exception.LabelNotFoundException;
@@ -32,6 +33,7 @@ import com.persiangulfwiki.core.moderation.exception.InvalidModerationTaskStateE
 import com.persiangulfwiki.core.moderation.exception.MissingDecisionReasonException;
 import com.persiangulfwiki.core.moderation.exception.ModerationTaskNotFoundException;
 import com.persiangulfwiki.core.common.exception.TooManyRequestsException;
+import com.persiangulfwiki.core.dev.exception.InvalidDevTestArticleRequestException;
 import com.persiangulfwiki.core.dev.exception.InvalidDevTestMediaRequestException;
 import com.persiangulfwiki.core.media.exception.DuplicateMediaException;
 import com.persiangulfwiki.core.media.exception.IncompleteMediaMetadataException;
@@ -599,6 +601,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(InvalidDevTestMediaRequestException.class)
     public ProblemDetail handleInvalidDevTestMediaRequest(InvalidDevTestMediaRequestException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidDevTestMediaRequest"), "INVALID_DEV_TEST_MEDIA_REQUEST", request);
+    }
+
+    @ExceptionHandler(InvalidDevTestArticleRequestException.class)
+    public ProblemDetail handleInvalidDevTestArticleRequest(InvalidDevTestArticleRequestException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidDevTestArticleRequest"), "INVALID_DEV_TEST_ARTICLE_REQUEST", request);
+    }
+
+    @ExceptionHandler(DevTestMainArticleTakenException.class)
+    public ProblemDetail handleDevTestMainArticleTaken(DevTestMainArticleTakenException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestMainArticleTaken"), "DEV_TEST_MAIN_ARTICLE_TAKEN", request);
     }
 
     @ExceptionHandler(DevTestAttributeGroupInUseException.class)

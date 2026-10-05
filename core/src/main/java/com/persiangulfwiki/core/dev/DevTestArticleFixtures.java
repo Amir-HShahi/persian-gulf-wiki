@@ -10,6 +10,8 @@ import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 import com.persiangulfwiki.core.dev.dto.DevTestArticleRequest;
 import com.persiangulfwiki.core.dev.dto.DevTestArticleResponse;
+import com.persiangulfwiki.core.dev.exception.DevTestMainArticleTakenException;
+import com.persiangulfwiki.core.dev.exception.InvalidDevTestArticleRequestException;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 import com.persiangulfwiki.core.user.entity.User;
@@ -21,6 +23,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
+
+import tools.jackson.databind.ObjectMapper;
 
 // The one place a marked article + canonical translation + first revision is minted, shared by
 // DevTestArticleController and by the media and moderation fixture controllers, which mint a
@@ -58,6 +62,7 @@ class DevTestArticleFixtures {
     private final ArticleRevisionRepository articleRevisionRepository;
     private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
+    private final ObjectMapper objectMapper;
 
     DevTestArticleResponse mint(DevTestArticleRequest request) {
         String slug = request.slug() != null ? request.slug() : DevTestFixtures.MARKER + "-article-" + randomSlug();
@@ -74,11 +79,13 @@ class DevTestArticleFixtures {
             throw new SubjectNotFoundException();
         }
         UUID authorUserId = resolveAuthorUserId(request.authorUserId());
+        boolean isMain = resolveIsMain(request, revisionStatus);
 
         Article article = articleRepository.save(Article.builder()
                 .subjectId(request.subjectId())
                 .canonicalLanguage(canonicalLanguage)
                 .createdByUserId(authorUserId)
+                .isMain(isMain)
                 .devMarker(DevTestFixtures.MARKER)
                 .build());
 
@@ -94,7 +101,7 @@ class DevTestArticleFixtures {
                 .revisionNumber(1)
                 .parentRevisionId(null)
                 .title(title)
-                .body(MINIMAL_BODY_JSON)
+                .body(request.body() != null ? objectMapper.writeValueAsString(request.body()) : MINIMAL_BODY_JSON)
                 .summary(summary)
                 .status(revisionStatus)
                 .authorId(authorUserId)
@@ -114,8 +121,34 @@ class DevTestArticleFixtures {
             articleTranslationRepository.save(translation);
         }
 
-        return new DevTestArticleResponse(
-                article.getId(), translation.getId(), revision.getId(), canonicalLanguage, slug, revisionStatus);
+        return new DevTestArticleResponse(article.getId(), translation.getId(), revision.getId(), canonicalLanguage,
+                slug, revisionStatus, isMain);
+    }
+
+    // Null applies the real rule (SubjectArticleService.promoteIfSubjectHasNoMain): an APPROVED
+    // article is main when its subject has none yet. True never demotes an existing main article,
+    // which may not be one this fixture minted.
+    private boolean resolveIsMain(DevTestArticleRequest request, RevisionStatus revisionStatus) {
+        UUID subjectId = request.subjectId();
+        if (Boolean.FALSE.equals(request.isMain())) {
+            return false;
+        }
+        if (subjectId == null) {
+            if (Boolean.TRUE.equals(request.isMain())) {
+                throw new InvalidDevTestArticleRequestException("a main article needs a subject");
+            }
+            return false;
+        }
+        if (request.isMain() == null && revisionStatus != RevisionStatus.APPROVED) {
+            return false;
+        }
+        // The lock real approvals take, so a concurrent one can't also make an article main.
+        subjectRepository.findByIdForUpdate(subjectId);
+        boolean hasMain = articleRepository.findMainBySubjectId(subjectId).isPresent();
+        if (hasMain && Boolean.TRUE.equals(request.isMain())) {
+            throw new DevTestMainArticleTakenException();
+        }
+        return !hasMain;
     }
 
     // article_revisions.author_id is NOT NULL with no ON DELETE action (V16) -- inserting an
