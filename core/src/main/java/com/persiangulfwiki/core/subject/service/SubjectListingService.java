@@ -83,6 +83,7 @@ public class SubjectListingService {
     private static final String KEY_PREFIX = "validation.subjectFilter.";
 
     private final SubjectRepository subjectRepository;
+    private final SubjectService subjectService;
     private final SubjectFactRepository subjectFactRepository;
     private final SubjectLiveRevisionRepository subjectLiveRevisionRepository;
     private final AttributeDefinitionRepository attributeDefinitionRepository;
@@ -120,7 +121,8 @@ public class SubjectListingService {
     @Transactional(readOnly = true)
     public SubjectReferencesResponse referencedBy(UUID subjectId, String attributeKey, @Nullable String kindFilter,
             String language, Pageable pageable) {
-        Subject subject = subjectRepository.findById(subjectId).orElseThrow(SubjectNotFoundException::new);
+        Subject subject = subjectRepository.findByIdAndDeletedAtIsNull(subjectId)
+                .orElseThrow(SubjectNotFoundException::new);
         SubjectKind kind = kindFilter == null ? null : SubjectService.parseKind(kindFilter);
         AttributeDefinition definition = attributeDefinitionRepository.findByKey(attributeKey)
                 .orElseThrow(() -> new InvalidSubjectFilterException(
@@ -215,6 +217,8 @@ public class SubjectListingService {
         return new OptionCondition(definition.getKey(), definition.getId(), optionIds);
     }
 
+    // A merged-away subject's id (from a bookmarked filter URL, say) selects the subject it was merged
+    // into; any other deleted subject is unknown, as it is in the facet's options.
     private Condition referenceCondition(AttributeDefinition definition, String parameter, Set<String> values,
             List<Violation> violations) {
         Map<String, UUID> idsByValue = new LinkedHashMap<>();
@@ -225,8 +229,10 @@ public class SubjectListingService {
                 violations.add(violation(parameter, "subjectUnknown", value));
             }
         }
+        Map<UUID, UUID> redirects = subjectService.redirectTargets(idsByValue.values());
+        idsByValue.replaceAll((_, id) -> redirects.getOrDefault(id, id));
         Set<UUID> ofRefKind = subjectRepository.findAllById(idsByValue.values()).stream()
-                .filter(subject -> subject.getKind() == definition.getRefKind())
+                .filter(subject -> subject.getKind() == definition.getRefKind() && !subject.isDeleted())
                 .map(Subject::getId)
                 .collect(Collectors.toSet());
         idsByValue.forEach((value, id) -> {
@@ -355,12 +361,13 @@ public class SubjectListingService {
                 .toList();
     }
 
-    // Every subject of the referenced kind (every province, say), by name in the reader's language.
+    // Every undeleted subject of the referenced kind (every province, say), by name in the reader's
+    // language.
     private List<SubjectFacetOptionResponse> referenceFacet(AttributeDefinition definition, SubjectFacetFilter others,
             String language) {
         SubjectKind refKind = definition.getRefKind();
         List<UUID> candidates = refKind == null ? List.of()
-                : subjectRepository.findByKind(refKind).stream().map(Subject::getId).toList();
+                : subjectRepository.findByKindAndDeletedAtIsNull(refKind).stream().map(Subject::getId).toList();
         Map<UUID, Long> counts = subjectRepository.countByReferencedSubject(definition.getId(), others);
         Map<UUID, LocalizedLabelResponse> names = labelService.resolveSubjects(candidates, language);
         Collator collator = Collator.getInstance(Locale.forLanguageTag(language));

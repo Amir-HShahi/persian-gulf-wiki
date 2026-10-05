@@ -18,6 +18,8 @@ public interface ArticleRepository extends JpaRepository<Article, UUID> {
 
     Page<Article> findBySubjectId(UUID subjectId, Pageable pageable);
 
+    boolean existsBySubjectId(UUID subjectId);
+
     @Query("select a from Article a where a.subjectId = :subjectId and a.isMain = true")
     Optional<Article> findMainBySubjectId(@Param("subjectId") UUID subjectId);
 
@@ -45,6 +47,16 @@ public interface ArticleRepository extends JpaRepository<Article, UUID> {
                                        where t.article_id = a.id and t.current_revision_id is not null)
                          order by a.subject_id, a.created_at, a.id)""", nativeQuery = true)
     int promoteMainArticlesWhereMissing();
+
+    // A merge's move of the source's articles, main flag and all. Run demoteMainBySubjectId on the
+    // source first when the target already has a main article, or uq_articles_main_per_subject fails.
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("update Article a set a.subjectId = :toSubjectId where a.subjectId = :fromSubjectId")
+    int moveToSubject(@Param("fromSubjectId") UUID fromSubjectId, @Param("toSubjectId") UUID toSubjectId);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("update Article a set a.isMain = false where a.subjectId = :subjectId and a.isMain = true")
+    int demoteMainBySubjectId(@Param("subjectId") UUID subjectId);
 
     long deleteByDevMarkerAndCreatedAtBefore(String devMarker, Instant threshold);
 }

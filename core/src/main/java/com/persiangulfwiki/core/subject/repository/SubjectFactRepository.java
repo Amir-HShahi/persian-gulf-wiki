@@ -23,6 +23,35 @@ public interface SubjectFactRepository extends JpaRepository<SubjectFact, UUID> 
 
     boolean existsByAttributeId(UUID attributeId);
 
+    // Any rank, any subject (deleted ones too): value_ref_subject_id has no ON DELETE action, so each
+    // of these would block a hard delete anyway.
+    boolean existsByValueRefSubjectId(UUID subjectId);
+
+    // A merge's repointing of other subjects' references (`excludedSubjectId` is the target, whose own
+    // facts the merge has just rewritten from its payload). Can leave a subject holding the same
+    // reference twice; removeDuplicateReferences cleans that up.
+    @Modifying(flushAutomatically = true)
+    @Query(value = """
+            update subject_facts set value_ref_subject_id = :toSubjectId
+            where value_ref_subject_id = :fromSubjectId and subject_id <> :excludedSubjectId
+            """, nativeQuery = true)
+    int repointReferences(@Param("fromSubjectId") UUID fromSubjectId, @Param("toSubjectId") UUID toSubjectId,
+            @Param("excludedSubjectId") UUID excludedSubjectId);
+
+    // Where one field of one subject refers to `subjectId` more than once, keeps the best of those
+    // values -- PREFERRED over NORMAL, then the earliest -- and deletes the rest. A single-valued field
+    // never ends up with two PREFERRED values: before the repointing it had at most one.
+    @Modifying(flushAutomatically = true)
+    @Query(value = """
+            delete from subject_facts f
+            using subject_facts g
+            where f.value_ref_subject_id = :subjectId and g.value_ref_subject_id = :subjectId
+              and g.subject_id = f.subject_id and g.attribute_id = f.attribute_id and g.id <> f.id
+              and ((g.rank = 'PREFERRED' and f.rank = 'NORMAL')
+                   or (g.rank = f.rank and (g.sort < f.sort or (g.sort = f.sort and g.id < f.id))))
+            """, nativeQuery = true)
+    int removeDuplicateReferences(@Param("subjectId") UUID subjectId);
+
     List<SubjectFact> findBySubjectIdAndRankOrderBySortAsc(UUID subjectId, FactRank rank);
 
     // The listing cards' badge codes: each PREFERRED value of a badge field, in field order.

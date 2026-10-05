@@ -95,7 +95,8 @@ public class ArticleController {
             + "and that translation's first draft revision, in a single step -- there is no "
             + "separate call to add the initial content afterwards. `subjectId` is optional: the "
             + "article's `subjectKind` is always that subject's kind, and null when no subject is "
-            + "given. `slug` must not already be in use by any translation of any article. A subject link in `body` "
+            + "given. A `subjectId` of a subject that was merged into another binds the article to that other "
+            + "subject (see the response's `subjectId`). `slug` must not already be in use by any translation of any article. A subject link in `body` "
             + "(`{\"type\": \"subjectLink\", \"subjectId\": \"…\"}`, anywhere in the tree) must name an existing "
             + "subject; an article may hold at most 1000 of them.")
     @ApiResponse(responseCode = "201", description = "The created article.")
@@ -105,7 +106,8 @@ public class ArticleController {
     @ApiResponse(responseCode = "403", description = "Either the account's email address is not yet verified, or the CSRF header is "
             + "missing or does not match the cookie -- both surface as a plain 403; read `detail` "
             + "for which one occurred.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    @ApiResponse(responseCode = "404", description = "`subjectId` was given but no subject with that id exists.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "404", description = "`subjectId` was given but no subject with that id exists, or it has "
+            + "been deleted.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "409", description = "`slug` is already in use by another translation.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = "CSRF token. Call GET /api/auth/csrf first to receive the XSRF-TOKEN cookie, "
             + "then encode its value and send the encoded result in this header — see the API "
@@ -152,7 +154,8 @@ public class ArticleController {
             + "(case-insensitive); or `page`/`size` is outside "
             + "its allowed range.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "language", required = true, description = "BCP-47 language tag of the translation to list, e.g. \"fa\", \"en\", \"ar\". Matched exactly.")
-    @Parameter(name = "subjectId", description = "Optional filter: only articles bound to this subject.")
+    @Parameter(name = "subjectId", description = "Optional filter: only articles bound to this subject. A subject that "
+            + "was merged into another filters on that other subject, which now holds its articles.")
     @Parameter(name = "subjectKind", description = "Optional filter: only articles whose subject is of this kind -- ISLAND, PORT, "
             + "OIL_FIELD, SPECIES, STRAIT, FISHING_GROUND or PROVINCE (case-insensitive). Articles with "
             + "no subject never match it.")

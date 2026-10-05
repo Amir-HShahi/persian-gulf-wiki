@@ -7,6 +7,7 @@ import com.persiangulfwiki.core.label.dto.LocalizedLabelResponse;
 import com.persiangulfwiki.core.label.service.LabelService;
 import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
+import com.persiangulfwiki.core.subject.service.SubjectService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import tools.jackson.databind.JsonNode;
@@ -46,11 +48,14 @@ public class SubjectLinkService {
     private static final String ROOT_PATH = "body";
 
     private final SubjectRepository subjectRepository;
+    private final SubjectService subjectService;
     private final LabelService labelService;
     private final SubjectArticleService subjectArticleService;
 
     /**
-     * Checks every subject link in {@code body} names an existing subject.
+     * Checks every subject link in {@code body} names an existing subject. A deleted or merged-away
+     * one counts: an article that already links to it must stay editable, and on read the link shows
+     * the merge target, or plain text while the subject is deleted.
      *
      * @throws InvalidArticleBodyException listing each bad link by its path in the body, or the body
      *         itself when it holds more than {@value #MAX_SUBJECT_LINKS} links
@@ -82,8 +87,9 @@ public class SubjectLinkService {
 
     /**
      * What each subject linked from {@code bodies} shows to a reader of {@code language}: kind, name
-     * and page slug. Links to subjects that no longer exist, and malformed ones (only a dev fixture
-     * can store those), are absent.
+     * and page slug, keyed by the id in the body. A link to a merged-away subject shows the subject it
+     * was merged into. Links to subjects that no longer exist or are deleted, and malformed ones (only
+     * a dev fixture can store those), are absent.
      */
     @Transactional(readOnly = true)
     public Map<UUID, SubjectLinkResponse> resolve(Collection<JsonNode> bodies, String language) {
@@ -97,16 +103,24 @@ public class SubjectLinkService {
         if (ids.isEmpty()) {
             return Map.of();
         }
-        List<Subject> subjects = subjectRepository.findAllById(ids);
-        List<UUID> found = subjects.stream().map(Subject::getId).toList();
-        Map<UUID, LocalizedLabelResponse> names = labelService.resolveSubjects(found, language);
-        Map<UUID, String> slugs = subjectArticleService.mainArticleSlugs(found, language);
+        // Body id -> the subject the link shows. Bodies are history and never rewritten, so a merge
+        // is followed here, on every read.
+        Map<UUID, UUID> redirects = subjectService.redirectTargets(ids);
+        Map<UUID, UUID> shownByLinked = new HashMap<>();
+        ids.forEach(id -> shownByLinked.put(id, redirects.getOrDefault(id, id)));
+        Map<UUID, Subject> shown = subjectRepository.findAllById(Set.copyOf(shownByLinked.values())).stream()
+                .filter(subject -> !subject.isDeleted())
+                .collect(Collectors.toMap(Subject::getId, Function.identity()));
+        Map<UUID, LocalizedLabelResponse> names = labelService.resolveSubjects(shown.keySet(), language);
+        Map<UUID, String> slugs = subjectArticleService.mainArticleSlugs(shown.keySet(), language);
 
         Map<UUID, SubjectLinkResponse> links = new HashMap<>();
-        for (Subject subject : subjects) {
-            links.put(subject.getId(),
-                    new SubjectLinkResponse(subject.getKind(), names.get(subject.getId()), slugs.get(subject.getId())));
-        }
+        shownByLinked.forEach((linkedId, shownId) -> {
+            Subject subject = shown.get(shownId);
+            if (subject != null) {
+                links.put(linkedId, new SubjectLinkResponse(subject.getKind(), names.get(shownId), slugs.get(shownId)));
+            }
+        });
         return Map.copyOf(links);
     }
 

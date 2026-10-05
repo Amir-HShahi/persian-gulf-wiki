@@ -19,8 +19,11 @@ import com.persiangulfwiki.core.subject.entity.SubjectLiveRevision;
 import com.persiangulfwiki.core.subject.entity.SubjectRevision;
 import com.persiangulfwiki.core.subject.entity.SubjectRevisionStatus;
 import com.persiangulfwiki.core.subject.event.SubjectRevisionSubmittedEvent;
+import com.persiangulfwiki.core.subject.exception.InvalidSubjectPayloadException;
 import com.persiangulfwiki.core.subject.exception.NotSubjectRevisionAuthorException;
 import com.persiangulfwiki.core.subject.exception.StaleSubjectRevisionException;
+import com.persiangulfwiki.core.subject.exception.SubjectDeletedException;
+import com.persiangulfwiki.core.subject.exception.SubjectMergeInvalidException;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotEditableException;
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotFoundException;
@@ -60,6 +63,10 @@ import tools.jackson.databind.ObjectMapper;
 // live -- approval re-checks under the subject row lock, since another edit can be approved
 // between this one's submit and its decision. The author then starts a new edit from the current
 // revision.
+//
+// A deleted subject (soft-deleted or merged away) takes no edits: starting, changing, submitting or
+// approving one of its revisions is a 409. Rejecting or sending one back still works, so pending
+// work on it can be cleared from the queue.
 @Service
 @RequiredArgsConstructor
 public class SubjectRevisionService {
@@ -69,6 +76,7 @@ public class SubjectRevisionService {
     private final SubjectRepository subjectRepository;
     private final SubjectPayloadValidationService subjectPayloadValidationService;
     private final SubjectReadModelService subjectReadModelService;
+    private final SubjectService subjectService;
     private final SourceService sourceService;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -91,13 +99,15 @@ public class SubjectRevisionService {
 
     /**
      * Starts an edit as a DRAFT copy of the live payload, unvalidated: it passed when it was approved,
-     * and anything the vocabulary has changed since is the author's to fix before submitting.
+     * and anything the vocabulary has changed since is the author's to fix before submitting. The one
+     * change made to the copy is pointing references to merged-away subjects at their merge targets.
      */
     @Transactional
     public SubjectRevisionResponse startEdit(UUID authorId, UUID subjectId) {
-        Subject subject = lockSubject(subjectId);
+        Subject subject = lockUndeletedSubject(subjectId);
         Optional<SubjectRevision> live = findLiveRevision(subjectId);
         String payload = live.map(SubjectRevision::getPayload)
+                .map(json -> followRedirects(json, subjectId))
                 .orElseGet(() -> toJson(subjectReadModelService.snapshot(subject)));
         return toResponse(subjectRevisionRepository.save(SubjectRevision.builder()
                 .subjectId(subjectId)
@@ -116,6 +126,7 @@ public class SubjectRevisionService {
         SubjectRevision revision = getRevision(revisionId);
         requireAuthor(revision, callerUserId);
         requireEditable(revision);
+        requireSubjectNotDeleted(revision);
 
         ValidatedSubjectPayload validated = validate(revision.getKind(), revision.getSubjectId(), request.payload());
         revision.setPayload(toJson(validated.payload()));
@@ -130,6 +141,7 @@ public class SubjectRevisionService {
         SubjectRevision revision = getRevision(revisionId);
         requireAuthor(revision, callerUserId);
         requireEditable(revision);
+        requireSubjectNotDeleted(revision);
         if (revision.getSubjectId() != null) {
             requireBasedOnLive(revision);
         }
@@ -178,8 +190,9 @@ public class SubjectRevisionService {
      * Applies a moderator's decision; called only by ModerationService. APPROVED publishes: for a
      * proposal it creates the subject, and in every case it rewrites the read model and moves the
      * live pointer, all in the caller's transaction. Throws StaleSubjectRevisionException (409) when
-     * an edit's base is no longer live, and InvalidSubjectPayloadException (400) when the vocabulary
-     * changed since submit in a way the payload no longer fits; either rolls the decision back.
+     * an edit's base is no longer live, SubjectDeletedException (409) when its subject was deleted or
+     * merged away since submit, and InvalidSubjectPayloadException (400) when the vocabulary changed
+     * since submit in a way the payload no longer fits; each rolls the decision back.
      */
     @Transactional
     public void applyModerationOutcome(UUID revisionId, SubjectRevisionStatus outcome) {
@@ -202,7 +215,7 @@ public class SubjectRevisionService {
         } else {
             // Held to the end of the transaction, so no other approval of this subject can move
             // the live pointer between the staleness check and the rewrite below.
-            subject = lockSubject(revision.getSubjectId());
+            subject = lockUndeletedSubject(revision.getSubjectId());
             requireBasedOnLive(revision);
             validated = validate(revision.getKind(), revision.getSubjectId(), fromJson(revision.getPayload()));
         }
@@ -212,6 +225,47 @@ public class SubjectRevisionService {
         // and Hibernate would otherwise flush the pointer's insert before this update.
         subjectRevisionRepository.saveAndFlush(revision);
         subjectReadModelService.publish(subject, revision.getId(), validated);
+    }
+
+    /**
+     * Publishes {@code merged} as a new APPROVED revision of {@code target}, authored by the moderator
+     * merging, with no moderation task: the merge is itself a moderator's decision. The caller holds
+     * the target's row lock. Any open edit of the target becomes stale.
+     *
+     * @throws SubjectMergeInvalidException if the merged payload fails the field vocabulary
+     */
+    @Transactional
+    public SubjectRevision publishMerge(UUID moderatorId, Subject target, SubjectPayloadRequest merged) {
+        ValidatedSubjectPayload validated;
+        try {
+            // The merged payload stands in as its own live payload: every value in it was approved on
+            // one of the two subjects, so a retired option or a hidden subject it carries over counts
+            // as kept, not newly chosen.
+            validated = subjectPayloadValidationService.validate(target.getKind(), target.getId(), merged, merged);
+        } catch (InvalidSubjectPayloadException e) {
+            throw new SubjectMergeInvalidException(e.getViolations());
+        }
+        SubjectRevision revision = subjectRevisionRepository.saveAndFlush(SubjectRevision.builder()
+                .subjectId(target.getId())
+                .kind(target.getKind())
+                .revisionNumber(subjectRevisionRepository.findMaxRevisionNumber(target.getId()) + 1)
+                .baseRevisionId(findLiveRevision(target.getId()).map(SubjectRevision::getId).orElse(null))
+                .payload(toJson(validated.payload()))
+                .status(SubjectRevisionStatus.APPROVED)
+                .authorId(moderatorId)
+                // A dev fixture target's merge revision goes with the fixture sweepers like the rest.
+                .devMarker(target.getDevMarker())
+                .build());
+        subjectReadModelService.publish(target, revision.getId(), validated);
+        return revision;
+    }
+
+    // What a merge starts from on each side: the live payload, or for a subject never approved, what
+    // its read model says.
+    SubjectPayloadRequest currentPayload(Subject subject) {
+        return findLiveRevision(subject.getId())
+                .map(live -> fromJson(live.getPayload()))
+                .orElseGet(() -> subjectReadModelService.snapshot(subject));
     }
 
     // For the moderator's task screen; the moderation route is the authorization check. While
@@ -339,6 +393,31 @@ public class SubjectRevisionService {
 
     private Subject lockSubject(UUID subjectId) {
         return subjectRepository.findByIdForUpdate(subjectId).orElseThrow(SubjectNotFoundException::new);
+    }
+
+    private Subject lockUndeletedSubject(UUID subjectId) {
+        Subject subject = lockSubject(subjectId);
+        if (subject.isDeleted()) {
+            throw new SubjectDeletedException();
+        }
+        return subject;
+    }
+
+    // Unlocked: submit and approval re-check under the lock that approval takes.
+    private void requireSubjectNotDeleted(SubjectRevision revision) {
+        if (revision.getSubjectId() != null && subjectRepository.findById(revision.getSubjectId())
+                .map(Subject::isDeleted)
+                .orElse(false)) {
+            throw new SubjectDeletedException();
+        }
+    }
+
+    // Rewritten only when a reference actually moved, so an untouched copy stays byte-for-byte the
+    // live payload.
+    private String followRedirects(String payloadJson, UUID subjectId) {
+        SubjectPayloadRequest payload = fromJson(payloadJson);
+        SubjectPayloadRequest followed = subjectService.followRedirects(payload, subjectId);
+        return followed == payload ? payloadJson : toJson(followed);
     }
 
     private Subject lockFreeSubject(UUID subjectId) {

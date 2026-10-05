@@ -195,8 +195,9 @@ public class ModerationController {
             + "METADATA_VERSION_SUPERSEDED); or APPROVE was sent for metadata of a gallery item that has "
             + "been rejected (code MEDIA_ALREADY_REJECTED); or APPROVE was sent for a subject revision copied from "
             + "a revision that is no longer the live one, because another edit was approved meanwhile (code "
-            + "STALE_SUBJECT_REVISION; reject it so its author starts again from the current revision). Read "
-            + "`code` for which one occurred.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+            + "STALE_SUBJECT_REVISION; reject it so its author starts again from the current revision); or APPROVE "
+            + "was sent for a revision of a subject that has since been deleted or merged into another (code "
+            + "SUBJECT_DELETED; reject it instead). Read `code` for which one occurred.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = "CSRF token. Call GET /api/auth/csrf first to receive the XSRF-TOKEN cookie, "
             + "then encode its value and send the encoded result in this header — see the API "
             + "description above for the required encoding algorithm; sending the raw cookie "

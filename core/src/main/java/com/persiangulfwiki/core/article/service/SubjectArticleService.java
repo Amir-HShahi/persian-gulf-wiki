@@ -12,6 +12,8 @@ import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository.MainArticleSlug;
 import com.persiangulfwiki.core.audit.service.AuditLogService;
 import com.persiangulfwiki.core.config.SupportedLocales;
+import com.persiangulfwiki.core.subject.entity.Subject;
+import com.persiangulfwiki.core.subject.exception.SubjectDeletedException;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 import com.persiangulfwiki.core.subject.service.SubjectInfoboxCacheService;
@@ -36,7 +38,8 @@ import java.util.stream.Stream;
 // and its gallery feeds the subject's 360° tour (decision 9).
 //
 // The rule: a subject's first article to get an approved translation becomes main, and a moderator
-// may switch it to any of the subject's other published articles. Every write here holds the subject
+// may switch it to any of the subject's other published articles. A merge keeps the target's main
+// article; a target with none takes the source's (see moveArticles). Every write here holds the subject
 // row lock (the one subject revision approval takes), so two first approvals can't both see "no main
 // yet"; uq_articles_main_per_subject (V28) is only the backstop.
 @Service
@@ -55,7 +58,7 @@ public class SubjectArticleService {
     // Public: only articles with an approved translation are listed, each through one of them.
     @Transactional(readOnly = true)
     public List<SubjectArticleResponse> list(UUID subjectId, String language, Pageable pageable) {
-        if (!subjectRepository.existsById(subjectId)) {
+        if (!subjectRepository.existsByIdAndDeletedAtIsNull(subjectId)) {
             throw new SubjectNotFoundException();
         }
         return toResponses(articleRepository.findPublishedBySubjectId(subjectId, pageable), language);
@@ -67,10 +70,14 @@ public class SubjectArticleService {
      *
      * @throws InvalidMainArticleException if the article does not exist, is about another subject or
      *         has no approved translation
+     * @throws SubjectDeletedException if the subject is deleted or merged away
      */
     @Transactional
     public SubjectArticleResponse switchMain(UUID moderatorId, UUID subjectId, UUID articleId, String language) {
-        subjectRepository.findByIdForUpdate(subjectId).orElseThrow(SubjectNotFoundException::new);
+        Subject subject = subjectRepository.findByIdForUpdate(subjectId).orElseThrow(SubjectNotFoundException::new);
+        if (subject.isDeleted()) {
+            throw new SubjectDeletedException();
+        }
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new InvalidMainArticleException("no article " + articleId,
                         "validation.mainArticle.notFound"));
@@ -114,6 +121,26 @@ public class SubjectArticleService {
             article.setMain(true);
             articleRepository.save(article);
         }
+    }
+
+    // Any article at all, published or not: a subject with one can only be merged, never deleted.
+    @Transactional(readOnly = true)
+    public boolean hasArticles(UUID subjectId) {
+        return articleRepository.existsBySubjectId(subjectId);
+    }
+
+    /**
+     * Rebinds every article of {@code sourceId} to {@code targetId}, galleries included (media belong
+     * to the article). The target keeps its main article and the source's is demoted; a target with no
+     * main article takes the source's, so a moderator's earlier choice and the source's page URL
+     * survive. The caller holds both subject row locks. Clears the persistence context.
+     */
+    @Transactional
+    public void moveArticles(UUID sourceId, UUID targetId) {
+        if (articleRepository.findMainBySubjectId(targetId).isPresent()) {
+            articleRepository.demoteMainBySubjectId(sourceId);
+        }
+        articleRepository.moveToSubject(sourceId, targetId);
     }
 
     /**

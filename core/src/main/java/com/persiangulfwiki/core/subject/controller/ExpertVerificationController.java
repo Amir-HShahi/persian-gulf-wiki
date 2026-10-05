@@ -80,8 +80,9 @@ public class ExpertVerificationController {
     @ApiResponse(responseCode = "404", description = "No revision with that id, or an unapproved one the caller may not read "
             + "-- the two are deliberately indistinguishable.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "409", description = "One of: the revision is not the one readers currently see -- a draft, "
-            + "pending or rejected revision, or an older approved one (code SUBJECT_REVISION_NOT_LIVE); or the caller "
-            + "has already verified it (code SUBJECT_REVISION_ALREADY_VERIFIED).",
+            + "pending or rejected revision, or an older approved one (code SUBJECT_REVISION_NOT_LIVE); its subject has "
+            + "been deleted or merged into another (code SUBJECT_DELETED); or the caller has already verified it (code "
+            + "SUBJECT_REVISION_ALREADY_VERIFIED).",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = CSRF_DESCRIPTION)
     @SecurityRequirement(name = "cookieAuth")

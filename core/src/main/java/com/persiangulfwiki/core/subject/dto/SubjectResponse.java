@@ -2,6 +2,10 @@ package com.persiangulfwiki.core.subject.dto;
 
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import org.jspecify.annotations.Nullable;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -19,5 +23,8 @@ public record SubjectResponse(
         String location,
         String area,
         String habitat,
-        String boundary) {
+        String boundary,
+        @Schema(description = "Set when the id asked for belongs to a subject that was merged into this one: that "
+                + "id. The client should switch to this subject's `id`. Null otherwise.", nullable = true)
+        @Nullable UUID redirectedFrom) {
 }

@@ -50,6 +50,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -91,7 +92,8 @@ public class SubjectInfoboxService {
     @Cacheable(cacheNames = CacheConfig.SUBJECT_INFOBOX, key = "#subjectId + ':' + #language")
     @Transactional(readOnly = true)
     public SubjectInfoboxResponse get(UUID subjectId, String language) {
-        Subject subject = subjectRepository.findById(subjectId).orElseThrow(SubjectNotFoundException::new);
+        Subject subject = subjectRepository.findByIdAndDeletedAtIsNull(subjectId)
+                .orElseThrow(SubjectNotFoundException::new);
         LocalizedLabelResponse name = labelService.resolveSubjects(List.of(subjectId), language).get(subjectId);
         SubjectLiveRevision live = subjectLiveRevisionRepository.findById(subjectId).orElse(null);
         if (live == null) {
@@ -121,9 +123,17 @@ public class SubjectInfoboxService {
         List<AttributeDefinition> definitions = attributeDefinitionRepository.findByKind(subject.getKind());
         Map<UUID, String> keysById = definitions.stream()
                 .collect(Collectors.toMap(AttributeDefinition::getId, AttributeDefinition::getKey));
-        Map<String, List<SubjectFact>> factsByKey = subjectFactRepository
-                .findBySubjectIdAndRankOrderBySortAsc(subject.getId(), FactRank.PREFERRED).stream()
+        List<SubjectFact> preferred = subjectFactRepository
+                .findBySubjectIdAndRankOrderBySortAsc(subject.getId(), FactRank.PREFERRED);
+        // A reference to a deleted subject is hidden like the subject itself; it shows again on a restore.
+        Set<UUID> referencedIds = preferred.stream().map(SubjectFact::getValueRefSubjectId).filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Set<UUID> deletedReferences = referencedIds.isEmpty() ? Set.of()
+                : subjectRepository.findDeletedIds(referencedIds);
+        Map<String, List<SubjectFact>> factsByKey = preferred.stream()
                 .filter(fact -> keysById.containsKey(fact.getAttributeId()))
+                .filter(fact -> fact.getValueRefSubjectId() == null
+                        || !deletedReferences.contains(fact.getValueRefSubjectId()))
                 .collect(Collectors.groupingBy(fact -> keysById.get(fact.getAttributeId()), LinkedHashMap::new,
                         Collectors.toList()));
         Lookups lookups = lookups(factsByKey.values().stream().flatMap(List::stream).toList(), language);

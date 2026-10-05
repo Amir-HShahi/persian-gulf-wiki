@@ -17,6 +17,7 @@ import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectKindException;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
+import com.persiangulfwiki.core.subject.service.SubjectService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -42,22 +43,27 @@ public class ArticleService {
     private final ArticleRevisionService articleRevisionService;
     private final ArticleVisibilityService articleVisibilityService;
     private final SubjectRepository subjectRepository;
+    private final SubjectService subjectService;
 
     // Article + its canonical translation + that translation's first DRAFT revision, written
     // together or not at all: an article with zero translations can never be reached by
     // GET .../translations/{language}, and nothing in this API creates a translation on its
     // own for a brand-new article -- same "detail row must exist or the parent is
     // unaddressable" reasoning as SubjectService.create.
+    //
+    // A subject that was merged away binds the article to the subject it was merged into; any other
+    // deleted subject is a 404, so no article lands on a subject hidden from readers.
     @Transactional
     public ArticleResponse create(UUID creatorUserId, CreateArticleRequest request) {
-        SubjectKind subjectKind = request.subjectId() == null ? null : findSubjectKind(request.subjectId());
+        Subject subject = request.subjectId() == null ? null : subjectService.lockForBinding(request.subjectId());
+        SubjectKind subjectKind = subject == null ? null : subject.getKind();
 
         if (articleTranslationRepository.existsBySlug(request.slug())) {
             throw new DuplicateSlugException();
         }
 
         Article article = articleRepository.save(Article.builder()
-                .subjectId(request.subjectId())
+                .subjectId(subject == null ? null : subject.getId())
                 .canonicalLanguage(request.canonicalLanguage())
                 .createdByUserId(creatorUserId)
                 .build());
@@ -97,13 +103,16 @@ public class ArticleService {
     // Only translations with an approved revision are listed: title/summary come from
     // currentRevisionId, which only a moderator's APPROVE sets, so unreviewed text never
     // reaches this public list. One page = four queries (translations, then their articles,
-    // revisions and subjects by id) rather than one per row.
+    // revisions and subjects by id) rather than one per row. A merged-away subjectId filters on the
+    // subject it was merged into, which now holds its articles.
     @Transactional(readOnly = true)
     public List<ArticleListItemResponse> list(String language, UUID subjectId, String subjectKindFilter, Pageable pageable) {
         SubjectKind subjectKind = subjectKindFilter == null ? null : parseSubjectKind(subjectKindFilter);
+        UUID subjectFilter = subjectId == null ? null
+                : subjectService.redirectTargets(List.of(subjectId)).getOrDefault(subjectId, subjectId);
 
         List<ArticleTranslation> translations = articleTranslationRepository
-                .findPublishedByLanguage(language, subjectId, subjectKind, pageable)
+                .findPublishedByLanguage(language, subjectFilter, subjectKind, pageable)
                 .getContent();
 
         Map<UUID, Article> articlesById = articleRepository

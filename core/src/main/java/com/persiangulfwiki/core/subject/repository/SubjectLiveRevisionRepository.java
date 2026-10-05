@@ -18,11 +18,12 @@ public interface SubjectLiveRevisionRepository extends JpaRepository<SubjectLive
     boolean existsByRevisionId(UUID revisionId);
 
     // The expert verification queue: live revisions of the given kinds that carry no mark yet
-    // (NONE or STALE), leaving out the expert's own, since nobody may verify what they wrote.
-    // Newest approval first.
+    // (NONE or STALE), leaving out the expert's own, since nobody may verify what they wrote, and
+    // those of deleted subjects, which can't be verified. Newest approval first.
     @Query("""
-            select l from SubjectLiveRevision l, SubjectRevision r
+            select l from SubjectLiveRevision l, SubjectRevision r, Subject s
             where r.id = l.revisionId and r.kind in :kinds and r.authorId <> :expertId
+              and s.id = l.subjectId and s.deletedAt is null
               and not exists (select 1 from ExpertVerification v where v.subjectRevisionId = l.revisionId)
             order by l.approvedAt desc, l.subjectId
             """)

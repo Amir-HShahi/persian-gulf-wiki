@@ -6,11 +6,13 @@ import com.persiangulfwiki.core.subject.dto.SubjectVerificationResponse;
 import com.persiangulfwiki.core.subject.dto.VerificationQueueItemResponse;
 import com.persiangulfwiki.core.subject.dto.VerificationState;
 import com.persiangulfwiki.core.subject.entity.ExpertVerification;
+import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.subject.entity.SubjectLiveRevision;
 import com.persiangulfwiki.core.subject.entity.SubjectRevision;
 import com.persiangulfwiki.core.subject.exception.NotSubjectKindExpertException;
 import com.persiangulfwiki.core.subject.exception.SelfVerificationNotAllowedException;
+import com.persiangulfwiki.core.subject.exception.SubjectDeletedException;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionAlreadyVerifiedException;
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotFoundException;
@@ -68,7 +70,7 @@ public class ExpertVerificationService {
     /**
      * Checked in this order: a revision the caller may not read is a 404, as on
      * GET /api/subject-revisions/{id}; then the caller's expertise and authorship (403); then
-     * whether the revision is live and not yet marked by this caller (409).
+     * whether its subject is undeleted and the revision live and not yet marked by this caller (409).
      */
     @Transactional
     public ExpertVerificationResponse verify(UUID expertId, UUID revisionId, boolean isCallerModerator) {
@@ -89,7 +91,10 @@ public class ExpertVerificationService {
         // The lock approval holds while it moves the live pointer, taken before the live check and
         // held to commit, so a mark cannot land on a revision that stopped being live in between.
         // It also serializes two identical requests, so the duplicate check below cannot race.
-        subjectRepository.findByIdForUpdate(subjectId).orElseThrow(SubjectNotFoundException::new);
+        Subject subject = subjectRepository.findByIdForUpdate(subjectId).orElseThrow(SubjectNotFoundException::new);
+        if (subject.isDeleted()) {
+            throw new SubjectDeletedException();
+        }
         boolean isLive = subjectLiveRevisionRepository.findById(subjectId)
                 .map(live -> live.getRevisionId().equals(revisionId))
                 .orElse(false);

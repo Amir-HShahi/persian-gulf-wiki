@@ -143,15 +143,15 @@ public class SubjectReadModelService {
         subjectInfoboxCacheService.evictAll();
     }
 
-    // What the read model currently says, in payload form: the starting point for editing a
-    // subject that has never had a revision approved (minted by the dev fixture route, or created
-    // before revisions existed). It has no facts, since only approval writes them.
+    // What the read model currently says, in payload form: the starting point for editing (or
+    // merging) a subject that has never had a revision approved (minted by the dev fixture route, or
+    // created before revisions existed). It has no facts, since only approval writes them.
     SubjectPayloadRequest snapshot(Subject subject) {
         LabelValuesResponse names = labelService.values(LabelReferent.subject(subject.getId()));
         Map<String, List<String>> aliases = subjectAliasRepository.findBySubjectId(subject.getId()).stream()
                 .collect(Collectors.groupingBy(SubjectAlias::getLanguage,
                         Collectors.mapping(SubjectAlias::getValue, Collectors.toList())));
-        SubjectResponse detail = subjectService.get(subject.getId());
+        SubjectResponse detail = subjectService.describe(subject);
         String geometry = Stream.of(detail.location(), detail.area(), detail.habitat(), detail.boundary())
                 .filter(Objects::nonNull)
                 .findFirst()

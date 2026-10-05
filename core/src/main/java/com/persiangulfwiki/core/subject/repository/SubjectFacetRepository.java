@@ -9,7 +9,7 @@ import java.util.UUID;
 // The facet listing's queries, mixed into SubjectRepository. A fragment rather than @Query methods
 // because the number of conditions depends on the request: each selected field adds one EXISTS.
 // Everything reads the read model only (subject_facts, PREFERRED values), so pending and rejected
-// revisions never show here.
+// revisions never show here, and deleted subjects are left out of every query.
 public interface SubjectFacetRepository {
 
     // A subject's main article (V28). Written against a `subjects s` row.

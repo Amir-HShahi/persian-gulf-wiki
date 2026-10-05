@@ -75,6 +75,7 @@ import com.persiangulfwiki.core.oauth2.exception.PasswordAlreadySetException;
 import com.persiangulfwiki.core.password.exception.InvalidPasswordResetTokenException;
 import com.persiangulfwiki.core.source.exception.SourceNotFoundException;
 import com.persiangulfwiki.core.subject.exception.ExpertVerificationNotFoundException;
+import com.persiangulfwiki.core.subject.exception.InvalidMergeTargetException;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectFilterException;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectKindException;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectPayloadException;
@@ -82,7 +83,14 @@ import com.persiangulfwiki.core.subject.exception.NotSubjectKindExpertException;
 import com.persiangulfwiki.core.subject.exception.NotSubjectRevisionAuthorException;
 import com.persiangulfwiki.core.subject.exception.SelfVerificationNotAllowedException;
 import com.persiangulfwiki.core.subject.exception.StaleSubjectRevisionException;
+import com.persiangulfwiki.core.subject.exception.SubjectDeletedException;
+import com.persiangulfwiki.core.subject.exception.SubjectHasArticlesException;
+import com.persiangulfwiki.core.subject.exception.SubjectKindMismatchException;
+import com.persiangulfwiki.core.subject.exception.SubjectMergeInvalidException;
+import com.persiangulfwiki.core.subject.exception.SubjectMergedException;
+import com.persiangulfwiki.core.subject.exception.SubjectNotDeletedException;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
+import com.persiangulfwiki.core.subject.exception.SubjectReferencedException;
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionAlreadyVerifiedException;
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotEditableException;
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotFoundException;
@@ -329,6 +337,61 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ExpertVerificationNotFoundException.class)
     public ProblemDetail handleExpertVerificationNotFound(ExpertVerificationNotFoundException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.expertVerificationNotFound"), "EXPERT_VERIFICATION_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(SubjectDeletedException.class)
+    public ProblemDetail handleSubjectDeleted(SubjectDeletedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectDeleted"), "SUBJECT_DELETED", request);
+    }
+
+    @ExceptionHandler(SubjectNotDeletedException.class)
+    public ProblemDetail handleSubjectNotDeleted(SubjectNotDeletedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectNotDeleted"), "SUBJECT_NOT_DELETED", request);
+    }
+
+    @ExceptionHandler(SubjectMergedException.class)
+    public ProblemDetail handleSubjectMerged(SubjectMergedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectMerged"), "SUBJECT_MERGED", request);
+    }
+
+    @ExceptionHandler(SubjectHasArticlesException.class)
+    public ProblemDetail handleSubjectHasArticles(SubjectHasArticlesException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectHasArticles"), "SUBJECT_HAS_ARTICLES", request);
+    }
+
+    @ExceptionHandler(SubjectReferencedException.class)
+    public ProblemDetail handleSubjectReferenced(SubjectReferencedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectReferenced"), "SUBJECT_REFERENCED", request);
+    }
+
+    @ExceptionHandler(SubjectKindMismatchException.class)
+    public ProblemDetail handleSubjectKindMismatch(SubjectKindMismatchException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectKindMismatch"), "SUBJECT_KIND_MISMATCH", request);
+    }
+
+    // VALIDATION_FAILED on `targetId`, like InvalidMainArticleException on `articleId`: the request
+    // names a subject that cannot take the merge.
+    @ExceptionHandler(InvalidMergeTargetException.class)
+    public ProblemDetail handleInvalidMergeTarget(InvalidMergeTargetException ex, HttpServletRequest request) {
+        ProblemDetail problemDetail = ProblemDetails.of(
+                HttpStatus.BAD_REQUEST, resolve("error.validationFailed"), "VALIDATION_FAILED", request);
+        problemDetail.setProperty("errors", List.of(new FieldViolation("targetId", resolve(ex.getMessageKey()))));
+        return problemDetail;
+    }
+
+    // The one 409 that carries `errors` (approved by the user): the request was fine, but the payload
+    // the merge would publish breaks the field vocabulary, and the moderator needs each broken field --
+    // a path into the merged payload -- to fix it with a normal edit before merging again.
+    @ExceptionHandler(SubjectMergeInvalidException.class)
+    public ProblemDetail handleSubjectMergeInvalid(SubjectMergeInvalidException ex, HttpServletRequest request) {
+        List<FieldViolation> errors = ex.getViolations().stream()
+                .map(violation -> new FieldViolation(violation.field(),
+                        resolve(violation.messageKey(), violation.args().toArray())))
+                .toList();
+        ProblemDetail problemDetail = ProblemDetails.of(
+                HttpStatus.CONFLICT, resolve("error.subjectMergeInvalid"), "SUBJECT_MERGE_INVALID", request);
+        problemDetail.setProperty("errors", errors);
+        return problemDetail;
     }
 
     @ExceptionHandler(AttributeGroupNotFoundException.class)

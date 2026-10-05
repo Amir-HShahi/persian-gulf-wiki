@@ -51,7 +51,12 @@ import java.util.stream.Stream;
 // Runs on every write of a payload and again on submit and on approval, because the vocabulary
 // can change in between: a field may become required, leave the kind, or have an option
 // deprecated. The deprecation rules compare against the live payload -- a value already live may
-// be kept unchanged, but a retired code may not be newly chosen.
+// be kept unchanged, but a retired code may not be newly chosen. A reference to a deleted subject
+// follows the same rule: kept if already live (it reappears on a restore), refused if new.
+//
+// References to a merged-away subject are first rewritten to the subject it was merged into, in
+// both payloads, so a revision written before a merge still validates; the returned payload carries
+// the rewritten ids.
 @Service
 @RequiredArgsConstructor
 public class SubjectPayloadValidationService {
@@ -78,14 +83,19 @@ public class SubjectPayloadValidationService {
     private final SubjectRepository subjectRepository;
     private final SourceService sourceService;
     private final MediaReadService mediaReadService;
+    private final SubjectService subjectService;
 
     /**
-     * subjectId is null for a proposal; livePayload is null when the subject has no approved
-     * revision. Throws InvalidSubjectPayloadException listing every failure; never returns partially.
+     * subjectId is null for a proposal; submittedLive, the live revision's payload, is null when the
+     * subject has no approved revision. Throws InvalidSubjectPayloadException listing every failure;
+     * never returns partially.
      */
     @Transactional(readOnly = true)
-    public ValidatedSubjectPayload validate(SubjectKind kind, @Nullable UUID subjectId, SubjectPayloadRequest payload,
-            @Nullable SubjectPayloadRequest livePayload) {
+    public ValidatedSubjectPayload validate(SubjectKind kind, @Nullable UUID subjectId, SubjectPayloadRequest submitted,
+            @Nullable SubjectPayloadRequest submittedLive) {
+        SubjectPayloadRequest payload = subjectService.followRedirects(submitted, subjectId);
+        SubjectPayloadRequest livePayload = submittedLive == null ? null
+                : subjectService.followRedirects(submittedLive, subjectId);
         List<Violation> violations = new ArrayList<>();
 
         checkNames(payload.names(), violations);
@@ -172,14 +182,17 @@ public class SubjectPayloadValidationService {
                 .flatMap(fact -> fact.values() == null ? Stream.empty() : fact.values().stream())
                 .filter(Objects::nonNull)
                 .toList();
-        Map<UUID, SubjectKind> referencedKinds = subjectRepository.findAllById(allValues.stream()
-                        .map(SubjectFactValueRequest::subjectId).filter(Objects::nonNull).collect(Collectors.toSet()))
-                .stream().collect(Collectors.toMap(Subject::getId, Subject::getKind));
+        List<Subject> referenced = subjectRepository.findAllById(allValues.stream()
+                .map(SubjectFactValueRequest::subjectId).filter(Objects::nonNull).collect(Collectors.toSet()));
+        Map<UUID, SubjectKind> referencedKinds = referenced.stream()
+                .collect(Collectors.toMap(Subject::getId, Subject::getKind));
+        Set<UUID> deletedReferences = referenced.stream().filter(Subject::isDeleted).map(Subject::getId)
+                .collect(Collectors.toSet());
         Set<UUID> existingSources = sourceService.findExistingIds(allValues.stream()
                 .map(SubjectFactValueRequest::sourceId).filter(Objects::nonNull).collect(Collectors.toSet()));
 
         FactContext context = new FactContext(subjectId, optionsByDefinition, liveValues, referencedKinds,
-                existingSources);
+                deletedReferences, existingSources);
         List<ResolvedFactValue> resolved = new ArrayList<>();
         Set<String> seenKeys = new HashSet<>();
         for (int i = 0; i < facts.size(); i++) {
@@ -293,7 +306,8 @@ public class SubjectPayloadValidationService {
             case ENUM -> {
                 return checkOption(definition, value.option(), path + ".option", liveValues, context, violations);
             }
-            case SUBJECT_REF -> checkReference(definition, value.subjectId(), path + ".subjectId", context, violations);
+            case SUBJECT_REF -> checkReference(definition, value.subjectId(), path + ".subjectId", liveValues, context,
+                    violations);
             case PLAIN_TEXT -> checkText(value.text(), path + ".text", violations);
             case LOCALIZED_TEXT -> checkLocalized(value.localized(), path + ".localized", violations);
             case BOOL, DATE -> {
@@ -328,10 +342,12 @@ public class SubjectPayloadValidationService {
         return option.getId();
     }
 
-    private void checkReference(AttributeDefinition definition, UUID referencedId, String path, FactContext context,
-            List<Violation> violations) {
+    private void checkReference(AttributeDefinition definition, UUID referencedId, String path,
+            List<SubjectFactValueRequest> liveValues, FactContext context, List<Violation> violations) {
         SubjectKind referencedKind = context.referencedKinds().get(referencedId);
-        if (referencedKind == null) {
+        boolean isLive = liveValues.stream().anyMatch(live -> referencedId.equals(live.subjectId()));
+        // A deleted subject is hidden, so newly pointing at one reads as pointing at nothing.
+        if (referencedKind == null || (context.deletedReferences().contains(referencedId) && !isLive)) {
             violations.add(violation(path, "referenceNotFound"));
         } else if (referencedId.equals(context.subjectId())) {
             violations.add(violation(path, "referenceSelf"));
@@ -483,6 +499,7 @@ public class SubjectPayloadValidationService {
             Map<UUID, Map<String, AttributeOption>> optionsByDefinition,
             Map<String, List<SubjectFactValueRequest>> liveValues,
             Map<UUID, SubjectKind> referencedKinds,
+            Set<UUID> deletedReferences,
             Set<UUID> existingSources) {
     }
 }

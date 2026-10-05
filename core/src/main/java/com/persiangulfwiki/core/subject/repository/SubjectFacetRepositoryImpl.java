@@ -88,8 +88,9 @@ class SubjectFacetRepositoryImpl implements SubjectFacetRepository {
         return counts;
     }
 
+    // Deleted subjects (soft-deleted or merged away) are never listed or counted.
     private static String where(SubjectFacetFilter filter, Map<String, Object> params) {
-        StringBuilder where = new StringBuilder("true");
+        StringBuilder where = new StringBuilder("s.deleted_at is null");
         if (!filter.kinds().isEmpty()) {
             where.append(" and s.kind in (:kinds)");
             params.put("kinds", filter.kinds().stream().map(SubjectKind::name).toList());

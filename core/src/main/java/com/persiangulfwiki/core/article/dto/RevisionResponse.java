@@ -26,6 +26,7 @@ public record RevisionResponse(
         Instant createdAt,
         @Schema(description = "Subject id to what a subject link in `body` shows: the subject's name in the reader's "
                 + "language (from `Accept-Language`: fa, en or ar; anything else gets fa) and its page's slug. A "
-                + "linked subject that no longer exists is absent; show the link as plain text.")
+                + "link to a subject that was merged into another shows that other subject. A linked subject that no "
+                + "longer exists or has been deleted is absent; show the link as plain text.")
         Map<UUID, SubjectLinkResponse> subjectLinks) {
 }

@@ -97,6 +97,8 @@ public class SubjectRevisionController {
     @ApiResponse(responseCode = "403", description = "Either the account's email address is not yet verified, or the CSRF header is "
             + "missing or does not match the cookie; read `detail` for which one occurred.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "404", description = "No subject with that id.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "409", description = "The subject has been deleted or merged into another (code "
+            + "SUBJECT_DELETED).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = CSRF_DESCRIPTION)
     @SecurityRequirement(name = "cookieAuth")
     @PostMapping("/subjects/{subjectId}/revisions")
@@ -148,7 +150,8 @@ public class SubjectRevisionController {
             + "occurred.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "404", description = "No revision with that id.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "409", description = "The revision is not DRAFT or CHANGES_REQUESTED, so it can no longer be "
-            + "changed.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+            + "changed (code SUBJECT_REVISION_NOT_EDITABLE); or its subject has been deleted or merged into another "
+            + "(code SUBJECT_DELETED).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = CSRF_DESCRIPTION)
     @SecurityRequirement(name = "cookieAuth")
     @PatchMapping("/subject-revisions/{revisionId}")
@@ -173,7 +176,8 @@ public class SubjectRevisionController {
     @ApiResponse(responseCode = "409", description = "One of: the revision is not DRAFT or CHANGES_REQUESTED (code "
             + "SUBJECT_REVISION_NOT_EDITABLE); or it is an edit whose base is no longer the revision readers see, "
             + "because another edit was approved meanwhile (code STALE_SUBJECT_REVISION) -- start a new edit from the "
-            + "current revision.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+            + "current revision; or its subject has been deleted or merged into another (code SUBJECT_DELETED).",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = CSRF_DESCRIPTION)
     @SecurityRequirement(name = "cookieAuth")
     @PostMapping("/subject-revisions/{revisionId}/submit")
