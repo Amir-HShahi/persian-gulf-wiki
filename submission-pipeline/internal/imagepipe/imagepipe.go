@@ -17,6 +17,7 @@ package imagepipe
 import (
 	"errors"
 	"fmt"
+	"math"
 )
 
 // ErrUnavailable is returned when the binary was built without image support.
@@ -156,11 +157,15 @@ func plan(widths []int, srcWidth int) []int {
 
 // scaledHeight returns the height a source scales to when fitted to a target
 // width, preserving aspect ratio and never returning zero.
+//
+// It rounds up. The result is the height of a box the image is fitted inside,
+// and a box one pixel short makes the width the limiting side, so a 400 px
+// target came out 399 wide.
 func scaledHeight(srcW, srcH, targetW int) int {
 	if srcW <= 0 {
 		return 0
 	}
-	h := int(float64(srcH) * (float64(targetW) / float64(srcW)))
+	h := int(math.Ceil(float64(srcH) * (float64(targetW) / float64(srcW))))
 	if h < 1 {
 		h = 1
 	}

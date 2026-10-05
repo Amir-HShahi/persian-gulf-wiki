@@ -100,6 +100,10 @@ func TestScaledHeightPreservesAspectRatio(t *testing.T) {
 		{3000, 2000, 1200, 800},
 		{4000, 3000, 400, 300},
 		{1000, 1000, 150, 150},
+		// The box is rounded up. Truncating made the width the limiting side, so
+		// a 400 px target came out 399 wide.
+		{3000, 2000, 400, 267},
+		{4000, 3000, 150, 113},
 		// A wide panorama scaled down must never round to a zero-height image.
 		{30000, 100, 150, 1},
 	}

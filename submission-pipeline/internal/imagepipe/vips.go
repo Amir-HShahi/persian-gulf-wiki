@@ -41,9 +41,19 @@ func Inspect(srcPath string, opt Options) (Info, *Rejection, error) {
 	}
 	defer img.Close()
 
+	// Width and Height are as the image is displayed, not as it is stored.
+	// Phones keep every photo in sensor orientation and record the turn in the
+	// EXIF orientation tag, so a portrait shot is stored landscape. Orientations
+	// 5 to 8 are the quarter turns; reading the stored size there would size every
+	// variant for a landscape image that is then rotated into a much smaller box.
+	width, height := img.Width(), img.Height()
+	if o := img.Orientation(); o >= 5 && o <= 8 {
+		width, height = height, width
+	}
+
 	info := Info{
-		Width:    img.Width(),
-		Height:   img.Height(),
+		Width:    width,
+		Height:   height,
 		Format:   vips.ImageTypes[img.Format()],
 		HasAlpha: img.HasAlpha(),
 	}
