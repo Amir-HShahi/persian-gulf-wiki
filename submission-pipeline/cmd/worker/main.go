@@ -15,6 +15,7 @@ import (
 
 	"wikipg/internal/config"
 	"wikipg/internal/handler"
+	"wikipg/internal/imagepipe"
 	"wikipg/internal/queue"
 	"wikipg/internal/storage"
 )
@@ -85,10 +86,23 @@ func run() error {
 		health.MarkPoll,
 	)
 
+	// The runner claims every job and dead-letters any type it has no handler
+	// for, so a binary that cannot process images must not start: it would
+	// pull real image jobs off the queue and discard them. Refusing here costs
+	// one failed deploy; the alternative costs the submissions.
+	if !imagepipe.Available() {
+		return fmt.Errorf("this binary was built without image support: rebuild with -tags vips")
+	}
+	if err := imagepipe.Start(); err != nil {
+		return fmt.Errorf("starting image pipeline: %w", err)
+	}
+	defer imagepipe.Stop()
+
 	runner.Register(queue.JobTypeImage, &handler.Image{
 		Store:         store,
 		RawBucket:     cfg.Storage.RawBucket,
 		DerivedBucket: cfg.Storage.DerivedBucket,
+		Options:       imagepipe.DefaultOptions(),
 	})
 
 	log.Info("worker ready", "config", cfg, "identity", identity())

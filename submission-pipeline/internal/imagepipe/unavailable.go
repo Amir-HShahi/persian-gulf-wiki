@@ -5,8 +5,9 @@ package imagepipe
 import "context"
 
 // This file is what compiles on a machine without libvips. It exists so the
-// rest of the worker still builds, tests and runs locally — the image handler
-// simply is not registered.
+// rest of the module still builds and tests there. The worker itself refuses to
+// start from such a build rather than run without a handler, because a runner
+// with no handler for a job type dead-letters those jobs.
 //
 // Refusing the work is deliberate: a fallback that resized with the standard
 // library would ignore ICC colour profiles, resize in sRGB instead of linear

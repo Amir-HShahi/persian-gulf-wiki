@@ -7,11 +7,14 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path"
 	"path/filepath"
+	"regexp"
 	"strconv"
 
 	"github.com/jackc/pgx/v5"
 
+	"wikipg/internal/imagepipe"
 	"wikipg/internal/queue"
 	"wikipg/internal/storage"
 )
@@ -22,17 +25,31 @@ type ImagePayload struct {
 	ObjectKey    string `json:"object_key"`
 }
 
+// validSubmissionID is what a submission id may look like. It becomes a prefix
+// in the derived bucket, so anything that could climb out of it — a slash, a
+// dot-dot — has to be refused rather than escaped.
+var validSubmissionID = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$`)
+
+// derivedContentType is what every variant is stored as. imagepipe only ever
+// writes WebP, so this is a fact about that package rather than a choice made
+// here; if it learns another output format this has to follow the file.
+const derivedContentType = "image/webp"
+
 type Image struct {
 	Store         *storage.Client
 	RawBucket     string
 	DerivedBucket string
+	Options       imagepipe.Options
 }
 
-func (h *Image) Handle(ctx context.Context, log *slog.Logger, tx pgx.Tx, job queue.Job) (queue.Result, error) {
+func (h *Image) Handle(ctx context.Context, log *slog.Logger, _ pgx.Tx, job queue.Job) (queue.Result, error) {
 	var payload ImagePayload
 	if err := json.Unmarshal(job.Payload, &payload); err != nil {
 		// Malformed payloads never become valid on a retry, so this is
 		// reported as a rejection rather than an error.
+		return reject("malformed_payload", nil), nil
+	}
+	if !validSubmissionID.MatchString(payload.SubmissionID) || payload.ObjectKey == "" {
 		return reject("malformed_payload", nil), nil
 	}
 
@@ -43,6 +60,14 @@ func (h *Image) Handle(ctx context.Context, log *slog.Logger, tx pgx.Tx, job que
 		return queue.Result{}, fmt.Errorf("creating work dir: %w", err)
 	}
 	defer os.RemoveAll(dir)
+
+	// Variants go in their own directory. The source is named after the object
+	// key, which the uploader influences, and a key such as "w400.webp" must not
+	// be able to collide with — or be overwritten by — an output file.
+	outDir := filepath.Join(dir, "out")
+	if err := os.Mkdir(outDir, 0o755); err != nil {
+		return queue.Result{}, fmt.Errorf("creating output dir: %w", err)
+	}
 
 	// filepath.Base strips any directory part: the object key arrives in the
 	// job payload, and a key like "../../etc/passwd" must not escape the
@@ -67,15 +92,60 @@ func (h *Image) Handle(ctx context.Context, log *slog.Logger, tx pgx.Tx, job que
 
 	log.Debug("source downloaded", "bytes", size)
 
-	// TODO:
-	//   rejected, reason, err := imagepipe.Validate(src)
-	//     err      -> return queue.Result{}, fmt.Errorf("validating image: %w", err)
-	//     rejected -> return reject(reason, nil), nil
-	//   imagepipe.Process(src, dir) -> variants
-	//   h.Store.Upload(ctx, h.DerivedBucket, <key>, variant.Path, "image/jpeg")
-	//   write image_variants rows on tx
+	processed, err := imagepipe.Process(ctx, src, outDir, h.Options)
+	if err != nil {
+		// A Rejection is a verdict on the file — unreadable, too many pixels —
+		// and is identical on a retry, so it ends the job. Everything else is
+		// the worker's own trouble and is retried.
+		var rejection *imagepipe.Rejection
+		if errors.As(err, &rejection) {
+			return reject(rejection.Code, rejection.Detail), nil
+		}
+		return queue.Result{}, fmt.Errorf("processing image: %w", err)
+	}
 
-	return queue.Result{Outcome: queue.OutcomeOK}, nil
+	if len(processed.Variants) == 0 {
+		// Not an error: imagepipe never upscales, so a source narrower than the
+		// smallest target has nothing to derive. It is logged because the job
+		// reports success while having produced no files.
+		log.Warn("no variants produced: source is narrower than every target width",
+			"width", processed.Source.Width)
+	}
+
+	variants := make([]queue.Variant, 0, len(processed.Variants))
+	for _, v := range processed.Variants {
+		// The key is rebuilt from the submission id and the file name rather than
+		// taken from the local path, so where the temp dir happens to be never
+		// leaks into the bucket. Overwriting on a retry is deliberate: the same
+		// input yields the same keys, which makes the upload idempotent.
+		key := path.Join(payload.SubmissionID, filepath.Base(v.Path))
+
+		uploaded, err := h.Store.Upload(ctx, h.DerivedBucket, key, v.Path, derivedContentType)
+		if err != nil {
+			return queue.Result{}, fmt.Errorf("uploading %s: %w", key, err)
+		}
+
+		variants = append(variants, queue.Variant{
+			Label:  v.Label,
+			Key:    key,
+			Width:  v.Width,
+			Height: v.Height,
+			Bytes:  uploaded,
+		})
+	}
+
+	log.Info("image processed", "variants", len(variants),
+		"width", processed.Source.Width, "height", processed.Source.Height)
+
+	return queue.Result{
+		Outcome: queue.OutcomeOK,
+		Image: &queue.ImageResult{
+			Width:    processed.Source.Width,
+			Height:   processed.Source.Height,
+			Format:   processed.Source.Format,
+			Variants: variants,
+		},
+	}, nil
 }
 
 // reject builds a terminal result: the pipeline worked, the content is not
