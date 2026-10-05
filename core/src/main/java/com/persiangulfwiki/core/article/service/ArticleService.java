@@ -12,8 +12,6 @@ import com.persiangulfwiki.core.article.exception.DuplicateSlugException;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
 import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
-import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository.MainArticleSlug;
-import com.persiangulfwiki.core.config.SupportedLocales;
 import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectKindException;
@@ -27,15 +25,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -131,26 +126,6 @@ public class ArticleService {
                             revisionsById.get(translation.getCurrentRevisionId()));
                 })
                 .toList();
-    }
-
-    /**
-     * Slug of each subject's main article in {@code language}, else in Farsi. A subject with no
-     * published article, or whose main article is published in neither language, is absent.
-     */
-    @Transactional(readOnly = true)
-    public Map<UUID, String> mainArticleSlugs(Collection<UUID> subjectIds, String language) {
-        if (subjectIds.isEmpty()) {
-            return Map.of();
-        }
-        Map<UUID, String> slugs = new HashMap<>();
-        List<String> languages = Stream.of(language, SupportedLocales.FARSI.getLanguage()).distinct().toList();
-        for (MainArticleSlug row : articleTranslationRepository.findMainArticleSlugs(subjectIds, languages)) {
-            // The reader's language always wins; Farsi only stands in until it is found.
-            if (row.getLanguage().equals(language) || !slugs.containsKey(row.getSubjectId())) {
-                slugs.put(row.getSubjectId(), row.getSlug());
-            }
-        }
-        return slugs;
     }
 
     // Same reasoning as SubjectService.parseKind, and the same INVALID_SUBJECT_KIND 400, so a

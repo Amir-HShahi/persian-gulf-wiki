@@ -5,9 +5,10 @@ import com.persiangulfwiki.core.common.exception.BadRequestException;
 import java.io.Serial;
 import java.util.List;
 
-// Every problem with the subject listing's filter parameters, collected in one pass. Each violation
-// names the query parameter (e.g. "attr.iucn_status") and a message key, resolved in the reader's
-// language by GlobalExceptionHandler.
+// Every problem with a subject listing's filter parameters (GET /api/subjects, and the field of
+// GET /api/subjects/{subjectId}/referenced-by), collected in one pass. Each violation names the query
+// parameter (e.g. "attr.iucn_status") and a message key, resolved in the reader's language by
+// GlobalExceptionHandler.
 public class InvalidSubjectFilterException extends BadRequestException {
 
     @Serial

@@ -1,6 +1,6 @@
 package com.persiangulfwiki.core.subject.service;
 
-import com.persiangulfwiki.core.article.service.ArticleService;
+import com.persiangulfwiki.core.article.service.SubjectArticleService;
 import com.persiangulfwiki.core.attribute.entity.AttributeDefinition;
 import com.persiangulfwiki.core.attribute.entity.AttributeGroup;
 import com.persiangulfwiki.core.attribute.entity.AttributeOption;
@@ -15,11 +15,13 @@ import com.persiangulfwiki.core.subject.dto.SubjectFacetOptionResponse;
 import com.persiangulfwiki.core.subject.dto.SubjectFacetResponse;
 import com.persiangulfwiki.core.subject.dto.SubjectListItemResponse;
 import com.persiangulfwiki.core.subject.dto.SubjectListResponse;
+import com.persiangulfwiki.core.subject.dto.SubjectReferencesResponse;
 import com.persiangulfwiki.core.subject.dto.SubjectMainImageResponse;
 import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectFilterException;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectFilterException.Violation;
+import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
 import com.persiangulfwiki.core.subject.repository.SubjectFacetFilter;
 import com.persiangulfwiki.core.subject.repository.SubjectFacetFilter.Condition;
 import com.persiangulfwiki.core.subject.repository.SubjectFacetFilter.Has360TourCondition;
@@ -35,6 +37,7 @@ import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.jspecify.annotations.Nullable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,12 +68,16 @@ import java.util.stream.Collectors;
 //
 // Reads only the read model, which only approval writes. No facet cache: about one grouped query
 // per facet, a handful per request.
+//
+// Also GET /api/subjects/{subjectId}/referenced-by, the other listing of subject cards: the subjects
+// whose PREFERRED value of one SUBJECT_REF field points at a subject (a province's islands).
 @Service
 @RequiredArgsConstructor
 public class SubjectListingService {
 
     private static final String ATTRIBUTE_PREFIX = "attr.";
     private static final String KIND_KEY = "kind";
+    private static final String REFERENCE_KEY = "attribute";
     // The one option of a BOOL facet: "has the property". There is no "false" checkbox.
     private static final String TRUE_CODE = "true";
     private static final String KEY_PREFIX = "validation.subjectFilter.";
@@ -82,7 +89,7 @@ public class SubjectListingService {
     private final AttributeGroupRepository attributeGroupRepository;
     private final AttributeOptionRepository attributeOptionRepository;
     private final LabelService labelService;
-    private final ArticleService articleService;
+    private final SubjectArticleService subjectArticleService;
     private final MediaReadService mediaReadService;
 
     /**
@@ -103,6 +110,32 @@ public class SubjectListingService {
         List<UUID> ids = subjectRepository.findMatchingIds(filter, pageable.getOffset(), pageable.getPageSize());
         return new SubjectListResponse(items(ids, language), subjectRepository.countMatching(filter),
                 facets(filter, definitions, optionsByDefinition, language));
+    }
+
+    /**
+     * One page of the subjects whose PREFERRED value of the SUBJECT_REF field {@code attributeKey}
+     * points at {@code subjectId}, optionally of one kind. An attribute that is unknown, not a
+     * SUBJECT_REF, or refers to another kind than the subject's throws InvalidSubjectFilterException.
+     */
+    @Transactional(readOnly = true)
+    public SubjectReferencesResponse referencedBy(UUID subjectId, String attributeKey, @Nullable String kindFilter,
+            String language, Pageable pageable) {
+        Subject subject = subjectRepository.findById(subjectId).orElseThrow(SubjectNotFoundException::new);
+        SubjectKind kind = kindFilter == null ? null : SubjectService.parseKind(kindFilter);
+        AttributeDefinition definition = attributeDefinitionRepository.findByKey(attributeKey)
+                .orElseThrow(() -> new InvalidSubjectFilterException(
+                        List.of(violation(REFERENCE_KEY, "attributeUnknown", attributeKey))));
+        if (definition.getValueType() != AttributeValueType.SUBJECT_REF) {
+            throw new InvalidSubjectFilterException(
+                    List.of(violation(REFERENCE_KEY, "attributeNotReference", attributeKey)));
+        }
+        if (definition.getRefKind() != subject.getKind()) {
+            throw new InvalidSubjectFilterException(List.of(violation(REFERENCE_KEY, "attributeRefKindMismatch",
+                    attributeKey, String.valueOf(definition.getRefKind()))));
+        }
+
+        Page<UUID> page = subjectRepository.findIdsReferencing(subjectId, definition.getId(), kind, pageable);
+        return new SubjectReferencesResponse(items(page.getContent(), language), page.getTotalElements());
     }
 
     // Both `kind=ISLAND,PORT` and `kind=ISLAND&kind=PORT`; no kind means every kind.
@@ -242,7 +275,7 @@ public class SubjectListingService {
         Map<UUID, Subject> subjects = subjectRepository.findAllById(ids).stream()
                 .collect(Collectors.toMap(Subject::getId, Function.identity()));
         Map<UUID, LocalizedLabelResponse> names = labelService.resolveSubjects(ids, language);
-        Map<UUID, String> slugs = articleService.mainArticleSlugs(ids, language);
+        Map<UUID, String> slugs = subjectArticleService.mainArticleSlugs(ids, language);
         Map<UUID, UUID> images = mediaReadService.retainPublishedImagesOfSubjects(
                 subjectLiveRevisionRepository.findMainImages(ids).stream()
                         .collect(Collectors.toMap(MainImage::getSubjectId, MainImage::getMediaId)));

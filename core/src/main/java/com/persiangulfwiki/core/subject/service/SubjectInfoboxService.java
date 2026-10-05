@@ -1,6 +1,6 @@
 package com.persiangulfwiki.core.subject.service;
 
-import com.persiangulfwiki.core.article.service.ArticleService;
+import com.persiangulfwiki.core.article.service.SubjectArticleService;
 import com.persiangulfwiki.core.attribute.entity.AttributeDefinition;
 import com.persiangulfwiki.core.attribute.entity.AttributeGroup;
 import com.persiangulfwiki.core.attribute.entity.AttributeOption;
@@ -82,7 +82,7 @@ public class SubjectInfoboxService {
     private final AttributeGroupRepository attributeGroupRepository;
     private final AttributeOptionRepository attributeOptionRepository;
     private final LabelService labelService;
-    private final ArticleService articleService;
+    private final SubjectArticleService subjectArticleService;
     private final MediaReadService mediaReadService;
     private final ExpertVerificationService expertVerificationService;
     private final ObjectMapper objectMapper;
@@ -254,7 +254,7 @@ public class SubjectInfoboxService {
                         .collect(Collectors.toMap(AttributeOption::getId, Function.identity()));
         return new Lookups(options, labelService.resolveOptions(optionIds, language),
                 labelService.resolveSubjects(referencedIds, language),
-                articleService.mainArticleSlugs(referencedIds, language));
+                subjectArticleService.mainArticleSlugs(referencedIds, language));
     }
 
     private record Lookups(

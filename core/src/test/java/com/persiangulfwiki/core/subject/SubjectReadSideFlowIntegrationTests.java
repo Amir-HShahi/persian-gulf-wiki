@@ -551,7 +551,7 @@ class SubjectReadSideFlowIntegrationTests {
     }
 
     // has_360_tour is computed, never stored: a public 360° panorama in the gallery of the
-    // subject's main article -- its oldest published article, not just any of them.
+    // subject's main article -- the first one published, not just any of them.
     @Test
     void has360TourCountsOnlyPublicPanoramasOfTheMainArticle() throws Exception {
         Session author = signIn("rsfauth5");

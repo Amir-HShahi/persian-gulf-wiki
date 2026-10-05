@@ -1,6 +1,7 @@
 package com.persiangulfwiki.core.article.service;
 
 import com.persiangulfwiki.core.article.dto.RevisionResponse;
+import com.persiangulfwiki.core.article.dto.SubjectLinkResponse;
 import com.persiangulfwiki.core.article.dto.UpdateRevisionRequest;
 import com.persiangulfwiki.core.article.entity.ArticleRevision;
 import com.persiangulfwiki.core.article.entity.ArticleTranslation;
@@ -21,7 +22,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import tools.jackson.databind.JsonNode;
@@ -35,6 +38,8 @@ public class ArticleRevisionService {
     private final ArticleRevisionRepository articleRevisionRepository;
     private final ArticleVisibilityService articleVisibilityService;
     private final SubjectInfoboxCacheService subjectInfoboxCacheService;
+    private final SubjectLinkService subjectLinkService;
+    private final SubjectArticleService subjectArticleService;
 
     // Converts JsonNode (every DTO's shape for `body`) to/from the pre-serialized JSON-text
     // String the entity actually stores. See the JSON-mapping decision comment on
@@ -52,6 +57,7 @@ public class ArticleRevisionService {
     // have a second implementation to drift out of sync with this one.
     @Transactional
     public UUID createInitialRevision(UUID translationId, String title, JsonNode body, String summary, UUID authorId) {
+        subjectLinkService.validate(body);
         ArticleRevision revision = articleRevisionRepository.save(ArticleRevision.builder()
                 .translationId(translationId)
                 .revisionNumber(allocateNextRevisionNumber(translationId))
@@ -79,16 +85,17 @@ public class ArticleRevisionService {
     // Every other status is rejected by the editability check below before this is reached.
     @Transactional
     public RevisionResponse update(UUID callerUserId, UUID articleId, String language, UUID revisionId,
-            UpdateRevisionRequest request) {
+            UpdateRevisionRequest request, String readerLanguage) {
         ArticleRevision revision = getRevisionScoped(articleId, language, revisionId);
         requireAuthor(revision, callerUserId);
         requireEditable(revision);
+        subjectLinkService.validate(request.body());
 
         revision.setTitle(request.title());
         revision.setBody(toJson(request.body()));
         revision.setSummary(request.summary());
 
-        return toResponse(articleRevisionRepository.save(revision));
+        return toResponse(articleRevisionRepository.save(revision), readerLanguage);
     }
 
     // Silently drops revisions the caller may not read (see isReadableBy) rather than
@@ -97,14 +104,24 @@ public class ArticleRevisionService {
     // not read at all is a 404, not an empty list -- 200 [] would confirm it exists.
     @Transactional(readOnly = true)
     public List<RevisionResponse> list(UUID articleId, String language, @Nullable UUID callerUserId,
-            boolean isCallerModerator) {
+            boolean isCallerModerator, String readerLanguage) {
         ArticleTranslation translation = getTranslation(articleId, language);
         if (!articleVisibilityService.isTranslationReadableBy(translation, callerUserId, isCallerModerator)) {
             throw new TranslationNotFoundException();
         }
-        return articleRevisionRepository.findByTranslationIdOrderByRevisionNumberAsc(translation.getId()).stream()
+        List<ArticleRevision> revisions = articleRevisionRepository
+                .findByTranslationIdOrderByRevisionNumberAsc(translation.getId()).stream()
                 .filter(revision -> isReadableBy(revision, callerUserId, isCallerModerator))
-                .map(this::toResponse)
+                .toList();
+        Map<UUID, JsonNode> bodies = new HashMap<>();
+        revisions.forEach(revision -> bodies.put(revision.getId(), fromJson(revision.getBody())));
+        // One lookup for every revision's links rather than one per revision.
+        Map<UUID, SubjectLinkResponse> links = subjectLinkService.resolve(bodies.values(), readerLanguage);
+        return revisions.stream()
+                .map(revision -> {
+                    JsonNode body = bodies.get(revision.getId());
+                    return toResponse(revision, body, subjectLinkService.retainLinkedFrom(body, links));
+                })
                 .toList();
     }
 
@@ -113,12 +130,12 @@ public class ArticleRevisionService {
     // existence the same way list() does. Don't "fix" this to 403.
     @Transactional(readOnly = true)
     public RevisionResponse get(UUID articleId, String language, UUID revisionId, @Nullable UUID callerUserId,
-            boolean isCallerModerator) {
+            boolean isCallerModerator, String readerLanguage) {
         ArticleRevision revision = getRevisionScoped(articleId, language, revisionId);
         if (!isReadableBy(revision, callerUserId, isCallerModerator)) {
             throw new RevisionNotFoundException();
         }
-        return toResponse(revision);
+        return toResponse(revision, readerLanguage);
     }
 
     // Moves DRAFT|CHANGES_REQUESTED -> PENDING, then announces it.
@@ -131,7 +148,8 @@ public class ArticleRevisionService {
     // PENDING with no moderation task behind it. Read RevisionSubmittedEvent before changing
     // any of that.
     @Transactional
-    public RevisionResponse submit(UUID callerUserId, UUID articleId, String language, UUID revisionId) {
+    public RevisionResponse submit(UUID callerUserId, UUID articleId, String language, UUID revisionId,
+            String readerLanguage) {
         ArticleRevision revision = getRevisionScoped(articleId, language, revisionId);
         requireAuthor(revision, callerUserId);
         requireEditable(revision);
@@ -147,7 +165,7 @@ public class ArticleRevisionService {
 
         eventPublisher.publishEvent(new RevisionSubmittedEvent(saved.getId(), firstSubmission));
 
-        return toResponse(saved);
+        return toResponse(saved, readerLanguage);
     }
 
     // Read-only status probe for the moderation package, which must refuse to record a
@@ -194,6 +212,7 @@ public class ArticleRevisionService {
         translation.setCurrentRevisionId(revision.getId());
         articleTranslationRepository.save(translation);
         if (isFirstApproval) {
+            subjectArticleService.promoteIfSubjectHasNoMain(translation.getArticleId());
             subjectInfoboxCacheService.evictAll();
         }
     }
@@ -249,9 +268,14 @@ public class ArticleRevisionService {
         return objectMapper.readTree(json);
     }
 
-    private RevisionResponse toResponse(ArticleRevision revision) {
+    private RevisionResponse toResponse(ArticleRevision revision, String readerLanguage) {
+        JsonNode body = fromJson(revision.getBody());
+        return toResponse(revision, body, subjectLinkService.resolve(List.of(body), readerLanguage));
+    }
+
+    private RevisionResponse toResponse(ArticleRevision revision, JsonNode body, Map<UUID, SubjectLinkResponse> links) {
         return new RevisionResponse(revision.getId(), revision.getTranslationId(), revision.getRevisionNumber(),
-                revision.getParentRevisionId(), revision.getTitle(), fromJson(revision.getBody()), revision.getSummary(),
-                revision.getStatus(), revision.getAuthorId(), revision.getCreatedAt());
+                revision.getParentRevisionId(), revision.getTitle(), body, revision.getSummary(),
+                revision.getStatus(), revision.getAuthorId(), revision.getCreatedAt(), links);
     }
 }

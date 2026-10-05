@@ -48,6 +48,11 @@ public class Article extends AuditableEntity {
     @Column(name = "created_by_user_id")
     private UUID createdByUserId;
 
+    // The subject's main article, whose slug is the subject's page URL (V28). Only
+    // SubjectArticleService writes it, under the subject row lock.
+    @Column(name = "is_main", nullable = false)
+    private boolean isMain;
+
     // Set only by the dev-profile fixture endpoint; null on every row a real caller creates.
     @Column(name = "dev_marker", length = 40)
     private String devMarker;

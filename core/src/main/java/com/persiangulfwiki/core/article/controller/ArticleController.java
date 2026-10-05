@@ -11,6 +11,7 @@ import com.persiangulfwiki.core.article.service.ArticleRevisionService;
 import com.persiangulfwiki.core.article.service.ArticleService;
 import com.persiangulfwiki.core.article.service.ArticleTranslationService;
 import com.persiangulfwiki.core.common.dto.ApiResult;
+import com.persiangulfwiki.core.config.SupportedLocales;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -94,9 +95,12 @@ public class ArticleController {
             + "and that translation's first draft revision, in a single step -- there is no "
             + "separate call to add the initial content afterwards. `subjectId` is optional: the "
             + "article's `subjectKind` is always that subject's kind, and null when no subject is "
-            + "given. `slug` must not already be in use by any translation of any article.")
+            + "given. `slug` must not already be in use by any translation of any article. A subject link in `body` "
+            + "(`{\"type\": \"subjectLink\", \"subjectId\": \"…\"}`, anywhere in the tree) must name an existing "
+            + "subject; an article may hold at most 1000 of them.")
     @ApiResponse(responseCode = "201", description = "The created article.")
-    @ApiResponse(responseCode = "400", description = "Field validation failed (see `errors`).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "400", description = "Field validation failed (see `errors`), including a subject link in `body` "
+            + "that names no existing subject, reported at the link's path (e.g. `body.content[2].subjectId`).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "Either the account's email address is not yet verified, or the CSRF header is "
             + "missing or does not match the cookie -- both surface as a plain 403; read `detail` "
@@ -174,7 +178,9 @@ public class ArticleController {
             + "people who can see it: its creator, anyone who wrote a revision in one of its "
             + "translations, and moderators/admins.")
     @ApiResponse(responseCode = "201", description = "The created translation.")
-    @ApiResponse(responseCode = "400", description = "Request failed field validation.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "400", description = "Request failed field validation (see `errors`), including a subject link "
+            + "in `body` that names no existing subject, reported at the link's path (e.g. "
+            + "`body.content[2].subjectId`).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "Either the account's email address is not yet verified, or the CSRF header is "
             + "missing or does not match the cookie.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
@@ -222,7 +228,9 @@ public class ArticleController {
             + "allowed while the revision's status is DRAFT or CHANGES_REQUESTED, and only by "
             + "the account that authored it.")
     @ApiResponse(responseCode = "200", description = "The updated revision.")
-    @ApiResponse(responseCode = "400", description = "Request failed field validation.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "400", description = "Request failed field validation (see `errors`), including a subject link "
+            + "in `body` that names no existing subject, reported at the link's path (e.g. "
+            + "`body.content[2].subjectId`).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "Either the caller is not the revision's author, the account's email address is "
             + "not yet verified, or the CSRF header is missing or does not match the cookie -- "
@@ -240,7 +248,8 @@ public class ArticleController {
     @ResponseStatus(HttpStatus.OK)
     public ApiResult<RevisionResponse> updateRevision(@PathVariable UUID articleId, @PathVariable String language,
             @PathVariable UUID revisionId, @Valid @RequestBody UpdateRevisionRequest request) {
-        RevisionResponse data = articleRevisionService.update(currentUserId(), articleId, language, revisionId, request);
+        RevisionResponse data = articleRevisionService.update(currentUserId(), articleId, language, revisionId, request,
+                readerLanguage());
         String message = messageSource.getMessage("success.revisionUpdated", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }
@@ -263,7 +272,8 @@ public class ArticleController {
     @ResponseStatus(HttpStatus.OK)
     public ApiResult<List<RevisionResponse>> listRevisions(@PathVariable UUID articleId, @PathVariable String language) {
         List<RevisionResponse> data =
-                articleRevisionService.list(articleId, language, currentUserIdOrNull(), isCurrentUserModerator());
+                articleRevisionService.list(articleId, language, currentUserIdOrNull(), isCurrentUserModerator(),
+                        readerLanguage());
         String message = messageSource.getMessage("success.revisionsList", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }
@@ -284,7 +294,7 @@ public class ArticleController {
     public ApiResult<RevisionResponse> getRevision(
             @PathVariable UUID articleId, @PathVariable String language, @PathVariable UUID revisionId) {
         RevisionResponse data = articleRevisionService.get(
-                articleId, language, revisionId, currentUserIdOrNull(), isCurrentUserModerator());
+                articleId, language, revisionId, currentUserIdOrNull(), isCurrentUserModerator(), readerLanguage());
         String message = messageSource.getMessage("success.revisionFetched", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }
@@ -309,9 +319,16 @@ public class ArticleController {
     @ResponseStatus(HttpStatus.OK)
     public ApiResult<RevisionResponse> submitRevision(
             @PathVariable UUID articleId, @PathVariable String language, @PathVariable UUID revisionId) {
-        RevisionResponse data = articleRevisionService.submit(currentUserId(), articleId, language, revisionId);
+        RevisionResponse data =
+                articleRevisionService.submit(currentUserId(), articleId, language, revisionId, readerLanguage());
         String message = messageSource.getMessage("success.revisionSubmitted", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
+    }
+
+    // The language subject links are named in: fa, en or ar from Accept-Language, else fa. Not the
+    // translation's own language, which the path carries.
+    private static String readerLanguage() {
+        return SupportedLocales.normalize(LocaleContextHolder.getLocale()).getLanguage();
     }
 
     private UUID currentUserId() {

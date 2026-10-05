@@ -22,6 +22,8 @@ import com.persiangulfwiki.core.label.exception.UnsupportedLabelLanguageExceptio
 import com.persiangulfwiki.core.article.exception.ArticleNotFoundException;
 import com.persiangulfwiki.core.article.exception.DuplicateSlugException;
 import com.persiangulfwiki.core.article.exception.DuplicateTranslationLanguageException;
+import com.persiangulfwiki.core.article.exception.InvalidArticleBodyException;
+import com.persiangulfwiki.core.article.exception.InvalidMainArticleException;
 import com.persiangulfwiki.core.article.exception.NotRevisionAuthorException;
 import com.persiangulfwiki.core.article.exception.RevisionNotEditableException;
 import com.persiangulfwiki.core.article.exception.RevisionNotFoundException;
@@ -425,6 +427,30 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(NotRevisionAuthorException.class)
     public ProblemDetail handleNotRevisionAuthor(NotRevisionAuthorException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.FORBIDDEN, resolve("error.notRevisionAuthor"), "NOT_REVISION_AUTHOR", request);
+    }
+
+    // VALIDATION_FAILED with an `errors` list, like a subject payload: a subject link naming no
+    // subject is a per-field input error, reported at the link's path in the body.
+    @ExceptionHandler(InvalidArticleBodyException.class)
+    public ProblemDetail handleInvalidArticleBody(InvalidArticleBodyException ex, HttpServletRequest request) {
+        List<FieldViolation> errors = ex.getViolations().stream()
+                .map(violation -> new FieldViolation(violation.field(),
+                        resolve(violation.messageKey(), violation.args().toArray())))
+                .toList();
+        ProblemDetail problemDetail = ProblemDetails.of(
+                HttpStatus.BAD_REQUEST, resolve("error.validationFailed"), "VALIDATION_FAILED", request);
+        problemDetail.setProperty("errors", errors);
+        return problemDetail;
+    }
+
+    // VALIDATION_FAILED on `articleId`, the same way an unusable mainImageMediaId in a subject payload
+    // is reported: the request names something that cannot fill the role.
+    @ExceptionHandler(InvalidMainArticleException.class)
+    public ProblemDetail handleInvalidMainArticle(InvalidMainArticleException ex, HttpServletRequest request) {
+        ProblemDetail problemDetail = ProblemDetails.of(
+                HttpStatus.BAD_REQUEST, resolve("error.validationFailed"), "VALIDATION_FAILED", request);
+        problemDetail.setProperty("errors", List.of(new FieldViolation("articleId", resolve(ex.getMessageKey()))));
+        return problemDetail;
     }
 
     @ExceptionHandler(ModerationTaskNotFoundException.class)

@@ -12,16 +12,8 @@ import java.util.UUID;
 // revisions never show here.
 public interface SubjectFacetRepository {
 
-    // A subject's main article until phase 6 stores one: its oldest article with an approved
-    // translation, which is the article phase 6 makes main first. Written against a `subjects s`
-    // row. ArticleTranslationRepository.findMainArticleSlugs applies the same rule.
-    String MAIN_ARTICLE_OF_S = """
-            (select a.id from articles a
-             where a.subject_id = s.id
-               and exists (select 1 from article_translations t
-                           where t.article_id = a.id and t.current_revision_id is not null)
-             order by a.created_at, a.id
-             limit 1)""";
+    // A subject's main article (V28). Written against a `subjects s` row.
+    String MAIN_ARTICLE_OF_S = "(select a.id from articles a where a.subject_id = s.id and a.is_main)";
 
     // The derived has_360_tour, computed rather than stored: a public 360° panorama in the main
     // article's gallery.

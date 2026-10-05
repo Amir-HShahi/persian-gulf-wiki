@@ -10,11 +10,14 @@ import org.springframework.data.repository.query.Param;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface AttributeDefinitionRepository extends JpaRepository<AttributeDefinition, UUID> {
 
     boolean existsByKey(String key);
+
+    Optional<AttributeDefinition> findByKey(String key);
 
     boolean existsByGroupId(UUID groupId);
 

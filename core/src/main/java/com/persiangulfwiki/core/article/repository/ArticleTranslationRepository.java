@@ -46,21 +46,14 @@ public interface ArticleTranslationRepository extends JpaRepository<ArticleTrans
     Page<ArticleTranslation> findPublishedByLanguage(@Param("language") String language,
             @Param("subjectId") UUID subjectId, @Param("subjectKind") SubjectKind subjectKind, Pageable pageable);
 
-    // The approved translations, in the given languages, of each subject's main article. Until
-    // phase 6 stores one, a subject's main article is its oldest article with an approved
-    // translation -- the article phase 6 will make main first. SubjectFacetRepository.MAIN_ARTICLE_OF_S
-    // applies the same rule inside the facet queries.
-    @Query(value = """
-            select m.subject_id as subjectId, t.language as language, t.slug as slug
-            from (select distinct on (a.subject_id) a.subject_id, a.id
-                  from articles a
-                  where a.subject_id in (:subjectIds)
-                    and exists (select 1 from article_translations p
-                                where p.article_id = a.id and p.current_revision_id is not null)
-                  order by a.subject_id, a.created_at, a.id) m
-            join article_translations t on t.article_id = m.id
-            where t.current_revision_id is not null and t.language in (:languages)
-            """, nativeQuery = true)
+    List<ArticleTranslation> findByArticleIdInAndCurrentRevisionIdIsNotNull(Collection<UUID> articleIds);
+
+    // The approved translations, in the given languages, of each subject's main article.
+    @Query("""
+            select a.subjectId as subjectId, t.language as language, t.slug as slug
+            from Article a join ArticleTranslation t on t.articleId = a.id
+            where a.subjectId in :subjectIds and a.isMain = true
+              and t.currentRevisionId is not null and t.language in :languages""")
     List<MainArticleSlug> findMainArticleSlugs(@Param("subjectIds") Collection<UUID> subjectIds,
             @Param("languages") Collection<String> languages);
 
