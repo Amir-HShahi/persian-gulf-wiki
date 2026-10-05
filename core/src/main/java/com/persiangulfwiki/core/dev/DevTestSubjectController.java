@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
 import java.util.UUID;
 
 // Mints a throwaway subject per call, for E2E suites that need something to hang an article
@@ -71,7 +72,8 @@ public class DevTestSubjectController {
     @Operation(summary = "Mint a disposable test subject", description = "Creates a subject marked as machine-minted. Every field of the request body is "
             + "optional; the default is an ISLAND with an empty detail row. Set `withDetailRow` "
             + "false to mint a subject with no detail row at all — a state the normal create "
-            + "endpoint cannot produce.")
+            + "endpoint cannot produce. Set `deleted` true to mint it already deleted (restorable), as a "
+            + "moderator's delete would leave it.")
     @ApiResponse(responseCode = "201", description = "The created subject.")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -79,13 +81,15 @@ public class DevTestSubjectController {
     // Returns the DTO bare rather than wrapped in the usual envelope, matching
     // DevTestUserController: there is no message worth translating for a machine-only caller.
     public DevTestSubjectResponse mint(@RequestBody(required = false) DevTestSubjectRequest request) {
-        DevTestSubjectRequest safeRequest = request != null ? request : new DevTestSubjectRequest(null, null);
+        DevTestSubjectRequest safeRequest = request != null ? request : new DevTestSubjectRequest(null, null, null);
         SubjectKind kind = safeRequest.kind() != null ? safeRequest.kind() : SubjectKind.ISLAND;
         boolean withDetailRow = safeRequest.withDetailRow() == null || safeRequest.withDetailRow();
+        boolean isDeleted = Boolean.TRUE.equals(safeRequest.deleted());
 
         Subject subject = subjectRepository.save(Subject.builder()
                 .kind(kind)
                 .devMarker(DevTestFixtures.MARKER)
+                .deletedAt(isDeleted ? Instant.now() : null)
                 .build());
 
         if (withDetailRow) {
@@ -103,7 +107,7 @@ public class DevTestSubjectController {
             }
         }
 
-        return new DevTestSubjectResponse(subject.getId(), kind, withDetailRow);
+        return new DevTestSubjectResponse(subject.getId(), kind, withDetailRow, isDeleted);
     }
 
     @Operation(summary = "Delete a minted test subject", description = "Deletes a subject previously created by this endpoint. Refuses anything else — a "
