@@ -20,4 +20,6 @@ public interface LabelRepository extends JpaRepository<Label, UUID> {
     List<Label> findBySubjectIdIn(Collection<UUID> subjectIds);
 
     List<Label> findByKindIn(Collection<SubjectKind> kinds);
+
+    List<Label> findByTopicIdIn(Collection<UUID> topicIds);
 }

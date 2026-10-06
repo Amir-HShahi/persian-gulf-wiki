@@ -183,7 +183,7 @@ class MediaProcessingFlowIntegrationTests {
 
     private UUID createArticle(Account author) throws Exception {
         CreateArticleRequest request = new CreateArticleRequest(null, "fa",
-                "processing-" + UUID.randomUUID(), "Title", objectMapper.readTree("{\"text\":\"body\"}"), null);
+                "processing-" + UUID.randomUUID(), "Title", objectMapper.readTree("{\"text\":\"body\"}"), null, null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(author.accessCookie())
                         .with(xsrf())

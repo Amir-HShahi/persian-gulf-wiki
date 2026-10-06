@@ -95,6 +95,8 @@ import com.persiangulfwiki.core.subject.exception.SubjectRevisionAlreadyVerified
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotEditableException;
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotFoundException;
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotLiveException;
+import com.persiangulfwiki.core.topic.exception.InvalidTopicIdsException;
+import com.persiangulfwiki.core.topic.exception.TopicNotFoundException;
 import com.persiangulfwiki.core.user.exception.SessionAlreadyRevokedException;
 import com.persiangulfwiki.core.user.exception.SessionNotFoundException;
 import com.persiangulfwiki.core.user.exception.UserNotFoundException;
@@ -510,6 +512,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     // VALIDATION_FAILED on `articleId`, the same way an unusable mainImageMediaId in a subject payload
     // is reported: the request names something that cannot fill the role.
+    @ExceptionHandler(TopicNotFoundException.class)
+    public ProblemDetail handleTopicNotFound(TopicNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.topicNotFound"), "TOPIC_NOT_FOUND", request);
+    }
+
+    // VALIDATION_FAILED on `topicIds`, like InvalidMainArticleException on `articleId`.
+    @ExceptionHandler(InvalidTopicIdsException.class)
+    public ProblemDetail handleInvalidTopicIds(InvalidTopicIdsException ex, HttpServletRequest request) {
+        ProblemDetail problemDetail = ProblemDetails.of(
+                HttpStatus.BAD_REQUEST, resolve("error.validationFailed"), "VALIDATION_FAILED", request);
+        problemDetail.setProperty("errors", List.of(new FieldViolation("topicIds", resolve(ex.getMessageKey()))));
+        return problemDetail;
+    }
+
     @ExceptionHandler(InvalidMainArticleException.class)
     public ProblemDetail handleInvalidMainArticle(InvalidMainArticleException ex, HttpServletRequest request) {
         ProblemDetail problemDetail = ProblemDetails.of(

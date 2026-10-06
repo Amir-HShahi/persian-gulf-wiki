@@ -5,6 +5,7 @@ import com.persiangulfwiki.core.article.entity.RevisionStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -28,5 +29,9 @@ public record RevisionResponse(
                 + "language (from `Accept-Language`: fa, en or ar; anything else gets fa) and its page's slug. A "
                 + "link to a subject that was merged into another shows that other subject. A linked subject that no "
                 + "longer exists or has been deleted is absent; show the link as plain text.")
-        Map<UUID, SubjectLinkResponse> subjectLinks) {
+        Map<UUID, SubjectLinkResponse> subjectLinks,
+        @Schema(description = "Ids of the topics this revision says the article is about (see `GET /api/topics`). "
+                + "Always empty on a revision that is not in the article's original language: translations inherit "
+                + "the article's topics, listed on the translation.")
+        List<UUID> topicIds) {
 }

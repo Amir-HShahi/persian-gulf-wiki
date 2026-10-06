@@ -196,7 +196,7 @@ class ModerationFlowIntegrationTests {
 
     private Draft createDraft(Cookie accessCookie, Cookie csrfCookie, String slug) throws Exception {
         CreateArticleRequest createArticle = new CreateArticleRequest(null, "fa",
-                slug, "Title", simpleBody("body"), null);
+                slug, "Title", simpleBody("body"), null, null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -213,7 +213,7 @@ class ModerationFlowIntegrationTests {
     private Draft createSubjectBoundDraft(Cookie accessCookie, Cookie csrfCookie, UUID subjectId, String slug,
             String title, String summary) throws Exception {
         CreateArticleRequest createArticle = new CreateArticleRequest(subjectId, "fa", slug, title,
-                simpleBody("body"), summary);
+                simpleBody("body"), summary, null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -259,7 +259,7 @@ class ModerationFlowIntegrationTests {
 
     private ResultActions patchRevision(Cookie accessCookie, Cookie csrfCookie, Draft draft, String title)
             throws Exception {
-        UpdateRevisionRequest update = new UpdateRevisionRequest(title, simpleBody("edited"), "edited summary");
+        UpdateRevisionRequest update = new UpdateRevisionRequest(title, simpleBody("edited"), "edited summary", null);
         return mockMvc.perform(patch("/api/articles/" + draft.articleId()
                         + "/translations/fa/revisions/" + draft.revisionId())
                 .cookie(accessCookie, csrfCookie)
@@ -352,7 +352,7 @@ class ModerationFlowIntegrationTests {
         Cookie authorCsrf = fetchCsrfCookie();
 
         CreateArticleRequest createArticle = new CreateArticleRequest(subjectId, "fa",
-                uniqueSlug("hormuz"), "Hormuz Island", simpleBody("An island."), "Summary.");
+                uniqueSlug("hormuz"), "Hormuz Island", simpleBody("An island."), "Summary.", null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(authorAccess, authorCsrf)
                         .header("X-XSRF-TOKEN", maskCsrfToken(authorCsrf.getValue()))

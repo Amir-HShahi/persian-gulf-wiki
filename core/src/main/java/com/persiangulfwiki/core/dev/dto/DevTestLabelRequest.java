@@ -9,8 +9,8 @@ import jakarta.validation.constraints.Size;
 
 import java.util.UUID;
 
-// Labels only a referent this dev surface minted: a test group, definition or option, or a test
-// subject. SUBJECT is accepted here although the admin endpoint refuses it, because it's the only
+// Labels only a referent this dev surface minted: a test group, definition or option, a test
+// subject or a test topic. SUBJECT is accepted here although the admin endpoint refuses it, because it's the only
 // way to name a subject before moderated subject revisions exist. KIND is refused: kind labels are
 // shared, seeded rows.
 public record DevTestLabelRequest(

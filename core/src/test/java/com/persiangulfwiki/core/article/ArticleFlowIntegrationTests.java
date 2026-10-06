@@ -208,7 +208,7 @@ class ArticleFlowIntegrationTests {
         Cookie csrfCookie = fetchCsrfCookie();
 
         CreateArticleRequest request = new CreateArticleRequest(subjectId, "fa",
-                uniqueSlug("hormuz-island"), "Hormuz Island", simpleBody("An island."), "Summary.");
+                uniqueSlug("hormuz-island"), "Hormuz Island", simpleBody("An island."), "Summary.", null);
 
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
@@ -269,7 +269,7 @@ class ArticleFlowIntegrationTests {
         Cookie csrfCookie = fetchCsrfCookie();
 
         CreateArticleRequest request = new CreateArticleRequest(UUID.randomUUID(), "fa",
-                uniqueSlug("unknown-subject"), "Title", simpleBody("body"), null);
+                uniqueSlug("unknown-subject"), "Title", simpleBody("body"), null, null);
 
         mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
@@ -324,7 +324,7 @@ class ArticleFlowIntegrationTests {
     private UUID createApprovedArticle(@Nullable UUID subjectId, String language, Cookie accessCookie,
             Cookie csrfCookie) throws Exception {
         CreateArticleRequest request = new CreateArticleRequest(subjectId, language,
-                uniqueSlug("kind-filter"), "Title", simpleBody("body"), null);
+                uniqueSlug("kind-filter"), "Title", simpleBody("body"), null, null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -350,7 +350,7 @@ class ArticleFlowIntegrationTests {
         Cookie csrfCookie = fetchCsrfCookie();
 
         CreateArticleRequest request = new CreateArticleRequest(null, "fa",
-                uniqueSlug("atomic-create"), "Title", nestedBody(), "Summary");
+                uniqueSlug("atomic-create"), "Title", nestedBody(), "Summary", null);
 
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
@@ -390,7 +390,7 @@ class ArticleFlowIntegrationTests {
         Cookie csrfCookie = fetchCsrfCookie();
 
         CreateArticleRequest createArticle = new CreateArticleRequest(null, "fa",
-                uniqueSlug("multi-lang"), "Title fa", simpleBody("fa body"), null);
+                uniqueSlug("multi-lang"), "Title fa", simpleBody("fa body"), null, null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -435,7 +435,7 @@ class ArticleFlowIntegrationTests {
 
         String sharedSlug = uniqueSlug("shared-slug");
         CreateArticleRequest first = new CreateArticleRequest(null, "fa",
-                sharedSlug, "First", simpleBody("body"), null);
+                sharedSlug, "First", simpleBody("body"), null, null);
         mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -444,7 +444,7 @@ class ArticleFlowIntegrationTests {
                 .andExpect(status().isCreated());
 
         CreateArticleRequest second = new CreateArticleRequest(null, "en",
-                sharedSlug, "Second", simpleBody("body"), null);
+                sharedSlug, "Second", simpleBody("body"), null, null);
         mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -464,7 +464,7 @@ class ArticleFlowIntegrationTests {
         Cookie csrfCookie = fetchCsrfCookie();
 
         CreateArticleRequest createArticle = new CreateArticleRequest(null, "fa",
-                uniqueSlug("patch-draft"), "Original title", simpleBody("original"), "orig summary");
+                uniqueSlug("patch-draft"), "Original title", simpleBody("original"), "orig summary", null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -476,7 +476,7 @@ class ArticleFlowIntegrationTests {
 
         UUID revisionId = firstRevisionId(articleId, accessCookie);
 
-        UpdateRevisionRequest update = new UpdateRevisionRequest("Edited title", nestedBody(), "edited summary");
+        UpdateRevisionRequest update = new UpdateRevisionRequest("Edited title", nestedBody(), "edited summary", null);
         mockMvc.perform(patch("/api/articles/" + articleId + "/translations/fa/revisions/" + revisionId)
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -538,7 +538,7 @@ class ArticleFlowIntegrationTests {
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue())))
                 .andExpect(status().isOk());
 
-        UpdateRevisionRequest update = new UpdateRevisionRequest("New title", simpleBody("new"), null);
+        UpdateRevisionRequest update = new UpdateRevisionRequest("New title", simpleBody("new"), null, null);
         mockMvc.perform(patch("/api/articles/" + articleId + "/translations/fa/revisions/" + revisionId)
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -565,7 +565,7 @@ class ArticleFlowIntegrationTests {
         Cookie otherAccess = loginAccessCookie("af-other11@example.com");
         Cookie otherCsrf = fetchCsrfCookie();
 
-        UpdateRevisionRequest update = new UpdateRevisionRequest("Hijacked title", simpleBody("hijack"), null);
+        UpdateRevisionRequest update = new UpdateRevisionRequest("Hijacked title", simpleBody("hijack"), null, null);
         mockMvc.perform(patch("/api/articles/" + articleId + "/translations/fa/revisions/" + revisionId)
                         .cookie(otherAccess, otherCsrf)
                         .header("X-XSRF-TOKEN", maskCsrfToken(otherCsrf.getValue()))
@@ -674,7 +674,7 @@ class ArticleFlowIntegrationTests {
         Cookie csrfCookie = fetchCsrfCookie();
 
         CreateArticleRequest request = new CreateArticleRequest(null, "fa",
-                uniqueSlug("anon-mutation"), "Title", simpleBody("body"), null);
+                uniqueSlug("anon-mutation"), "Title", simpleBody("body"), null, null);
         mockMvc.perform(post("/api/articles")
                         .cookie(csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -692,7 +692,7 @@ class ArticleFlowIntegrationTests {
         Cookie csrfCookie = fetchCsrfCookie();
 
         CreateArticleRequest request = new CreateArticleRequest(null, "fa",
-                uniqueSlug("unverified-mutation"), "Title", simpleBody("body"), null);
+                uniqueSlug("unverified-mutation"), "Title", simpleBody("body"), null, null);
         mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -708,7 +708,7 @@ class ArticleFlowIntegrationTests {
         Cookie accessCookie = loginAccessCookie("af-author14@example.com");
 
         CreateArticleRequest request = new CreateArticleRequest(null, "fa",
-                uniqueSlug("no-csrf"), "Title", simpleBody("body"), null);
+                uniqueSlug("no-csrf"), "Title", simpleBody("body"), null, null);
         mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -726,7 +726,7 @@ class ArticleFlowIntegrationTests {
         Cookie csrfCookie = fetchCsrfCookie();
 
         CreateArticleRequest request = new CreateArticleRequest(null, "fa",
-                uniqueSlug("raw-csrf"), "Title", simpleBody("body"), null);
+                uniqueSlug("raw-csrf"), "Title", simpleBody("body"), null, null);
         mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", csrfCookie.getValue())
@@ -740,7 +740,7 @@ class ArticleFlowIntegrationTests {
     private UUID[] createArticleAndReturnArticleAndRevisionId(Cookie accessCookie, Cookie csrfCookie, String slug)
             throws Exception {
         CreateArticleRequest createArticle = new CreateArticleRequest(null, "fa",
-                slug, "Title", simpleBody("body"), null);
+                slug, "Title", simpleBody("body"), null, null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))

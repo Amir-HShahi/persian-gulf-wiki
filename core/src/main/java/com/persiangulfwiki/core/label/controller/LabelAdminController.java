@@ -52,7 +52,7 @@ public class LabelAdminController {
             + "choice value always keeps its Farsi name.")
     @ApiResponse(responseCode = "200", description = "The stored label.")
     @ApiResponse(responseCode = "400", description = "One of: `referentKind` is not GROUP, ATTRIBUTE, OPTION or KIND "
-            + "(SUBJECT is refused), or `referentId` is not a UUID — or, for KIND, not one of ISLAND, PORT, OIL_FIELD, "
+            + "(SUBJECT and TOPIC are refused), or `referentId` is not a UUID — or, for KIND, not one of ISLAND, PORT, OIL_FIELD, "
             + "SPECIES, STRAIT, FISHING_GROUND, PROVINCE — with `code` INVALID_LABEL_REFERENT; `language` is not fa, "
             + "en or ar, with `code` UNSUPPORTED_LABEL_LANGUAGE; or `value` is blank or longer than 200 characters, "
             + "with `detail` \"validation failed\" and the failure in the `errors` array.",

@@ -53,7 +53,8 @@ public class LabelService {
 
     /**
      * Admin write of one label. Only the vocabulary — GROUP, ATTRIBUTE, OPTION and KIND — is writable here;
-     * SUBJECT is rejected, because a subject's names change only through a moderated revision.
+     * SUBJECT is rejected, because a subject's names change only through a moderated revision, and so is
+     * TOPIC, whose names are seeded by migration.
      */
     @Transactional
     public LabelResponse upsert(UUID actingAdminId, String referentKindRaw, String referentIdRaw, String languageRaw,
@@ -163,6 +164,13 @@ public class LabelService {
                 : resolve(labelRepository.findBySubjectIdIn(subjectIds), Label::getSubjectId, language);
     }
 
+    /** Ids with no label in the language or in Farsi are absent from the map. */
+    @Transactional(readOnly = true)
+    public Map<UUID, LocalizedLabelResponse> resolveTopics(Collection<UUID> topicIds, String language) {
+        return topicIds.isEmpty() ? Map.of()
+                : resolve(labelRepository.findByTopicIdIn(topicIds), Label::getTopicId, language);
+    }
+
     /** Kinds with no label in the language or in Farsi are absent from the map. */
     @Transactional(readOnly = true)
     public Map<SubjectKind, LocalizedLabelResponse> resolveKinds(Collection<SubjectKind> kinds, String language) {
@@ -201,6 +209,7 @@ public class LabelService {
             case OPTION -> labelRepository.findByOptionIdIn(List.of(referent.id()));
             case SUBJECT -> labelRepository.findBySubjectIdIn(List.of(referent.id()));
             case KIND -> labelRepository.findByKindIn(List.of(referent.subjectKind()));
+            case TOPIC -> labelRepository.findByTopicIdIn(List.of(referent.id()));
         };
     }
 
@@ -212,16 +221,17 @@ public class LabelService {
             case OPTION -> builder.optionId(referent.id()).build();
             case SUBJECT -> builder.subjectId(referent.id()).build();
             case KIND -> builder.kind(referent.subjectKind()).build();
+            case TOPIC -> builder.topicId(referent.id()).build();
         };
     }
 
     // Parses the raw path segments rather than binding enums/UUIDs on the controller, so every
-    // malformed form — unknown kind, SUBJECT, a non-UUID id, an unknown kind name — is one
+    // malformed form — unknown kind, SUBJECT or TOPIC, a non-UUID id, an unknown kind name — is one
     // translated 400 carrying INVALID_LABEL_REFERENT. A well-formed id that names nothing is a
     // 404 from the referent's own not-found exception.
     private LabelReferent parseVocabularyReferent(String referentKindRaw, String referentIdRaw) {
         LabelReferentKind type = parseEnum(LabelReferentKind.class, referentKindRaw);
-        if (type == null || type == LabelReferentKind.SUBJECT) {
+        if (type == null || type == LabelReferentKind.SUBJECT || type == LabelReferentKind.TOPIC) {
             throw new InvalidLabelReferentException("label referent kind not writable here: " + referentKindRaw);
         }
         if (type == LabelReferentKind.KIND) {
@@ -252,7 +262,7 @@ public class LabelService {
                 }
                 yield LabelReferent.option(id);
             }
-            case SUBJECT, KIND -> throw new IllegalStateException("handled above: " + type);
+            case SUBJECT, KIND, TOPIC -> throw new IllegalStateException("handled above: " + type);
         };
     }
 
