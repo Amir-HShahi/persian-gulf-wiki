@@ -40,10 +40,12 @@ jobs:
             ghcr.io/amir-hshahi/persian-gulf-wiki-core:staging
             ghcr.io/amir-hshahi/persian-gulf-wiki-core:${{ steps.version.outputs.tag }}
       - name: Install cloudflared
+        if: vars.DEPLOY_ENABLED == 'true'
         run: |
           curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
           sudo dpkg -i cloudflared.deb
       - name: Deploy over Cloudflare-tunneled SSH
+        if: vars.DEPLOY_ENABLED == 'true'
         env:
           TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
           TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}

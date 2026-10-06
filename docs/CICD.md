@@ -7,6 +7,10 @@
 3. **release-please** watches `master` and maintains a standing release PR. Merging it bumps the version, tags `vX.Y.Z`, and creates a GitHub Release.
 4. The version tag push triggers **Deploy Production** (`deploy-production.yml`) — same build/deploy flow, tagged with the version number, but the job sits in the `production` GitHub Environment, which requires manual reviewer approval before it runs.
 
+## Deploys are switched off
+
+The server is gone, so the cloudflared install and SSH deploy steps in both deploy workflows run only when the repository variable `DEPLOY_ENABLED` is `true` (Settings → Secrets and variables → Actions → Variables). It is unset, so each run still builds and pushes the GHCR image but skips the server. Production still waits for reviewer approval first. To deploy again, rebuild the VPS per @docs/VPS-SETUP.md and set `DEPLOY_ENABLED=true`.
+
 ## Key pieces
 
 - **Docker build context is the repo root**, not `core/` (`context: ., file: core/Dockerfile`). This is required so `git-commit-id-maven-plugin` can see `.git` during the build. The Dockerfile also explicitly copies `core/lombok.config` — Maven needs it to correctly wire `@Value` fields through Lombok's generated constructors.
