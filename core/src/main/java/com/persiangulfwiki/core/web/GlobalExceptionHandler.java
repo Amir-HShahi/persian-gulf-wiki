@@ -17,6 +17,7 @@ import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeOptionCode
 import com.persiangulfwiki.core.dev.exception.DevTestAttributeGroupInUseException;
 import com.persiangulfwiki.core.dev.exception.DevTestMainArticleTakenException;
 import com.persiangulfwiki.core.dev.exception.DevTestSubjectRevisionLiveException;
+import com.persiangulfwiki.core.dev.exception.DevTestTopicInUseException;
 import com.persiangulfwiki.core.label.exception.InvalidLabelReferentException;
 import com.persiangulfwiki.core.label.exception.LabelNotFoundException;
 import com.persiangulfwiki.core.label.exception.UnsupportedLabelLanguageException;
@@ -690,6 +691,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DevTestMainArticleTakenException.class)
     public ProblemDetail handleDevTestMainArticleTaken(DevTestMainArticleTakenException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestMainArticleTaken"), "DEV_TEST_MAIN_ARTICLE_TAKEN", request);
+    }
+
+    @ExceptionHandler(DevTestTopicInUseException.class)
+    public ProblemDetail handleDevTestTopicInUse(DevTestTopicInUseException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestTopicInUse"), "DEV_TEST_TOPIC_IN_USE", request);
     }
 
     @ExceptionHandler(DevTestAttributeGroupInUseException.class)

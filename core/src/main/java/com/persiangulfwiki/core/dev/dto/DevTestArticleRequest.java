@@ -3,6 +3,7 @@ package com.persiangulfwiki.core.dev.dto;
 import com.persiangulfwiki.core.article.entity.RevisionStatus;
 import com.persiangulfwiki.core.article.entity.TranslationState;
 
+import java.util.Set;
 import java.util.UUID;
 
 import tools.jackson.databind.JsonNode;
@@ -24,6 +25,9 @@ import tools.jackson.databind.JsonNode;
 // isMain null follows the real rule (an APPROVED article becomes main when its subject has none);
 // false never makes it main, so "published but not main" is reachable on a subject with no main.
 // body is stored as given, unvalidated, so a subject link to a missing subject is reachable too.
+//
+// topicIds tags the minted revision. Always allowed: the minted translation is the canonical one,
+// the only kind the real path lets carry topics. Each must name an existing topic.
 public record DevTestArticleRequest(
         UUID subjectId,
         String canonicalLanguage,
@@ -34,5 +38,6 @@ public record DevTestArticleRequest(
         UUID authorUserId,
         TranslationState translationState,
         Boolean isMain,
-        JsonNode body) {
+        JsonNode body,
+        Set<UUID> topicIds) {
 }
