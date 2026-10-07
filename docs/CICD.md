@@ -9,12 +9,14 @@
 
 ## Deploys are switched off
 
-The server is gone, so the cloudflared install and SSH deploy steps in both deploy workflows run only when the repository variable `DEPLOY_ENABLED` is `true` (Settings → Secrets and variables → Actions → Variables). It is unset, so each run still builds and pushes the GHCR image but skips the server. Production still waits for reviewer approval first. To deploy again, rebuild the VPS per @docs/VPS-SETUP.md and set `DEPLOY_ENABLED=true`.
+The server is gone, so the cloudflared install and SSH deploy steps in both deploy workflows run only when the repository variable `DEPLOY_ENABLED` is `true` (Settings → Secrets and variables → Actions → Variables). It is set to `false`, so each run still builds and pushes the GHCR image but skips the server. Production still waits for reviewer approval first. To deploy again, rebuild the VPS per @docs/VPS-SETUP.md and set `DEPLOY_ENABLED=true`.
+
+The pushed image is still consumed: the frontend handover stack (@docs/FRONTEND-HANDOVER.md) pulls `:staging` from GHCR, so a merge to `master` is what ships a new backend to the frontend developer.
 
 ## Key pieces
 
 - **Docker build context is the repo root**, not `core/` (`context: ., file: core/Dockerfile`). This is required so `git-commit-id-maven-plugin` can see `.git` during the build. The Dockerfile also explicitly copies `core/lombok.config` — Maven needs it to correctly wire `@Value` fields through Lombok's generated constructors.
-- **GHCR package (`persian-gulf-wiki-core`) is public.** The VPS pulls anonymously; if it's ever made private again, the VPS needs its own `docker login` credentials or every deploy will fail with `unauthorized`.
+- **GHCR package (`persian-gulf-wiki-core`) is public.** The VPS and the frontend handover stack pull anonymously; if it's ever made private again, the VPS needs its own `docker login` credentials or every deploy will fail with `unauthorized` — and the frontend developer would need a `read:packages` token.
 - **SSH access is over a Cloudflare Tunnel**, not a public port. The runner installs `cloudflared`, then SSHes with `ProxyCommand="cloudflared access ssh --hostname <host>"`, authenticated via a Cloudflare Access **service token** (`CF_ACCESS_CLIENT_ID`/`SECRET` env vars). Host key checking is disabled — safe because Access already authenticates the tunnel before it reaches origin sshd.
 - **`deploy.sh`** (lives on the VPS at `/opt/pgw/deploy.sh`, **not** synced automatically from the repo) pulls the new app image, runs `docker compose up -d app` (starts `postgres`/`redis` too if not already running — don't add `--no-deps`, that was a bug that skipped creating them entirely on a fresh box), then polls `/actuator/health/readiness` for up to 60s. On failure it dumps the last 100 log lines and exits nonzero, failing the GitHub Actions job.
 - **`/actuator/health/**` must be `permitAll()`** in `SecurityConfig.java` — the health check curl is unauthenticated.
