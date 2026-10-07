@@ -1,0 +1,124 @@
+# Self-contained backend for frontend development: pulls the published API image, so no
+# repo checkout, JDK or build is needed. See docs/FRONTEND-HANDOVER.md.
+#
+# Everything binds to 127.0.0.1: the app runs the `dev` Spring profile, which exposes
+# unauthenticated /api/dev/** fixture endpoints. Never publish these ports on a LAN or server.
+services:
+  app:
+    image: ${PGW_IMAGE:-ghcr.io/amir-hshahi/persian-gulf-wiki-core:staging}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: core
+      DB_USERNAME: core
+      DB_PASSWORD: core
+      # Mail goes to Mailpit (application-dev.yaml turns off SMTP auth/TLS); credentials unused.
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      MAIL_USERNAME: unused
+      MAIL_PASSWORD: unused
+      MAIL_FROM: noreply@localhost
+      # OAuth placeholders only: Google sign-in does not work locally. Log in with the
+      # seeded @dev.local accounts or the /api/dev/test-users endpoint instead.
+      GOOGLE_CLIENT_ID: unused
+      GOOGLE_CLIENT_SECRET: unused
+      JWT_SECRET: VMnaOXjmQYX8vyU5JLkFMDuisY3FsxFBHKzYfr9hRtc=  # base64, 32 bytes; public, local only
+      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:3000}
+      FRONTEND_ORIGINS: ${FRONTEND_ORIGINS:-http://localhost:3000}
+      COOKIE_DOMAIN: localhost
+      SPRING_DATA_REDIS_HOST: redis
+      # The app reaches MinIO on the compose network; the browser uses the published port.
+      # Presigned URLs are signed for STORAGE_PUBLIC_ENDPOINT's host, so it must be what the
+      # browser sees.
+      STORAGE_ENDPOINT: http://minio:9000
+      STORAGE_PUBLIC_ENDPOINT: http://localhost:9000
+      STORAGE_REGION: us-east-1
+      STORAGE_ACCESS_KEY: pgw-dev
+      STORAGE_SECRET_KEY: pgw-dev-secret
+      STORAGE_STAGING_BUCKET: submissions-raw
+      STORAGE_MEDIA_BUCKET: submissions-derived
+      STORAGE_PUBLIC_BASE_URL: http://localhost:9000/submissions-derived/public
+      STORAGE_PATH_STYLE: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio-init:
+        condition: service_completed_successfully
+
+  postgres:
+    # PostGIS, not stock postgres: several tables have geometry columns.
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: core
+      POSTGRES_USER: core
+      POSTGRES_PASSWORD: core
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U core"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    environment:
+      MP_MAX_MESSAGES: 500
+      MP_DATABASE: /data/mailpit.db
+    ports:
+      # Web inbox only; SMTP (1025) stays on the compose network.
+      - "127.0.0.1:8025:8025"
+    volumes:
+      - mailpit-data:/data
+
+  # Community MinIO build; see the repo's docker-compose.yml for why not upstream.
+  minio:
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
+    restart: unless-stopped
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: pgw-dev
+      MINIO_ROOT_PASSWORD: pgw-dev-secret
+      # The browser PUTs uploads straight to MinIO, so it needs CORS for the frontend origin.
+      MINIO_API_CORS_ALLOW_ORIGIN: ${FRONTEND_ORIGINS:-http://localhost:3000}
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - minio-data:/data
+
+  # One-shot and idempotent: creates both buckets and makes only the media bucket's public/
+  # prefix anonymously readable.
+  minio-init:
+    image: pgsty/mc:RELEASE.2026-09-16T00-00-00Z
+    depends_on:
+      - minio
+    entrypoint: >
+      sh -c '
+      until mc alias set local http://minio:9000 pgw-dev pgw-dev-secret; do sleep 1; done &&
+      mc mb --ignore-existing local/submissions-raw &&
+      mc mb --ignore-existing local/submissions-derived &&
+      mc anonymous set download local/submissions-derived/public
+      '
+
+volumes:
+  postgres-data:
+  redis-data:
+  mailpit-data:
+  minio-data:
