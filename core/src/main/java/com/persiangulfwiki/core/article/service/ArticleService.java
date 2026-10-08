@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -84,7 +85,8 @@ public class ArticleService {
         // unmoderated content to anonymous readers the instant an article was created and made
         // the approval step a no-op that re-pointed it where it already pointed.
         articleRevisionService.createInitialRevision(
-                translation.getId(), request.title(), request.body(), request.summary(), creatorUserId);
+                translation.getId(), request.title(), request.body(), request.summary(), creatorUserId,
+                request.topicIds() == null ? Set.of() : request.topicIds());
 
         return toResponse(article, subjectKind);
     }

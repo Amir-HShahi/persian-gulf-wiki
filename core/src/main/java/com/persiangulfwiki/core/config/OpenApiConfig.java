@@ -58,6 +58,8 @@ public class OpenApiConfig {
             "Dev Test Articles",
             "Article Media",
             "Dev Test Media",
+            "Topics",
+            "Dev Test Topics",
             "Moderation",
             "Dev Test Moderation Tasks");
 

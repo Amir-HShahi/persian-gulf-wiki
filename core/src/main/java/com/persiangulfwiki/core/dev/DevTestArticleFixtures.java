@@ -14,6 +14,7 @@ import com.persiangulfwiki.core.dev.exception.DevTestMainArticleTakenException;
 import com.persiangulfwiki.core.dev.exception.InvalidDevTestArticleRequestException;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
+import com.persiangulfwiki.core.topic.service.TopicService;
 import com.persiangulfwiki.core.user.entity.User;
 import com.persiangulfwiki.core.user.repository.UserRepository;
 
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
 import java.util.UUID;
 
 import tools.jackson.databind.ObjectMapper;
@@ -62,6 +64,7 @@ class DevTestArticleFixtures {
     private final ArticleRevisionRepository articleRevisionRepository;
     private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
+    private final TopicService topicService;
     private final ObjectMapper objectMapper;
 
     DevTestArticleResponse mint(DevTestArticleRequest request) {
@@ -78,6 +81,12 @@ class DevTestArticleFixtures {
         if (request.subjectId() != null && !subjectRepository.existsById(request.subjectId())) {
             throw new SubjectNotFoundException();
         }
+        Set<UUID> topicIds = request.topicIds() != null ? request.topicIds() : Set.of();
+        // The same check as the API, archived topics included -- a deliberate exception to fixtures
+        // bypassing the service path (decided with the user): a suite reaches "revision keeps an
+        // archived topic" by minting the article first, then archiving through PATCH
+        // /api/admin/topics/{id}.
+        topicService.requireAssignable(topicIds, Set.of());
         UUID authorUserId = resolveAuthorUserId(request.authorUserId());
         boolean isMain = resolveIsMain(request, revisionStatus);
 
@@ -96,7 +105,7 @@ class DevTestArticleFixtures {
                 .translationState(translationState)
                 .build());
 
-        ArticleRevision revision = articleRevisionRepository.save(ArticleRevision.builder()
+        ArticleRevision revision = ArticleRevision.builder()
                 .translationId(translation.getId())
                 .revisionNumber(1)
                 .parentRevisionId(null)
@@ -105,7 +114,9 @@ class DevTestArticleFixtures {
                 .summary(summary)
                 .status(revisionStatus)
                 .authorId(authorUserId)
-                .build());
+                .build();
+        revision.setTopicIds(topicIds);
+        revision = articleRevisionRepository.save(revision);
 
         // Mirrors the production invariant rather than the old unconditional assignment: a
         // translation's currentRevisionId names approved content only (see

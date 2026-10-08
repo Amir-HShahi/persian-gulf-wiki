@@ -132,6 +132,6 @@ class OpenApiDocsIntegrationTests {
                 "User Management", "Admin", "Expert Reviewer", "Subjects", "Subject Revisions",
                 "Expert Verifications", "Attributes",
                 "Labels",
-                "Sources", "Articles", "Article Media", "Moderation");
+                "Sources", "Articles", "Article Media", "Topics", "Moderation");
     }
 }

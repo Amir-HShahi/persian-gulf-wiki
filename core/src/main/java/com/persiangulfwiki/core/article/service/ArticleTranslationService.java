@@ -18,6 +18,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -70,9 +71,10 @@ public class ArticleTranslationService {
 
         // Left null on purpose -- see the same decision in ArticleService.create. A new
         // language starts unpublished like any other draft, and stays that way until a
-        // moderator approves its first revision.
+        // moderator approves its first revision. Never canonical (that translation already exists),
+        // so it carries no topics of its own; it inherits the article's.
         articleRevisionService.createInitialRevision(
-                translation.getId(), request.title(), request.body(), request.summary(), authorUserId);
+                translation.getId(), request.title(), request.body(), request.summary(), authorUserId, Set.of());
 
         return toResponse(translation);
     }
@@ -93,6 +95,7 @@ public class ArticleTranslationService {
     private TranslationResponse toResponse(ArticleTranslation translation) {
         return new TranslationResponse(translation.getId(), translation.getArticleId(), translation.getLanguage(),
                 translation.getSlug(), translation.getCurrentRevisionId(), translation.getSourceRevisionId(),
-                translation.getTranslationState(), translation.getCreatedAt(), translation.getUpdatedAt());
+                translation.getTranslationState(), translation.getCreatedAt(), translation.getUpdatedAt(),
+                articleRevisionService.liveTopicIds(translation.getArticleId()));
     }
 }

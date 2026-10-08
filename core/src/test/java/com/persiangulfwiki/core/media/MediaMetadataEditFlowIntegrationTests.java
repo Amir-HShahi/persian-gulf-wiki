@@ -194,7 +194,7 @@ class MediaMetadataEditFlowIntegrationTests {
 
     private UUID createDraftArticle(Account author) throws Exception {
         CreateArticleRequest request = new CreateArticleRequest(null, "fa",
-                "edit-" + UUID.randomUUID(), "Title", objectMapper.readTree("{\"text\":\"body\"}"), null);
+                "edit-" + UUID.randomUUID(), "Title", objectMapper.readTree("{\"text\":\"body\"}"), null, null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(author.accessCookie())
                         .with(xsrf())

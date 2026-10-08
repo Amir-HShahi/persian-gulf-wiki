@@ -8,6 +8,7 @@ import com.persiangulfwiki.core.source.repository.SourceRepository;
 import com.persiangulfwiki.core.subject.repository.ExpertVerificationRepository;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 import com.persiangulfwiki.core.subject.repository.SubjectRevisionRepository;
+import com.persiangulfwiki.core.topic.repository.TopicRepository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +61,9 @@ class DevTestContentEndpointDisabledIntegrationTests {
     private ExpertVerificationRepository expertVerificationRepository;
 
     @Autowired
+    private TopicRepository topicRepository;
+
+    @Autowired
     private ApplicationContext applicationContext;
 
     @Test
@@ -83,6 +87,8 @@ class DevTestContentEndpointDisabledIntegrationTests {
         assertThat(applicationContext.getBeanNamesForType(DevTestSubjectRevisionController.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestSubjectRevisionSweeper.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestExpertVerificationController.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestTopicController.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestTopicSweeper.class)).isEmpty();
     }
 
     @Test
@@ -108,6 +114,8 @@ class DevTestContentEndpointDisabledIntegrationTests {
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(get("/api/dev/test-expert-verifications/{verificationId}", UUID.randomUUID()))
                 .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/dev/test-topics/{topicId}", UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -119,6 +127,7 @@ class DevTestContentEndpointDisabledIntegrationTests {
         long definitionsBefore = attributeDefinitionRepository.count();
         long subjectRevisionsBefore = subjectRevisionRepository.count();
         long expertVerificationsBefore = expertVerificationRepository.count();
+        long topicsBefore = topicRepository.count();
 
         // 403 rather than 401 for the same reason as the user fixture route: the main chain's
         // CSRF filter runs ahead of authorization and /api/dev/** is not exempt from it, so
@@ -164,6 +173,10 @@ class DevTestContentEndpointDisabledIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"subjectRevisionId\": \"%s\"}".formatted(UUID.randomUUID())))
                 .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/dev/test-topics")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden());
 
         assertThat(subjectRepository.count()).isEqualTo(subjectsBefore);
         assertThat(sourceRepository.count()).isEqualTo(sourcesBefore);
@@ -172,5 +185,6 @@ class DevTestContentEndpointDisabledIntegrationTests {
         assertThat(attributeDefinitionRepository.count()).isEqualTo(definitionsBefore);
         assertThat(subjectRevisionRepository.count()).isEqualTo(subjectRevisionsBefore);
         assertThat(expertVerificationRepository.count()).isEqualTo(expertVerificationsBefore);
+        assertThat(topicRepository.count()).isEqualTo(topicsBefore);
     }
 }

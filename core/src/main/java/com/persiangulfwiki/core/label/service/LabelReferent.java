@@ -7,7 +7,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
-// The thing a label belongs to: an id for the four row-backed referents, a SubjectKind for KIND.
+// The thing a label belongs to: an id for the five row-backed referents, a SubjectKind for KIND.
 // Exactly one of `id`/`subjectKind` is set, matching `type` — use the factories.
 public record LabelReferent(LabelReferentKind type, @Nullable UUID id, @Nullable SubjectKind subjectKind) {
 
@@ -29,6 +29,10 @@ public record LabelReferent(LabelReferentKind type, @Nullable UUID id, @Nullable
 
     public static LabelReferent kind(SubjectKind kind) {
         return new LabelReferent(LabelReferentKind.KIND, null, kind);
+    }
+
+    public static LabelReferent topic(UUID id) {
+        return new LabelReferent(LabelReferentKind.TOPIC, id, null);
     }
 
     public String describe() {

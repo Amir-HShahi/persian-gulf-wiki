@@ -59,9 +59,12 @@ public class DevTestArticleController {
             + "APPROVED with no prior moderation history -- a state the real submit/review "
             + "flow cannot produce. isMain defaults to the real rule (an APPROVED article bound to a subject "
             + "with no main article becomes main); false keeps it from being main, true makes it main whatever "
-            + "its status. body is stored as given, unchecked, so it may link to a subject that does not exist.")
+            + "its status. body is stored as given, unchecked, so it may link to a subject that does not exist. "
+            + "topicIds sets the revision's topics; they count once the revision is APPROVED. An archived topic is "
+            + "refused, as on the real path; tag the article first and archive the topic afterwards.")
     @ApiResponse(responseCode = "201", description = "The created article, translation and revision.")
-    @ApiResponse(responseCode = "400", description = "isMain is true but no subjectId was given.")
+    @ApiResponse(responseCode = "400", description = "isMain is true but no subjectId was given, or a topicIds entry "
+            + "names no topic or an archived one.")
     @ApiResponse(responseCode = "404", description = "subjectId was supplied but does not name an existing subject.")
     @ApiResponse(responseCode = "409", description = "isMain is true but the subject already has a main article; this "
             + "endpoint does not demote it.")
@@ -73,7 +76,7 @@ public class DevTestArticleController {
     public DevTestArticleResponse mint(@RequestBody(required = false) DevTestArticleRequest request) {
         return articleFixtures.mint(request != null
                 ? request
-                : new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null));
+                : new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null));
     }
 
     @Operation(summary = "Delete a minted test article", description = "Deletes an article previously created by this endpoint. Refuses anything "

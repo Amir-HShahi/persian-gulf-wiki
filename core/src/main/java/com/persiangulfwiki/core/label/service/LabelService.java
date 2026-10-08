@@ -19,6 +19,8 @@ import com.persiangulfwiki.core.label.exception.UnsupportedLabelLanguageExceptio
 import com.persiangulfwiki.core.label.repository.LabelRepository;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.subject.service.SubjectInfoboxCacheService;
+import com.persiangulfwiki.core.topic.exception.TopicNotFoundException;
+import com.persiangulfwiki.core.topic.repository.TopicRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -48,12 +50,13 @@ public class LabelService {
     private final AttributeGroupRepository attributeGroupRepository;
     private final AttributeDefinitionRepository attributeDefinitionRepository;
     private final AttributeOptionRepository attributeOptionRepository;
+    private final TopicRepository topicRepository;
     private final AuditLogService auditLogService;
     private final SubjectInfoboxCacheService subjectInfoboxCacheService;
 
     /**
-     * Admin write of one label. Only the vocabulary — GROUP, ATTRIBUTE, OPTION and KIND — is writable here;
-     * SUBJECT is rejected, because a subject's names change only through a moderated revision.
+     * Admin write of one label. Only the vocabulary — GROUP, ATTRIBUTE, OPTION, KIND and TOPIC — is writable
+     * here; SUBJECT is rejected, because a subject's names change only through a moderated revision.
      */
     @Transactional
     public LabelResponse upsert(UUID actingAdminId, String referentKindRaw, String referentIdRaw, String languageRaw,
@@ -163,6 +166,13 @@ public class LabelService {
                 : resolve(labelRepository.findBySubjectIdIn(subjectIds), Label::getSubjectId, language);
     }
 
+    /** Ids with no label in the language or in Farsi are absent from the map. */
+    @Transactional(readOnly = true)
+    public Map<UUID, LocalizedLabelResponse> resolveTopics(Collection<UUID> topicIds, String language) {
+        return topicIds.isEmpty() ? Map.of()
+                : resolve(labelRepository.findByTopicIdIn(topicIds), Label::getTopicId, language);
+    }
+
     /** Kinds with no label in the language or in Farsi are absent from the map. */
     @Transactional(readOnly = true)
     public Map<SubjectKind, LocalizedLabelResponse> resolveKinds(Collection<SubjectKind> kinds, String language) {
@@ -201,6 +211,7 @@ public class LabelService {
             case OPTION -> labelRepository.findByOptionIdIn(List.of(referent.id()));
             case SUBJECT -> labelRepository.findBySubjectIdIn(List.of(referent.id()));
             case KIND -> labelRepository.findByKindIn(List.of(referent.subjectKind()));
+            case TOPIC -> labelRepository.findByTopicIdIn(List.of(referent.id()));
         };
     }
 
@@ -212,6 +223,7 @@ public class LabelService {
             case OPTION -> builder.optionId(referent.id()).build();
             case SUBJECT -> builder.subjectId(referent.id()).build();
             case KIND -> builder.kind(referent.subjectKind()).build();
+            case TOPIC -> builder.topicId(referent.id()).build();
         };
     }
 
@@ -251,6 +263,12 @@ public class LabelService {
                     throw new AttributeOptionNotFoundException("attribute option not found: " + id);
                 }
                 yield LabelReferent.option(id);
+            }
+            case TOPIC -> {
+                if (!topicRepository.existsById(id)) {
+                    throw new TopicNotFoundException("topic not found: " + id);
+                }
+                yield LabelReferent.topic(id);
             }
             case SUBJECT, KIND -> throw new IllegalStateException("handled above: " + type);
         };

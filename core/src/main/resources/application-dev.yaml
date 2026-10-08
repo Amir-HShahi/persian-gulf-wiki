@@ -79,3 +79,7 @@ app:
     # by DevTestSubjectRevisionSweeper at :35. A live one is left for the subject sweep, which takes
     # it with its test subject.
     test-subject-revision-ttl-hours: ${DEV_TEST_SUBJECT_REVISION_TTL_HOURS:6}
+
+    # TTL for the topics minted by POST /api/dev/test-topics, reclaimed hourly by DevTestTopicSweeper
+    # at :25. One still set on a revision is left until the article sweep has removed that revision.
+    test-topic-ttl-hours: ${DEV_TEST_TOPIC_TTL_HOURS:6}

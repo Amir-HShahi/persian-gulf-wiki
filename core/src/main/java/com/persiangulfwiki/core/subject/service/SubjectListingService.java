@@ -13,6 +13,7 @@ import com.persiangulfwiki.core.label.service.LabelService;
 import com.persiangulfwiki.core.media.service.MediaReadService;
 import com.persiangulfwiki.core.subject.dto.SubjectFacetOptionResponse;
 import com.persiangulfwiki.core.subject.dto.SubjectFacetResponse;
+import com.persiangulfwiki.core.subject.dto.SubjectKindCountResponse;
 import com.persiangulfwiki.core.subject.dto.SubjectListItemResponse;
 import com.persiangulfwiki.core.subject.dto.SubjectListResponse;
 import com.persiangulfwiki.core.subject.dto.SubjectReferencesResponse;
@@ -295,6 +296,17 @@ public class SubjectListingService {
                 .map(id -> new SubjectListItemResponse(id, subjects.get(id).getKind(), names.get(id), slugs.get(id),
                         images.containsKey(id) ? new SubjectMainImageResponse(images.get(id)) : null,
                         Collections.unmodifiableMap(badges.getOrDefault(id, new LinkedHashMap<>()))))
+                .toList();
+    }
+
+    /** Every kind, in declaration order, zero counts included; deleted and merged-away subjects never count. */
+    @Transactional(readOnly = true)
+    public List<SubjectKindCountResponse> kindCounts(String language) {
+        List<SubjectKind> allKinds = Arrays.asList(SubjectKind.values());
+        Map<SubjectKind, Long> counts = subjectRepository.countByKind(new SubjectFacetFilter(Set.of(), List.of()));
+        Map<SubjectKind, LocalizedLabelResponse> labels = labelService.resolveKinds(allKinds, language);
+        return allKinds.stream()
+                .map(kind -> new SubjectKindCountResponse(kind, labels.get(kind), counts.getOrDefault(kind, 0L)))
                 .toList();
     }
 

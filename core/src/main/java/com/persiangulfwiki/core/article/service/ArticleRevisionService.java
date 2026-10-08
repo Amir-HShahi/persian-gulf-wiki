@@ -11,9 +11,13 @@ import com.persiangulfwiki.core.article.exception.NotRevisionAuthorException;
 import com.persiangulfwiki.core.article.exception.RevisionNotEditableException;
 import com.persiangulfwiki.core.article.exception.RevisionNotFoundException;
 import com.persiangulfwiki.core.article.exception.TranslationNotFoundException;
+import com.persiangulfwiki.core.article.exception.ArticleNotFoundException;
+import com.persiangulfwiki.core.article.repository.ArticleRepository;
 import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 import com.persiangulfwiki.core.subject.service.SubjectInfoboxCacheService;
+import com.persiangulfwiki.core.topic.exception.InvalidTopicIdsException;
+import com.persiangulfwiki.core.topic.service.TopicService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import tools.jackson.databind.JsonNode;
@@ -34,12 +39,14 @@ import tools.jackson.databind.ObjectMapper;
 @RequiredArgsConstructor
 public class ArticleRevisionService {
 
+    private final ArticleRepository articleRepository;
     private final ArticleTranslationRepository articleTranslationRepository;
     private final ArticleRevisionRepository articleRevisionRepository;
     private final ArticleVisibilityService articleVisibilityService;
     private final SubjectInfoboxCacheService subjectInfoboxCacheService;
     private final SubjectLinkService subjectLinkService;
     private final SubjectArticleService subjectArticleService;
+    private final TopicService topicService;
 
     // Converts JsonNode (every DTO's shape for `body`) to/from the pre-serialized JSON-text
     // String the entity actually stores. See the JSON-mapping decision comment on
@@ -55,10 +62,17 @@ public class ArticleRevisionService {
     // and ArticleTranslationService.addTranslation call this rather than building the entity
     // themselves, so the JSON conversion above and the revision-number allocation below never
     // have a second implementation to drift out of sync with this one.
+    //
+    // topicIds must be empty unless translationId is the article's canonical translation; the
+    // caller knows which it is creating. A first revision has no topics yet, so none may be
+    // archived. A later path creating a revision from an existing one should pass that one's
+    // topics as already on it, as update() does.
     @Transactional
-    public UUID createInitialRevision(UUID translationId, String title, JsonNode body, String summary, UUID authorId) {
+    public UUID createInitialRevision(UUID translationId, String title, JsonNode body, String summary, UUID authorId,
+            Set<UUID> topicIds) {
         subjectLinkService.validate(body);
-        ArticleRevision revision = articleRevisionRepository.save(ArticleRevision.builder()
+        topicService.requireAssignable(topicIds, Set.of());
+        ArticleRevision revision = ArticleRevision.builder()
                 .translationId(translationId)
                 .revisionNumber(allocateNextRevisionNumber(translationId))
                 .parentRevisionId(null)
@@ -67,8 +81,9 @@ public class ArticleRevisionService {
                 .summary(summary)
                 .status(RevisionStatus.DRAFT)
                 .authorId(authorId)
-                .build());
-        return revision.getId();
+                .build();
+        revision.setTopicIds(topicIds);
+        return articleRevisionRepository.save(revision).getId();
     }
 
     // Owned here rather than duplicated at each creation call site, even though every Phase 2
@@ -86,10 +101,20 @@ public class ArticleRevisionService {
     @Transactional
     public RevisionResponse update(UUID callerUserId, UUID articleId, String language, UUID revisionId,
             UpdateRevisionRequest request, String readerLanguage) {
-        ArticleRevision revision = getRevisionScoped(articleId, language, revisionId);
+        ArticleTranslation translation = getTranslation(articleId, language);
+        ArticleRevision revision = getRevisionScoped(translation, revisionId);
         requireAuthor(revision, callerUserId);
         requireEditable(revision);
         subjectLinkService.validate(request.body());
+        Set<UUID> topicIds = request.topicIds();
+        if (topicIds != null) {
+            if (!topicIds.isEmpty() && !isCanonical(translation)) {
+                throw new InvalidTopicIdsException("topics on a non-canonical revision " + revisionId,
+                        "validation.topicIds.canonicalOnly");
+            }
+            topicService.requireAssignable(topicIds, revision.getTopicIds());
+            revision.setTopicIds(topicIds);
+        }
 
         revision.setTitle(request.title());
         revision.setBody(toJson(request.body()));
@@ -217,6 +242,22 @@ public class ArticleRevisionService {
         }
     }
 
+    /**
+     * The article's live topics: those of its canonical translation's approved revision, which every
+     * translation inherits. Empty while that translation has nothing approved.
+     */
+    @Transactional(readOnly = true)
+    public List<UUID> liveTopicIds(UUID articleId) {
+        String canonicalLanguage = articleRepository.findById(articleId)
+                .orElseThrow(ArticleNotFoundException::new)
+                .getCanonicalLanguage();
+        return articleTranslationRepository.findByArticleIdAndLanguage(articleId, canonicalLanguage)
+                .map(ArticleTranslation::getCurrentRevisionId)
+                .flatMap(articleRevisionRepository::findById)
+                .map(revision -> sorted(revision.getTopicIds()))
+                .orElse(List.of());
+    }
+
     // The read-authorization rule for revision content: only APPROVED revisions are public;
     // every other status (DRAFT, PENDING, CHANGES_REQUESTED, REJECTED) is visible only to its
     // author and to moderators (ADMIN included, via the role hierarchy the caller resolves).
@@ -252,12 +293,26 @@ public class ArticleRevisionService {
     // revision ids are random v4 UUIDs, and who may read a revision is decided solely by
     // isReadableBy.
     private ArticleRevision getRevisionScoped(UUID articleId, String language, UUID revisionId) {
-        ArticleTranslation translation = getTranslation(articleId, language);
+        return getRevisionScoped(getTranslation(articleId, language), revisionId);
+    }
+
+    private ArticleRevision getRevisionScoped(ArticleTranslation translation, UUID revisionId) {
         ArticleRevision revision = articleRevisionRepository.findById(revisionId).orElseThrow(RevisionNotFoundException::new);
         if (!revision.getTranslationId().equals(translation.getId())) {
             throw new RevisionNotFoundException();
         }
         return revision;
+    }
+
+    private boolean isCanonical(ArticleTranslation translation) {
+        return articleRepository.findById(translation.getArticleId())
+                .orElseThrow(ArticleNotFoundException::new)
+                .getCanonicalLanguage()
+                .equals(translation.getLanguage());
+    }
+
+    private static List<UUID> sorted(Set<UUID> ids) {
+        return ids.stream().sorted().toList();
     }
 
     private String toJson(JsonNode node) {
@@ -276,6 +331,7 @@ public class ArticleRevisionService {
     private RevisionResponse toResponse(ArticleRevision revision, JsonNode body, Map<UUID, SubjectLinkResponse> links) {
         return new RevisionResponse(revision.getId(), revision.getTranslationId(), revision.getRevisionNumber(),
                 revision.getParentRevisionId(), revision.getTitle(), body, revision.getSummary(),
-                revision.getStatus(), revision.getAuthorId(), revision.getCreatedAt(), links);
+                revision.getStatus(), revision.getAuthorId(), revision.getCreatedAt(), links,
+                sorted(revision.getTopicIds()));
     }
 }

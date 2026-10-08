@@ -38,7 +38,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/admin/labels")
 @RequiredArgsConstructor
-@Tag(name = "Labels", description = "Display names of the field vocabulary in Farsi, English and Arabic. Farsi is "
+@Tag(name = "Labels", description = "Display names of the field vocabulary and of topics in Farsi, English and Arabic. Farsi is "
         + "canonical; a missing English or Arabic name falls back to it wherever names are read. Subject names are "
         + "not edited here — they change only through a moderated subject revision.")
 @SecurityRequirement(name = "cookieAuth")
@@ -48,11 +48,11 @@ public class LabelAdminController {
     private final MessageSource messageSource;
 
     @Operation(summary = "Set a label", description = "Admin only. Creates or replaces the name of a field group, field "
-            + "definition, choice value or subject kind in one language. Labels cannot be deleted, so a group, field or "
-            + "choice value always keeps its Farsi name.")
+            + "definition, choice value, subject kind or topic in one language. Labels cannot be deleted, so a group, "
+            + "field, choice value or topic always keeps its Farsi name.")
     @ApiResponse(responseCode = "200", description = "The stored label.")
-    @ApiResponse(responseCode = "400", description = "One of: `referentKind` is not GROUP, ATTRIBUTE, OPTION or KIND "
-            + "(SUBJECT is refused), or `referentId` is not a UUID — or, for KIND, not one of ISLAND, PORT, OIL_FIELD, "
+    @ApiResponse(responseCode = "400", description = "One of: `referentKind` is not GROUP, ATTRIBUTE, OPTION, KIND "
+            + "or TOPIC (SUBJECT is refused), or `referentId` is not a UUID — or, for KIND, not one of ISLAND, PORT, OIL_FIELD, "
             + "SPECIES, STRAIT, FISHING_GROUND, PROVINCE — with `code` INVALID_LABEL_REFERENT; `language` is not fa, "
             + "en or ar, with `code` UNSUPPORTED_LABEL_LANGUAGE; or `value` is blank or longer than 200 characters, "
             + "with `detail` \"validation failed\" and the failure in the `errors` array.",
@@ -61,9 +61,10 @@ public class LabelAdminController {
     @ApiResponse(responseCode = "403", description = "Either the account is not an admin, its email address is not yet "
             + "verified, or the CSRF header is missing or does not match the cookie; read `detail` for which one "
             + "occurred.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    @ApiResponse(responseCode = "404", description = "No group, definition or choice value with this id.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    @Parameter(name = "referentKind", description = "What is being named: GROUP, ATTRIBUTE, OPTION or KIND (case-insensitive).")
-    @Parameter(name = "referentId", description = "The group's, definition's or choice value's id; for KIND, the kind "
+    @ApiResponse(responseCode = "404", description = "No group, definition, choice value or topic with this id.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @Parameter(name = "referentKind", description = "What is being named: GROUP, ATTRIBUTE, OPTION, KIND or TOPIC "
+            + "(case-insensitive).")
+    @Parameter(name = "referentId", description = "The group's, definition's, choice value's or topic's id; for KIND, the kind "
             + "itself, e.g. ISLAND (case-insensitive).")
     @Parameter(name = "language", description = "fa, en or ar (case-insensitive).")
     @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = "CSRF token. Call GET /api/auth/csrf first to receive the XSRF-TOKEN cookie, "

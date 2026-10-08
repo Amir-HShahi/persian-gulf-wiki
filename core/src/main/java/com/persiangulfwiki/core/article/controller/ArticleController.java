@@ -101,7 +101,8 @@ public class ArticleController {
             + "subject; an article may hold at most 1000 of them.")
     @ApiResponse(responseCode = "201", description = "The created article.")
     @ApiResponse(responseCode = "400", description = "Field validation failed (see `errors`), including a subject link in `body` "
-            + "that names no existing subject, reported at the link's path (e.g. `body.content[2].subjectId`).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+            + "that names no existing subject, reported at the link's path (e.g. `body.content[2].subjectId`), and "
+            + "more than 5 `topicIds` or one that names no topic, reported at `topicIds`.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "Either the account's email address is not yet verified, or the CSRF header is "
             + "missing or does not match the cookie -- both surface as a plain 403; read `detail` "
@@ -227,13 +228,15 @@ public class ArticleController {
         return ApiResult.of(data, message);
     }
 
-    @Operation(summary = "Update a draft revision", description = "Replaces `title`, `body` and `summary` on an existing revision in place. Only "
+    @Operation(summary = "Update a draft revision", description = "Replaces `title`, `body` and `summary` on an existing revision in place, and its "
+            + "topics when `topicIds` is sent (left out, they stay as they are). Only "
             + "allowed while the revision's status is DRAFT or CHANGES_REQUESTED, and only by "
             + "the account that authored it.")
     @ApiResponse(responseCode = "200", description = "The updated revision.")
     @ApiResponse(responseCode = "400", description = "Request failed field validation (see `errors`), including a subject link "
             + "in `body` that names no existing subject, reported at the link's path (e.g. "
-            + "`body.content[2].subjectId`).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+            + "`body.content[2].subjectId`); more than 5 `topicIds`, one that names no topic, or any on a revision "
+            + "not in the article's original language, reported at `topicIds`.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "Either the caller is not the revision's author, the account's email address is "
             + "not yet verified, or the CSRF header is missing or does not match the cookie -- "

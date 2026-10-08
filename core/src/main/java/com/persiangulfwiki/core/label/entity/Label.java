@@ -18,7 +18,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
-// One human-readable name of one referent in one language. Exactly one of the five referent
+// One human-readable name of one referent in one language. Exactly one of the six referent
 // columns is set (V22's ck_labels_exactly_one_referent); they are plain ids rather than
 // associations because nothing reads a label through its referent's entity, only the other way.
 // Only `value` ever changes after insert.
@@ -45,6 +45,9 @@ public class Label extends AuditableEntity {
     @Enumerated(EnumType.STRING)
     @Column(updatable = false, length = 30)
     private @Nullable SubjectKind kind;
+
+    @Column(name = "topic_id", updatable = false)
+    private @Nullable UUID topicId;
 
     // "fa", "en" or "ar" — see config/SupportedLocales.
     @Column(nullable = false, updatable = false, length = 2)

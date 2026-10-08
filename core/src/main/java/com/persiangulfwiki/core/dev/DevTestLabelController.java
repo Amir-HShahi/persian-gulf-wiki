@@ -15,6 +15,8 @@ import com.persiangulfwiki.core.label.exception.LabelNotFoundException;
 import com.persiangulfwiki.core.label.repository.LabelRepository;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
+import com.persiangulfwiki.core.topic.exception.TopicNotFoundException;
+import com.persiangulfwiki.core.topic.repository.TopicRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -56,9 +58,10 @@ public class DevTestLabelController {
     private final AttributeDefinitionRepository attributeDefinitionRepository;
     private final AttributeOptionRepository attributeOptionRepository;
     private final SubjectRepository subjectRepository;
+    private final TopicRepository topicRepository;
 
     @Operation(summary = "Set a label on a minted referent", description = "Creates or replaces the label of a test group, "
-            + "definition, option or subject in one language. KIND is refused, and so is any referent not minted by a "
+            + "definition, option, subject or topic in one language. KIND is refused, and so is any referent not minted by a "
             + "dev fixture endpoint.")
     @ApiResponse(responseCode = "201", description = "The stored label.")
     @ApiResponse(responseCode = "400", description = "`referentKind` is KIND, or a field is missing or invalid.")
@@ -80,6 +83,7 @@ public class DevTestLabelController {
                 case ATTRIBUTE -> builder.attributeId(request.referentId()).build();
                 case OPTION -> builder.optionId(request.referentId()).build();
                 case SUBJECT -> builder.subjectId(request.referentId()).build();
+                case TOPIC -> builder.topicId(request.referentId()).build();
                 case KIND -> throw new IllegalStateException("refused by requireMintedReferent");
             };
         } else {
@@ -120,6 +124,9 @@ public class DevTestLabelController {
         if (label.getSubjectId() != null) {
             return isMintedSubject(label.getSubjectId());
         }
+        if (label.getTopicId() != null) {
+            return isMintedTopic(label.getTopicId());
+        }
         return false;
     }
 
@@ -148,6 +155,11 @@ public class DevTestLabelController {
                     throw new SubjectNotFoundException();
                 }
             }
+            case TOPIC -> {
+                if (!isMintedTopic(referentId)) {
+                    throw new TopicNotFoundException();
+                }
+            }
             case KIND -> throw new InvalidLabelReferentException("kind labels are seeded data, not fixtures");
         }
     }
@@ -158,6 +170,7 @@ public class DevTestLabelController {
             case ATTRIBUTE -> labelRepository.findByAttributeIdIn(List.of(referentId));
             case OPTION -> labelRepository.findByOptionIdIn(List.of(referentId));
             case SUBJECT -> labelRepository.findBySubjectIdIn(List.of(referentId));
+            case TOPIC -> labelRepository.findByTopicIdIn(List.of(referentId));
             case KIND -> List.of();
         };
     }
@@ -177,6 +190,12 @@ public class DevTestLabelController {
     private boolean isMintedSubject(UUID subjectId) {
         return subjectRepository.findById(subjectId)
                 .map(subject -> DevTestFixtures.MARKER.equals(subject.getDevMarker()))
+                .orElse(false);
+    }
+
+    private boolean isMintedTopic(UUID topicId) {
+        return topicRepository.findById(topicId)
+                .map(topic -> DevTestFixtures.MARKER.equals(topic.getDevMarker()))
                 .orElse(false);
     }
 }

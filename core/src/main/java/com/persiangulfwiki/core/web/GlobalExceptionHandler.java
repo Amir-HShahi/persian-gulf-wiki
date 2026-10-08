@@ -17,6 +17,7 @@ import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeOptionCode
 import com.persiangulfwiki.core.dev.exception.DevTestAttributeGroupInUseException;
 import com.persiangulfwiki.core.dev.exception.DevTestMainArticleTakenException;
 import com.persiangulfwiki.core.dev.exception.DevTestSubjectRevisionLiveException;
+import com.persiangulfwiki.core.dev.exception.DevTestTopicInUseException;
 import com.persiangulfwiki.core.label.exception.InvalidLabelReferentException;
 import com.persiangulfwiki.core.label.exception.LabelNotFoundException;
 import com.persiangulfwiki.core.label.exception.UnsupportedLabelLanguageException;
@@ -95,6 +96,9 @@ import com.persiangulfwiki.core.subject.exception.SubjectRevisionAlreadyVerified
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotEditableException;
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotFoundException;
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotLiveException;
+import com.persiangulfwiki.core.topic.exception.DuplicateTopicSlugException;
+import com.persiangulfwiki.core.topic.exception.InvalidTopicIdsException;
+import com.persiangulfwiki.core.topic.exception.TopicNotFoundException;
 import com.persiangulfwiki.core.user.exception.SessionAlreadyRevokedException;
 import com.persiangulfwiki.core.user.exception.SessionNotFoundException;
 import com.persiangulfwiki.core.user.exception.UserNotFoundException;
@@ -510,6 +514,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     // VALIDATION_FAILED on `articleId`, the same way an unusable mainImageMediaId in a subject payload
     // is reported: the request names something that cannot fill the role.
+    @ExceptionHandler(TopicNotFoundException.class)
+    public ProblemDetail handleTopicNotFound(TopicNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.topicNotFound"), "TOPIC_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(DuplicateTopicSlugException.class)
+    public ProblemDetail handleDuplicateTopicSlug(DuplicateTopicSlugException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.duplicateTopicSlug"), "DUPLICATE_TOPIC_SLUG", request);
+    }
+
+    // VALIDATION_FAILED on `topicIds`, like InvalidMainArticleException on `articleId`.
+    @ExceptionHandler(InvalidTopicIdsException.class)
+    public ProblemDetail handleInvalidTopicIds(InvalidTopicIdsException ex, HttpServletRequest request) {
+        ProblemDetail problemDetail = ProblemDetails.of(
+                HttpStatus.BAD_REQUEST, resolve("error.validationFailed"), "VALIDATION_FAILED", request);
+        problemDetail.setProperty("errors", List.of(new FieldViolation("topicIds", resolve(ex.getMessageKey()))));
+        return problemDetail;
+    }
+
     @ExceptionHandler(InvalidMainArticleException.class)
     public ProblemDetail handleInvalidMainArticle(InvalidMainArticleException ex, HttpServletRequest request) {
         ProblemDetail problemDetail = ProblemDetails.of(
@@ -674,6 +697,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DevTestMainArticleTakenException.class)
     public ProblemDetail handleDevTestMainArticleTaken(DevTestMainArticleTakenException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestMainArticleTaken"), "DEV_TEST_MAIN_ARTICLE_TAKEN", request);
+    }
+
+    @ExceptionHandler(DevTestTopicInUseException.class)
+    public ProblemDetail handleDevTestTopicInUse(DevTestTopicInUseException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestTopicInUse"), "DEV_TEST_TOPIC_IN_USE", request);
     }
 
     @ExceptionHandler(DevTestAttributeGroupInUseException.class)
