@@ -26,12 +26,13 @@ public class TopicService {
     private final LabelService labelService;
 
     /**
-     * {@code language} picks both whose published articles are counted (matched exactly, like the
-     * article listing) and the names' language ({@code labelLanguage}, already one of fa/en/ar).
+     * Archived topics are left out. {@code language} picks both whose published articles are counted
+     * (matched exactly, like the article listing) and the names' language ({@code labelLanguage},
+     * already one of fa/en/ar).
      */
     @Transactional(readOnly = true)
     public List<TopicResponse> list(String language, String labelLanguage) {
-        List<Topic> topics = topicRepository.findAllByOrderBySortOrderAscSlugAsc();
+        List<Topic> topics = topicRepository.findAllByIsArchivedFalseOrderBySortOrderAscSlugAsc();
         Map<UUID, LocalizedLabelResponse> names =
                 labelService.resolveTopics(topics.stream().map(Topic::getId).toList(), labelLanguage);
         Map<UUID, Long> counts = new HashMap<>();
@@ -40,15 +41,30 @@ public class TopicService {
         }
         return topics.stream()
                 .map(topic -> new TopicResponse(topic.getId(), topic.getSlug(), topic.getIcon(),
-                        names.get(topic.getId()), counts.getOrDefault(topic.getId(), 0L)))
+                        topic.getColor(), names.get(topic.getId()), counts.getOrDefault(topic.getId(), 0L)))
                 .toList();
     }
 
-    /** @throws InvalidTopicIdsException if any id names no topic */
+    /**
+     * An archived topic is accepted only if it is in {@code alreadyOnRevision} -- a revision keeps the
+     * topics it had, but no revision gains an archived one.
+     *
+     * @throws InvalidTopicIdsException if an id names no topic, or names an archived topic not in
+     *     {@code alreadyOnRevision}
+     */
     @Transactional(readOnly = true)
-    public void requireExisting(Set<UUID> topicIds) {
-        if (!topicIds.isEmpty() && topicRepository.countByIdIn(topicIds) != topicIds.size()) {
-            throw new InvalidTopicIdsException("unknown topic id in " + topicIds);
+    public void requireAssignable(Set<UUID> requested, Set<UUID> alreadyOnRevision) {
+        if (requested.isEmpty()) {
+            return;
+        }
+        List<Topic> found = topicRepository.findAllByIdIn(requested);
+        if (found.size() != requested.size()) {
+            throw new InvalidTopicIdsException("unknown topic id in " + requested);
+        }
+        boolean isAddingArchived = found.stream()
+                .anyMatch(topic -> topic.isArchived() && !alreadyOnRevision.contains(topic.getId()));
+        if (isAddingArchived) {
+            throw new InvalidTopicIdsException("archived topic id in " + requested, "validation.topicIds.archived");
         }
     }
 }

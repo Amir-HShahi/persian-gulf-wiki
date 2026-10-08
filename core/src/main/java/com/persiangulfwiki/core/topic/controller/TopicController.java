@@ -36,18 +36,19 @@ import java.util.Locale;
 @RequiredArgsConstructor
 @Tag(name = "Topics", description = "What articles are about (marine life, history, ...) -- the home page's "
         + "categories. An article can have several. Its topics are set on its original-language text and apply "
-        + "to every translation.")
+        + "to every translation. Admins create topics and edit their Lucide icon, color and order; topics are never "
+        + "deleted, only archived. Reading the public list is open to everyone.")
 public class TopicController {
 
     private final TopicService topicService;
     private final MessageSource messageSource;
 
     @Operation(summary = "List topics with article counts", description = "Open to everyone; no account is required. "
-            + "Every topic, in display order, with how many articles about it are published in `language`. An "
-            + "article counts once it has an approved text in `language` and its approved original-language text "
-            + "names the topic. Names are in the language picked from `Accept-Language` (fa, en or ar; anything "
-            + "else gets fa); a missing English or Arabic name falls back to the Farsi one, with `isFallback` true.")
-    @ApiResponse(responseCode = "200", description = "Every topic, zero counts included.")
+            + "Every topic that is not archived, in display order, with how many articles about it are published in "
+            + "`language`. An article counts once it has an approved text in `language` and its approved "
+            + "original-language text names the topic. Names are in the language picked from `Accept-Language` (fa, "
+            + "en or ar; anything else gets fa); a missing English or Arabic name falls back to the Farsi one, with `isFallback` true.")
+    @ApiResponse(responseCode = "200", description = "Every topic that is not archived, zero counts included.")
     @ApiResponse(responseCode = "400", description = "`language` is missing, blank or longer than 20 characters.",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "language", required = true, description = "Language of the articles to count, e.g. \"fa\", "

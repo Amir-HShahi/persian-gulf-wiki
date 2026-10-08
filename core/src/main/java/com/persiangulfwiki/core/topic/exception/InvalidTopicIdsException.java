@@ -4,9 +4,10 @@ import com.persiangulfwiki.core.common.exception.BadRequestException;
 
 import java.io.Serial;
 
-// A request's `topicIds` can't be accepted: an id names no topic, or the revision is not in its
-// article's canonical language. Reported against `topicIds` with the message key, resolved in the
-// reader's language by GlobalExceptionHandler.
+// A request's `topicIds` can't be accepted: an id names no topic, names an archived topic the
+// revision didn't already have, or the revision is not in its article's canonical language.
+// Reported against `topicIds` with the message key, resolved in the reader's language by
+// GlobalExceptionHandler.
 public class InvalidTopicIdsException extends BadRequestException {
 
     @Serial

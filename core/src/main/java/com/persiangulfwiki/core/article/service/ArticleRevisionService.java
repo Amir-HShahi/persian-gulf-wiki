@@ -64,12 +64,14 @@ public class ArticleRevisionService {
     // have a second implementation to drift out of sync with this one.
     //
     // topicIds must be empty unless translationId is the article's canonical translation; the
-    // caller knows which it is creating.
+    // caller knows which it is creating. A first revision has no topics yet, so none may be
+    // archived. A later path creating a revision from an existing one should pass that one's
+    // topics as already on it, as update() does.
     @Transactional
     public UUID createInitialRevision(UUID translationId, String title, JsonNode body, String summary, UUID authorId,
             Set<UUID> topicIds) {
         subjectLinkService.validate(body);
-        topicService.requireExisting(topicIds);
+        topicService.requireAssignable(topicIds, Set.of());
         ArticleRevision revision = ArticleRevision.builder()
                 .translationId(translationId)
                 .revisionNumber(allocateNextRevisionNumber(translationId))
@@ -110,7 +112,7 @@ public class ArticleRevisionService {
                 throw new InvalidTopicIdsException("topics on a non-canonical revision " + revisionId,
                         "validation.topicIds.canonicalOnly");
             }
-            topicService.requireExisting(topicIds);
+            topicService.requireAssignable(topicIds, revision.getTopicIds());
             revision.setTopicIds(topicIds);
         }
 

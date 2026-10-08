@@ -19,6 +19,8 @@ import com.persiangulfwiki.core.label.exception.UnsupportedLabelLanguageExceptio
 import com.persiangulfwiki.core.label.repository.LabelRepository;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.subject.service.SubjectInfoboxCacheService;
+import com.persiangulfwiki.core.topic.exception.TopicNotFoundException;
+import com.persiangulfwiki.core.topic.repository.TopicRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -48,13 +50,13 @@ public class LabelService {
     private final AttributeGroupRepository attributeGroupRepository;
     private final AttributeDefinitionRepository attributeDefinitionRepository;
     private final AttributeOptionRepository attributeOptionRepository;
+    private final TopicRepository topicRepository;
     private final AuditLogService auditLogService;
     private final SubjectInfoboxCacheService subjectInfoboxCacheService;
 
     /**
-     * Admin write of one label. Only the vocabulary — GROUP, ATTRIBUTE, OPTION and KIND — is writable here;
-     * SUBJECT is rejected, because a subject's names change only through a moderated revision, and so is
-     * TOPIC, whose names are seeded by migration.
+     * Admin write of one label. Only the vocabulary — GROUP, ATTRIBUTE, OPTION, KIND and TOPIC — is writable
+     * here; SUBJECT is rejected, because a subject's names change only through a moderated revision.
      */
     @Transactional
     public LabelResponse upsert(UUID actingAdminId, String referentKindRaw, String referentIdRaw, String languageRaw,
@@ -226,12 +228,12 @@ public class LabelService {
     }
 
     // Parses the raw path segments rather than binding enums/UUIDs on the controller, so every
-    // malformed form — unknown kind, SUBJECT or TOPIC, a non-UUID id, an unknown kind name — is one
+    // malformed form — unknown kind, SUBJECT, a non-UUID id, an unknown kind name — is one
     // translated 400 carrying INVALID_LABEL_REFERENT. A well-formed id that names nothing is a
     // 404 from the referent's own not-found exception.
     private LabelReferent parseVocabularyReferent(String referentKindRaw, String referentIdRaw) {
         LabelReferentKind type = parseEnum(LabelReferentKind.class, referentKindRaw);
-        if (type == null || type == LabelReferentKind.SUBJECT || type == LabelReferentKind.TOPIC) {
+        if (type == null || type == LabelReferentKind.SUBJECT) {
             throw new InvalidLabelReferentException("label referent kind not writable here: " + referentKindRaw);
         }
         if (type == LabelReferentKind.KIND) {
@@ -262,7 +264,13 @@ public class LabelService {
                 }
                 yield LabelReferent.option(id);
             }
-            case SUBJECT, KIND, TOPIC -> throw new IllegalStateException("handled above: " + type);
+            case TOPIC -> {
+                if (!topicRepository.existsById(id)) {
+                    throw new TopicNotFoundException("topic not found: " + id);
+                }
+                yield LabelReferent.topic(id);
+            }
+            case SUBJECT, KIND -> throw new IllegalStateException("handled above: " + type);
         };
     }
 

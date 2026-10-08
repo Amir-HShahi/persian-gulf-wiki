@@ -2,6 +2,7 @@ package com.persiangulfwiki.core.topic.repository;
 
 import com.persiangulfwiki.core.topic.entity.Topic;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,7 +17,15 @@ public interface TopicRepository extends JpaRepository<Topic, UUID> {
 
     List<Topic> findAllByOrderBySortOrderAscSlugAsc();
 
-    long countByIdIn(Collection<UUID> ids);
+    List<Topic> findAllByIsArchivedFalseOrderBySortOrderAscSlugAsc();
+
+    List<Topic> findAllByIdIn(Collection<UUID> ids);
+
+    boolean existsBySlug(String slug);
+
+    // Null when there are no topics.
+    @Query("select max(t.sortOrder) from Topic t")
+    @Nullable Integer findMaxSortOrder();
 
     // Per topic, the articles whose live topics include it and that have a published translation in
     // `language`. The live topics are those of the canonical translation's current revision -- an

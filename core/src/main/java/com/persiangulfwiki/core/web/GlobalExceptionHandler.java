@@ -96,6 +96,7 @@ import com.persiangulfwiki.core.subject.exception.SubjectRevisionAlreadyVerified
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotEditableException;
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotFoundException;
 import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotLiveException;
+import com.persiangulfwiki.core.topic.exception.DuplicateTopicSlugException;
 import com.persiangulfwiki.core.topic.exception.InvalidTopicIdsException;
 import com.persiangulfwiki.core.topic.exception.TopicNotFoundException;
 import com.persiangulfwiki.core.user.exception.SessionAlreadyRevokedException;
@@ -516,6 +517,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(TopicNotFoundException.class)
     public ProblemDetail handleTopicNotFound(TopicNotFoundException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.topicNotFound"), "TOPIC_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(DuplicateTopicSlugException.class)
+    public ProblemDetail handleDuplicateTopicSlug(DuplicateTopicSlugException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.duplicateTopicSlug"), "DUPLICATE_TOPIC_SLUG", request);
     }
 
     // VALIDATION_FAILED on `topicIds`, like InvalidMainArticleException on `articleId`.

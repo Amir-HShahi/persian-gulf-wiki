@@ -10,6 +10,8 @@ import com.persiangulfwiki.core.article.dto.CreateTranslationRequest;
 import com.persiangulfwiki.core.article.dto.UpdateRevisionRequest;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
 import com.persiangulfwiki.core.auth.dto.RegisterRequest;
+import com.persiangulfwiki.core.label.entity.Label;
+import com.persiangulfwiki.core.label.repository.LabelRepository;
 import com.persiangulfwiki.core.moderation.dto.DecideRequest;
 import com.persiangulfwiki.core.moderation.entity.Decision;
 import com.persiangulfwiki.core.moderation.repository.ModerationTaskRepository;
@@ -79,6 +81,9 @@ class TopicFlowIntegrationTests {
     private TopicRepository topicRepository;
 
     @Autowired
+    private LabelRepository labelRepository;
+
+    @Autowired
     private SubjectRepository subjectRepository;
 
     @Autowired
@@ -124,10 +129,15 @@ class TopicFlowIntegrationTests {
     }
 
     private UUID newTopic() {
+        return newTopic(500);
+    }
+
+    private UUID newTopic(int sortOrder) {
         return topicRepository.save(Topic.builder()
                 .slug("test-" + UUID.randomUUID().toString().substring(0, 12))
-                .icon("pin")
-                .sortOrder(500)
+                .icon("map-pin")
+                .color("#1288B6")
+                .sortOrder(sortOrder)
                 .build()).getId();
     }
 
@@ -253,15 +263,25 @@ class TopicFlowIntegrationTests {
         assertThat(articleCount(topic, "fa")).isZero();
     }
 
+    // Sort orders below anything other tests create, so these two head the shared list.
     @Test
     void topicsListAnonymouslyInDisplayOrderWithLocalizedNames() throws Exception {
+        UUID second = newTopic(Integer.MIN_VALUE + 1);
+        UUID first = newTopic(Integer.MIN_VALUE);
+        labelRepository.save(Label.builder().topicId(first).language("fa").value("زیست‌بوم").build());
+        labelRepository.save(Label.builder().topicId(first).language("en").value("Marine life").build());
+        labelRepository.save(Label.builder().topicId(second).language("fa").value("جزایر").build());
+
         mockMvc.perform(get("/api/topics").param("language", "fa").header(HttpHeaders.ACCEPT_LANGUAGE, "en"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].slug").value("marine-life"))
-                .andExpect(jsonPath("$.data[0].icon").value("fish"))
-                .andExpect(jsonPath("$.data[0].name.value").value("Marine life and ecosystems"))
+                .andExpect(jsonPath("$.data[0].id").value(first.toString()))
+                .andExpect(jsonPath("$.data[0].icon").value("map-pin"))
+                .andExpect(jsonPath("$.data[0].color").value("#1288B6"))
+                .andExpect(jsonPath("$.data[0].name.value").value("Marine life"))
                 .andExpect(jsonPath("$.data[0].name.isFallback").value(false))
-                .andExpect(jsonPath("$.data[9].slug").value("culture-ethnography"));
+                .andExpect(jsonPath("$.data[1].id").value(second.toString()))
+                .andExpect(jsonPath("$.data[1].name.value").value("جزایر"))
+                .andExpect(jsonPath("$.data[1].name.isFallback").value(true));
     }
 
     @Test

@@ -82,7 +82,11 @@ class DevTestArticleFixtures {
             throw new SubjectNotFoundException();
         }
         Set<UUID> topicIds = request.topicIds() != null ? request.topicIds() : Set.of();
-        topicService.requireExisting(topicIds);
+        // The same check as the API, archived topics included -- a deliberate exception to fixtures
+        // bypassing the service path (decided with the user): a suite reaches "revision keeps an
+        // archived topic" by minting the article first, then archiving through PATCH
+        // /api/admin/topics/{id}.
+        topicService.requireAssignable(topicIds, Set.of());
         UUID authorUserId = resolveAuthorUserId(request.authorUserId());
         boolean isMain = resolveIsMain(request, revisionStatus);
 
