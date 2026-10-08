@@ -27,7 +27,7 @@ import tools.jackson.databind.JsonNode;
 // body is stored as given, unvalidated, so a subject link to a missing subject is reachable too.
 //
 // topicIds tags the minted revision. Always allowed: the minted translation is the canonical one,
-// the only kind the real path lets carry topics. Each must name an existing topic.
+// the only kind the real path lets carry topics. Each must name an existing, unarchived topic.
 public record DevTestArticleRequest(
         UUID subjectId,
         String canonicalLanguage,

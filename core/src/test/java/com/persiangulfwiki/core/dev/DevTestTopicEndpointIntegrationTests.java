@@ -22,7 +22,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -127,14 +128,51 @@ class DevTestTopicEndpointIntegrationTests {
     }
 
     @Test
-    void deleteRefusesASeededTopic() throws Exception {
-        Topic seeded = topicRepository.findAllByOrderBySortOrderAscSlugAsc().getFirst();
-        assertThat(seeded.getDevMarker()).isNull();
+    void deleteRefusesATopicItDidNotMint() throws Exception {
+        Topic handMade = handMadeTopic();
 
-        mockMvc.perform(delete("/api/dev/test-topics/" + seeded.getId()))
+        mockMvc.perform(delete("/api/dev/test-topics/" + handMade.getId()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("TOPIC_NOT_FOUND"));
-        assertThat(topicRepository.findById(seeded.getId())).isPresent();
+        assertThat(topicRepository.findById(handMade.getId())).isPresent();
+    }
+
+    @Test
+    void mintAppliesDefaultsAndAcceptsColorAndArchivedState() throws Exception {
+        Topic defaults = topicRepository.findById(mintTopicId("{}")).orElseThrow();
+        assertThat(defaults.getIcon()).isEqualTo("map-pin");
+        assertThat(defaults.getColor()).isEqualTo("#1288B6");
+        assertThat(defaults.isArchived()).isFalse();
+
+        UUID archivedId = mintTopicId("{\"icon\": \"fish\", \"color\": \"#abcdef\", \"isArchived\": true}");
+        Topic archived = topicRepository.findById(archivedId).orElseThrow();
+        assertThat(archived.getIcon()).isEqualTo("fish");
+        assertThat(archived.getColor()).isEqualTo("#ABCDEF");
+        assertThat(archived.isArchived()).isTrue();
+        mockMvc.perform(get("/api/topics").param("language", "fa"))
+                .andExpect(jsonPath("$.data[*].id", not(hasItem(archivedId.toString()))));
+    }
+
+    @Test
+    void mintRejectsAMalformedIconOrColor() throws Exception {
+        mintTopic("{\"icon\": \"Map Pin\"}")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("icon"));
+        mintTopic("{\"color\": \"red\"}")
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("color"));
+    }
+
+    // Same check as the real path (see DevTestArticleFixtures): a minted article can't be tagged
+    // with an archived topic.
+    @Test
+    void mintedArticleRejectsAnArchivedTopic() throws Exception {
+        UUID archivedId = mintTopicId("{\"isArchived\": true}");
+        mockMvc.perform(post("/api/dev/test-articles")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"topicIds\": [\"%s\"]}".formatted(archivedId)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("topicIds"));
     }
 
     @Test
@@ -150,19 +188,28 @@ class DevTestTopicEndpointIntegrationTests {
     }
 
     @Test
-    void sweeperRemovesUnusedMintedTopicsAndKeepsUsedAndSeededOnes() throws Exception {
+    void sweeperRemovesUnusedMintedTopicsAndKeepsUsedAndHandMadeOnes() throws Exception {
         UUID unused = mintTopicId("{}");
         UUID used = mintTopicId("{}");
         mintPublishedArticle(used);
-        long seededBefore = topicRepository.findAll().stream().filter(topic -> topic.getDevMarker() == null).count();
+        Topic handMade = handMadeTopic();
 
         topicSweeper.deleteOlderThan(Instant.now().plus(1, ChronoUnit.HOURS));
 
         assertThat(topicRepository.findById(unused)).isEmpty();
         assertThat(topicRepository.findById(used)).isPresent();
-        assertThat(topicRepository.findAll().stream().filter(topic -> topic.getDevMarker() == null).count())
-                .isEqualTo(seededBefore);
-        mockMvc.perform(get("/api/topics").param("language", "fa"))
-                .andExpect(jsonPath("$.data[0].slug", startsWith("marine-life")));
+        assertThat(topicRepository.findById(handMade.getId())).isPresent();
+    }
+
+    // Stands in for one an admin made: no dev marker.
+    private Topic handMadeTopic() {
+        Topic topic = topicRepository.save(Topic.builder()
+                .slug("hand-" + UUID.randomUUID().toString().substring(0, 12))
+                .icon("fish")
+                .color("#000000")
+                .sortOrder(1)
+                .build());
+        assertThat(topic.getDevMarker()).isNull();
+        return topic;
     }
 }
