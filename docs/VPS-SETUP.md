@@ -2,6 +2,8 @@
 
 Steps to bring up a fresh VPS so it can receive deploys from `deploy-staging.yml` / `deploy-production.yml`. Do this once per VPS (staging is done; production is not).
 
+> **Currently disabled:** the VPS no longer exists, so the deploy workflows skip their server steps until the repository variable `DEPLOY_ENABLED` is `true` (see @docs/CICD.md).
+
 ## 1. Provision
 
 - Hetzner Cloud (or similar). **Buy a Primary IPv4** for it — under the *project's* "Primary IPs" page, not the per-server Networking tab. Without it, the server only has IPv6 and outbound pulls to `ghcr.io` fail with `ENETUNREACH`.
