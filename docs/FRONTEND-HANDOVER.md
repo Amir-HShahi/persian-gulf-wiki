@@ -8,11 +8,13 @@ Only the `deploy/frontend/` folder is needed. A sparse checkout or a copy of tha
 
 ```
 cd deploy/frontend
-cp .env.example .env        # optional; only to change the image tag or frontend origin
 docker compose up -d --wait
 ```
 
 The first start takes about a minute while the database migrates.
+
+- `--wait` was tested on Docker Compose 5.5.1, where the one-shot `minio-init` exiting with code 0 counts as success.
+- Older Compose v2 releases may report that exit as a `--wait` failure. If yours does, drop `--wait` and check that `docker compose ps` shows `app` as healthy.
 
 | What | Where |
 |---|---|
@@ -29,7 +31,7 @@ The first start takes about a minute while the database migrates.
 
 - The image is `ghcr.io/amir-hshahi/persian-gulf-wiki-core`. It is public, so no login is needed.
 - The default tag is `:staging`, which every merge to `master` rebuilds.
-- To hold the backend still, set `PGW_IMAGE` in `.env` to a version tag. Version tags exist only after the first release.
+- To hold the backend still, set `PGW_IMAGE` to a full image reference with a version tag, either in a `.env` file next to the compose file or in the shell. Version tags exist only after the first release.
 
 ## Logging in
 
@@ -46,7 +48,7 @@ The first start takes about a minute while the database migrates.
 
 - CORS on the API and on MinIO allows only `FRONTEND_ORIGINS`. The default is `http://localhost:3000`.
 - `FRONTEND_BASE_URL` is used for the links in emails. The default is also `http://localhost:3000`.
-- If the dev server runs on another port, change both values in `.env` and run `docker compose up -d`.
+- If the dev server runs on another port, set both values in a `.env` file next to the compose file or in the shell, then run `docker compose up -d`.
 
 ## Media uploads
 

@@ -26,7 +26,7 @@ services:
       # seeded @dev.local accounts or the /api/dev/test-users endpoint instead.
       GOOGLE_CLIENT_ID: unused
       GOOGLE_CLIENT_SECRET: unused
-      JWT_SECRET: VMnaOXjmQYX8vyU5JLkFMDuisY3FsxFBHKzYfr9hRtc=  # base64, 32 bytes; public, local only
+      JWT_SECRET: ZGV2LW9ubHktbG9jYWwtand0LXNlY3JldC1ub3QtYS1yZWFsLWtleQ==  # base64 of "dev-only-local-jwt-secret-not-a-real-key"
       FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:3000}
       FRONTEND_ORIGINS: ${FRONTEND_ORIGINS:-http://localhost:3000}
       COOKIE_DOMAIN: localhost
@@ -76,7 +76,7 @@ services:
       - redis-data:/data
 
   mailpit:
-    image: axllent/mailpit:latest
+    image: axllent/mailpit:v1.31.1
     restart: unless-stopped
     environment:
       MP_MAX_MESSAGES: 500
