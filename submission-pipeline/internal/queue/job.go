@@ -136,6 +136,21 @@ type ImageResult struct {
 	Height   int       `json:"height"`
 	Format   string    `json:"format"`
 	Variants []Variant `json:"variants"`
+
+	// Original is the untouched upload, saved beside the variants so it outlives
+	// whatever the raw bucket's own lifecycle does to the staging copy.
+	//
+	// It is not a variant and must not be served as one: it is byte for byte what
+	// the camera wrote, including any location data, and may be a format a
+	// browser cannot show.
+	Original *Original `json:"original,omitempty"`
+}
+
+// Original is where the saved copy of an upload lives.
+type Original struct {
+	Key         string `json:"key"`
+	Bytes       int64  `json:"bytes"`
+	ContentType string `json:"content_type"`
 }
 
 type Variant struct {

@@ -104,12 +104,18 @@ func (h *Image) Handle(ctx context.Context, log *slog.Logger, _ pgx.Tx, job queu
 		return queue.Result{}, fmt.Errorf("processing image: %w", err)
 	}
 
-	if len(processed.Variants) == 0 {
-		// Not an error: imagepipe never upscales, so a source narrower than the
-		// smallest target has nothing to derive. It is logged because the job
-		// reports success while having produced no files.
-		log.Warn("no variants produced: source is narrower than every target width",
-			"width", processed.Source.Width)
+	// The original is copied next to the variants byte for byte, so it survives
+	// whatever the raw bucket's own lifecycle does to the upload. It is saved
+	// before the variants: a failure here retries the whole job, rather than
+	// leaving a submission with pictures and no original behind them.
+	ext, contentType, err := originalOf(src, processed.Source.Format)
+	if err != nil {
+		return queue.Result{}, fmt.Errorf("reading original: %w", err)
+	}
+	originalKey := path.Join(payload.SubmissionID, "original."+ext)
+	originalBytes, err := h.Store.Upload(ctx, h.DerivedBucket, originalKey, src, contentType)
+	if err != nil {
+		return queue.Result{}, fmt.Errorf("saving original %s: %w", originalKey, err)
 	}
 
 	variants := make([]queue.Variant, 0, len(processed.Variants))
@@ -134,7 +140,7 @@ func (h *Image) Handle(ctx context.Context, log *slog.Logger, _ pgx.Tx, job queu
 		})
 	}
 
-	log.Info("image processed", "variants", len(variants),
+	log.Info("image processed", "variants", len(variants), "original", originalKey,
 		"width", processed.Source.Width, "height", processed.Source.Height)
 
 	return queue.Result{
@@ -144,6 +150,11 @@ func (h *Image) Handle(ctx context.Context, log *slog.Logger, _ pgx.Tx, job queu
 			Height:   processed.Source.Height,
 			Format:   processed.Source.Format,
 			Variants: variants,
+			Original: &queue.Original{
+				Key:         originalKey,
+				Bytes:       originalBytes,
+				ContentType: contentType,
+			},
 		},
 	}, nil
 }
