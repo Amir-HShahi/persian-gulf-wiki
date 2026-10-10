@@ -26,7 +26,10 @@ public final class PublicRoutes {
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/sources"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/sources/**"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/articles"),
-            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/articles/**")));
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/articles/**"),
+            // Homepage data cards: public provider data with nothing per-user in it.
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/marine-metrics"),
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/marine-metrics/**")));
 
     public static final RequestMatcher API_DOCS = new OrRequestMatcher(List.of(
             PathPatternRequestMatcher.withDefaults().matcher("/docs/**"),

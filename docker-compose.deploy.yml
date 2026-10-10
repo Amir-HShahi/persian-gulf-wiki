@@ -26,6 +26,7 @@ services:
       ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-}
       SPRING_DATA_REDIS_HOST: redis
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
+      MARINE_DATA_INGEST_ENABLED: ${MARINE_DATA_INGEST_ENABLED:-true}
       # The app reaches MinIO on the compose network; browsers reach it through the tunnel
       # hostname in STORAGE_PUBLIC_ENDPOINT. Presigned URLs are signed for that public host.
       STORAGE_ENDPOINT: http://minio:9000

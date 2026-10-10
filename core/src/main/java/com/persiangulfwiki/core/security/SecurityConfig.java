@@ -89,8 +89,8 @@ public class SecurityConfig {
                         .requestMatchers(PublicRoutes.API_DOCS).permitAll()
                         // Deploy health check hits this unauthenticated — no app data exposed.
                         .requestMatchers(PublicRoutes.HEALTH).permitAll()
-                        // Public wiki content: reading an article, subject or citation needs no
-                        // account. Scoped to GET on purpose (see PublicRoutes.CONTENT_READS):
+                        // Public wiki content: reading an article, subject or citation, or the
+                        // homepage marine data cards, needs no account. Scoped to GET on purpose (see PublicRoutes.CONTENT_READS):
                         // POST /api/subjects, POST /api/sources and every article mutation fall
                         // through to anyRequest().authenticated() below and keep their CSRF
                         // requirement (and, for subjects/sources, their role check). Article

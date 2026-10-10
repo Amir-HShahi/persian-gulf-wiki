@@ -41,6 +41,7 @@ class OpenApiDevDocsIntegrationTests {
                 "Sources", "Dev Test Sources",
                 "Articles", "Dev Test Articles",
                 "Article Media", "Dev Test Media",
-                "Moderation", "Dev Test Moderation Tasks");
+                "Moderation", "Dev Test Moderation Tasks",
+                "Marine Data");
     }
 }
