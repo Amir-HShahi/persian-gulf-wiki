@@ -93,6 +93,12 @@ func (r *Runner) Run(ctx context.Context) error {
 // drain claims and starts jobs until the queue is empty or every worker slot
 // is busy.
 func (r *Runner) drain(ctx context.Context, sem chan struct{}, wg *sync.WaitGroup) {
+	if ids, err := r.store.ParkExhausted(ctx, r.cfg.MaxAttempts); err != nil {
+		r.log.Error("parking exhausted jobs", "err", err)
+	} else if len(ids) > 0 {
+		r.log.Error("jobs parked: their worker died on the last allowed attempt", "job_ids", ids)
+	}
+
 	for ctx.Err() == nil {
 		select {
 		case sem <- struct{}{}:
@@ -100,7 +106,7 @@ func (r *Runner) drain(ctx context.Context, sem chan struct{}, wg *sync.WaitGrou
 			return // all slots busy; the next tick will try again
 		}
 
-		job, ok, err := r.store.Claim(ctx, r.cfg.LockDuration, r.identity)
+		job, ok, err := r.store.Claim(ctx, r.cfg.LockDuration, r.identity, r.cfg.MaxAttempts)
 		if err != nil {
 			<-sem
 			r.log.Error("claiming job", "err", err)
@@ -146,6 +152,14 @@ func (r *Runner) listen(ctx context.Context, wake chan<- struct{}) {
 
 // process runs one claimed job and records its fate.
 func (r *Runner) process(ctx context.Context, job Job) {
+	// A claimed job runs to its end even if shutdown begins meanwhile: the work,
+	// its heartbeat, and the write that records how it finished all use a context
+	// that shutdown cannot cancel. Run stops claiming new jobs and then waits for
+	// these, which is what a deploy needs. Tied to the shutdown context instead,
+	// the job would be aborted mid-run and then fail to record that too, leaving
+	// it locked until the lock expired. The job's own timeout still bounds it.
+	ctx = context.WithoutCancel(ctx)
+
 	jobLog := r.log.With(job.LogAttrs()...)
 
 	h, ok := r.handlers[job.Type]

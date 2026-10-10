@@ -16,7 +16,8 @@ import (
 const NotifyChannel = "jobs"
 
 // Store is the worker's access to the jobs table. Schema changes belong to
-// core's Flyway migrations — nothing here creates or alters anything.
+// core's Flyway migrations — nothing here creates or alters anything. The DDL
+// to put in that migration is schema.sql in this package.
 type Store struct {
 	pool *pgxpool.Pool
 }
@@ -32,7 +33,10 @@ func NewStore(pool *pgxpool.Pool) *Store {
 // and any other worker skips straight past that locked row to the next one.
 //
 // The second OR clause recovers jobs whose worker died — the lock they held
-// expires and the row becomes claimable again.
+// expires and the row becomes claimable again. It only does so while the job has
+// attempts left: a job that has used them all is parked by ParkExhausted, never
+// handed out a fresh time. $3 is the worker's default ceiling for jobs that
+// carry none of their own.
 const claimSQL = `
 UPDATE jobs
 SET status       = 'running',
@@ -43,21 +47,22 @@ SET status       = 'running',
 WHERE id = (
     SELECT id FROM jobs
     WHERE (status = 'pending' AND run_after <= now())
-       OR (status = 'running' AND locked_until < now())
+       OR (status = 'running' AND locked_until < now() AND attempts < coalesce(max_attempts, $3))
     ORDER BY run_after, id
     FOR UPDATE SKIP LOCKED
     LIMIT 1
 )
-RETURNING id, type, payload, attempts, max_attempts, run_after, created_at`
+RETURNING id, type, payload, attempts, coalesce(max_attempts, 0), run_after, created_at`
 
 // Claim takes the next runnable job, or reports false when the queue is empty.
-func (s *Store) Claim(ctx context.Context, lock time.Duration, lockedBy string) (Job, bool, error) {
+// defaultMaxAttempts is the ceiling for a job that has none of its own.
+func (s *Store) Claim(ctx context.Context, lock time.Duration, lockedBy string, defaultMaxAttempts int) (Job, bool, error) {
 	var (
 		job     Job
 		payload []byte
 	)
 
-	err := s.pool.QueryRow(ctx, claimSQL, lock.Seconds(), lockedBy).Scan(
+	err := s.pool.QueryRow(ctx, claimSQL, lock.Seconds(), lockedBy, defaultMaxAttempts).Scan(
 		&job.ID,
 		&job.Type,
 		&payload,
@@ -75,6 +80,43 @@ func (s *Store) Claim(ctx context.Context, lock time.Duration, lockedBy string) 
 
 	job.Payload = json.RawMessage(payload)
 	return job, true, nil
+}
+
+const parkExhaustedSQL = `
+UPDATE jobs
+SET status       = 'failed',
+    last_error   = 'the worker died with no attempts remaining; not retried',
+    locked_until = NULL,
+    locked_by    = NULL,
+    updated_at   = now()
+WHERE status = 'running'
+  AND locked_until < now()
+  AND attempts >= coalesce(max_attempts, $1)
+RETURNING id`
+
+// ParkExhausted fails every job whose worker died on its last allowed attempt,
+// and returns their ids.
+//
+// A job that kills its worker — an image that exhausts memory — never reaches
+// the failure path, because no worker is left to record one. The only trace is
+// a lapsed lock with every attempt already spent. Without this, each worker in
+// turn would pick the job up and die on it, indefinitely.
+func (s *Store) ParkExhausted(ctx context.Context, defaultMaxAttempts int) ([]int64, error) {
+	rows, err := s.pool.Query(ctx, parkExhaustedSQL, defaultMaxAttempts)
+	if err != nil {
+		return nil, fmt.Errorf("parking exhausted jobs: %w", err)
+	}
+	defer rows.Close()
+
+	var ids []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, fmt.Errorf("parking exhausted jobs: %w", err)
+		}
+		ids = append(ids, id)
+	}
+	return ids, rows.Err()
 }
 
 const heartbeatSQL = `
