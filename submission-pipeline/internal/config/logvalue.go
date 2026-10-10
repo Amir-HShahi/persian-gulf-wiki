@@ -10,6 +10,7 @@ func (c Config) LogValue() slog.Value {
 		slog.Any("database", c.Database),
 		slog.Any("storage", c.Storage),
 		slog.Any("worker", c.Worker),
+		slog.Any("search", c.Search),
 	)
 }
 
@@ -45,6 +46,13 @@ func (w Worker) LogValue() slog.Value {
 		slog.Duration("lock_duration", w.LockDuration),
 		slog.Int("max_attempts", w.MaxAttempts),
 		slog.Duration("retry_base_delay", w.RetryBaseDelay),
+	)
+}
+
+func (s Search) LogValue() slog.Value {
+	return slog.GroupValue(
+		slog.Duration("sync_interval", s.SyncInterval),
+		slog.Int("sync_batch", s.SyncBatch),
 	)
 }
 

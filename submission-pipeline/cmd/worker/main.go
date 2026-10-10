@@ -17,6 +17,7 @@ import (
 	"wikipg/internal/handler"
 	"wikipg/internal/imagepipe"
 	"wikipg/internal/queue"
+	"wikipg/internal/search"
 	"wikipg/internal/storage"
 )
 
@@ -63,6 +64,22 @@ func run() error {
 	if err != nil {
 		return err
 	}
+
+	// Search sync runs beside the job loop and shares its pool. Nothing it hits
+	// can stop the worker: a database without the search schema, or a failed
+	// pass, is logged and retried on the next interval while image jobs carry on.
+	// The worker waits for it on the way out so the pool outlives it.
+	searchDone := make(chan struct{})
+	go func() {
+		defer close(searchDone)
+		(&search.Reconciler{
+			DB:       pool,
+			Log:      log.With("component", "search"),
+			Interval: cfg.Search.SyncInterval,
+			Batch:    cfg.Search.SyncBatch,
+		}).Run(ctx)
+	}()
+	defer func() { <-searchDone }()
 
 	health := &Health{}
 	health.MarkPoll() // don't report stale before the first poll

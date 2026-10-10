@@ -19,6 +19,7 @@ type Config struct {
 	Database Database
 	Storage  Storage
 	Worker   Worker
+	Search   Search
 	LogLevel slog.Level
 }
 
@@ -80,6 +81,18 @@ type Worker struct {
 	RetryBaseDelay time.Duration
 }
 
+// Search controls how the article search index is kept in step with core.
+type Search struct {
+	// SyncInterval is how often the index is compared with core's published
+	// articles. It is also the longest a newly approved article waits before it
+	// becomes searchable.
+	SyncInterval time.Duration
+
+	// SyncBatch is how many index rows one pass may refresh. Passes repeat until
+	// one comes back short, so this bounds a single transaction, not the total.
+	SyncBatch int
+}
+
 // Load reads configuration from the environment, reporting every problem
 // it finds at once rather than failing on the first.
 func Load() (Config, error) {
@@ -113,6 +126,10 @@ func Load() (Config, error) {
 			MaxAttempts:       l.optInt("WORKER_MAX_ATTEMPTS", 5),
 			RetryBaseDelay:    l.optDuration("WORKER_RETRY_BASE_DELAY", 30*time.Second),
 		},
+		Search: Search{
+			SyncInterval: l.optDuration("SEARCH_SYNC_INTERVAL", 30*time.Second),
+			SyncBatch:    l.optInt("SEARCH_SYNC_BATCH", 500),
+		},
 	}
 
 	if cfg.Worker.Concurrency < 1 {
@@ -123,6 +140,12 @@ func Load() (Config, error) {
 	}
 	if cfg.Worker.MaxAttempts < 1 {
 		l.errorf("WORKER_MAX_ATTEMPTS must be at least 1, got %d", cfg.Worker.MaxAttempts)
+	}
+	if cfg.Search.SyncInterval <= 0 {
+		l.errorf("SEARCH_SYNC_INTERVAL must be positive, got %s", cfg.Search.SyncInterval)
+	}
+	if cfg.Search.SyncBatch < 1 {
+		l.errorf("SEARCH_SYNC_BATCH must be at least 1, got %d", cfg.Search.SyncBatch)
 	}
 	if cfg.Database.MaxConns < 1 {
 		l.errorf("DB_MAX_CONNS must be at least 1, got %d", cfg.Database.MaxConns)
