@@ -65,6 +65,8 @@ class DevTestContentEndpointDisabledIntegrationTests {
         assertThat(applicationContext.getBeanNamesForType(DevTestModerationSweeper.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestMediaSweeper.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestMediaController.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestMarineController.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestMarineSweeper.class)).isEmpty();
     }
 
     @Test
@@ -81,6 +83,8 @@ class DevTestContentEndpointDisabledIntegrationTests {
         mockMvc.perform(get("/api/dev/test-moderation-tasks/{taskId}", UUID.randomUUID()))
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(delete("/api/dev/test-media/{mediaId}", UUID.randomUUID()))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(delete("/api/dev/marine-readings/{stationKey}", "dev-test-abc"))
                 .andExpect(status().isForbidden());
     }
 
@@ -114,6 +118,10 @@ class DevTestContentEndpointDisabledIntegrationTests {
         mockMvc.perform(post("/api/dev/test-media")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/dev/marine-readings")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"metricKey\":\"pm10\",\"readings\":[{\"observedAt\":\"2026-01-01T00:00:00Z\",\"value\":1}]}"))
                 .andExpect(status().isForbidden());
 
         assertThat(subjectRepository.count()).isEqualTo(subjectsBefore);

@@ -17,6 +17,7 @@ import com.persiangulfwiki.core.moderation.exception.InvalidModerationTaskStateE
 import com.persiangulfwiki.core.moderation.exception.MissingDecisionReasonException;
 import com.persiangulfwiki.core.moderation.exception.ModerationTaskNotFoundException;
 import com.persiangulfwiki.core.common.exception.TooManyRequestsException;
+import com.persiangulfwiki.core.dev.exception.InvalidDevTestMarineRequestException;
 import com.persiangulfwiki.core.dev.exception.InvalidDevTestMediaRequestException;
 import com.persiangulfwiki.core.marinedata.exception.InvalidMarineSeriesRangeException;
 import com.persiangulfwiki.core.marinedata.exception.MarineMetricNotFoundException;
@@ -429,6 +430,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(InvalidDevTestMediaRequestException.class)
     public ProblemDetail handleInvalidDevTestMediaRequest(InvalidDevTestMediaRequestException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidDevTestMediaRequest"), "INVALID_DEV_TEST_MEDIA_REQUEST", request);
+    }
+
+    @ExceptionHandler(InvalidDevTestMarineRequestException.class)
+    public ProblemDetail handleInvalidDevTestMarineRequest(InvalidDevTestMarineRequestException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidDevTestMarineRequest"), "INVALID_DEV_TEST_MARINE_REQUEST", request);
     }
 
     @ExceptionHandler(MarineMetricNotFoundException.class)

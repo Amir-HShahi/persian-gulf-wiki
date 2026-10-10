@@ -52,7 +52,8 @@ public class OpenApiConfig {
             "Dev Test Media",
             "Moderation",
             "Dev Test Moderation Tasks",
-            "Marine Data");
+            "Marine Data",
+            "Dev Test Marine Data");
 
     // Flattens ApiResult<T> to T on every documented response — see the class javadoc and the
     // "Response envelope" section of the API description below.

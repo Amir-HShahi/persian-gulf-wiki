@@ -69,3 +69,7 @@ app:
     # TTL for the gallery fixtures minted by POST /api/dev/test-media, reclaimed hourly by
     # DevTestMediaSweeper at :15 -- ahead of the user sweep at :30, see the cron comment there.
     test-media-ttl-hours: ${DEV_TEST_MEDIA_TTL_HOURS:6}
+
+    # TTL for the stations minted by POST /api/dev/marine-readings, reclaimed hourly by
+    # DevTestMarineSweeper at :45. Same reasoning as the TTLs above.
+    test-marine-ttl-hours: ${DEV_TEST_MARINE_TTL_HOURS:6}
