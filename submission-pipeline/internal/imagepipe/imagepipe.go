@@ -57,7 +57,11 @@ type Options struct {
 
 func DefaultOptions() Options {
 	return Options{
-		Widths: []int{150, 400, 1200},
+		// Thumbnail, card, article body and large view. 1920 is the sharpest
+		// variant ever generated, and it is enough: the original is never
+		// modified and stays in the raw bucket for anything that needs full
+		// resolution, so there is no need for a larger derived size.
+		Widths: []int{320, 640, 1280, 1920},
 
 		// 100 MP rejects any plausible bomb (a 40,000 x 40,000 image is 1.6
 		// gigapixels) while still accepting a high-end scan, which is about
