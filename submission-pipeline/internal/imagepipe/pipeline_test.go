@@ -16,7 +16,8 @@ func TestPlanSkipsUpscaling(t *testing.T) {
 		{"large source keeps every width", 3000, []int{150, 400, 1200}},
 		{"mid source drops the largest", 800, []int{150, 400}},
 		{"small source keeps only the thumbnail", 300, []int{150}},
-		{"tiny source produces nothing", 100, []int{}},
+		{"tiny source still gets one variant at its own width", 100, []int{100}},
+		{"source equal to the smallest target gets one variant", 150, []int{150}},
 		{"source exactly on a target is not regenerated", 400, []int{150}},
 	}
 

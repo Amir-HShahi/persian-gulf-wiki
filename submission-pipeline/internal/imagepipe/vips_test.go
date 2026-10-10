@@ -260,3 +260,22 @@ func TestProcessRejectsWhatItCannotOrShouldNotDecode(t *testing.T) {
 		})
 	}
 }
+
+func TestProcessGivesATinyImageOneVariantAtItsOwnSize(t *testing.T) {
+	dir := t.TempDir()
+	// Narrower than every target. Nothing may be upscaled, but the submission
+	// must still end up with a picture it can show.
+	src := writeJPEG(t, dir, "tiny.jpg", 100, 75, 0)
+
+	res, err := Process(context.Background(), src, outDir(t, dir), quick(320, 640))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(res.Variants) != 1 {
+		t.Fatalf("got %d variants, want 1", len(res.Variants))
+	}
+	if v := res.Variants[0]; v.Label != "w100" || v.Width != 100 || v.Height != 75 {
+		t.Errorf("variant = %s %dx%d, want w100 100x75", v.Label, v.Width, v.Height)
+	}
+}

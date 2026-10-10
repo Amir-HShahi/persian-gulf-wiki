@@ -149,12 +149,20 @@ func check(info Info, opt Options) *Rejection {
 //
 // A target at or above the source is dropped: upscaling invents no detail, it
 // only produces a larger file that looks softer than the original.
+//
+// A source narrower than every target would leave nothing, and the original is
+// private, so the submission would have no picture to show at all. It gets one
+// variant at its own width instead: still no upscaling, but a stripped,
+// colour-corrected WebP that is safe to serve.
 func plan(widths []int, srcWidth int) []int {
 	out := make([]int, 0, len(widths))
 	for _, w := range widths {
 		if w > 0 && w < srcWidth {
 			out = append(out, w)
 		}
+	}
+	if len(out) == 0 && srcWidth > 0 {
+		out = append(out, srcWidth)
 	}
 	return out
 }
