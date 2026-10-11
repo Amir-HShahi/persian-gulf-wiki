@@ -284,6 +284,27 @@ class TopicFlowIntegrationTests {
                 .andExpect(jsonPath("$.data[1].name.isFallback").value(true));
     }
 
+    // V31's seed: other tests' topics interleave in the shared list, so only the seeded slugs are compared.
+    @Test
+    void seededTopicsListInOrderWithANameInEveryLanguage() throws Exception {
+        List<String> seeded = List.of("marine-life", "plants-and-algae", "islands", "ports-and-oil-terminals",
+                "shipping-and-transit", "pollution-and-environment", "history-and-archaeology", "economy-and-trade",
+                "geography-and-climate", "culture-and-ethnography");
+        for (String language : List.of("fa", "en", "ar")) {
+            String topics = mockMvc.perform(get("/api/topics").param("language", language)
+                            .header(HttpHeaders.ACCEPT_LANGUAGE, language))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+            List<String> slugs = JsonPath.read(topics, "$.data[*].slug");
+            assertThat(slugs.stream().filter(seeded::contains).toList()).isEqualTo(seeded);
+            List<Boolean> fallbacks = JsonPath.read(topics, "$.data[?(@.slug == 'islands')].name.isFallback");
+            assertThat(fallbacks).containsExactly(false);
+        }
+        mockMvc.perform(get("/api/topics").param("language", "ar").header(HttpHeaders.ACCEPT_LANGUAGE, "ar"))
+                .andExpect(jsonPath("$.data[?(@.slug == 'islands')].name.value").value(contains("الجزر")))
+                .andExpect(jsonPath("$.data[?(@.slug == 'islands')].icon").value(contains("map-pin")));
+    }
+
     @Test
     void topicsWithoutLanguageAreRejected() throws Exception {
         mockMvc.perform(get("/api/topics"))
