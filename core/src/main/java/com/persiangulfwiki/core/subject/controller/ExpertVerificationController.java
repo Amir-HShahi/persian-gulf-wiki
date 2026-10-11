@@ -1,6 +1,7 @@
 package com.persiangulfwiki.core.subject.controller;
 
 import com.persiangulfwiki.core.common.dto.ApiResult;
+import com.persiangulfwiki.core.common.dto.PageResponse;
 import com.persiangulfwiki.core.subject.dto.ExpertVerificationResponse;
 import com.persiangulfwiki.core.subject.dto.VerificationQueueItemResponse;
 import com.persiangulfwiki.core.subject.service.ExpertVerificationService;
@@ -99,7 +100,8 @@ public class ExpertVerificationController {
             + "current revision no expert has confirmed yet -- never confirmed (NONE), or confirmed only on an older "
             + "revision (STALE) -- newest approval first. Revisions the caller wrote are left out, since they may not "
             + "verify them.")
-    @ApiResponse(responseCode = "200", description = "One page of subjects. An out-of-range page is an empty list, not an error.")
+    @ApiResponse(responseCode = "200", description = "One page of subjects, with the total number of queued subjects across "
+            + "all pages. An out-of-range page has an empty `items` list, not an error.")
     @ApiResponse(responseCode = "400", description = "`kind` is not one of ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, "
             + "FISHING_GROUND, PROVINCE (case-insensitive), or `page`/`size` is outside its allowed range.",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
@@ -116,11 +118,11 @@ public class ExpertVerificationController {
     @PreAuthorize("hasRole('EXPERT_REVIEWER')")
     @GetMapping("/expert-reviewer/verification-queue")
     @ResponseStatus(HttpStatus.OK)
-    public ApiResult<List<VerificationQueueItemResponse>> queue(
+    public ApiResult<PageResponse<VerificationQueueItemResponse>> queue(
             @RequestParam(required = false) String kind,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(MAX_PAGE_SIZE) int size) {
-        List<VerificationQueueItemResponse> data =
+        PageResponse<VerificationQueueItemResponse> data =
                 expertVerificationService.queue(currentUserId(), kind, PageRequest.of(page, size));
         return ApiResult.of(data, message("success.verificationQueueList"));
     }

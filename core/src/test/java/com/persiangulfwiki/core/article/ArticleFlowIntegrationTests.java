@@ -301,24 +301,34 @@ class ArticleFlowIntegrationTests {
 
         mockMvc.perform(get("/api/articles").param("language", language))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.length()").value(3))
+                .andExpect(jsonPath("$.data.items.length()").value(3))
+                .andExpect(jsonPath("$.data.total").value(3))
                 // Newest first.
-                .andExpect(jsonPath("$.data[0].id").value(subjectLessArticle.toString()))
-                .andExpect(jsonPath("$.data[0].subjectKind").value(nullValue()))
-                .andExpect(jsonPath("$.data[1].id").value(portArticle.toString()))
-                .andExpect(jsonPath("$.data[1].subjectKind").value("PORT"))
-                .andExpect(jsonPath("$.data[2].id").value(islandArticle.toString()))
-                .andExpect(jsonPath("$.data[2].subjectKind").value("ISLAND"));
+                .andExpect(jsonPath("$.data.items[0].id").value(subjectLessArticle.toString()))
+                .andExpect(jsonPath("$.data.items[0].subjectKind").value(nullValue()))
+                .andExpect(jsonPath("$.data.items[1].id").value(portArticle.toString()))
+                .andExpect(jsonPath("$.data.items[1].subjectKind").value("PORT"))
+                .andExpect(jsonPath("$.data.items[2].id").value(islandArticle.toString()))
+                .andExpect(jsonPath("$.data.items[2].subjectKind").value("ISLAND"));
 
         mockMvc.perform(get("/api/articles").param("language", language).param("subjectKind", "island"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.length()").value(1))
-                .andExpect(jsonPath("$.data[0].id").value(islandArticle.toString()))
-                .andExpect(jsonPath("$.data[0].subjectKind").value("ISLAND"));
+                .andExpect(jsonPath("$.data.items.length()").value(1))
+                .andExpect(jsonPath("$.data.total").value(1))
+                .andExpect(jsonPath("$.data.items[0].id").value(islandArticle.toString()))
+                .andExpect(jsonPath("$.data.items[0].subjectKind").value("ISLAND"));
 
         mockMvc.perform(get("/api/articles").param("language", language).param("subjectKind", "SPECIES"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.length()").value(0));
+                .andExpect(jsonPath("$.data.items.length()").value(0))
+                .andExpect(jsonPath("$.data.total").value(0));
+
+        // The total counts every page, not just the one returned.
+        mockMvc.perform(get("/api/articles").param("language", language).param("page", "1").param("size", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items.length()").value(1))
+                .andExpect(jsonPath("$.data.items[0].id").value(islandArticle.toString()))
+                .andExpect(jsonPath("$.data.total").value(3));
     }
 
     private UUID createApprovedArticle(@Nullable UUID subjectId, String language, Cookie accessCookie,

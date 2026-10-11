@@ -437,7 +437,8 @@ class AdminFlowIntegrationTests {
 
         mockMvc.perform(get("/api/admin/users").param("size", "1000").cookie(adminAccessCookie))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[?(@.id == '" + judy.getId() + "')].roles[?(@.role == 'EXPERT_REVIEWER')].expertise",
+                .andExpect(jsonPath("$.data.total").value(userRepository.count()))
+                .andExpect(jsonPath("$.data.items[?(@.id == '" + judy.getId() + "')].roles[?(@.role == 'EXPERT_REVIEWER')].expertise",
                         org.hamcrest.Matchers.contains("SPECIES")));
 
         RoleGrantRequest revokeOtherKind = new RoleGrantRequest(Role.EXPERT_REVIEWER, SubjectKind.PORT, GrantAction.REVOKE);

@@ -10,6 +10,7 @@ import com.persiangulfwiki.core.admin.exception.LastAdminException;
 import com.persiangulfwiki.core.admin.exception.RoleAlreadyGrantedException;
 import com.persiangulfwiki.core.admin.exception.RoleNotGrantedException;
 import com.persiangulfwiki.core.audit.service.AuditLogService;
+import com.persiangulfwiki.core.common.dto.PageResponse;
 import com.persiangulfwiki.core.user.entity.Role;
 import com.persiangulfwiki.core.user.entity.User;
 import com.persiangulfwiki.core.user.entity.UserRole;
@@ -20,6 +21,7 @@ import com.persiangulfwiki.core.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,13 +38,12 @@ public class AdminService {
     private final UserRoleRepository userRoleRepository;
     private final AuditLogService auditLogService;
 
-    public List<AdminUserResponse> listUsers(int page, int size) {
+    public PageResponse<AdminUserResponse> listUsers(int page, int size) {
         if (page < 0 || size < 1) {
             throw new InvalidPagingParametersException("page must be >= 0 and size must be >= 1");
         }
-        return userRepository.findAll(PageRequest.of(page, size)).stream()
-                .map(this::toAdminUserResponse)
-                .toList();
+        Page<User> users = userRepository.findAll(PageRequest.of(page, size));
+        return new PageResponse<>(users.stream().map(this::toAdminUserResponse).toList(), users.getTotalElements());
     }
 
     @Transactional

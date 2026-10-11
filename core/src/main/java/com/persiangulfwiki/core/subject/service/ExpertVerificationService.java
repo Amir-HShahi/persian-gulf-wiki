@@ -1,5 +1,6 @@
 package com.persiangulfwiki.core.subject.service;
 
+import com.persiangulfwiki.core.common.dto.PageResponse;
 import com.persiangulfwiki.core.subject.dto.ExpertVerificationResponse;
 import com.persiangulfwiki.core.subject.dto.SubjectPayloadResponse;
 import com.persiangulfwiki.core.subject.dto.SubjectVerificationResponse;
@@ -29,6 +30,7 @@ import com.persiangulfwiki.core.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.jspecify.annotations.Nullable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,16 +123,17 @@ public class ExpertVerificationService {
      * isn't one of the caller's. Also a 403 when the caller has no expertise at all.
      */
     @Transactional(readOnly = true)
-    public List<VerificationQueueItemResponse> queue(UUID expertId, @Nullable String kindFilter, Pageable pageable) {
+    public PageResponse<VerificationQueueItemResponse> queue(UUID expertId, @Nullable String kindFilter, Pageable pageable) {
         Set<SubjectKind> expertise = expertiseOf(expertId);
         Set<SubjectKind> kinds = kindFilter == null ? expertise : Set.of(SubjectService.parseKind(kindFilter));
         if (kinds.isEmpty() || !expertise.containsAll(kinds)) {
             throw new NotSubjectKindExpertException();
         }
 
-        List<SubjectLiveRevision> liveRevisions = subjectLiveRevisionRepository.findUnverified(kinds, expertId, pageable);
+        Page<SubjectLiveRevision> page = subjectLiveRevisionRepository.findUnverified(kinds, expertId, pageable);
+        List<SubjectLiveRevision> liveRevisions = page.getContent();
         if (liveRevisions.isEmpty()) {
-            return List.of();
+            return new PageResponse<>(List.of(), page.getTotalElements());
         }
         Map<UUID, SubjectRevision> revisionsById = subjectRevisionRepository
                 .findAllById(liveRevisions.stream().map(SubjectLiveRevision::getRevisionId).toList()).stream()
@@ -141,7 +144,7 @@ public class ExpertVerificationService {
                 .collect(Collectors.toMap(LatestVerifiedRevision::getSubjectId,
                         LatestVerifiedRevision::getRevisionNumber));
 
-        return liveRevisions.stream()
+        List<VerificationQueueItemResponse> items = liveRevisions.stream()
                 .map(live -> {
                     SubjectRevision revision = Objects.requireNonNull(revisionsById.get(live.getRevisionId()));
                     SubjectPayloadResponse payload =
@@ -151,6 +154,7 @@ public class ExpertVerificationService {
                             verificationOf(revision.getRevisionNumber(), latestVerifiedBySubject.get(live.getSubjectId())));
                 })
                 .toList();
+        return new PageResponse<>(items, page.getTotalElements());
     }
 
     /** The verification state of the subject whose live revision is {@code liveRevisionNumber}. */

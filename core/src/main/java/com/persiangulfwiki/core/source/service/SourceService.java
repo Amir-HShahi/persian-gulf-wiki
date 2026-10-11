@@ -1,5 +1,6 @@
 package com.persiangulfwiki.core.source.service;
 
+import com.persiangulfwiki.core.common.dto.PageResponse;
 import com.persiangulfwiki.core.source.dto.CreateSourceRequest;
 import com.persiangulfwiki.core.source.dto.SourceResponse;
 import com.persiangulfwiki.core.source.entity.Source;
@@ -8,6 +9,7 @@ import com.persiangulfwiki.core.source.repository.SourceRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,8 +43,9 @@ public class SourceService {
     }
 
     @Transactional(readOnly = true)
-    public List<SourceResponse> list(Pageable pageable) {
-        return sourceRepository.findAll(pageable).getContent().stream().map(this::toResponse).toList();
+    public PageResponse<SourceResponse> list(Pageable pageable) {
+        Page<Source> sources = sourceRepository.findAll(pageable);
+        return new PageResponse<>(sources.stream().map(this::toResponse).toList(), sources.getTotalElements());
     }
 
     /** Unknown ids are left out rather than reported. */

@@ -12,6 +12,7 @@ import com.persiangulfwiki.core.article.exception.DuplicateSlugException;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
 import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
+import com.persiangulfwiki.core.common.dto.PageResponse;
 import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectKindException;
@@ -22,6 +23,7 @@ import com.persiangulfwiki.core.subject.service.SubjectService;
 import lombok.RequiredArgsConstructor;
 
 import org.jspecify.annotations.Nullable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -108,14 +110,15 @@ public class ArticleService {
     // revisions and subjects by id) rather than one per row. A merged-away subjectId filters on the
     // subject it was merged into, which now holds its articles.
     @Transactional(readOnly = true)
-    public List<ArticleListItemResponse> list(String language, UUID subjectId, String subjectKindFilter, Pageable pageable) {
+    public PageResponse<ArticleListItemResponse> list(String language, UUID subjectId, String subjectKindFilter,
+            Pageable pageable) {
         SubjectKind subjectKind = subjectKindFilter == null ? null : parseSubjectKind(subjectKindFilter);
         UUID subjectFilter = subjectId == null ? null
                 : subjectService.redirectTargets(List.of(subjectId)).getOrDefault(subjectId, subjectId);
 
-        List<ArticleTranslation> translations = articleTranslationRepository
-                .findPublishedByLanguage(language, subjectFilter, subjectKind, pageable)
-                .getContent();
+        Page<ArticleTranslation> page = articleTranslationRepository
+                .findPublishedByLanguage(language, subjectFilter, subjectKind, pageable);
+        List<ArticleTranslation> translations = page.getContent();
 
         Map<UUID, Article> articlesById = articleRepository
                 .findAllById(translations.stream().map(ArticleTranslation::getArticleId).toList())
@@ -130,13 +133,14 @@ public class ArticleService {
                 .stream()
                 .collect(Collectors.toMap(Subject::getId, Subject::getKind));
 
-        return translations.stream()
+        List<ArticleListItemResponse> items = translations.stream()
                 .map(translation -> {
                     Article article = articlesById.get(translation.getArticleId());
                     return toListItemResponse(article, kindsBySubjectId.get(article.getSubjectId()), translation,
                             revisionsById.get(translation.getCurrentRevisionId()));
                 })
                 .toList();
+        return new PageResponse<>(items, page.getTotalElements());
     }
 
     // Same reasoning as SubjectService.parseKind, and the same INVALID_SUBJECT_KIND 400, so a

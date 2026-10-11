@@ -5,6 +5,7 @@ import com.persiangulfwiki.core.admin.dto.RoleGrantRequest;
 import com.persiangulfwiki.core.admin.dto.UserStatusRequest;
 import com.persiangulfwiki.core.admin.service.AdminService;
 import com.persiangulfwiki.core.common.dto.ApiResult;
+import com.persiangulfwiki.core.common.dto.PageResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -49,7 +50,7 @@ public class AdminController {
 
     @Operation(summary = "List users", description = "Admin only. Simple page/size paging, newest-registered ordering left to the "
             + "database's default id order (no explicit sort requested by this step).")
-    @ApiResponse(responseCode = "200", description = "Page of users.")
+    @ApiResponse(responseCode = "200", description = "One page of users, with the total number of users across all pages.")
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "Either the account is authenticated but not an admin, or its email address "
             + "is not yet verified — both surface as a plain 403 with no way to distinguish them from the "
@@ -60,10 +61,10 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users")
     @ResponseStatus(HttpStatus.OK)
-    public ApiResult<List<AdminUserResponse>> listUsers(
+    public ApiResult<PageResponse<AdminUserResponse>> listUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        List<AdminUserResponse> data = adminService.listUsers(page, size);
+        PageResponse<AdminUserResponse> data = adminService.listUsers(page, size);
         String message = messageSource.getMessage("success.adminUsersList", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }

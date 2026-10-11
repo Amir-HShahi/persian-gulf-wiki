@@ -1,6 +1,7 @@
 package com.persiangulfwiki.core.source.controller;
 
 import com.persiangulfwiki.core.common.dto.ApiResult;
+import com.persiangulfwiki.core.common.dto.PageResponse;
 import com.persiangulfwiki.core.source.dto.CreateSourceRequest;
 import com.persiangulfwiki.core.source.dto.SourceResponse;
 import com.persiangulfwiki.core.source.service.SourceService;
@@ -95,16 +96,17 @@ public class SourceController {
     }
 
     @Operation(summary = "List sources", description = "Open to everyone; no account is required.")
-    @ApiResponse(responseCode = "200", description = "One page of sources. An out-of-range page is an empty list, not an error.")
+    @ApiResponse(responseCode = "200", description = "One page of sources, with the total number of sources across all pages. "
+            + "An out-of-range page has an empty `items` list, not an error.")
     @ApiResponse(responseCode = "400", description = "`page` or `size` is outside its allowed range.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "page", description = "Zero-based page index.")
     @Parameter(name = "size", description = "Page size, 1 to 100.")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public ApiResult<List<SourceResponse>> list(
+    public ApiResult<PageResponse<SourceResponse>> list(
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(MAX_PAGE_SIZE) int size) {
-        List<SourceResponse> data = sourceService.list(PageRequest.of(page, size));
+        PageResponse<SourceResponse> data = sourceService.list(PageRequest.of(page, size));
         String message = messageSource.getMessage("success.sourcesList", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }

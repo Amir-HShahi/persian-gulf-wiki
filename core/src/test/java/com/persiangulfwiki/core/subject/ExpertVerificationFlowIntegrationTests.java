@@ -193,13 +193,13 @@ class ExpertVerificationFlowIntegrationTests {
     // The subject's entry in the caller's queue, or null when it is not listed.
     private @Nullable Map<String, Object> queueEntry(Session expert, UUID subjectId) throws Exception {
         String body = read(QUEUE, expert).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        List<Map<String, Object>> entries = JsonPath.read(body, "$.data[?(@.subjectId == '%s')]".formatted(subjectId));
+        List<Map<String, Object>> entries = JsonPath.read(body, "$.data.items[?(@.subjectId == '%s')]".formatted(subjectId));
         return entries.isEmpty() ? null : entries.getFirst();
     }
 
     private List<String> queuedSubjectIds(Session expert) throws Exception {
         String body = read(QUEUE, expert).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        return JsonPath.read(body, "$.data[*].subjectId");
+        return JsonPath.read(body, "$.data.items[*].subjectId");
     }
 
     // --- Smoke: the new behavior this phase adds ---
@@ -370,9 +370,14 @@ class ExpertVerificationFlowIntegrationTests {
 
         read(QUEUE + "&kind=island", expert)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[?(@.subjectId == '%s')]".formatted(older)).isNotEmpty())
-                .andExpect(jsonPath("$.data[?(@.subjectId == '%s')]".formatted(newer)).isEmpty())
-                .andExpect(jsonPath("$.data[?(@.kind != 'ISLAND')]").isEmpty());
+                .andExpect(jsonPath("$.data.items[?(@.subjectId == '%s')]".formatted(older)).isNotEmpty())
+                .andExpect(jsonPath("$.data.items[?(@.subjectId == '%s')]".formatted(newer)).isEmpty())
+                .andExpect(jsonPath("$.data.items[?(@.kind != 'ISLAND')]").isEmpty());
+        // The total counts every page: both of this expert's queued subjects, with one per page.
+        read("/api/expert-reviewer/verification-queue?size=1", expert)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items.length()").value(1))
+                .andExpect(jsonPath("$.data.total").value(queued.size()));
         read(QUEUE + "&kind=STRAIT", expert)
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("NOT_SUBJECT_KIND_EXPERT"));

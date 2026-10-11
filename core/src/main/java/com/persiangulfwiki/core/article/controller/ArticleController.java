@@ -11,6 +11,7 @@ import com.persiangulfwiki.core.article.service.ArticleRevisionService;
 import com.persiangulfwiki.core.article.service.ArticleService;
 import com.persiangulfwiki.core.article.service.ArticleTranslationService;
 import com.persiangulfwiki.core.common.dto.ApiResult;
+import com.persiangulfwiki.core.common.dto.PageResponse;
 import com.persiangulfwiki.core.config.SupportedLocales;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -149,7 +150,8 @@ public class ArticleController {
             + "`summary` come from that translation's most recently approved revision -- older "
             + "approved revisions and unreviewed drafts are never shown. Newest article first. "
             + "Optionally filtered by subject and/or subject kind, and paged.")
-    @ApiResponse(responseCode = "200", description = "One page of articles. An out-of-range page is an empty list, not an error.")
+    @ApiResponse(responseCode = "200", description = "One page of articles, with the total number of matching articles across all "
+            + "pages. An out-of-range page has an empty `items` list, not an error.")
     @ApiResponse(responseCode = "400", description = "`language` is missing, blank or longer than 20 characters; `subjectKind` is not "
             + "one of ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, FISHING_GROUND, PROVINCE "
             + "(case-insensitive); or `page`/`size` is outside "
@@ -164,14 +166,14 @@ public class ArticleController {
     @Parameter(name = "size", description = "Page size, 1 to 100.")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public ApiResult<List<ArticleListItemResponse>> list(
+    public ApiResult<PageResponse<ArticleListItemResponse>> list(
             @RequestParam @NotBlank(message = "{validation.language.required}")
                     @Size(max = 20, message = "{validation.language.tooLong}") String language,
             @RequestParam(required = false) UUID subjectId,
             @RequestParam(required = false) String subjectKind,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(MAX_PAGE_SIZE) int size) {
-        List<ArticleListItemResponse> data = articleService.list(language, subjectId, subjectKind, PageRequest.of(page, size));
+        PageResponse<ArticleListItemResponse> data = articleService.list(language, subjectId, subjectKind, PageRequest.of(page, size));
         String message = messageSource.getMessage("success.articlesList", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }
