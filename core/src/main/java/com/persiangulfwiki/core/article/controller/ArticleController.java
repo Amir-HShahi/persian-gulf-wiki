@@ -149,7 +149,8 @@ public class ArticleController {
             + "language, or whose translation has not been approved yet, are left out. `title` and "
             + "`summary` come from that translation's most recently approved revision -- older "
             + "approved revisions and unreviewed drafts are never shown. Newest article first. "
-            + "Optionally filtered by subject and/or subject kind, and paged.")
+            + "Articles about a deleted subject are never listed. Optionally filtered by subject, subject "
+            + "kind and/or topic (all given filters must match), and paged.")
     @ApiResponse(responseCode = "200", description = "One page of articles, with the total number of matching articles across all "
             + "pages. An out-of-range page has an empty `items` list, not an error.")
     @ApiResponse(responseCode = "400", description = "`language` is missing, blank or longer than 20 characters; `subjectKind` is not "
@@ -162,6 +163,11 @@ public class ArticleController {
     @Parameter(name = "subjectKind", description = "Optional filter: only articles whose subject is of this kind -- ISLAND, PORT, "
             + "OIL_FIELD, SPECIES, STRAIT, FISHING_GROUND or PROVINCE (case-insensitive). Articles with "
             + "no subject never match it.")
+    @Parameter(name = "topic", description = "Optional filter: only articles about this topic, by its `slug` from "
+            + "GET /api/topics. An article's topics are those of its original-language translation's latest "
+            + "approved version and apply to all its translations, so the `total` here equals that topic's "
+            + "`articleCount` from GET /api/topics with the same `language`. An unknown or archived topic "
+            + "gives an empty page, not an error.")
     @Parameter(name = "page", description = "Zero-based page index.")
     @Parameter(name = "size", description = "Page size, 1 to 100.")
     @GetMapping
@@ -171,9 +177,10 @@ public class ArticleController {
                     @Size(max = 20, message = "{validation.language.tooLong}") String language,
             @RequestParam(required = false) UUID subjectId,
             @RequestParam(required = false) String subjectKind,
+            @RequestParam(required = false) String topic,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(MAX_PAGE_SIZE) int size) {
-        PageResponse<ArticleListItemResponse> data = articleService.list(language, subjectId, subjectKind, PageRequest.of(page, size));
+        PageResponse<ArticleListItemResponse> data = articleService.list(language, subjectId, subjectKind, topic, PageRequest.of(page, size));
         String message = messageSource.getMessage("success.articlesList", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }

@@ -8,6 +8,10 @@ import com.persiangulfwiki.core.TestcontainersConfiguration;
 import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
 import com.persiangulfwiki.core.article.dto.CreateTranslationRequest;
 import com.persiangulfwiki.core.article.dto.UpdateRevisionRequest;
+import com.persiangulfwiki.core.article.entity.ArticleRevision;
+import com.persiangulfwiki.core.article.entity.RevisionStatus;
+import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
+import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
 import com.persiangulfwiki.core.auth.dto.RegisterRequest;
 import com.persiangulfwiki.core.label.entity.Label;
@@ -48,6 +52,7 @@ import static com.persiangulfwiki.core.CsrfTestSupport.maskCsrfToken;
 import static com.persiangulfwiki.core.CsrfTestSupport.xsrf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -88,6 +93,12 @@ class TopicFlowIntegrationTests {
 
     @Autowired
     private ModerationTaskRepository moderationTaskRepository;
+
+    @Autowired
+    private ArticleTranslationRepository articleTranslationRepository;
+
+    @Autowired
+    private ArticleRevisionRepository articleRevisionRepository;
 
     private Cookie author;
     private Cookie moderator;
@@ -188,13 +199,20 @@ class TopicFlowIntegrationTests {
                 new UpdateRevisionRequest("Edited", body(), null, topicIds));
     }
 
-    // Through the real submit -> claim -> decide flow.
     private void publish(UUID articleId, String language) throws Exception {
-        String path = revisionPath(articleId, language);
-        mockMvc.perform(post(path + "/submit")
+        review(articleId, language, Decision.APPROVE);
+    }
+
+    private void submit(UUID articleId, String language) throws Exception {
+        mockMvc.perform(post(revisionPath(articleId, language) + "/submit")
                         .cookie(author, csrf)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrf.getValue())))
                 .andExpect(status().isOk());
+    }
+
+    // Through the real submit -> claim -> decide flow.
+    private void review(UUID articleId, String language, Decision decision) throws Exception {
+        submit(articleId, language);
         UUID taskId = moderationTaskRepository.findByRevisionId(revisionId(articleId, language)).orElseThrow().getId();
         mockMvc.perform(post("/api/moderation/tasks/" + taskId + "/claim")
                         .cookie(moderator, csrf)
@@ -204,7 +222,7 @@ class TopicFlowIntegrationTests {
                         .cookie(moderator, csrf)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrf.getValue()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new DecideRequest(Decision.APPROVE, null))))
+                        .content(objectMapper.writeValueAsString(new DecideRequest(decision, decision == Decision.APPROVE ? null : "Not suitable"))))
                 .andExpect(status().isOk());
     }
 
@@ -216,6 +234,35 @@ class TopicFlowIntegrationTests {
         List<Integer> counts = JsonPath.read(topics, "$.data[?(@.id == '" + topicId + "')].articleCount");
         assertThat(counts).hasSize(1);
         return counts.getFirst();
+    }
+
+    private String slugOf(UUID topicId) {
+        return topicRepository.findById(topicId).orElseThrow().getSlug();
+    }
+
+    // A second revision of the canonical translation, after the approved one. No endpoint creates
+    // one yet, so it is inserted directly, as a later edit would be.
+    private void addLaterCanonicalRevision(UUID articleId, RevisionStatus status, UUID topicId) throws Exception {
+        UUID translationId = articleTranslationRepository.findByArticleIdAndLanguage(articleId, "fa").orElseThrow().getId();
+        ArticleRevision approved = articleRevisionRepository.findById(revisionId(articleId, "fa")).orElseThrow();
+        ArticleRevision later = ArticleRevision.builder()
+                .translationId(translationId)
+                .revisionNumber(approved.getRevisionNumber() + 1)
+                .parentRevisionId(approved.getId())
+                .title("Later")
+                .body("{\"text\":\"later\"}")
+                .status(status)
+                .authorId(approved.getAuthorId())
+                .build();
+        later.setTopicIds(Set.of(topicId));
+        articleRevisionRepository.save(later);
+    }
+
+    // Anonymous, like the home page's topic cards.
+    private ResultActions listByTopic(String topicSlug, String language) throws Exception {
+        return mockMvc.perform(get("/api/articles").param("language", language).param("topic", topicSlug)
+                        .param("size", "100"))
+                .andExpect(status().isOk());
     }
 
     // --- smoke ---
@@ -250,17 +297,105 @@ class TopicFlowIntegrationTests {
     }
 
     @Test
-    void articlesAboutADeletedSubjectAreNotCounted() throws Exception {
+    void articlesAboutADeletedSubjectAreNeitherCountedNorListed() throws Exception {
         UUID topic = newTopic();
         Subject subject = subjectRepository.save(Subject.builder().kind(SubjectKind.ISLAND).build());
         UUID articleId = createArticleId(subject.getId(), Set.of(topic));
         publish(articleId, "fa");
         assertThat(articleCount(topic, "fa")).isEqualTo(1);
+        listByTopic(slugOf(topic), "fa").andExpect(jsonPath("$.data.total").value(1));
 
         subject.setDeletedAt(Instant.now());
         subjectRepository.save(subject);
 
         assertThat(articleCount(topic, "fa")).isZero();
+        listByTopic(slugOf(topic), "fa")
+                .andExpect(jsonPath("$.data.total").value(0))
+                .andExpect(jsonPath("$.data.items", empty()));
+        mockMvc.perform(get("/api/articles").param("language", "fa").param("size", "100"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[?(@.id == '" + articleId + "')]", empty()));
+    }
+
+    // Only the canonical translation's approved revision counts: a topic on a rejected revision, on
+    // one still pending, or on a pending/rejected revision after an untagged approved one doesn't
+    // put the article under the topic. The list's total is the topic's articleCount in each language.
+    @Test
+    void topicFilterMatchesOnlyTheApprovedCanonicalRevisionAndTotalsItsCount() throws Exception {
+        UUID topic = newTopic();
+        String slug = slugOf(topic);
+        UUID live = createArticleId(null, Set.of(topic));
+        publish(live, "fa");
+        addEnglish(live);
+        publish(live, "en");
+        UUID untagged = createArticleId(null, null);
+        publish(untagged, "fa");
+        UUID rejected = createArticleId(null, Set.of(topic));
+        review(rejected, "fa", Decision.REJECT);
+        UUID pending = createArticleId(null, Set.of(topic));
+        submit(pending, "fa");
+        UUID laterPending = createArticleId(null, null);
+        publish(laterPending, "fa");
+        addLaterCanonicalRevision(laterPending, RevisionStatus.PENDING, topic);
+        UUID laterRejected = createArticleId(null, null);
+        publish(laterRejected, "fa");
+        addLaterCanonicalRevision(laterRejected, RevisionStatus.REJECTED, topic);
+
+        for (String language : List.of("fa", "en")) {
+            listByTopic(slug, language)
+                    .andExpect(jsonPath("$.data.items[*].id", contains(live.toString())))
+                    .andExpect(jsonPath("$.data.items[0].language").value(language))
+                    .andExpect(jsonPath("$.data.total").value(articleCount(topic, language)))
+                    .andExpect(jsonPath("$.data.total").value(1));
+        }
+    }
+
+    @Test
+    void topicFilterCombinesWithSubjectKind() throws Exception {
+        UUID topic = newTopic();
+        String slug = slugOf(topic);
+        UUID island = subjectRepository.save(Subject.builder().kind(SubjectKind.ISLAND).build()).getId();
+        UUID port = subjectRepository.save(Subject.builder().kind(SubjectKind.PORT).build()).getId();
+        UUID taggedIsland = createArticleId(island, Set.of(topic));
+        UUID taggedPort = createArticleId(port, Set.of(topic));
+        UUID untaggedIsland = createArticleId(island, null);
+        for (UUID articleId : List.of(taggedIsland, taggedPort, untaggedIsland)) {
+            publish(articleId, "fa");
+        }
+
+        listByTopic(slug, "fa")
+                .andExpect(jsonPath("$.data.items[*].id", containsInAnyOrder(taggedIsland.toString(), taggedPort.toString())))
+                .andExpect(jsonPath("$.data.total").value(articleCount(topic, "fa")));
+        mockMvc.perform(get("/api/articles").param("language", "fa").param("topic", slug).param("subjectKind", "island"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[*].id", contains(taggedIsland.toString())))
+                .andExpect(jsonPath("$.data.total").value(1));
+        mockMvc.perform(get("/api/articles").param("language", "fa").param("topic", slug).param("subjectId", port.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[*].id", contains(taggedPort.toString())))
+                .andExpect(jsonPath("$.data.total").value(1));
+    }
+
+    // Both match nothing rather than failing: an archived topic is gone from the home page, and the
+    // list treats it like one that never existed.
+    @Test
+    void unknownOrArchivedTopicGivesAnEmptyPage() throws Exception {
+        listByTopic("no-such-topic", "fa")
+                .andExpect(jsonPath("$.data.items", empty()))
+                .andExpect(jsonPath("$.data.total").value(0));
+
+        UUID topicId = newTopic();
+        UUID articleId = createArticleId(null, Set.of(topicId));
+        publish(articleId, "fa");
+        listByTopic(slugOf(topicId), "fa").andExpect(jsonPath("$.data.total").value(1));
+
+        Topic topic = topicRepository.findById(topicId).orElseThrow();
+        topic.setArchived(true);
+        topicRepository.save(topic);
+
+        listByTopic(slugOf(topicId), "fa")
+                .andExpect(jsonPath("$.data.items", empty()))
+                .andExpect(jsonPath("$.data.total").value(0));
     }
 
     // Sort orders below anything other tests create, so these two head the shared list.
@@ -365,6 +500,20 @@ class TopicFlowIntegrationTests {
     }
 
     // --- regression ---
+
+    // Without `topic`, tagged and untagged articles are listed alike, as before the filter existed.
+    @Test
+    void listWithoutTopicStillIncludesTaggedAndUntaggedArticles() throws Exception {
+        UUID tagged = createArticleId(null, Set.of(newTopic()));
+        UUID untagged = createArticleId(null, null);
+        publish(tagged, "fa");
+        publish(untagged, "fa");
+
+        mockMvc.perform(get("/api/articles").param("language", "fa").param("size", "100"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[?(@.id == '" + tagged + "')]").isNotEmpty())
+                .andExpect(jsonPath("$.data.items[?(@.id == '" + untagged + "')]").isNotEmpty());
+    }
 
     // An article created and edited without ever mentioning topics behaves as before: the PATCH
     // still replaces the text, and the revision simply has no topics.

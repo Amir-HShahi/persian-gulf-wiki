@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -43,6 +44,12 @@ public class TopicService {
                 .map(topic -> new TopicResponse(topic.getId(), topic.getSlug(), topic.getIcon(),
                         topic.getColor(), names.get(topic.getId()), counts.getOrDefault(topic.getId(), 0L)))
                 .toList();
+    }
+
+    /** Empty for an unknown or archived slug: an archived topic can't be filtered on. */
+    @Transactional(readOnly = true)
+    public Optional<UUID> findFilterableId(String slug) {
+        return topicRepository.findBySlugAndIsArchivedFalse(slug).map(Topic::getId);
     }
 
     /**

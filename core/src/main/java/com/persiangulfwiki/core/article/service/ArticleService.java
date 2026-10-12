@@ -19,6 +19,7 @@ import com.persiangulfwiki.core.subject.exception.InvalidSubjectKindException;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 import com.persiangulfwiki.core.subject.service.SubjectService;
+import com.persiangulfwiki.core.topic.service.TopicService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -47,6 +49,7 @@ public class ArticleService {
     private final ArticleVisibilityService articleVisibilityService;
     private final SubjectRepository subjectRepository;
     private final SubjectService subjectService;
+    private final TopicService topicService;
 
     // Article + its canonical translation + that translation's first DRAFT revision, written
     // together or not at all: an article with zero translations can never be reached by
@@ -108,16 +111,25 @@ public class ArticleService {
     // currentRevisionId, which only a moderator's APPROVE sets, so unreviewed text never
     // reaches this public list. One page = four queries (translations, then their articles,
     // revisions and subjects by id) rather than one per row. A merged-away subjectId filters on the
-    // subject it was merged into, which now holds its articles.
+    // subject it was merged into, which now holds its articles. An unknown or archived topic slug
+    // matches nothing -- an empty page, like an unknown subjectId -- rather than a 400.
     @Transactional(readOnly = true)
     public PageResponse<ArticleListItemResponse> list(String language, UUID subjectId, String subjectKindFilter,
-            Pageable pageable) {
+            @Nullable String topicSlug, Pageable pageable) {
         SubjectKind subjectKind = subjectKindFilter == null ? null : parseSubjectKind(subjectKindFilter);
         UUID subjectFilter = subjectId == null ? null
                 : subjectService.redirectTargets(List.of(subjectId)).getOrDefault(subjectId, subjectId);
+        UUID topicId = null;
+        if (topicSlug != null) {
+            Optional<UUID> found = topicService.findFilterableId(topicSlug);
+            if (found.isEmpty()) {
+                return new PageResponse<>(List.of(), 0);
+            }
+            topicId = found.get();
+        }
 
         Page<ArticleTranslation> page = articleTranslationRepository
-                .findPublishedByLanguage(language, subjectFilter, subjectKind, pageable);
+                .findPublishedByLanguage(language, subjectFilter, subjectKind, topicId, pageable);
         List<ArticleTranslation> translations = page.getContent();
 
         Map<UUID, Article> articlesById = articleRepository

@@ -842,19 +842,19 @@ class ModerationFlowIntegrationTests {
 
         mockMvc.perform(get("/api/articles").param("language", "fa").param("subjectId", subjectId.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", hasSize(1)))
-                .andExpect(jsonPath("$.data[0].id").value(approved.articleId().toString()))
-                .andExpect(jsonPath("$.data[0].subjectId").value(subjectId.toString()))
-                .andExpect(jsonPath("$.data[0].subjectKind").value("ISLAND"))
-                .andExpect(jsonPath("$.data[0].language").value("fa"))
-                .andExpect(jsonPath("$.data[0].slug").value(approvedSlug))
-                .andExpect(jsonPath("$.data[0].title").value("First approved title"))
-                .andExpect(jsonPath("$.data[0].summary").value("First approved summary"))
-                .andExpect(jsonPath("$.data[0].currentRevisionId").value(approved.revisionId().toString()));
+                .andExpect(jsonPath("$.data.items", hasSize(1)))
+                .andExpect(jsonPath("$.data.items[0].id").value(approved.articleId().toString()))
+                .andExpect(jsonPath("$.data.items[0].subjectId").value(subjectId.toString()))
+                .andExpect(jsonPath("$.data.items[0].subjectKind").value("ISLAND"))
+                .andExpect(jsonPath("$.data.items[0].language").value("fa"))
+                .andExpect(jsonPath("$.data.items[0].slug").value(approvedSlug))
+                .andExpect(jsonPath("$.data.items[0].title").value("First approved title"))
+                .andExpect(jsonPath("$.data.items[0].summary").value("First approved summary"))
+                .andExpect(jsonPath("$.data.items[0].currentRevisionId").value(approved.revisionId().toString()));
 
         mockMvc.perform(get("/api/articles").param("language", "en").param("subjectId", subjectId.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", hasSize(0)));
+                .andExpect(jsonPath("$.data.items", hasSize(0)));
 
         // No endpoint creates a follow-up revision on an already-approved translation yet, so
         // the second and third revisions are inserted directly; the second is then published
@@ -885,11 +885,11 @@ class ModerationFlowIntegrationTests {
 
         mockMvc.perform(get("/api/articles").param("language", "fa").param("subjectId", subjectId.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", hasSize(1)))
-                .andExpect(jsonPath("$.data[0].id").value(approved.articleId().toString()))
-                .andExpect(jsonPath("$.data[0].title").value("Second approved title"))
-                .andExpect(jsonPath("$.data[0].summary").value("Second approved summary"))
-                .andExpect(jsonPath("$.data[0].currentRevisionId").value(secondApproved.getId().toString()));
+                .andExpect(jsonPath("$.data.items", hasSize(1)))
+                .andExpect(jsonPath("$.data.items[0].id").value(approved.articleId().toString()))
+                .andExpect(jsonPath("$.data.items[0].title").value("Second approved title"))
+                .andExpect(jsonPath("$.data.items[0].summary").value("Second approved summary"))
+                .andExpect(jsonPath("$.data.items[0].currentRevisionId").value(secondApproved.getId().toString()));
 
         // Adjacent behavior: the article-level read is unchanged by the list's new shape.
         mockMvc.perform(get("/api/articles/" + approved.articleId()))
