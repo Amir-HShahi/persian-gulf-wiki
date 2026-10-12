@@ -13,11 +13,13 @@ import com.persiangulfwiki.core.label.repository.LabelRepository;
 import com.persiangulfwiki.core.media.entity.ArticleMedia;
 import com.persiangulfwiki.core.media.entity.MediaKind;
 import com.persiangulfwiki.core.media.entity.MediaMetadataVersion;
+import com.persiangulfwiki.core.media.entity.MediaVariant;
 import com.persiangulfwiki.core.media.entity.MetadataVersionStatus;
 import com.persiangulfwiki.core.media.entity.ProcessingStatus;
 import com.persiangulfwiki.core.media.entity.PublicationStatus;
 import com.persiangulfwiki.core.media.repository.ArticleMediaRepository;
 import com.persiangulfwiki.core.media.repository.MediaMetadataVersionRepository;
+import com.persiangulfwiki.core.media.service.MediaVariantService;
 import com.persiangulfwiki.core.moderation.dto.DecideRequest;
 import com.persiangulfwiki.core.moderation.entity.Decision;
 import com.persiangulfwiki.core.moderation.repository.ModerationTaskRepository;
@@ -53,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -288,6 +291,12 @@ class SubjectReadSideFlowIntegrationTests {
                     .build());
             media.setCurrentMetadataVersionId(version.getId());
             media.setPublishedAt(Instant.now());
+            // Where approval leaves the renditions (see MediaVariantService.publish).
+            String prefix = MediaVariantService.publicVariantPrefix(media.getId());
+            media.setVariants(new ArrayList<>(List.of(
+                    new MediaVariant("640", "webp", prefix + "640.webp", 48211, 640, 480),
+                    new MediaVariant("1280", "webp", prefix + "1280.webp", 151022, 1280, 960))));
+            media.setPlaceholder("data:image/webp;base64,UklGR");
         }
         media.setPublicationStatus(publication);
         return articleMediaRepository.save(media).getId();
@@ -460,13 +469,34 @@ class SubjectReadSideFlowIntegrationTests {
                 {"names": {"fa": "مینو", "en": "Minu"},
                  "facts": [%s], "mainImageMediaId": "%s"}""".formatted(reference("province", provinceId), imageId)));
 
+        // Both carry what it takes to show the image, with its permanent public URLs.
+        String publicUrl = "http://localhost/test-media/public/" + imageId + "/";
         infobox(islandId, "en")
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.mainImage.mediaId").value(imageId.toString()));
+                .andExpect(jsonPath("$.data.mainImage.mediaId").value(imageId.toString()))
+                .andExpect(jsonPath("$.data.mainImage.placeholder").value("data:image/webp;base64,UklGR"))
+                .andExpect(jsonPath("$.data.mainImage.variants[*].url")
+                        .value(containsInAnyOrder(publicUrl + "640.webp", publicUrl + "1280.webp")));
         String listed = listingBody("kind", "ISLAND", "attr.province", provinceId.toString());
         assertThat(JsonPath.<String>read(listed, "$.data.items[0].mainImage.mediaId"))
                 .isEqualTo(imageId.toString());
+        assertThat(JsonPath.<String>read(listed, "$.data.items[0].mainImage.placeholder"))
+                .isEqualTo("data:image/webp;base64,UklGR");
+        assertThat(JsonPath.<List<String>>read(listed, "$.data.items[0].mainImage.variants[*].url"))
+                .containsExactlyInAnyOrder(publicUrl + "640.webp", publicUrl + "1280.webp");
+        assertThat(JsonPath.<List<Integer>>read(listed, "$.data.items[0].mainImage.variants[*].width"))
+                .containsExactlyInAnyOrder(640, 1280);
         assertThat(JsonPath.<String>read(listed, "$.data.items[0].slug")).isEqualTo(article.slug());
+        assertThat(JsonPath.<Integer>read(listed, "$.data.total")).isEqualTo(1);
+        assertThat(JsonPath.<Map<String, String>>read(listed, "$.data.items[0].badges")).isEmpty();
+
+        // Back to awaiting review: dropped too, rather than handed out with signed URLs.
+        ArticleMedia pending = articleMediaRepository.findById(imageId).orElseThrow();
+        pending.setPublicationStatus(PublicationStatus.PENDING);
+        articleMediaRepository.save(pending);
+        listing("en", "kind", "ISLAND", "attr.province", provinceId.toString())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[0].mainImage").doesNotExist());
 
         // Hidden after the fact: the listing, which is not cached, stops offering it at once.
         ArticleMedia image = articleMediaRepository.findById(imageId).orElseThrow();

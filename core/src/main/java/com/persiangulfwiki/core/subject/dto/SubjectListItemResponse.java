@@ -17,7 +17,8 @@ public record SubjectListItemResponse(
         @Schema(description = "Slug of the subject's main article in the reader's language, else in Farsi. Null when "
                 + "the subject has no published article: the card then has no page to link to.", nullable = true)
         @Nullable String slug,
-        @Schema(nullable = true) @Nullable SubjectMainImageResponse mainImage,
+        @Schema(description = "The card image. Null when the subject has no public image: show a stand-in.", nullable = true)
+        @Nullable SubjectMainImageResponse mainImage,
         @Schema(description = "Field key to choice code, for the fields shown on listing cards (e.g. "
                 + "`{\"iucn_status\": \"EN\"}`). Labels for the codes are in `facets`.")
         Map<String, String> badges) {

@@ -16,7 +16,8 @@ public record SubjectInfoboxResponse(
         @Schema(description = "The subject's name in the reader's language, or the Farsi name marked as a fallback. "
                 + "Null only when the subject has no name at all.", nullable = true)
         @Nullable LocalizedLabelResponse name,
-        @Schema(nullable = true) @Nullable SubjectMainImageResponse mainImage,
+        @Schema(description = "The infobox image. Null when no image was picked or the picked one is no longer public.", nullable = true)
+        @Nullable SubjectMainImageResponse mainImage,
         List<InfoboxGroupResponse> groups,
         @Schema(description = "The published revision the infobox shows. Null when no revision of the subject has "
                 + "been approved yet, in which case `groups` is empty.", nullable = true)

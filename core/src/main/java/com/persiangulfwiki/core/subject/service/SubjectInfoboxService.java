@@ -13,6 +13,7 @@ import com.persiangulfwiki.core.config.SupportedLocales;
 import com.persiangulfwiki.core.label.dto.LocalizedLabelResponse;
 import com.persiangulfwiki.core.label.service.LabelService;
 import com.persiangulfwiki.core.media.service.MediaReadService;
+import com.persiangulfwiki.core.media.service.MediaReadService.SubjectImage;
 import com.persiangulfwiki.core.subject.dto.InfoboxGroupResponse;
 import com.persiangulfwiki.core.subject.dto.InfoboxOptionResponse;
 import com.persiangulfwiki.core.subject.dto.InfoboxRevisionResponse;
@@ -112,8 +113,12 @@ public class SubjectInfoboxService {
     // Dropped once the image is no longer public, rather than handing out an id that 404s.
     private @Nullable SubjectMainImageResponse mainImage(UUID subjectId, SubjectRevision revision) {
         UUID mediaId = objectMapper.readValue(revision.getPayload(), SubjectPayloadResponse.class).mainImageMediaId();
-        return mediaId != null && mediaReadService.isPublishedImageOfSubject(mediaId, subjectId)
-                ? new SubjectMainImageResponse(mediaId)
+        if (mediaId == null) {
+            return null;
+        }
+        SubjectImage image = mediaReadService.publishedImagesOfSubjects(Map.of(subjectId, mediaId)).get(subjectId);
+        return image != null
+                ? new SubjectMainImageResponse(image.mediaId(), image.placeholder(), image.variants())
                 : null;
     }
 

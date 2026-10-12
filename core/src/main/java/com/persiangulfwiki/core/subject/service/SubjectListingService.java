@@ -11,6 +11,7 @@ import com.persiangulfwiki.core.attribute.repository.AttributeOptionRepository;
 import com.persiangulfwiki.core.label.dto.LocalizedLabelResponse;
 import com.persiangulfwiki.core.label.service.LabelService;
 import com.persiangulfwiki.core.media.service.MediaReadService;
+import com.persiangulfwiki.core.media.service.MediaReadService.SubjectImage;
 import com.persiangulfwiki.core.subject.dto.SubjectFacetOptionResponse;
 import com.persiangulfwiki.core.subject.dto.SubjectFacetResponse;
 import com.persiangulfwiki.core.subject.dto.SubjectKindCountResponse;
@@ -283,7 +284,7 @@ public class SubjectListingService {
                 .collect(Collectors.toMap(Subject::getId, Function.identity()));
         Map<UUID, LocalizedLabelResponse> names = labelService.resolveSubjects(ids, language);
         Map<UUID, String> slugs = subjectArticleService.mainArticleSlugs(ids, language);
-        Map<UUID, UUID> images = mediaReadService.retainPublishedImagesOfSubjects(
+        Map<UUID, SubjectImage> images = mediaReadService.publishedImagesOfSubjects(
                 subjectLiveRevisionRepository.findMainImages(ids).stream()
                         .collect(Collectors.toMap(MainImage::getSubjectId, MainImage::getMediaId)));
         Map<UUID, Map<String, String>> badges = new HashMap<>();
@@ -294,7 +295,7 @@ public class SubjectListingService {
 
         return ids.stream()
                 .map(id -> new SubjectListItemResponse(id, subjects.get(id).getKind(), names.get(id), slugs.get(id),
-                        images.containsKey(id) ? new SubjectMainImageResponse(images.get(id)) : null,
+                        mainImage(images.get(id)),
                         Collections.unmodifiableMap(badges.getOrDefault(id, new LinkedHashMap<>()))))
                 .toList();
     }
@@ -403,6 +404,12 @@ public class SubjectListingService {
     }
 
     // Comma-separated and/or repeated; blanks dropped, duplicates collapsed, order kept.
+    private static @Nullable SubjectMainImageResponse mainImage(@Nullable SubjectImage image) {
+        return image != null
+                ? new SubjectMainImageResponse(image.mediaId(), image.placeholder(), image.variants())
+                : null;
+    }
+
     private static Set<String> splitValues(List<String> values) {
         Set<String> split = new LinkedHashSet<>();
         values.stream()

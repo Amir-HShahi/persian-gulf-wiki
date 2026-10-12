@@ -155,7 +155,9 @@ public class SubjectController {
             + "the reader's language, else in Farsi, or null when it has no published article. `revision` gives the "
             + "published revision's number and its expert verification state: VERIFIED, STALE (with the older "
             + "revision an expert confirmed) or NONE. A subject with no published revision yet has empty `groups` and "
-            + "a null `revision`. Edits awaiting review never show here.")
+            + "a null `revision`. `mainImage` carries the image's renditions with permanent URLs, ready to show "
+            + "without another request; it is null when no image was picked or the picked one is no longer public. "
+            + "Edits awaiting review never show here.")
     @ApiResponse(responseCode = "200", description = "The infobox.")
     @ApiResponse(responseCode = "400", description = "The id in the path is not a valid UUID.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "404", description = "No subject with that id, or it has been deleted or merged into another.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
@@ -191,7 +193,9 @@ public class SubjectController {
             + "**Items.** Each carries the subject's name and its main article's slug in the reader's language "
             + "(`Accept-Language`: fa, en or ar; anything else gets fa), falling back to Farsi; a null slug means the "
             + "subject has no published article and so no page. `badges` maps the fields shown on cards to their "
-            + "codes; their labels are among the facet options.")
+            + "codes; their labels are among the facet options. `mainImage` carries the card image's placeholder and "
+            + "renditions with permanent URLs, so no further request is needed; it is null when the subject has no "
+            + "public image.")
     @ApiResponse(responseCode = "200", description = "One page of subjects, the total across all pages, and the facets. "
             + "An out-of-range page has no items but still has its total and facets.")
     @ApiResponse(responseCode = "400", description = "`kind` names a kind that does not exist (code INVALID_SUBJECT_KIND); "
