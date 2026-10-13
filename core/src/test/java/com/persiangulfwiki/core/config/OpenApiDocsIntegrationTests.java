@@ -132,7 +132,7 @@ class OpenApiDocsIntegrationTests {
         List<String> tagNames = JsonPath.read(spec, "$.tags[*].name");
         assertThat(tagNames).containsExactly(
                 "Authentication", "OAuth2", "Email Verification", "Password",
-                "User", "Admin", "Expert Reviewer", "Subjects", "Subject Revisions",
+                "User", "Profiles", "Admin", "Expert Reviewer", "Subjects", "Subject Revisions",
                 "Expert Verifications", "Attributes",
                 "Labels",
                 "Sources", "Articles", "Featured Articles", "Article Media", "Topics", "Moderation",

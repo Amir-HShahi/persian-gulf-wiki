@@ -39,6 +39,7 @@ public class OpenApiConfig {
             "Email Verification",
             "Password",
             "User",
+            "Profiles",
             "Dev Test Users",
             "Admin",
             "Expert Reviewer",

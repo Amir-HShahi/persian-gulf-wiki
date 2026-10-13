@@ -2,6 +2,8 @@ package com.persiangulfwiki.core.dev;
 
 import com.persiangulfwiki.core.dev.dto.DevTestUserRequest;
 import com.persiangulfwiki.core.dev.dto.DevTestUserResponse;
+import com.persiangulfwiki.core.media.storage.MediaStorage;
+import com.persiangulfwiki.core.media.storage.StorageBucket;
 import com.persiangulfwiki.core.user.entity.Role;
 import com.persiangulfwiki.core.user.exception.UserNotFoundException;
 import com.persiangulfwiki.core.user.entity.User;
@@ -27,6 +29,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.imageio.ImageIO;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.List;
@@ -69,14 +78,18 @@ public class DevTestUserController {
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
+    private static final int PLACEHOLDER_AVATAR_SIDE = 64;
+
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MediaStorage mediaStorage;
 
     @Operation(summary = "Mint a disposable test user", description = "Creates a new user with a generated username, email and password, and returns "
             + "the plaintext credentials. Every field of the request body is optional; the "
-            + "default is a verified, enabled CONTRIBUTOR. Roles are applied literally, with "
-            + "no implied grants.")
+            + "default is a verified, enabled CONTRIBUTOR with an empty profile. Roles are applied "
+            + "literally, with no implied grants. `fullName` and `hasAvatar` set the profile; with "
+            + "both, the user has a public profile.")
     @ApiResponse(responseCode = "201", description = "The created user, including its plaintext password.")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -87,7 +100,7 @@ public class DevTestUserController {
     public DevTestUserResponse mint(@RequestBody(required = false) DevTestUserRequest request) {
         DevTestUserRequest safeRequest = request != null
                 ? request
-                : new DevTestUserRequest(null, null, null);
+                : new DevTestUserRequest(null, null, null, null, null);
 
         List<Role> roles = safeRequest.roles() == null || safeRequest.roles().isEmpty()
                 ? List.of(Role.CONTRIBUTOR)
@@ -103,6 +116,17 @@ public class DevTestUserController {
                 .emailVerified(safeRequest.emailVerified() == null || safeRequest.emailVerified())
                 .enabled(safeRequest.enabled() == null || safeRequest.enabled())
                 .build());
+
+        if (safeRequest.fullName() != null) {
+            user.setFullName(safeRequest.fullName());
+        }
+        if (Boolean.TRUE.equals(safeRequest.hasAvatar())) {
+            // A real object at the key, so the avatarUrl a test reads back actually loads.
+            String key = avatarPrefix(user.getId()) + "dev.jpg";
+            mediaStorage.put(StorageBucket.MEDIA, key, placeholderAvatar(), "image/jpeg");
+            user.setAvatarKey(key);
+        }
+        userRepository.save(user);
 
         for (Role role : roles) {
             userRoleRepository.save(UserRole.builder()
@@ -140,6 +164,32 @@ public class DevTestUserController {
         // the V2/V3/V5/V6/V12/V13 migrations — so the row's roles, refresh tokens and
         // outstanding verification/reset tokens go with it without an explicit cleanup pass.
         userRepository.delete(user);
+        if (user.getAvatarKey() != null) {
+            mediaStorage.deletePrefix(StorageBucket.MEDIA, avatarPrefix(user.getId()));
+        }
+    }
+
+    private static String avatarPrefix(UUID userId) {
+        return "public/avatars/" + userId + "/";
+    }
+
+    private static byte[] placeholderAvatar() {
+        BufferedImage image = new BufferedImage(PLACEHOLDER_AVATAR_SIDE, PLACEHOLDER_AVATAR_SIDE,
+                BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = image.createGraphics();
+        try {
+            graphics.setColor(new Color(0x2A6F97));
+            graphics.fillRect(0, 0, PLACEHOLDER_AVATAR_SIDE, PLACEHOLDER_AVATAR_SIDE);
+        } finally {
+            graphics.dispose();
+        }
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(image, "jpeg", bytes);
+        } catch (IOException ex) {
+            throw new UncheckedIOException(ex);
+        }
+        return bytes.toByteArray();
     }
 
     private String generatePassword() {

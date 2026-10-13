@@ -3,9 +3,13 @@ package com.persiangulfwiki.core.user.controller;
 import com.persiangulfwiki.core.common.dto.ApiResult;
 import com.persiangulfwiki.core.password.service.PasswordService;
 import com.persiangulfwiki.core.user.dto.ChangePasswordRequest;
+import com.persiangulfwiki.core.user.dto.ReserveAvatarRequest;
+import com.persiangulfwiki.core.user.dto.ReserveAvatarResponse;
 import com.persiangulfwiki.core.user.dto.SessionResponse;
-import com.persiangulfwiki.core.user.dto.UserProfile;
+import com.persiangulfwiki.core.user.dto.UpdateProfileRequest;
 import com.persiangulfwiki.core.user.dto.UserResponse;
+import com.persiangulfwiki.core.user.service.AvatarService;
+import com.persiangulfwiki.core.user.service.UserProfileService;
 import com.persiangulfwiki.core.user.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +37,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -47,11 +52,13 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-@Tag(name = "User", description = "The authenticated user's own profile, active sessions, and password")
+@Tag(name = "User", description = "The authenticated user's own account and profile, active sessions, and password")
 @SecurityRequirement(name = "cookieAuth")
 public class UsersController {
 
     private final UserService userService;
+    private final UserProfileService userProfileService;
+    private final AvatarService avatarService;
     private final PasswordService passwordService;
     private final MessageSource messageSource;
 
@@ -62,7 +69,8 @@ public class UsersController {
     private final String refreshTokenCookieName;
 
     @Operation(summary = "Get the current user's profile", description = "Reads the user id from the access-token cookie's authenticated principal; there is "
-            + "no path parameter, so this can only ever return the caller's own profile.")
+            + "no path parameter, so this can only ever return the caller's own profile. Includes the public-profile "
+            + "fields, which start empty: `isProfileComplete` is false until a full name and an avatar are both set.")
     @ApiResponse(responseCode = "200", description = "Profile of the authenticated user.")
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "404", description = "The access token is valid but the user it names no longer exists (e.g. the "
@@ -70,13 +78,82 @@ public class UsersController {
     @GetMapping("/me")
     @ResponseStatus(HttpStatus.OK)
     public ApiResult<UserResponse> me() {
-        UserProfile profile = userService.getProfile(currentUserId());
-        UserResponse data = new UserResponse(
-                profile.user().getId(),
-                profile.user().getUsername(),
-                profile.user().getEmail(),
-                profile.roles());
+        UserResponse data = userProfileService.getOwnProfile(currentUserId());
         String message = messageSource.getMessage("success.userProfile", null, LocaleContextHolder.getLocale());
+        return ApiResult.of(data, message);
+    }
+
+    @Operation(summary = "Update the current user's public profile", description = "Replaces the whole editable profile: "
+            + "an omitted or empty `bio`, `affiliation` or `links` clears it. `fullName` is required. The avatar is "
+            + "set separately, through POST /api/users/me/avatar.")
+    @ApiResponse(responseCode = "200", description = "The updated profile, the same shape as GET /api/users/me.")
+    @ApiResponse(responseCode = "400", description = "Request failed field validation (see `errors`): `fullName` blank or over 100 "
+            + "characters, `bio` over 500, `affiliation` over 150, more than 5 `links`, or a link that is not an "
+            + "https URL or is over 500 characters.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "403", description = "Either the account's email address is not yet verified, or the CSRF header is "
+            + "missing or does not match the cookie.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "404", description = "The access token is valid but the user it names no longer exists.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = "CSRF token. Call GET /api/auth/csrf first to receive the XSRF-TOKEN cookie, "
+            + "then encode its value and send the encoded result in this header — see the API "
+            + "description above for the required encoding algorithm; sending the raw cookie "
+            + "value here is rejected.")
+    @PutMapping("/me/profile")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResult<UserResponse> updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
+        UserResponse data = userProfileService.updateProfile(currentUserId(), request);
+        String message = messageSource.getMessage("success.profileUpdated", null, LocaleContextHolder.getLocale());
+        return ApiResult.of(data, message);
+    }
+
+    @Operation(summary = "Reserve an avatar upload", description = "Step 1 of 2. Declares the image and returns a presigned "
+            + "URL to PUT it to, straight to storage (the file never passes through this API). Then call "
+            + "POST /api/users/me/avatar/{avatarId}/complete. A new reservation replaces any earlier one that was "
+            + "not completed. JPEG or PNG, at most 5 MiB, 64 to 4096 pixels on each side; the published avatar is "
+            + "a square JPEG cropped from the center, at most 512 pixels, with all photo metadata removed.")
+    @ApiResponse(responseCode = "201", description = "Reserved; PUT the file to `uploadUrl` with `requiredHeaders`.")
+    @ApiResponse(responseCode = "400", description = "Request failed field validation (see `errors`), the content type is not "
+            + "image/jpeg or image/png, or the file is larger than 5 MiB.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "403", description = "Either the account's email address is not yet verified, or the CSRF header is "
+            + "missing or does not match the cookie.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "404", description = "The access token is valid but the user it names no longer exists.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "429", description = "Too many avatar reservations in the current period. `Retry-After` gives the "
+            + "seconds until the next one is allowed.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = "CSRF token. Call GET /api/auth/csrf first to receive the XSRF-TOKEN cookie, "
+            + "then encode its value and send the encoded result in this header — see the API "
+            + "description above for the required encoding algorithm; sending the raw cookie "
+            + "value here is rejected.")
+    @PostMapping("/me/avatar")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResult<ReserveAvatarResponse> reserveAvatar(@Valid @RequestBody ReserveAvatarRequest request) {
+        ReserveAvatarResponse data = avatarService.reserve(currentUserId(), request);
+        String message = messageSource.getMessage("success.avatarReserved", null, LocaleContextHolder.getLocale());
+        return ApiResult.of(data, message);
+    }
+
+    @Operation(summary = "Complete an avatar upload", description = "Step 2 of 2, after the file has been PUT to the reserved "
+            + "URL. Checks the upload, publishes it as the avatar at once (avatars are not reviewed) and deletes the "
+            + "previous one.")
+    @ApiResponse(responseCode = "200", description = "The updated profile, the same shape as GET /api/users/me, with the new `avatarUrl`.")
+    @ApiResponse(responseCode = "400", description = "The uploaded file is not a readable JPEG/PNG of the declared type, or is "
+            + "smaller than 64 or larger than 4096 pixels on a side. Reserve again with a different image.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "403", description = "Either the account's email address is not yet verified, or the CSRF header is "
+            + "missing or does not match the cookie.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "404", description = "`avatarId` is not the caller's current reservation: unknown, already "
+            + "completed, replaced by a newer reservation, or expired and cleaned up.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "409", description = "Nothing has been uploaded to the reserved URL yet, or what was uploaded does "
+            + "not match the declared size and checksum.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = "CSRF token. Call GET /api/auth/csrf first to receive the XSRF-TOKEN cookie, "
+            + "then encode its value and send the encoded result in this header — see the API "
+            + "description above for the required encoding algorithm; sending the raw cookie "
+            + "value here is rejected.")
+    @PostMapping("/me/avatar/{avatarId}/complete")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResult<UserResponse> completeAvatar(@PathVariable UUID avatarId) {
+        UserResponse data = userProfileService.toOwnResponse(avatarService.complete(currentUserId(), avatarId));
+        String message = messageSource.getMessage("success.avatarUpdated", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }
 
