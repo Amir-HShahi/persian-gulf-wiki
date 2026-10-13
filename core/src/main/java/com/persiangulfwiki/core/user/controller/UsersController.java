@@ -47,7 +47,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-@Tag(name = "User Management", description = "The authenticated user's own profile, active sessions, and password")
+@Tag(name = "User", description = "The authenticated user's own profile, active sessions, and password")
 @SecurityRequirement(name = "cookieAuth")
 public class UsersController {
 

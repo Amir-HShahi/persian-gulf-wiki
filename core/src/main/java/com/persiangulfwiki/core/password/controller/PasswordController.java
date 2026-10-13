@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/password")
-@Tag(name = "Password Management", description = "Forgot-password and reset-password flow (email-issued token, not a login session)")
+@Tag(name = "Password", description = "Forgot-password and reset-password flow (email-issued token, not a login session)")
 public class PasswordController {
 
     private final PasswordService passwordService;
