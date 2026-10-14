@@ -5,6 +5,7 @@ import com.persiangulfwiki.core.user.entity.Role;
 import com.persiangulfwiki.core.user.entity.UserRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -12,6 +13,8 @@ import java.util.UUID;
 public interface UserRoleRepository extends JpaRepository<UserRole, UUID> {
 
     List<UserRole> findByUserId(UUID userId);
+
+    List<UserRole> findByUserIdIn(Collection<UUID> userIds);
 
     boolean existsByRole(Role role);
 

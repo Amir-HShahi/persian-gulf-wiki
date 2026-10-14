@@ -1,6 +1,7 @@
 package com.persiangulfwiki.core.web;
 
 import com.persiangulfwiki.core.admin.exception.InvalidPagingParametersException;
+import com.persiangulfwiki.core.admin.exception.InvalidUserRoleFilterException;
 import com.persiangulfwiki.core.admin.exception.LastAdminException;
 import com.persiangulfwiki.core.admin.exception.RoleAlreadyGrantedException;
 import com.persiangulfwiki.core.admin.exception.RoleNotGrantedException;
@@ -254,6 +255,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(InvalidPagingParametersException.class)
     public ProblemDetail handleInvalidPagingParameters(InvalidPagingParametersException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidPagingParameters"), "INVALID_PAGING_PARAMETERS", request);
+    }
+
+    @ExceptionHandler(InvalidUserRoleFilterException.class)
+    public ProblemDetail handleInvalidUserRoleFilter(InvalidUserRoleFilterException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidUserRoleFilter"), "INVALID_USER_ROLE_FILTER", request);
     }
 
     @ExceptionHandler(InvalidApplicationStatusException.class)
