@@ -18,8 +18,11 @@ import com.persiangulfwiki.core.media.entity.ProcessingStatus;
 import com.persiangulfwiki.core.media.entity.PublicationStatus;
 import com.persiangulfwiki.core.media.repository.ArticleMediaRepository;
 import com.persiangulfwiki.core.media.repository.MediaMetadataVersionRepository;
+import com.persiangulfwiki.core.user.entity.Role;
 import com.persiangulfwiki.core.user.entity.User;
+import com.persiangulfwiki.core.user.entity.UserRole;
 import com.persiangulfwiki.core.user.repository.UserRepository;
+import com.persiangulfwiki.core.user.repository.UserRoleRepository;
 import com.persiangulfwiki.core.user.service.AvatarService;
 
 import jakarta.servlet.http.Cookie;
@@ -61,6 +64,7 @@ import java.util.UUID;
 
 import static com.persiangulfwiki.core.CsrfTestSupport.xsrf;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
@@ -110,6 +114,9 @@ class UserProfileFlowIntegrationTests {
 
     @Autowired
     private AvatarService avatarService;
+
+    @Autowired
+    private UserRoleRepository userRoleRepository;
 
     @Value("${app.storage.staging-bucket}")
     private String stagingBucket;
@@ -620,6 +627,27 @@ class UserProfileFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.total").value(2))
                 .andExpect(jsonPath("$.data.items", hasSize(1)))
                 .andExpect(jsonPath("$.data.items[0].article.id").value(first.toString()));
+
+        // The admin user list counts from the same definition, batched over the page.
+        Cookie admin = adminAccessCookie();
+        mockMvc.perform(get("/api/admin/users").param("size", "10000").cookie(admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[?(@.id == '" + author.userId() + "')].contributionCount",
+                        contains(4)))
+                .andExpect(jsonPath("$.data.items[?(@.id == '" + translator.userId() + "')].contributionCount",
+                        contains(3)));
+    }
+
+    private Cookie adminAccessCookie() throws Exception {
+        Account account = verifiedAccount();
+        User user = userRepository.findById(account.userId()).orElseThrow();
+        userRoleRepository.save(UserRole.builder().user(user).role(Role.ADMIN).build());
+        return mockMvc.perform(post("/api/auth/login")
+                        .with(xsrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new LoginRequest(user.getEmail(), PASSWORD))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getCookie("access_token");
     }
 
     @Test

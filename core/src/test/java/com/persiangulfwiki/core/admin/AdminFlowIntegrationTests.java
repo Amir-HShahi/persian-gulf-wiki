@@ -15,6 +15,7 @@ import com.persiangulfwiki.core.user.entity.UserRole;
 import com.persiangulfwiki.core.user.repository.UserRepository;
 import com.persiangulfwiki.core.user.repository.UserRoleRepository;
 
+import com.jayway.jsonpath.JsonPath;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +26,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.security.SecureRandom;
+import java.time.Instant;
+import java.util.Comparator;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.nullValue;
 import static com.persiangulfwiki.core.CsrfTestSupport.xsrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -462,6 +468,101 @@ class AdminFlowIntegrationTests {
                 .filteredOn(userRole -> userRole.getRole() == Role.EXPERT_REVIEWER)
                 .extracting(UserRole::getExpertise)
                 .containsExactly(SubjectKind.SPECIES);
+    }
+
+    @Test
+    void userListFiltersByAnyOfTheRolesAndNarrowsByBlocked() throws Exception {
+        seedAdmin("admin-filter@example.com", "adminfilter");
+        Cookie adminAccessCookie = loginAccessCookie("admin-filter@example.com");
+
+        registerContributor("affmod", "aff-mod@example.com");
+        registerContributor("affexpert", "aff-expert@example.com");
+        registerContributor("affplain", "aff-plain@example.com");
+        registerContributor("affbanned", "aff-banned@example.com");
+        User moderator = userRepository.findByEmail("aff-mod@example.com").orElseThrow();
+        User expert = userRepository.findByEmail("aff-expert@example.com").orElseThrow();
+        User plain = userRepository.findByEmail("aff-plain@example.com").orElseThrow();
+        User banned = userRepository.findByEmail("aff-banned@example.com").orElseThrow();
+        User admin = userRepository.findByEmail("admin-filter@example.com").orElseThrow();
+        userRoleRepository.save(UserRole.builder().user(moderator).role(Role.MODERATOR).build());
+        // Two expertise rows still make one expert reviewer.
+        userRoleRepository.save(UserRole.builder().user(expert).role(Role.EXPERT_REVIEWER).expertise(SubjectKind.PORT).build());
+        userRoleRepository.save(UserRole.builder().user(expert).role(Role.EXPERT_REVIEWER).expertise(SubjectKind.ISLAND).build());
+        userRoleRepository.save(UserRole.builder().user(banned).role(Role.MODERATOR).build());
+        banned.setEnabled(false);
+        userRepository.save(banned);
+        plain.setFullName("Plain Person");
+        userRepository.save(plain);
+
+        String moderatorOrExpert = mockMvc.perform(get("/api/admin/users").param("size", "10000")
+                        .param("role", "moderator").param("role", "EXPERT_REVIEWER").cookie(adminAccessCookie))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        List<String> ids = JsonPath.read(moderatorOrExpert, "$.data.items[*].id");
+        assertThat(ids).contains(moderator.getId().toString(), expert.getId().toString(), banned.getId().toString())
+                .doesNotContain(plain.getId().toString(), admin.getId().toString())
+                .doesNotHaveDuplicates();
+
+        mockMvc.perform(get("/api/admin/users").param("size", "10000")
+                        .param("role", "MODERATOR").param("blocked", "true").cookie(adminAccessCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[?(@.id == '" + banned.getId() + "')]").isNotEmpty())
+                .andExpect(jsonPath("$.data.items[?(@.id == '" + moderator.getId() + "')]").isEmpty())
+                .andExpect(jsonPath("$.data.items[?(@.enabled == true)]").isEmpty());
+
+        mockMvc.perform(get("/api/admin/users").param("size", "10000").param("role", "CONTRIBUTOR")
+                        .cookie(adminAccessCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[?(@.id == '" + plain.getId() + "')].displayName",
+                        contains("Plain Person")))
+                .andExpect(jsonPath("$.data.items[?(@.id == '" + plain.getId() + "')].avatarUrl",
+                        contains(nullValue())))
+                .andExpect(jsonPath("$.data.items[?(@.id == '" + moderator.getId() + "')]").isEmpty())
+                .andExpect(jsonPath("$.data.items[?(@.id == '" + admin.getId() + "')]").isEmpty());
+
+        // Counts ignore the request's filter and match what each single filter lists.
+        String all = mockMvc.perform(get("/api/admin/users").param("size", "1").param("role", "ADMIN")
+                        .cookie(adminAccessCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items", hasSize(1)))
+                .andExpect(jsonPath("$.data.counts.all").value(userRepository.count()))
+                .andReturn().getResponse().getContentAsString();
+        Number adminCount = JsonPath.read(all, "$.data.counts.admin");
+        Number adminTotal = JsonPath.read(all, "$.data.total");
+        assertThat(adminTotal.longValue()).isEqualTo(adminCount.longValue());
+        for (String[] filter : new String[][] {{"MODERATOR", "moderator"}, {"EXPERT_REVIEWER", "expertReviewer"},
+                {"CONTRIBUTOR", "contributor"}}) {
+            String body = mockMvc.perform(get("/api/admin/users").param("role", filter[0]).cookie(adminAccessCookie))
+                    .andReturn().getResponse().getContentAsString();
+            Number total = JsonPath.read(body, "$.data.total");
+            Number count = JsonPath.read(body, "$.data.counts." + filter[1]);
+            assertThat(total.longValue()).as(filter[0]).isEqualTo(count.longValue());
+        }
+        String blocked = mockMvc.perform(get("/api/admin/users").param("blocked", "true").cookie(adminAccessCookie))
+                .andReturn().getResponse().getContentAsString();
+        Number blockedTotal = JsonPath.read(blocked, "$.data.total");
+        Number blockedCount = JsonPath.read(blocked, "$.data.counts.blocked");
+        assertThat(blockedTotal.longValue()).isEqualTo(blockedCount.longValue()).isPositive();
+
+        // Newest sign-up first.
+        String newest = mockMvc.perform(get("/api/admin/users").param("size", "10000").cookie(adminAccessCookie))
+                .andReturn().getResponse().getContentAsString();
+        List<String> createdAt = JsonPath.read(newest, "$.data.items[*].createdAt");
+        assertThat(createdAt.stream().map(Instant::parse).toList())
+                .isSortedAccordingTo(Comparator.reverseOrder());
+    }
+
+    @Test
+    void userListRejectsAnUnknownRoleFilter() throws Exception {
+        seedAdmin("admin-badrole@example.com", "adminbadrole");
+        Cookie adminAccessCookie = loginAccessCookie("admin-badrole@example.com");
+
+        mockMvc.perform(get("/api/admin/users").param("role", "ADMIN").param("role", "OWNER").cookie(adminAccessCookie))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_USER_ROLE_FILTER"));
+        mockMvc.perform(get("/api/admin/users").param("page", "-1").cookie(adminAccessCookie))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_PAGING_PARAMETERS"));
     }
 
     // V21 widened the expertise CHECK alongside SubjectKind; without that, each grant below would

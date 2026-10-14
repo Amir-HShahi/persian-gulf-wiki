@@ -1,33 +1,43 @@
 package com.persiangulfwiki.core.admin.service;
 
+import com.persiangulfwiki.core.admin.dto.AdminUserCounts;
+import com.persiangulfwiki.core.admin.dto.AdminUserListResponse;
 import com.persiangulfwiki.core.admin.dto.AdminUserResponse;
 import com.persiangulfwiki.core.admin.dto.RoleAssignment;
 import com.persiangulfwiki.core.admin.dto.RoleGrantRequest;
 import com.persiangulfwiki.core.admin.dto.UserStatusAction;
+import com.persiangulfwiki.core.admin.dto.UserRoleFilter;
 import com.persiangulfwiki.core.admin.dto.UserStatusRequest;
 import com.persiangulfwiki.core.admin.exception.InvalidPagingParametersException;
+import com.persiangulfwiki.core.admin.exception.InvalidUserRoleFilterException;
 import com.persiangulfwiki.core.admin.exception.LastAdminException;
 import com.persiangulfwiki.core.admin.exception.RoleAlreadyGrantedException;
 import com.persiangulfwiki.core.admin.exception.RoleNotGrantedException;
 import com.persiangulfwiki.core.audit.service.AuditLogService;
-import com.persiangulfwiki.core.common.dto.PageResponse;
 import com.persiangulfwiki.core.user.entity.Role;
 import com.persiangulfwiki.core.user.entity.User;
 import com.persiangulfwiki.core.user.entity.UserRole;
 import com.persiangulfwiki.core.user.exception.UserNotFoundException;
+import com.persiangulfwiki.core.user.repository.AdminUserCountsRow;
+import com.persiangulfwiki.core.user.repository.UserContributionCountRow;
 import com.persiangulfwiki.core.user.repository.UserRepository;
 import com.persiangulfwiki.core.user.repository.UserRoleRepository;
+import com.persiangulfwiki.core.user.service.AvatarService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -37,13 +47,54 @@ public class AdminService {
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
     private final AuditLogService auditLogService;
+    private final AvatarService avatarService;
 
-    public PageResponse<AdminUserResponse> listUsers(int page, int size) {
+    // roleFilters OR together; enabled, when set, narrows on top. Counts ignore both.
+    @Transactional(readOnly = true)
+    public AdminUserListResponse listUsers(int page, int size, List<String> roleFilters, @Nullable Boolean enabled) {
         if (page < 0 || size < 1) {
             throw new InvalidPagingParametersException("page must be >= 0 and size must be >= 1");
         }
-        Page<User> users = userRepository.findAll(PageRequest.of(page, size));
-        return new PageResponse<>(users.stream().map(this::toAdminUserResponse).toList(), users.getTotalElements());
+        Set<UserRoleFilter> roles = roleFilters.stream().map(AdminService::parseRoleFilter)
+                .collect(Collectors.toCollection(() -> EnumSet.noneOf(UserRoleFilter.class)));
+        boolean anyRole = !roles.isEmpty();
+        boolean admin = roles.contains(UserRoleFilter.ADMIN);
+        boolean moderator = roles.contains(UserRoleFilter.MODERATOR);
+        boolean expertReviewer = roles.contains(UserRoleFilter.EXPERT_REVIEWER);
+        boolean contributorOnly = roles.contains(UserRoleFilter.CONTRIBUTOR);
+        boolean filterEnabled = enabled != null;
+        boolean enabledValue = enabled == null || enabled;
+
+        List<User> users = userRepository.findForAdmin(filterEnabled, enabledValue, anyRole, admin, moderator,
+                expertReviewer, contributorOnly, size, (long) page * size);
+        long total = userRepository.countForAdmin(filterEnabled, enabledValue, anyRole, admin, moderator,
+                expertReviewer, contributorOnly);
+
+        List<UUID> ids = users.stream().map(User::getId).toList();
+        Map<UUID, List<RoleAssignment>> rolesByUser = ids.isEmpty() ? Map.of()
+                : userRoleRepository.findByUserIdIn(ids).stream().collect(Collectors.groupingBy(
+                        userRole -> userRole.getUser().getId(),
+                        Collectors.mapping(userRole -> new RoleAssignment(userRole.getRole(), userRole.getExpertise()),
+                                Collectors.toList())));
+        Map<UUID, Long> contributionsByUser = ids.isEmpty() ? Map.of()
+                : userRepository.countContributionsByUser(ids).stream().collect(Collectors.toMap(
+                        UserContributionCountRow::getUserId, UserContributionCountRow::getContributionCount));
+
+        List<AdminUserResponse> items = users.stream()
+                .map(user -> toAdminUserResponse(user, rolesByUser.getOrDefault(user.getId(), List.of()),
+                        contributionsByUser.getOrDefault(user.getId(), 0L)))
+                .toList();
+        AdminUserCountsRow counts = userRepository.countUsersForAdmin();
+        return new AdminUserListResponse(items, total, new AdminUserCounts(counts.getTotal(), counts.getBlocked(),
+                counts.getAdmin(), counts.getModerator(), counts.getExpertReviewer(), counts.getContributor()));
+    }
+
+    private static UserRoleFilter parseRoleFilter(String value) {
+        try {
+            return UserRoleFilter.valueOf(value.strip().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            throw new InvalidUserRoleFilterException("invalid role filter: " + value);
+        }
     }
 
     @Transactional
@@ -115,17 +166,27 @@ public class AdminService {
         }
     }
 
-    private AdminUserResponse toAdminUserResponse(User user) {
-        List<RoleAssignment> roles = userRoleRepository.findByUserId(user.getId()).stream()
-                .map(userRole -> new RoleAssignment(userRole.getRole(), userRole.getExpertise()))
-                .toList();
+    private AdminUserResponse toAdminUserResponse(User user, List<RoleAssignment> roles, long contributionCount) {
         return new AdminUserResponse(
                 user.getId(),
                 user.getUsername(),
+                displayName(user),
                 user.getEmail(),
+                avatarService.publicUrl(user.getAvatarKey()).orElse(null),
                 user.isEnabled(),
                 user.isEmailVerified(),
-                roles,
+                List.copyOf(roles),
+                contributionCount,
                 user.getCreatedAt());
+    }
+
+    private static String displayName(User user) {
+        if (user.getFullName() != null) {
+            return user.getFullName();
+        }
+        if (user.getUsername() != null) {
+            return user.getUsername();
+        }
+        return user.getEmail().substring(0, user.getEmail().indexOf('@'));
     }
 }
