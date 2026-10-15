@@ -51,7 +51,8 @@ public class AdminService {
 
     // roleFilters OR together; enabled, when set, narrows on top. Counts ignore both.
     @Transactional(readOnly = true)
-    public AdminUserListResponse listUsers(int page, int size, List<String> roleFilters, @Nullable Boolean enabled) {
+    public AdminUserListResponse listUsers(int page, int size, List<String> roleFilters, @Nullable Boolean enabled,
+            @Nullable String query) {
         if (page < 0 || size < 1) {
             throw new InvalidPagingParametersException("page must be >= 0 and size must be >= 1");
         }
@@ -64,11 +65,13 @@ public class AdminService {
         boolean contributorOnly = roles.contains(UserRoleFilter.CONTRIBUTOR);
         boolean filterEnabled = enabled != null;
         boolean enabledValue = enabled == null || enabled;
+        String search = query == null ? "" : query.strip();
+        boolean filterQuery = !search.isEmpty();
 
         List<User> users = userRepository.findForAdmin(filterEnabled, enabledValue, anyRole, admin, moderator,
-                expertReviewer, contributorOnly, size, (long) page * size);
+                expertReviewer, contributorOnly, filterQuery, search, size, (long) page * size);
         long total = userRepository.countForAdmin(filterEnabled, enabledValue, anyRole, admin, moderator,
-                expertReviewer, contributorOnly);
+                expertReviewer, contributorOnly, filterQuery, search);
 
         List<UUID> ids = users.stream().map(User::getId).toList();
         Map<UUID, List<RoleAssignment>> rolesByUser = ids.isEmpty() ? Map.of()

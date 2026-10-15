@@ -565,6 +565,76 @@ class AdminFlowIntegrationTests {
                 .andExpect(jsonPath("$.code").value("INVALID_PAGING_PARAMETERS"));
     }
 
+    @Test
+    void userListSearchMatchesNameUsernameAndEmailAcrossLetterVariants() throws Exception {
+        seedAdmin("admin-search@example.com", "adminsearch");
+        Cookie adminAccessCookie = loginAccessCookie("admin-search@example.com");
+
+        registerContributor("qsrch-zahra", "z.moradi.qsrch@example.com");
+        registerContributor("qsrch-other", "other-qsrch@example.com");
+        registerContributor("qsrch-banned", "banned-qsrch@example.com");
+        User zahra = userRepository.findByEmail("z.moradi.qsrch@example.com").orElseThrow();
+        User other = userRepository.findByEmail("other-qsrch@example.com").orElseThrow();
+        User banned = userRepository.findByEmail("banned-qsrch@example.com").orElseThrow();
+        zahra.setFullName("زهرا مرادی");
+        userRepository.save(zahra);
+        other.setFullName("Rate 100%% sure");
+        userRepository.save(other);
+        userRoleRepository.save(UserRole.builder().user(banned).role(Role.MODERATOR).build());
+        banned.setEnabled(false);
+        userRepository.save(banned);
+
+        // Arabic ي for Persian ی, the space dropped, the username's case and the email's local part.
+        for (String q : List.of("زهرا مرادي", "زهرامرادی", "QSRCH-ZAHRA", "z.moradi.qsrch")) {
+            mockMvc.perform(get("/api/admin/users").param("q", q).cookie(adminAccessCookie))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.items[*].id").value(contains(zahra.getId().toString())))
+                    .andExpect(jsonPath("$.data.total").value(1));
+        }
+
+        String unfiltered = mockMvc.perform(get("/api/admin/users").cookie(adminAccessCookie))
+                .andReturn().getResponse().getContentAsString();
+        Number allUsers = JsonPath.read(unfiltered, "$.data.total");
+        mockMvc.perform(get("/api/admin/users").param("q", "qsrch").cookie(adminAccessCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(3))
+                .andExpect(jsonPath("$.data.counts.all").value(allUsers.longValue()));
+
+        // q ANDs onto role and blocked.
+        mockMvc.perform(get("/api/admin/users").param("q", "qsrch").param("role", "MODERATOR")
+                        .param("blocked", "true").cookie(adminAccessCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[*].id").value(contains(banned.getId().toString())))
+                .andExpect(jsonPath("$.data.total").value(1));
+
+        // % is not a wildcard; a term that folds to nothing matches nobody; a blank one is no search.
+        mockMvc.perform(get("/api/admin/users").param("q", "%%").cookie(adminAccessCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[*].id").value(contains(other.getId().toString())));
+        mockMvc.perform(get("/api/admin/users").param("q", "__").cookie(adminAccessCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items", hasSize(0)))
+                .andExpect(jsonPath("$.data.total").value(0));
+        mockMvc.perform(get("/api/admin/users").param("q", "   ").cookie(adminAccessCookie))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(allUsers.longValue()));
+    }
+
+    @Test
+    void userListRejectsASearchTermOutsideTheLengthBounds() throws Exception {
+        seedAdmin("admin-badsearch@example.com", "adminbadsearch");
+        Cookie adminAccessCookie = loginAccessCookie("admin-badsearch@example.com");
+
+        for (String q : List.of("a", "a".repeat(101))) {
+            mockMvc.perform(get("/api/admin/users").param("q", q).cookie(adminAccessCookie))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+                    .andExpect(jsonPath("$.errors", hasSize(1)));
+        }
+        mockMvc.perform(get("/api/admin/users").param("q", "a".repeat(100)).cookie(adminAccessCookie))
+                .andExpect(status().isOk());
+    }
+
     // V21 widened the expertise CHECK alongside SubjectKind; without that, each grant below would
     // fail at the insert as a constraint error.
     @Test

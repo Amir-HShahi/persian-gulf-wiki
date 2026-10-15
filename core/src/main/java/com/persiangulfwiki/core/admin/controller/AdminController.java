@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 
 import org.jspecify.annotations.Nullable;
@@ -50,8 +51,8 @@ public class AdminController {
     private final MessageSource messageSource;
 
     @Operation(summary = "List users", description = "Admin only. Newest sign-up first. Filter by role with any "
-            + "number of `role` values (a user matching any of them is listed) and narrow by `blocked`. `counts` "
-            + "gives how many users each filter matches across all users, unaffected by the filters in this request.")
+            + "number of `role` values (a user matching any of them is listed), narrow by `blocked`, and search with `q`. "
+            + "`counts` gives how many users each filter matches across all users, unaffected by the filters in this request.")
     @ApiResponse(responseCode = "200", description = "One page of matching users, the number matching across all pages, "
             + "and the per-filter counts.")
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
@@ -59,12 +60,17 @@ public class AdminController {
             + "is not yet verified — both surface as a plain 403 with no way to distinguish them from the "
             + "response's status code alone; read `detail` for which one occurred.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "400", description = "`page` is negative, `size` is less than 1, `blocked` isn't true or "
-            + "false, or a `role` value isn't one of the allowed ones (`code` INVALID_USER_ROLE_FILTER).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+            + "false, a `role` value isn't one of the allowed ones (`code` INVALID_USER_ROLE_FILTER), or `q` is shorter "
+            + "than 2 or longer than 100 characters (`code` VALIDATION_FAILED, the failure in `errors`).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "page", description = "Zero-based page index. Must be 0 or greater.")
     @Parameter(name = "size", description = "Page size. Must be 1 or greater.")
     @Parameter(name = "role", description = "Repeatable, case-insensitive. Omit for every role.\n\n" + UserRoleFilter.VALUES_DOC)
     @Parameter(name = "blocked", description = "`true` lists only suspended or banned users, `false` only active ones. "
             + "Omit for both.")
+    @Parameter(name = "q", description = "Optional search, 2 to 100 characters: lists users whose full name, username "
+            + "or email contains it. Ignores case, accents, Arabic diacritics, spaces, half-spaces and punctuation, and "
+            + "treats the Arabic and Persian forms of the same letter (ي/ی, ك/ک) and digits as equal. Combines with "
+            + "`role` and `blocked`. A term made only of punctuation or spaces matches nobody.")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users")
     @ResponseStatus(HttpStatus.OK)
@@ -72,9 +78,11 @@ public class AdminController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(name = "role", required = false) @Nullable List<String> roles,
-            @RequestParam(required = false) @Nullable Boolean blocked) {
+            @RequestParam(required = false) @Nullable Boolean blocked,
+            @RequestParam(required = false) @Nullable
+            @Size(min = 2, max = 100, message = "{validation.adminUserSearch.queryLength}") String q) {
         AdminUserListResponse data = adminService.listUsers(page, size, roles == null ? List.of() : roles,
-                blocked == null ? null : !blocked);
+                blocked == null ? null : !blocked, q);
         String message = messageSource.getMessage("success.adminUsersList", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }

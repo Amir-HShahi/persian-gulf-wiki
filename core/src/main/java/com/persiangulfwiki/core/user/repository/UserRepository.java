@@ -137,7 +137,10 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     List<UserContributionCountRow> countContributionsByUser(@Param("userIds") Collection<UUID> userIds);
 
     // The admin user list's filter: role flags OR together (contributorOnly = holds no role
-    // besides CONTRIBUTOR; anyRole false = no role filter), then the enabled filter ANDs on.
+    // besides CONTRIBUTOR; anyRole false = no role filter), then the enabled filter ANDs on, then
+    // the search: :query must be a substring of the full name, username or email, each folded by
+    // subject_search_key (V29) on its own so a match can't span two fields. A query that folds to
+    // empty (only punctuation or spacing) matches nobody rather than everybody.
     String ADMIN_USER_FILTER = """
             from users u
             where (not :filterEnabled or u.enabled = :enabled)
@@ -148,6 +151,11 @@ public interface UserRepository extends JpaRepository<User, UUID> {
                                                    where r.user_id = u.id and r.role = 'EXPERT_REVIEWER'))
                    or (:contributorOnly and not exists (select 1 from user_roles r
                                                         where r.user_id = u.id and r.role <> 'CONTRIBUTOR')))
+              and (not :filterQuery
+                   or (subject_search_key(:query) <> ''
+                       and (strpos(subject_search_key(u.full_name), subject_search_key(:query)) > 0
+                            or strpos(subject_search_key(u.username), subject_search_key(:query)) > 0
+                            or strpos(subject_search_key(u.email), subject_search_key(:query)) > 0)))
             """;
 
     @Query(value = "select u.* " + ADMIN_USER_FILTER + " order by u.created_at desc, u.id limit :limit offset :offset",
@@ -155,12 +163,14 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     List<User> findForAdmin(@Param("filterEnabled") boolean filterEnabled, @Param("enabled") boolean enabled,
             @Param("anyRole") boolean anyRole, @Param("admin") boolean admin, @Param("moderator") boolean moderator,
             @Param("expertReviewer") boolean expertReviewer, @Param("contributorOnly") boolean contributorOnly,
-            @Param("limit") int limit, @Param("offset") long offset);
+            @Param("filterQuery") boolean filterQuery, @Param("query") String query, @Param("limit") int limit,
+            @Param("offset") long offset);
 
     @Query(value = "select count(*) " + ADMIN_USER_FILTER, nativeQuery = true)
     long countForAdmin(@Param("filterEnabled") boolean filterEnabled, @Param("enabled") boolean enabled,
             @Param("anyRole") boolean anyRole, @Param("admin") boolean admin, @Param("moderator") boolean moderator,
-            @Param("expertReviewer") boolean expertReviewer, @Param("contributorOnly") boolean contributorOnly);
+            @Param("expertReviewer") boolean expertReviewer, @Param("contributorOnly") boolean contributorOnly,
+            @Param("filterQuery") boolean filterQuery, @Param("query") String query);
 
     // The admin list's chip counts, over every user regardless of the active filter.
     @Query(value = """
