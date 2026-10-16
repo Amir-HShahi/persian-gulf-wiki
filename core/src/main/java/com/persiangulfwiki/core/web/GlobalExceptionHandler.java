@@ -34,6 +34,7 @@ import com.persiangulfwiki.core.article.exception.NotRevisionAuthorException;
 import com.persiangulfwiki.core.article.exception.RevisionNotEditableException;
 import com.persiangulfwiki.core.article.exception.RevisionNotFoundException;
 import com.persiangulfwiki.core.article.exception.TranslationNotFoundException;
+import com.persiangulfwiki.core.moderation.exception.InvalidDashboardRangeException;
 import com.persiangulfwiki.core.moderation.exception.InvalidModerationTaskStateException;
 import com.persiangulfwiki.core.moderation.exception.MissingDecisionReasonException;
 import com.persiangulfwiki.core.moderation.exception.ModerationTaskNotFoundException;
@@ -606,6 +607,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(InvalidModerationTaskStateException.class)
     public ProblemDetail handleInvalidModerationTaskState(InvalidModerationTaskStateException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidModerationTaskState"), "INVALID_MODERATION_TASK_STATE", request);
+    }
+
+    @ExceptionHandler(InvalidDashboardRangeException.class)
+    public ProblemDetail handleInvalidDashboardRange(InvalidDashboardRangeException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidDashboardRange"), "INVALID_DASHBOARD_RANGE", request);
     }
 
     @ExceptionHandler(MissingDecisionReasonException.class)
