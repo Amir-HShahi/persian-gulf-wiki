@@ -3,6 +3,7 @@ package com.persiangulfwiki.core.moderation.repository;
 import com.persiangulfwiki.core.moderation.entity.ModerationDecision;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -35,4 +36,13 @@ public interface ModerationDecisionRepository extends JpaRepository<ModerationDe
             """, nativeQuery = true)
     List<DayCount> countArticleApprovalsPerDayBetween(@Param("zone") String zone, @Param("from") Instant from,
             @Param("to") Instant to);
+
+    // Dev fixtures only, mirroring ModerationTaskRepository.backdateDevTask: the decision itself
+    // carries no marker, so the guard is its task's.
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = """
+            update moderation_decisions set created_at = :at
+            where id = :id and task_id in (select id from moderation_tasks where dev_marker = :marker)
+            """, nativeQuery = true)
+    int backdateDevDecision(@Param("id") UUID id, @Param("marker") String marker, @Param("at") Instant at);
 }

@@ -683,6 +683,34 @@ class DevTestContentEndpointIntegrationTests {
         assertThat(moderationTaskRepository.findById(handMade.getId())).isPresent();
     }
 
+    // The dashboard counts by first-submission and decision day, and the real flow only stamps
+    // "now" -- so these two fields are the only way a suite can put a task on an earlier day.
+    @Test
+    void backdatesAMintedTaskAndItsSeededDecision() throws Exception {
+        Instant submittedAt = Instant.now().minus(3, ChronoUnit.DAYS).truncatedTo(ChronoUnit.SECONDS);
+        Instant decidedAt = Instant.now().minus(2, ChronoUnit.DAYS).truncatedTo(ChronoUnit.SECONDS);
+
+        DevTestModerationResponse minted = mintModerationTask(new DevTestModerationRequest(mintRevisionId(),
+                ModerationTaskState.DECIDED, null, Decision.APPROVE, null, null, null, submittedAt, decidedAt));
+
+        assertThat(moderationTaskRepository.findById(minted.taskId())).get()
+                .extracting(ModerationTask::getCreatedAt).isEqualTo(submittedAt);
+        assertThat(moderationDecisionRepository.findById(minted.decisionId())).get()
+                .extracting(ModerationDecision::getCreatedAt).isEqualTo(decidedAt);
+    }
+
+    // A backdated fixture must survive the next sweep: the TTL runs from when it was minted, not
+    // from the first-submission time a suite moved into the past.
+    @Test
+    void sweeperSparesAFreshlyMintedTaskBackdatedPastTheTtl() throws Exception {
+        DevTestModerationResponse minted = mintModerationTask(new DevTestModerationRequest(mintRevisionId(),
+                null, null, null, null, null, null, Instant.now().minus(29, ChronoUnit.DAYS), null));
+
+        moderationSweeper.deleteOlderThan(Instant.now().minus(1, ChronoUnit.HOURS));
+
+        assertThat(moderationTaskRepository.findById(minted.taskId())).isPresent();
+    }
+
     @Test
     void sweeperReclaimsAgedMintedModerationTasksButSparesHandMadeOnes() throws Exception {
         DevTestModerationResponse minted =

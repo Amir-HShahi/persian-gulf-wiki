@@ -3,6 +3,7 @@ package com.persiangulfwiki.core.dev.dto;
 import com.persiangulfwiki.core.moderation.entity.Decision;
 import com.persiangulfwiki.core.moderation.entity.ModerationTaskState;
 
+import java.time.Instant;
 import java.util.UUID;
 
 // Every field is nullable, matching DevTestArticleRequest. At most one of revisionId,
@@ -26,6 +27,11 @@ import java.util.UUID;
 // REJECT and REQUEST_CHANGES must carry a reason is deliberately not reproduced: this endpoint
 // bypasses ModerationService entirely, and a reasonless REJECT is exactly the sort of
 // otherwise-unreachable row a fixture may want to assert a renderer copes with.
+//
+// submittedAt / decidedAt backdate the task's created_at (its first submission, which the
+// moderation dashboard counts by) and the seeded decision's created_at. The real flow only ever
+// stamps "now", so "approved yesterday" or "submitted 29 days ago" is otherwise unreachable.
+// decidedAt is ignored when no decision is seeded.
 public record DevTestModerationRequest(
         UUID revisionId,
         ModerationTaskState state,
@@ -33,5 +39,13 @@ public record DevTestModerationRequest(
         Decision decision,
         String reason,
         UUID mediaMetadataVersionId,
-        UUID subjectRevisionId) {
+        UUID subjectRevisionId,
+        Instant submittedAt,
+        Instant decidedAt) {
+
+    public DevTestModerationRequest(UUID revisionId, ModerationTaskState state, UUID claimedByUserId,
+            Decision decision, String reason, UUID mediaMetadataVersionId, UUID subjectRevisionId) {
+        this(revisionId, state, claimedByUserId, decision, reason, mediaMetadataVersionId, subjectRevisionId, null,
+                null);
+    }
 }
