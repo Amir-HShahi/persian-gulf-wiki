@@ -31,6 +31,8 @@ services:
       FRONTEND_ORIGINS: ${FRONTEND_ORIGINS:-http://localhost:3000}
       COOKIE_DOMAIN: localhost
       SPRING_DATA_REDIS_HOST: redis
+      # Real provider data for the homepage cards; no API key needed.
+      MARINE_DATA_INGEST_ENABLED: "true"
       # The app reaches MinIO on the compose network; the browser uses the published port.
       # Presigned URLs are signed for STORAGE_PUBLIC_ENDPOINT's host, so it must be what the
       # browser sees.

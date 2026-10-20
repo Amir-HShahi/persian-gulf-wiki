@@ -6,6 +6,7 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cache.transaction.TransactionAwareCacheManagerProxy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 // In-process caches, from spring-context alone: no cache library, and nothing to share, since
 // production runs a single app instance. An entry has no expiry; every cache here is cleared by
@@ -20,7 +21,10 @@ public class CacheConfig {
 
     public static final String SUBJECT_INFOBOX = "subjectInfobox";
 
+    // Primary so @Cacheable without a cacheManager attribute lands here; the marine caches name
+    // MarineDataConfig.CACHE_MANAGER explicitly.
     @Bean
+    @Primary
     public CacheManager cacheManager() {
         return new TransactionAwareCacheManagerProxy(new ConcurrentMapCacheManager(SUBJECT_INFOBOX));
     }

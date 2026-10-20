@@ -90,13 +90,14 @@ public class SecurityConfig {
                         // Deploy health check hits this unauthenticated — no app data exposed.
                         .requestMatchers(PublicRoutes.HEALTH).permitAll()
                         // Public wiki content: reading an article, subject, subject revision,
-                        // citation or a kind's field vocabulary needs no account. Scoped to GET on
-                        // purpose (see PublicRoutes.CONTENT_READS): POST /api/sources and every
-                        // article and subject revision mutation fall through to
-                        // anyRequest().authenticated() below and keep their CSRF requirement.
-                        // Article and subject revision mutations carry no role check at all — see
-                        // ArticleController's class comment for why gating authorship by moderator
-                        // role would be self-defeating here.
+                        // citation, a kind's field vocabulary or the homepage marine data cards
+                        // needs no account. Scoped to GET on purpose (see
+                        // PublicRoutes.CONTENT_READS): POST /api/sources and every article and
+                        // subject revision mutation fall through to anyRequest().authenticated()
+                        // below and keep their CSRF requirement. Article and subject revision
+                        // mutations carry no role check at all — see ArticleController's class
+                        // comment for why gating authorship by moderator role would be
+                        // self-defeating here.
                         //
                         // permitAll only lets the request in. Anything not yet approved (a
                         // revision, a translation, or an article with no approved translation)

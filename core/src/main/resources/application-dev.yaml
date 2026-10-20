@@ -83,3 +83,6 @@ app:
     # TTL for the topics minted by POST /api/dev/test-topics, reclaimed hourly by DevTestTopicSweeper
     # at :25. One still set on a revision is left until the article sweep has removed that revision.
     test-topic-ttl-hours: ${DEV_TEST_TOPIC_TTL_HOURS:6}
+    # TTL for the stations minted by POST /api/dev/marine-readings, reclaimed hourly by
+    # DevTestMarineSweeper at :55. Same reasoning as the TTLs above.
+    test-marine-ttl-hours: ${DEV_TEST_MARINE_TTL_HOURS:6}

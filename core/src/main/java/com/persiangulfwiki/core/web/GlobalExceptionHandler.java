@@ -35,7 +35,12 @@ import com.persiangulfwiki.core.moderation.exception.MissingDecisionReasonExcept
 import com.persiangulfwiki.core.moderation.exception.ModerationTaskNotFoundException;
 import com.persiangulfwiki.core.common.exception.TooManyRequestsException;
 import com.persiangulfwiki.core.dev.exception.InvalidDevTestArticleRequestException;
+import com.persiangulfwiki.core.dev.exception.InvalidDevTestMarineRequestException;
 import com.persiangulfwiki.core.dev.exception.InvalidDevTestMediaRequestException;
+import com.persiangulfwiki.core.marinedata.exception.InvalidMarineSeriesRangeException;
+import com.persiangulfwiki.core.marinedata.exception.MarineMetricNotFoundException;
+import com.persiangulfwiki.core.marinedata.exception.MarineStationNotFoundException;
+import com.persiangulfwiki.core.marinedata.exception.UnsupportedMarineSeriesRangeException;
 import com.persiangulfwiki.core.media.exception.DuplicateMediaException;
 import com.persiangulfwiki.core.media.exception.IncompleteMediaMetadataException;
 import com.persiangulfwiki.core.media.exception.MediaAlreadyRejectedException;
@@ -712,6 +717,31 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DevTestSubjectRevisionLiveException.class)
     public ProblemDetail handleDevTestSubjectRevisionLive(DevTestSubjectRevisionLiveException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestSubjectRevisionLive"), "DEV_TEST_SUBJECT_REVISION_LIVE", request);
+    }
+
+    @ExceptionHandler(InvalidDevTestMarineRequestException.class)
+    public ProblemDetail handleInvalidDevTestMarineRequest(InvalidDevTestMarineRequestException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidDevTestMarineRequest"), "INVALID_DEV_TEST_MARINE_REQUEST", request);
+    }
+
+    @ExceptionHandler(MarineMetricNotFoundException.class)
+    public ProblemDetail handleMarineMetricNotFound(MarineMetricNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.marineMetricNotFound"), "MARINE_METRIC_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(MarineStationNotFoundException.class)
+    public ProblemDetail handleMarineStationNotFound(MarineStationNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.marineStationNotFound"), "MARINE_STATION_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(InvalidMarineSeriesRangeException.class)
+    public ProblemDetail handleInvalidMarineSeriesRange(InvalidMarineSeriesRangeException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidMarineSeriesRange"), "INVALID_MARINE_SERIES_RANGE", request);
+    }
+
+    @ExceptionHandler(UnsupportedMarineSeriesRangeException.class)
+    public ProblemDetail handleUnsupportedMarineSeriesRange(UnsupportedMarineSeriesRangeException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.unsupportedMarineSeriesRange"), "UNSUPPORTED_MARINE_SERIES_RANGE", request);
     }
 
     // The one handler that returns a ResponseEntity rather than a bare ProblemDetail: a 429
