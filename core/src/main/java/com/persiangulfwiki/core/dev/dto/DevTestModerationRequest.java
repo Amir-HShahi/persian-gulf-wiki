@@ -5,11 +5,12 @@ import com.persiangulfwiki.core.moderation.entity.ModerationTaskState;
 
 import java.util.UUID;
 
-// Every field is nullable, matching DevTestArticleRequest. At most one of revisionId and
-// mediaMetadataVersionId may be sent (ck_moderation_tasks_exactly_one_target, V18); sending both
-// is refused by that constraint as a 409. Sending neither mints a throwaway article whose first
-// revision is PENDING and targets that -- its id comes back in the response. Pass a target only
-// to judge a specific one, e.g. from POST /api/dev/test-articles or POST /api/dev/test-media.
+// Every field is nullable, matching DevTestArticleRequest. At most one of revisionId,
+// mediaMetadataVersionId and subjectRevisionId may be sent (ck_moderation_tasks_exactly_one_target,
+// V18/V24); sending more is refused by that constraint as a 409. Sending none mints a throwaway
+// article whose first revision is PENDING and targets that -- its id comes back in the response.
+// Pass a target only to judge a specific one, e.g. from POST /api/dev/test-articles,
+// /api/dev/test-media or /api/dev/test-subject-revisions.
 //
 // state is the point of this endpoint. The real flow only ever reaches CLAIMED by having a
 // moderator call claim, and DECIDED by having that same moderator then call decide on a
@@ -31,5 +32,6 @@ public record DevTestModerationRequest(
         UUID claimedByUserId,
         Decision decision,
         String reason,
-        UUID mediaMetadataVersionId) {
+        UUID mediaMetadataVersionId,
+        UUID subjectRevisionId) {
 }

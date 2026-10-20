@@ -69,3 +69,17 @@ app:
     # TTL for the gallery fixtures minted by POST /api/dev/test-media, reclaimed hourly by
     # DevTestMediaSweeper at :15 -- ahead of the user sweep at :30, see the cron comment there.
     test-media-ttl-hours: ${DEV_TEST_MEDIA_TTL_HOURS:6}
+
+    # TTL for the field groups and definitions minted by POST /api/dev/test-attribute-groups and
+    # /api/dev/test-attribute-definitions, reclaimed hourly by DevTestAttributeSweeper. Their
+    # options and labels go with them through ON DELETE CASCADE, so they need no TTL of their own.
+    test-attribute-ttl-hours: ${DEV_TEST_ATTRIBUTE_TTL_HOURS:6}
+
+    # TTL for the subject revisions minted by POST /api/dev/test-subject-revisions, reclaimed hourly
+    # by DevTestSubjectRevisionSweeper at :35. A live one is left for the subject sweep, which takes
+    # it with its test subject.
+    test-subject-revision-ttl-hours: ${DEV_TEST_SUBJECT_REVISION_TTL_HOURS:6}
+
+    # TTL for the topics minted by POST /api/dev/test-topics, reclaimed hourly by DevTestTopicSweeper
+    # at :25. One still set on a revision is left until the article sweep has removed that revision.
+    test-topic-ttl-hours: ${DEV_TEST_TOPIC_TTL_HOURS:6}

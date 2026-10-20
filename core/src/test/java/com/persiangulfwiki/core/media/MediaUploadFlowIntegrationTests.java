@@ -5,7 +5,6 @@ import tools.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.persiangulfwiki.core.TestcontainersConfiguration;
 import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
-import com.persiangulfwiki.core.article.entity.EntityType;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
 import com.persiangulfwiki.core.auth.dto.RegisterRequest;
 import com.persiangulfwiki.core.media.entity.ArticleMedia;
@@ -158,8 +157,8 @@ class MediaUploadFlowIntegrationTests {
     // A draft article: readable only by its author (and moderators), which is exactly the
     // visibility the reserve route has to respect.
     private UUID createArticle(Account author) throws Exception {
-        CreateArticleRequest request = new CreateArticleRequest(null, EntityType.GENERIC, "fa",
-                "media-" + UUID.randomUUID(), "Title", objectMapper.readTree("{\"text\":\"body\"}"), null);
+        CreateArticleRequest request = new CreateArticleRequest(null, "fa",
+                "media-" + UUID.randomUUID(), "Title", objectMapper.readTree("{\"text\":\"body\"}"), null, null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(author.accessCookie())
                         .with(xsrf())
@@ -235,6 +234,8 @@ class MediaUploadFlowIntegrationTests {
     }
 
     private List<MapRecord<String, Object, Object>> jobsFor(UUID mediaId) {
+        // read(...) takes generic varargs and is not @SafeVarargs; the array holds one offset.
+        @SuppressWarnings("unchecked")
         List<MapRecord<String, Object, Object>> all = redisTemplate.opsForStream().read(StreamOffset.fromStart(jobStream));
         return all == null ? List.of() : all.stream()
                 .filter(record -> mediaId.toString().equals(record.getValue().get("submission_id")))

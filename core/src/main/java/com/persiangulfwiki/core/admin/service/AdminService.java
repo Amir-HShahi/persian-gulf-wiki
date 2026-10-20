@@ -10,6 +10,7 @@ import com.persiangulfwiki.core.admin.exception.LastAdminException;
 import com.persiangulfwiki.core.admin.exception.RoleAlreadyGrantedException;
 import com.persiangulfwiki.core.admin.exception.RoleNotGrantedException;
 import com.persiangulfwiki.core.audit.service.AuditLogService;
+import com.persiangulfwiki.core.common.dto.PageResponse;
 import com.persiangulfwiki.core.user.entity.Role;
 import com.persiangulfwiki.core.user.entity.User;
 import com.persiangulfwiki.core.user.entity.UserRole;
@@ -20,6 +21,7 @@ import com.persiangulfwiki.core.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,13 +38,12 @@ public class AdminService {
     private final UserRoleRepository userRoleRepository;
     private final AuditLogService auditLogService;
 
-    public List<AdminUserResponse> listUsers(int page, int size) {
+    public PageResponse<AdminUserResponse> listUsers(int page, int size) {
         if (page < 0 || size < 1) {
             throw new InvalidPagingParametersException("page must be >= 0 and size must be >= 1");
         }
-        return userRepository.findAll(PageRequest.of(page, size)).stream()
-                .map(this::toAdminUserResponse)
-                .toList();
+        Page<User> users = userRepository.findAll(PageRequest.of(page, size));
+        return new PageResponse<>(users.stream().map(this::toAdminUserResponse).toList(), users.getTotalElements());
     }
 
     @Transactional
@@ -50,11 +51,11 @@ public class AdminService {
         User targetUser = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new UserNotFoundException("user not found: " + targetUserId));
 
-        String detail = "role=" + request.role() + ", entityType=" + request.entityType();
+        String detail = "role=" + request.role() + ", expertise=" + request.expertise();
 
         switch (request.action()) {
             case GRANT -> {
-                if (userRoleRepository.findByUserIdAndRoleAndEntityType(targetUserId, request.role(), request.entityType())
+                if (userRoleRepository.findByUserIdAndRoleAndExpertise(targetUserId, request.role(), request.expertise())
                         .isPresent()) {
                     throw new RoleAlreadyGrantedException();
                 }
@@ -62,7 +63,7 @@ public class AdminService {
                 userRoleRepository.save(UserRole.builder()
                         .user(targetUser)
                         .role(request.role())
-                        .entityType(request.entityType())
+                        .expertise(request.expertise())
                         .build());
 
                 auditLogService.record(actingAdminId, "ROLE_GRANT", targetUserId, detail);
@@ -70,7 +71,7 @@ public class AdminService {
             }
             case REVOKE -> {
                 UserRole existing = userRoleRepository
-                        .findByUserIdAndRoleAndEntityType(targetUserId, request.role(), request.entityType())
+                        .findByUserIdAndRoleAndExpertise(targetUserId, request.role(), request.expertise())
                         .orElseThrow(RoleNotGrantedException::new);
 
                 // The highest-trust action this endpoint can take: revoking the system's
@@ -116,7 +117,7 @@ public class AdminService {
 
     private AdminUserResponse toAdminUserResponse(User user) {
         List<RoleAssignment> roles = userRoleRepository.findByUserId(user.getId()).stream()
-                .map(userRole -> new RoleAssignment(userRole.getRole(), userRole.getEntityType()))
+                .map(userRole -> new RoleAssignment(userRole.getRole(), userRole.getExpertise()))
                 .toList();
         return new AdminUserResponse(
                 user.getId(),

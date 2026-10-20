@@ -89,19 +89,20 @@ public class SecurityConfig {
                         .requestMatchers(PublicRoutes.API_DOCS).permitAll()
                         // Deploy health check hits this unauthenticated — no app data exposed.
                         .requestMatchers(PublicRoutes.HEALTH).permitAll()
-                        // Public wiki content: reading an article, subject or citation needs no
-                        // account. Scoped to GET on purpose (see PublicRoutes.CONTENT_READS):
-                        // POST /api/subjects, POST /api/sources and every article mutation fall
-                        // through to anyRequest().authenticated() below and keep their CSRF
-                        // requirement (and, for subjects/sources, their role check). Article
-                        // mutations carry no role check at all — see ArticleController's class
-                        // comment for why gating authorship by moderator role would be
-                        // self-defeating here.
+                        // Public wiki content: reading an article, subject, subject revision,
+                        // citation or a kind's field vocabulary needs no account. Scoped to GET on
+                        // purpose (see PublicRoutes.CONTENT_READS): POST /api/sources and every
+                        // article and subject revision mutation fall through to
+                        // anyRequest().authenticated() below and keep their CSRF requirement.
+                        // Article and subject revision mutations carry no role check at all — see
+                        // ArticleController's class comment for why gating authorship by moderator
+                        // role would be self-defeating here.
                         //
                         // permitAll only lets the request in. Anything not yet approved (a
                         // revision, a translation, or an article with no approved translation)
                         // is still restricted to its authors and moderators, enforced in
-                        // ArticleVisibilityService/ArticleRevisionService, not by this matcher.
+                        // ArticleVisibilityService/ArticleRevisionService/SubjectRevisionService,
+                        // not by this matcher.
                         //
                         // These routes, plus the docs and health routes above, are also where
                         // PendingPasswordSetupFilter and EmailVerificationRequiredFilter treat a

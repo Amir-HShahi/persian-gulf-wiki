@@ -164,6 +164,8 @@ public class MediaResultConsumer implements SmartLifecycle {
                     createGroupIfMissing();
                     hasGroup = true;
                 }
+                // read(...) takes generic varargs and is not @SafeVarargs; the array holds one offset.
+                @SuppressWarnings("unchecked")
                 List<MapRecord<String, Object, Object>> records = redisTemplate.opsForStream().read(
                         Consumer.from(consumerGroup, consumerName),
                         StreamReadOptions.empty().count(READ_BATCH).block(READ_BLOCK),

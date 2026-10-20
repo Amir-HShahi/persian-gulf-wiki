@@ -1,12 +1,15 @@
 package com.persiangulfwiki.core.article.entity;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -16,10 +19,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 // One version of one translation's content. The *history* is append-only -- a superseded or
@@ -119,6 +125,25 @@ public class ArticleRevision {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    // The topics this revision says the article is about (V30). Only a revision of the article's
+    // canonical-language translation carries any; ArticleRevisionService enforces that. Batch-loaded
+    // so a revision history doesn't load each revision's set separately.
+    @ElementCollection
+    @CollectionTable(name = "revision_topics", joinColumns = @JoinColumn(name = "revision_id"))
+    @Column(name = "topic_id", nullable = false)
+    @BatchSize(size = 50)
+    @Builder.Default
+    private Set<UUID> topicIds = new HashSet<>();
+
+    public Set<UUID> getTopicIds() {
+        return Set.copyOf(topicIds);
+    }
+
+    public void setTopicIds(Set<UUID> topicIds) {
+        this.topicIds.clear();
+        this.topicIds.addAll(topicIds);
+    }
 
     @PrePersist
     void onCreate() {

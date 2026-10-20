@@ -5,7 +5,6 @@ import tools.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.persiangulfwiki.core.TestcontainersConfiguration;
 import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
-import com.persiangulfwiki.core.article.entity.EntityType;
 import com.persiangulfwiki.core.article.entity.RevisionStatus;
 import com.persiangulfwiki.core.article.service.ArticleRevisionService;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
@@ -181,8 +180,8 @@ class MediaGalleryFlowIntegrationTests {
 
     // A draft: visible only to its author and moderators.
     private UUID createDraftArticle(Account author) throws Exception {
-        CreateArticleRequest request = new CreateArticleRequest(null, EntityType.GENERIC, "fa",
-                "gallery-" + UUID.randomUUID(), "Title", objectMapper.readTree("{\"text\":\"body\"}"), null);
+        CreateArticleRequest request = new CreateArticleRequest(null, "fa",
+                "gallery-" + UUID.randomUUID(), "Title", objectMapper.readTree("{\"text\":\"body\"}"), null, null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(author.accessCookie())
                         .with(xsrf())
@@ -256,6 +255,8 @@ class MediaGalleryFlowIntegrationTests {
     }
 
     private String jobIdFor(UUID mediaId) {
+        // read(...) takes generic varargs and is not @SafeVarargs; the array holds one offset.
+        @SuppressWarnings("unchecked")
         List<MapRecord<String, Object, Object>> jobs = redisTemplate.opsForStream().read(StreamOffset.fromStart(jobStream));
         return jobs.stream()
                 .filter(record -> mediaId.toString().equals(record.getValue().get("submission_id")))

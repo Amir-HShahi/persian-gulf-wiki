@@ -1,11 +1,11 @@
 package com.persiangulfwiki.core.dev;
 
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import com.persiangulfwiki.core.TestcontainersConfiguration;
 import com.persiangulfwiki.core.article.entity.Article;
 import com.persiangulfwiki.core.article.entity.ArticleRevision;
 import com.persiangulfwiki.core.article.entity.ArticleTranslation;
-import com.persiangulfwiki.core.article.entity.EntityType;
 import com.persiangulfwiki.core.article.entity.RevisionStatus;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
 import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
@@ -52,10 +52,12 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -150,10 +152,26 @@ class DevTestContentEndpointIntegrationTests {
         return objectMapper.readValue(body, DevTestModerationResponse.class);
     }
 
+    private static DevTestArticleRequest articleOf(UUID subjectId, RevisionStatus status, Boolean isMain) {
+        return new DevTestArticleRequest(subjectId, null, null, status, null, null, null, null, isMain, null, null);
+    }
+
+    private Optional<UUID> mainArticleOf(UUID subjectId) {
+        return articleRepository.findMainBySubjectId(subjectId).map(Article::getId);
+    }
+
+    // Articles before their subject: articles.subject_id has no ON DELETE action, so a leftover
+    // would make the subject sweep in sweeperReclaimsMintedRowsAndSparesHandMadeOnes fail.
+    private void deleteArticles(List<UUID> articleIds) throws Exception {
+        for (UUID articleId : articleIds) {
+            mockMvc.perform(delete("/api/dev/test-articles/" + articleId)).andExpect(status().isNoContent());
+        }
+    }
+
     // At most one task can ever exist per revision (uq_moderation_tasks_revision), so every
     // moderation case below needs a revision of its own rather than a shared fixture.
     private UUID mintRevisionId() throws Exception {
-        return mintArticle(new DevTestArticleRequest(null, null, null, null, null, null, null, null, null))
+        return mintArticle(new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null))
                 .revisionId();
     }
 
@@ -170,7 +188,7 @@ class DevTestContentEndpointIntegrationTests {
     // call this before an account exists.
     @Test
     void mintsAMarkedSubjectWithItsDetailRow() throws Exception {
-        UUID subjectId = mintSubject(new DevTestSubjectRequest(SubjectKind.ISLAND, null));
+        UUID subjectId = mintSubject(new DevTestSubjectRequest(SubjectKind.ISLAND, null, null));
 
         Subject subject = subjectRepository.findById(subjectId).orElseThrow();
         assertThat(subject.getKind()).isEqualTo(SubjectKind.ISLAND);
@@ -182,7 +200,7 @@ class DevTestContentEndpointIntegrationTests {
     // the service layer at all.
     @Test
     void mintsASubjectWithNoDetailRowAtAll() throws Exception {
-        UUID subjectId = mintSubject(new DevTestSubjectRequest(SubjectKind.ISLAND, false));
+        UUID subjectId = mintSubject(new DevTestSubjectRequest(SubjectKind.ISLAND, false, null));
 
         assertThat(subjectRepository.findById(subjectId)).isPresent();
         assertThat(islandRepository.findById(subjectId)).isEmpty();
@@ -190,7 +208,7 @@ class DevTestContentEndpointIntegrationTests {
 
     @Test
     void deletesOnlySubjectsItMinted() throws Exception {
-        UUID mintedId = mintSubject(new DevTestSubjectRequest(SubjectKind.PORT, null));
+        UUID mintedId = mintSubject(new DevTestSubjectRequest(SubjectKind.PORT, null, null));
 
         mockMvc.perform(delete("/api/dev/test-subjects/" + mintedId))
                 .andExpect(status().isNoContent());
@@ -210,6 +228,57 @@ class DevTestContentEndpointIntegrationTests {
         mockMvc.perform(delete("/api/dev/test-subjects/" + handMade.getId()))
                 .andExpect(status().isNotFound());
         assertThat(subjectRepository.findById(handMade.getId())).isPresent();
+    }
+
+    // Phase 7: the deleted state, without a moderator account.
+    @Test
+    void mintsASubjectAlreadyDeleted() throws Exception {
+        UUID subjectId = mintSubject(new DevTestSubjectRequest(SubjectKind.ISLAND, null, true));
+
+        assertThat(subjectRepository.findById(subjectId).orElseThrow().isDeleted()).isTrue();
+        mockMvc.perform(get("/api/subjects/" + subjectId)).andExpect(status().isNotFound());
+    }
+
+    // The merged-away state in one call: the source's id answers with the target until the redirect
+    // is removed, after which it is an ordinary deleted subject.
+    @Test
+    void mintsAndDeletesARedirectBetweenMintedSubjects() throws Exception {
+        UUID sourceId = mintSubject(new DevTestSubjectRequest(SubjectKind.ISLAND, null, null));
+        UUID targetId = mintSubject(new DevTestSubjectRequest(SubjectKind.ISLAND, null, null));
+
+        mockMvc.perform(post("/api/dev/test-subject-redirects")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"sourceId\": \"%s\", \"targetId\": \"%s\"}".formatted(sourceId, targetId)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.sourceId").value(sourceId.toString()))
+                .andExpect(jsonPath("$.targetId").value(targetId.toString()))
+                .andExpect(jsonPath("$.mergedAt").exists());
+        assertThat(subjectRepository.findById(sourceId).orElseThrow().isDeleted()).isTrue();
+        mockMvc.perform(get("/api/subjects/" + sourceId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(targetId.toString()))
+                .andExpect(jsonPath("$.data.redirectedFrom").value(sourceId.toString()));
+
+        mockMvc.perform(delete("/api/dev/test-subject-redirects/" + sourceId)).andExpect(status().isNoContent());
+        mockMvc.perform(get("/api/subjects/" + sourceId)).andExpect(status().isNotFound());
+        mockMvc.perform(delete("/api/dev/test-subject-redirects/" + sourceId)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void refusesARedirectInvolvingASubjectItDidNotMint() throws Exception {
+        Subject handMade = subjectRepository.save(Subject.builder().kind(SubjectKind.ISLAND).build());
+        UUID minted = mintSubject(new DevTestSubjectRequest(SubjectKind.ISLAND, null, null));
+
+        String redirect = "{\"sourceId\": \"%s\", \"targetId\": \"%s\"}";
+        for (String body : List.of(redirect.formatted(handMade.getId(), minted),
+                redirect.formatted(minted, handMade.getId()))) {
+            mockMvc.perform(post("/api/dev/test-subject-redirects")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    .andExpect(status().isNotFound());
+        }
+        assertThat(subjectRepository.findById(handMade.getId()).orElseThrow().isDeleted()).isFalse();
+        assertThat(subjectRepository.findById(minted).orElseThrow().isDeleted()).isFalse();
     }
 
     @Test
@@ -238,7 +307,7 @@ class DevTestContentEndpointIntegrationTests {
     // sweeper's selectivity without waiting out a real TTL.
     @Test
     void sweeperReclaimsMintedRowsAndSparesHandMadeOnes() throws Exception {
-        UUID mintedSubjectId = mintSubject(new DevTestSubjectRequest(SubjectKind.OIL_FIELD, null));
+        UUID mintedSubjectId = mintSubject(new DevTestSubjectRequest(SubjectKind.OIL_FIELD, null, null));
         UUID mintedSourceId = mintSource(new DevTestSourceRequest(null, null));
         Subject handMadeSubject = subjectRepository.save(Subject.builder().kind(SubjectKind.PORT).build());
         Source handMadeSource = sourceRepository.save(Source.builder().title("Survives the sweep").build());
@@ -256,11 +325,11 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void mintsAMarkedArticleWithItsTranslationAndFirstRevision() throws Exception {
         DevTestArticleResponse minted = mintArticle(
-                new DevTestArticleRequest(null, null, null, null, null, null, null, null, null));
+                new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null));
 
         Article article = articleRepository.findById(minted.articleId()).orElseThrow();
         assertThat(article.getDevMarker()).isNotNull();
-        assertThat(article.getEntityType()).isEqualTo(EntityType.GENERIC);
+        assertThat(article.getSubjectId()).isNull();
 
         ArticleTranslation translation = articleTranslationRepository.findById(minted.translationId()).orElseThrow();
         assertThat(translation.getArticleId()).isEqualTo(article.getId());
@@ -282,16 +351,138 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void mintsARevisionAtApprovedWithNoModerationHistory() throws Exception {
         DevTestArticleResponse minted = mintArticle(new DevTestArticleRequest(
-                null, null, null, null, RevisionStatus.APPROVED, null, null, null, null));
+                null, null, null, RevisionStatus.APPROVED, null, null, null, null, null, null, null));
 
         ArticleRevision revision = articleRevisionRepository.findById(minted.revisionId()).orElseThrow();
         assertThat(revision.getStatus()).isEqualTo(RevisionStatus.APPROVED);
     }
 
+    // With no kind field on the request any more, binding a minted subject is the only way to
+    // get an article of a given kind -- and the public read must report that subject's kind.
+    @Test
+    void mintsAnArticleBoundToASubjectThatReportsTheSubjectsKind() throws Exception {
+        UUID subjectId = mintSubject(new DevTestSubjectRequest(SubjectKind.SPECIES, null, null));
+
+        DevTestArticleResponse minted = mintArticle(new DevTestArticleRequest(
+                subjectId, null, null, RevisionStatus.APPROVED, null, null, null, null, null, null, null));
+
+        // Deleted before returning: articles.subject_id has no ON DELETE action, so a leftover
+        // would make the subject sweep in sweeperReclaimsMintedRowsAndSparesHandMadeOnes fail.
+        // The real sweepers don't hit this, since the article sweep runs first.
+        try {
+            assertThat(articleRepository.findById(minted.articleId()).orElseThrow().getSubjectId())
+                    .isEqualTo(subjectId);
+            mockMvc.perform(get("/api/articles/" + minted.articleId()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.subjectKind").value("SPECIES"));
+        } finally {
+            mockMvc.perform(delete("/api/dev/test-articles/" + minted.articleId()))
+                    .andExpect(status().isNoContent());
+        }
+    }
+
+    // Checked up front rather than left to the foreign key, which would surface as a 409.
+    @Test
+    void mintingAnArticleForAnUnknownSubjectIsNotFound() throws Exception {
+        mockMvc.perform(post("/api/dev/test-articles")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new DevTestArticleRequest(
+                                UUID.randomUUID(), null, null, null, null, null, null, null, null, null, null))))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("SUBJECT_NOT_FOUND"));
+    }
+
+    // The real rule unless told otherwise: a subject's first APPROVED article is main, later ones and
+    // drafts are not; isMain false keeps a published one from being main, and true needs a subject
+    // that has no main yet.
+    @Test
+    void mintsMainArticlesByTheRealRuleUnlessToldOtherwise() throws Exception {
+        UUID subjectId = mintSubject(new DevTestSubjectRequest(SubjectKind.ISLAND, null, null));
+        List<UUID> minted = new ArrayList<>();
+        try {
+            DevTestArticleResponse heldBack = mintArticle(articleOf(subjectId, RevisionStatus.APPROVED, false));
+            minted.add(heldBack.articleId());
+            DevTestArticleResponse draft = mintArticle(articleOf(subjectId, RevisionStatus.DRAFT, null));
+            minted.add(draft.articleId());
+            DevTestArticleResponse first = mintArticle(articleOf(subjectId, RevisionStatus.APPROVED, null));
+            minted.add(first.articleId());
+            DevTestArticleResponse second = mintArticle(articleOf(subjectId, RevisionStatus.APPROVED, null));
+            minted.add(second.articleId());
+
+            assertThat(List.of(heldBack.isMain(), draft.isMain(), first.isMain(), second.isMain()))
+                    .containsExactly(false, false, true, false);
+            assertThat(mainArticleOf(subjectId)).contains(first.articleId());
+
+            mockMvc.perform(post("/api/dev/test-articles")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(
+                                    articleOf(subjectId, RevisionStatus.DRAFT, true))))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.code").value("DEV_TEST_MAIN_ARTICLE_TAKEN"));
+            mockMvc.perform(post("/api/dev/test-articles")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(
+                                    articleOf(null, RevisionStatus.APPROVED, true))))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("INVALID_DEV_TEST_ARTICLE_REQUEST"));
+        } finally {
+            deleteArticles(minted);
+        }
+    }
+
+    // A subject never loses its page to a fixture teardown: deleting or sweeping its main article
+    // hands the role to its oldest remaining published article.
+    @Test
+    void removingAMainArticlePromotesTheSubjectsNextPublishedOne() throws Exception {
+        UUID subjectId = mintSubject(new DevTestSubjectRequest(SubjectKind.ISLAND, null, null));
+        List<UUID> minted = new ArrayList<>();
+        try {
+            DevTestArticleResponse first = mintArticle(articleOf(subjectId, RevisionStatus.APPROVED, null));
+            DevTestArticleResponse draft = mintArticle(articleOf(subjectId, RevisionStatus.DRAFT, null));
+            minted.add(draft.articleId());
+            Instant threshold = Instant.now();
+            DevTestArticleResponse second = mintArticle(articleOf(subjectId, RevisionStatus.APPROVED, null));
+            minted.add(second.articleId());
+            DevTestArticleResponse third = mintArticle(articleOf(subjectId, RevisionStatus.APPROVED, null));
+            minted.add(third.articleId());
+
+            // Swept with the other articles older than the threshold; the draft is no candidate.
+            articleSweeper.deleteOlderThan(threshold);
+            minted.remove(draft.articleId());
+            assertThat(articleRepository.findById(first.articleId())).isEmpty();
+            assertThat(mainArticleOf(subjectId)).contains(second.articleId());
+
+            mockMvc.perform(delete("/api/dev/test-articles/" + second.articleId()))
+                    .andExpect(status().isNoContent());
+            minted.remove(second.articleId());
+            assertThat(mainArticleOf(subjectId)).contains(third.articleId());
+        } finally {
+            deleteArticles(minted);
+        }
+    }
+
+    // The body is stored unchecked, so an E2E suite can reach a link whose subject is gone; reading it
+    // back resolves no link for it.
+    @Test
+    void mintsABodyAsGivenEvenWithALinkToAMissingSubject() throws Exception {
+        UUID missingSubjectId = UUID.randomUUID();
+        JsonNode body = objectMapper.readTree("""
+                {"type": "doc", "content": [{"type": "subjectLink", "subjectId": "%s"}]}"""
+                .formatted(missingSubjectId));
+        DevTestArticleResponse minted = mintArticle(new DevTestArticleRequest(
+                null, null, null, RevisionStatus.APPROVED, null, null, null, null, null, body, null));
+
+        String revision = "/api/articles/" + minted.articleId() + "/translations/fa/revisions/" + minted.revisionId();
+        mockMvc.perform(get(revision))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.body.content[0].subjectId").value(missingSubjectId.toString()))
+                .andExpect(jsonPath("$.data.subjectLinks").isEmpty());
+    }
+
     @Test
     void deletesAMintedArticleAndCascadesToItsTranslationAndRevision() throws Exception {
         DevTestArticleResponse minted = mintArticle(
-                new DevTestArticleRequest(null, null, null, null, null, null, null, null, null));
+                new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null));
 
         mockMvc.perform(delete("/api/dev/test-articles/" + minted.articleId()))
                 .andExpect(status().isNoContent());
@@ -310,7 +501,7 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void refusesToDeleteAnArticleItDidNotMint() throws Exception {
         Article handMade = articleRepository.save(
-                Article.builder().entityType(EntityType.GENERIC).canonicalLanguage("fa").build());
+                Article.builder().canonicalLanguage("fa").build());
 
         mockMvc.perform(delete("/api/dev/test-articles/" + handMade.getId()))
                 .andExpect(status().isNotFound());
@@ -320,9 +511,9 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void sweeperReclaimsAgedMintedArticlesButSparesHandMadeOnes() throws Exception {
         DevTestArticleResponse minted = mintArticle(
-                new DevTestArticleRequest(null, null, null, null, null, null, null, null, null));
+                new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null));
         Article handMade = articleRepository.save(
-                Article.builder().entityType(EntityType.GENERIC).canonicalLanguage("fa").build());
+                Article.builder().canonicalLanguage("fa").build());
 
         Instant threshold = Instant.now().plus(1, ChronoUnit.HOURS);
         articleSweeper.deleteOlderThan(threshold);
@@ -336,7 +527,7 @@ class DevTestContentEndpointIntegrationTests {
         UUID revisionId = mintRevisionId();
 
         DevTestModerationResponse minted =
-                mintModerationTask(new DevTestModerationRequest(revisionId, null, null, null, null, null));
+                mintModerationTask(new DevTestModerationRequest(revisionId, null, null, null, null, null, null));
 
         ModerationTask task = moderationTaskRepository.findById(minted.taskId()).orElseThrow();
         assertThat(task.getDevMarker()).isNotNull();
@@ -353,7 +544,7 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void mintsAClaimedTaskWithBothClaimColumnsSet() throws Exception {
         DevTestModerationResponse minted = mintModerationTask(
-                new DevTestModerationRequest(mintRevisionId(), ModerationTaskState.CLAIMED, null, null, null, null));
+                new DevTestModerationRequest(mintRevisionId(), ModerationTaskState.CLAIMED, null, null, null, null, null));
 
         ModerationTask task = moderationTaskRepository.findById(minted.taskId()).orElseThrow();
         assertThat(task.getState()).isEqualTo(ModerationTaskState.CLAIMED);
@@ -370,7 +561,7 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void mintsADecidedTaskWithASeededDecisionOnItsHistory() throws Exception {
         DevTestModerationResponse minted = mintModerationTask(new DevTestModerationRequest(
-                mintRevisionId(), ModerationTaskState.DECIDED, null, Decision.REJECT, "out of scope", null));
+                mintRevisionId(), ModerationTaskState.DECIDED, null, Decision.REJECT, "out of scope", null, null));
 
         ModerationTask task = moderationTaskRepository.findById(minted.taskId()).orElseThrow();
         assertThat(task.getState()).isEqualTo(ModerationTaskState.DECIDED);
@@ -393,7 +584,7 @@ class DevTestContentEndpointIntegrationTests {
         mockMvc.perform(post("/api/dev/test-moderation-tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new DevTestModerationRequest(UUID.randomUUID(), null, null, null, null, null))))
+                                new DevTestModerationRequest(UUID.randomUUID(), null, null, null, null, null, null))))
                 .andExpect(status().isNotFound());
 
     }
@@ -407,8 +598,8 @@ class DevTestContentEndpointIntegrationTests {
                         .content("{}"))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
-        UUID taskId = UUID.fromString(objectMapper.readTree(body).get("taskId").asText());
-        UUID revisionId = UUID.fromString(objectMapper.readTree(body).get("revisionId").asText());
+        UUID taskId = UUID.fromString(objectMapper.readTree(body).get("taskId").asString());
+        UUID revisionId = UUID.fromString(objectMapper.readTree(body).get("revisionId").asString());
 
         assertThat(articleRevisionRepository.findById(revisionId)).get()
                 .extracting(revision -> revision.getStatus()).isEqualTo(RevisionStatus.PENDING);
@@ -420,7 +611,7 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void deletesAMintedModerationTaskAndCascadesToItsDecision() throws Exception {
         DevTestModerationResponse minted = mintModerationTask(new DevTestModerationRequest(
-                mintRevisionId(), ModerationTaskState.DECIDED, null, Decision.APPROVE, null, null));
+                mintRevisionId(), ModerationTaskState.DECIDED, null, Decision.APPROVE, null, null, null));
 
         mockMvc.perform(delete("/api/dev/test-moderation-tasks/" + minted.taskId()))
                 .andExpect(status().isNoContent());
@@ -452,7 +643,7 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void sweeperReclaimsAgedMintedModerationTasksButSparesHandMadeOnes() throws Exception {
         DevTestModerationResponse minted =
-                mintModerationTask(new DevTestModerationRequest(mintRevisionId(), null, null, null, null, null));
+                mintModerationTask(new DevTestModerationRequest(mintRevisionId(), null, null, null, null, null, null));
         ModerationTask handMade = moderationTaskRepository.save(ModerationTask.builder()
                 .revisionId(mintRevisionId())
                 .state(ModerationTaskState.OPEN)
@@ -469,10 +660,10 @@ class DevTestContentEndpointIntegrationTests {
     // that adding it did not disturb them.
     @Test
     void existingFixtureRoutesStillWorkAlongsideTheModerationOne() throws Exception {
-        UUID subjectId = mintSubject(new DevTestSubjectRequest(SubjectKind.ISLAND, null));
+        UUID subjectId = mintSubject(new DevTestSubjectRequest(SubjectKind.ISLAND, null, null));
         UUID sourceId = mintSource(new DevTestSourceRequest(null, null));
         DevTestArticleResponse article = mintArticle(
-                new DevTestArticleRequest(null, null, null, null, null, null, null, null, null));
+                new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null));
 
         assertThat(subjectRepository.findById(subjectId)).isPresent();
         assertThat(sourceRepository.findById(sourceId)).isPresent();
@@ -495,7 +686,8 @@ class DevTestContentEndpointIntegrationTests {
     }
 
     private UUID mintArticleId() throws Exception {
-        return mintArticle(new DevTestArticleRequest(null, null, null, null, null, null, null, null, null)).articleId();
+        return mintArticle(new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null))
+                .articleId();
     }
 
     private DevTestMediaRequest mediaRequest(UUID articleId, ProcessingStatus processing, PublicationStatus publication) {
@@ -606,8 +798,8 @@ class DevTestContentEndpointIntegrationTests {
                         .content("{}"))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
-        UUID mediaId = UUID.fromString(objectMapper.readTree(body).get("mediaId").asText());
-        UUID articleId = UUID.fromString(objectMapper.readTree(body).get("articleId").asText());
+        UUID mediaId = UUID.fromString(objectMapper.readTree(body).get("mediaId").asString());
+        UUID articleId = UUID.fromString(objectMapper.readTree(body).get("articleId").asString());
 
         assertThat(articleRepository.findById(articleId)).get()
                 .extracting(article -> article.getDevMarker()).isEqualTo("e2e");
@@ -623,7 +815,7 @@ class DevTestContentEndpointIntegrationTests {
         DevTestMediaResponse media = mintMedia(mediaRequest(mintArticleId(), ProcessingStatus.READY, PublicationStatus.PENDING));
 
         DevTestModerationResponse minted = mintModerationTask(new DevTestModerationRequest(null,
-                ModerationTaskState.CLAIMED, null, null, null, media.firstMetadataVersionId()));
+                ModerationTaskState.CLAIMED, null, null, null, media.firstMetadataVersionId(), null));
         assertThat(minted.revisionId()).isNull();
         assertThat(minted.mediaMetadataVersionId()).isEqualTo(media.firstMetadataVersionId());
         ModerationTask task = moderationTaskRepository.findById(minted.taskId()).orElseThrow();
@@ -634,12 +826,12 @@ class DevTestContentEndpointIntegrationTests {
         mockMvc.perform(post("/api/dev/test-moderation-tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new DevTestModerationRequest(mintRevisionId(), null,
-                                null, null, null, mintMedia(mediaRequest(mintArticleId(), null, null)).firstMetadataVersionId()))))
+                                null, null, null, mintMedia(mediaRequest(mintArticleId(), null, null)).firstMetadataVersionId(), null))))
                 .andExpect(status().isConflict());
         mockMvc.perform(post("/api/dev/test-moderation-tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new DevTestModerationRequest(null, null, null, null,
-                                null, UUID.randomUUID()))))
+                                null, UUID.randomUUID(), null))))
                 .andExpect(status().isNotFound());
 
         // Deleting the minted item takes its task with it.

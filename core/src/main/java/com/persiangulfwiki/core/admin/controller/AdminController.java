@@ -5,6 +5,7 @@ import com.persiangulfwiki.core.admin.dto.RoleGrantRequest;
 import com.persiangulfwiki.core.admin.dto.UserStatusRequest;
 import com.persiangulfwiki.core.admin.service.AdminService;
 import com.persiangulfwiki.core.common.dto.ApiResult;
+import com.persiangulfwiki.core.common.dto.PageResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,7 +35,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -49,7 +49,7 @@ public class AdminController {
 
     @Operation(summary = "List users", description = "Admin only. Simple page/size paging, newest-registered ordering left to the "
             + "database's default id order (no explicit sort requested by this step).")
-    @ApiResponse(responseCode = "200", description = "Page of users.")
+    @ApiResponse(responseCode = "200", description = "One page of users, with the total number of users across all pages.")
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "Either the account is authenticated but not an admin, or its email address "
             + "is not yet verified — both surface as a plain 403 with no way to distinguish them from the "
@@ -60,15 +60,15 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users")
     @ResponseStatus(HttpStatus.OK)
-    public ApiResult<List<AdminUserResponse>> listUsers(
+    public ApiResult<PageResponse<AdminUserResponse>> listUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        List<AdminUserResponse> data = adminService.listUsers(page, size);
+        PageResponse<AdminUserResponse> data = adminService.listUsers(page, size);
         String message = messageSource.getMessage("success.adminUsersList", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }
 
-    @Operation(summary = "Grant or revoke a role", description = "Admin only. Granting a (role, entityType) pair the user already holds is a "
+    @Operation(summary = "Grant or revoke a role", description = "Admin only. Granting a (role, expertise) pair the user already holds is a "
             + "409 conflict; revoking one they don't hold is a 404. Revoking the system's last "
             + "ADMIN is rejected with a 409, since nothing could grant the next one back. Every "
             + "grant/revoke of ADMIN itself is additionally logged at WARN level, on top of the "
@@ -77,9 +77,12 @@ public class AdminController {
             + "confirmation message.")
     @ApiResponse(responseCode = "400", description = "Request failed field validation. `detail` is a fixed summary string "
             + "(\"validation failed\") — the actual failures are in the `errors` array, one entry per field with "
-            + "`field` and `message`. `role` and `action` are required; `entityType` is free-form and only "
-            + "meaningful for an EXPERT_REVIEWER role — leave it null for a global role such as MODERATOR or "
-            + "ADMIN.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+            + "`field` and `message`. `role` and `action` are required; `expertise` is one of ISLAND, PORT, "
+            + "OIL_FIELD, SPECIES, STRAIT, FISHING_GROUND, PROVINCE and only meaningful for an "
+            + "EXPERT_REVIEWER role — leave it null for a global "
+            + "role such as MODERATOR or ADMIN. A `role`, `action` or `expertise` value outside its allowed set "
+            + "(exact, upper case) is also a 400, but as an unreadable body: `code` is "
+            + "HTTP_MESSAGE_NOT_READABLE and there is no `errors` array.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "Either the account is authenticated but not an admin, or its email address "
             + "is not yet verified — both surface as a plain 403 with no way to distinguish them from the "

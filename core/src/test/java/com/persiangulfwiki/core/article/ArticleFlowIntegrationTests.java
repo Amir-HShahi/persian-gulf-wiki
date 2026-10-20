@@ -9,7 +9,6 @@ import com.persiangulfwiki.core.article.dto.CreateTranslationRequest;
 import com.persiangulfwiki.core.article.dto.UpdateRevisionRequest;
 import com.persiangulfwiki.core.article.entity.Article;
 import com.persiangulfwiki.core.article.entity.ArticleRevision;
-import com.persiangulfwiki.core.article.entity.EntityType;
 import com.persiangulfwiki.core.article.entity.RevisionStatus;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
 import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
@@ -18,8 +17,9 @@ import com.persiangulfwiki.core.article.service.ArticleRevisionService;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
 import com.persiangulfwiki.core.auth.dto.RegisterRequest;
 import com.persiangulfwiki.core.security.JwtService;
-import com.persiangulfwiki.core.subject.dto.CreateSubjectRequest;
+import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
+import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 import com.persiangulfwiki.core.user.entity.Role;
 import com.persiangulfwiki.core.user.entity.User;
 import com.persiangulfwiki.core.user.entity.UserRole;
@@ -57,7 +57,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 // Phase 2 (article core): article -> translation -> revision. Every GET is reachable without an
 // account, but shows an anonymous caller only approved content; every mutation needs an authenticated, email-verified account (any contributor, not
-// hasRole('MODERATOR') -- deliberately different from /api/subjects). See
+// hasRole('MODERATOR')). See
 // ArticleController's class comment and SecurityConfig's articles requestMatchers entry for
 // why. Structured the same way as SubjectFlowIntegrationTests: helpers first, then the new
 // behavior, then regression coverage for what this change could plausibly have broken
@@ -95,6 +95,9 @@ class ArticleFlowIntegrationTests {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private SubjectRepository subjectRepository;
 
     private void registerContributor(String username, String email) throws Exception {
         RegisterRequest register = new RegisterRequest(username, email, PASSWORD);
@@ -161,18 +164,15 @@ class ArticleFlowIntegrationTests {
         return Base64.getUrlEncoder().encodeToString(combined);
     }
 
-    // Creates an ISLAND subject through the real moderator-gated path so article tests can
-    // bind to a real subject id rather than a made-up one.
-    private UUID createIslandSubject(Cookie accessCookie, Cookie csrfCookie) throws Exception {
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.ISLAND, null, null, null, null);
-        String created = mockMvc.perform(post("/api/subjects")
-                        .cookie(accessCookie, csrfCookie)
-                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
-        return UUID.fromString(com.jayway.jsonpath.JsonPath.read(created, "$.data.id"));
+    // Seeded directly: since phase 3 the only API path to a subject is a moderated proposal
+    // (covered by SubjectRevisionFlowIntegrationTests), and these tests only need a real subject
+    // id to bind an article to.
+    private UUID createIslandSubject() {
+        return createSubject(SubjectKind.ISLAND);
+    }
+
+    private UUID createSubject(SubjectKind kind) {
+        return subjectRepository.save(Subject.builder().kind(kind).build()).getId();
     }
 
     private JsonNode simpleBody(String text) {
@@ -196,22 +196,19 @@ class ArticleFlowIntegrationTests {
 
     // --- Smoke: the new behavior this phase adds ---
 
-    // Main path: entityType is DERIVED from the bound subject's kind, never client-chosen,
+    // Main path: subjectKind is DERIVED from the bound subject's kind, never client-chosen,
     // and once its first revision is approved the article is readable by a caller with no
     // account at all -- proving the public-read rule, not merely session reuse.
     @Test
     void contributorCreatesSubjectBoundArticleAndAnonymousReadsItBack() throws Exception {
-        seedModerator("afmod1", "af-mod1@example.com");
-        Cookie modAccess = loginAccessCookie("af-mod1@example.com");
-        Cookie modCsrf = fetchCsrfCookie();
-        UUID subjectId = createIslandSubject(modAccess, modCsrf);
+        UUID subjectId = createIslandSubject();
 
         registerVerifiedContributor("afauth1", "af-author1@example.com");
         Cookie accessCookie = loginAccessCookie("af-author1@example.com");
         Cookie csrfCookie = fetchCsrfCookie();
 
-        CreateArticleRequest request = new CreateArticleRequest(subjectId, null, "fa",
-                uniqueSlug("hormuz-island"), "Hormuz Island", simpleBody("An island."), "Summary.");
+        CreateArticleRequest request = new CreateArticleRequest(subjectId, "fa",
+                uniqueSlug("hormuz-island"), "Hormuz Island", simpleBody("An island."), "Summary.", null);
 
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
@@ -220,7 +217,7 @@ class ArticleFlowIntegrationTests {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.subjectId").value(subjectId.toString()))
-                .andExpect(jsonPath("$.data.entityType").value("ISLAND"))
+                .andExpect(jsonPath("$.data.subjectKind").value("ISLAND"))
                 .andReturn().getResponse().getContentAsString();
 
         UUID articleId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(created, "$.data.id"));
@@ -228,72 +225,127 @@ class ArticleFlowIntegrationTests {
 
         mockMvc.perform(get("/api/articles/" + articleId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.entityType").value("ISLAND"))
+                .andExpect(jsonPath("$.data.subjectKind").value("ISLAND"))
                 .andExpect(jsonPath("$.data.subjectId").value(subjectId.toString()));
     }
 
-    // The subjectId -> entityType derivation is one-way: a client supplying entityType on a
-    // subject-bound article must be rejected, not silently overridden or accepted if it
-    // happens to agree with the derived value.
+    // An article with no subject has no kind: subjectKind is null -- there is no GENERIC
+    // placeholder any more -- and a kind sent by the client (under either the new or the old
+    // field name) is ignored rather than stored, since it is only ever read off the subject.
     @Test
-    void creatingSubjectBoundArticleWithExplicitEntityTypeIsRejected() throws Exception {
-        seedModerator("afmod2", "af-mod2@example.com");
-        Cookie modAccess = loginAccessCookie("af-mod2@example.com");
-        Cookie modCsrf = fetchCsrfCookie();
-        UUID subjectId = createIslandSubject(modAccess, modCsrf);
-
-        registerVerifiedContributor("afauth2", "af-author2@example.com");
-        Cookie accessCookie = loginAccessCookie("af-author2@example.com");
-        Cookie csrfCookie = fetchCsrfCookie();
-
-        CreateArticleRequest request = new CreateArticleRequest(subjectId, EntityType.ISLAND, "fa",
-                uniqueSlug("explicit-type"), "Title", simpleBody("body"), null);
-
-        mockMvc.perform(post("/api/articles")
-                        .cookie(accessCookie, csrfCookie)
-                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("ENTITY_TYPE_NOT_DERIVABLE"));
-    }
-
-    // A subject-less article has no kind to derive entityType from, so the client must say
-    // GENERIC explicitly -- omitting it must not be silently treated as GENERIC by default.
-    @Test
-    void creatingSubjectLessArticleWithoutEntityTypeIsRejected() throws Exception {
+    void subjectLessArticleHasNullSubjectKindEvenWhenClientSendsOne() throws Exception {
         registerVerifiedContributor("afauth3", "af-author3@example.com");
         Cookie accessCookie = loginAccessCookie("af-author3@example.com");
         Cookie csrfCookie = fetchCsrfCookie();
 
-        CreateArticleRequest request = new CreateArticleRequest(null, null, "fa",
-                uniqueSlug("no-entity-type"), "Title", simpleBody("body"), null);
+        String body = """
+                {"subjectKind":"SPECIES","entityType":"SPECIES","canonicalLanguage":"fa","slug":"%s",
+                 "title":"Title","body":{"text":"body"}}""".formatted(uniqueSlug("client-kind"));
 
-        mockMvc.perform(post("/api/articles")
+        String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("ENTITY_TYPE_NOT_DERIVABLE"));
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.subjectId").value(nullValue()))
+                .andExpect(jsonPath("$.data.subjectKind").value(nullValue()))
+                .andReturn().getResponse().getContentAsString();
+
+        UUID articleId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(created, "$.data.id"));
+        articleRevisionService.applyModerationOutcome(firstRevisionId(articleId, accessCookie), RevisionStatus.APPROVED);
+
+        mockMvc.perform(get("/api/articles/" + articleId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.subjectKind").value(nullValue()));
     }
 
+    // subjectKind is read off the subject at create time, so an unknown subjectId is still the
+    // 404 it was when the kind came from the same lookup -- not a foreign-key 409 from the insert.
     @Test
-    void creatingSubjectLessArticleWithNonGenericEntityTypeIsRejected() throws Exception {
+    void creatingArticleForUnknownSubjectIsNotFound() throws Exception {
         registerVerifiedContributor("afauth4", "af-author4@example.com");
         Cookie accessCookie = loginAccessCookie("af-author4@example.com");
         Cookie csrfCookie = fetchCsrfCookie();
 
-        CreateArticleRequest request = new CreateArticleRequest(null, EntityType.SPECIES, "fa",
-                uniqueSlug("wrong-entity-type"), "Title", simpleBody("body"), null);
+        CreateArticleRequest request = new CreateArticleRequest(UUID.randomUUID(), "fa",
+                uniqueSlug("unknown-subject"), "Title", simpleBody("body"), null, null);
 
         mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("ENTITY_TYPE_NOT_DERIVABLE"));
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("SUBJECT_NOT_FOUND"));
+    }
+
+    // The list's subjectKind filter joins through subjects: it keeps only articles whose subject
+    // is of that kind (case-insensitive, like the subjects filter), never a subject-less one.
+    // The unfiltered list must still include subject-less articles -- the regression an inner
+    // join would cause -- and every row reports its own subject's kind. A one-off language
+    // keeps other tests' published articles out of the counts.
+    @Test
+    void listFilterBySubjectKindKeepsOnlyThatKindAndUnfilteredListKeepsSubjectLessArticles() throws Exception {
+        UUID islandId = createSubject(SubjectKind.ISLAND);
+        UUID portId = createSubject(SubjectKind.PORT);
+
+        registerVerifiedContributor("afauth5k", "af-author5k@example.com");
+        Cookie accessCookie = loginAccessCookie("af-author5k@example.com");
+        Cookie csrfCookie = fetchCsrfCookie();
+        String language = "zz-" + UUID.randomUUID().toString().substring(0, 8);
+
+        UUID islandArticle = createApprovedArticle(islandId, language, accessCookie, csrfCookie);
+        UUID portArticle = createApprovedArticle(portId, language, accessCookie, csrfCookie);
+        UUID subjectLessArticle = createApprovedArticle(null, language, accessCookie, csrfCookie);
+
+        mockMvc.perform(get("/api/articles").param("language", language))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items.length()").value(3))
+                .andExpect(jsonPath("$.data.total").value(3))
+                // Newest first.
+                .andExpect(jsonPath("$.data.items[0].id").value(subjectLessArticle.toString()))
+                .andExpect(jsonPath("$.data.items[0].subjectKind").value(nullValue()))
+                .andExpect(jsonPath("$.data.items[1].id").value(portArticle.toString()))
+                .andExpect(jsonPath("$.data.items[1].subjectKind").value("PORT"))
+                .andExpect(jsonPath("$.data.items[2].id").value(islandArticle.toString()))
+                .andExpect(jsonPath("$.data.items[2].subjectKind").value("ISLAND"));
+
+        mockMvc.perform(get("/api/articles").param("language", language).param("subjectKind", "island"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items.length()").value(1))
+                .andExpect(jsonPath("$.data.total").value(1))
+                .andExpect(jsonPath("$.data.items[0].id").value(islandArticle.toString()))
+                .andExpect(jsonPath("$.data.items[0].subjectKind").value("ISLAND"));
+
+        mockMvc.perform(get("/api/articles").param("language", language).param("subjectKind", "SPECIES"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items.length()").value(0))
+                .andExpect(jsonPath("$.data.total").value(0));
+
+        // The total counts every page, not just the one returned.
+        mockMvc.perform(get("/api/articles").param("language", language).param("page", "1").param("size", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items.length()").value(1))
+                .andExpect(jsonPath("$.data.items[0].id").value(islandArticle.toString()))
+                .andExpect(jsonPath("$.data.total").value(3));
+    }
+
+    private UUID createApprovedArticle(@Nullable UUID subjectId, String language, Cookie accessCookie,
+            Cookie csrfCookie) throws Exception {
+        CreateArticleRequest request = new CreateArticleRequest(subjectId, language,
+                uniqueSlug("kind-filter"), "Title", simpleBody("body"), null, null);
+        String created = mockMvc.perform(post("/api/articles")
+                        .cookie(accessCookie, csrfCookie)
+                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        UUID articleId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(created, "$.data.id"));
+        articleRevisionService.applyModerationOutcome(
+                firstRevisionId(articleId, language, accessCookie), RevisionStatus.APPROVED);
+        return articleId;
     }
 
     // Atomicity: creating an article also writes its canonical translation and that
@@ -307,8 +359,8 @@ class ArticleFlowIntegrationTests {
         Cookie accessCookie = loginAccessCookie("af-author5@example.com");
         Cookie csrfCookie = fetchCsrfCookie();
 
-        CreateArticleRequest request = new CreateArticleRequest(null, EntityType.GENERIC, "fa",
-                uniqueSlug("atomic-create"), "Title", nestedBody(), "Summary");
+        CreateArticleRequest request = new CreateArticleRequest(null, "fa",
+                uniqueSlug("atomic-create"), "Title", nestedBody(), "Summary", null);
 
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
@@ -347,8 +399,8 @@ class ArticleFlowIntegrationTests {
         Cookie accessCookie = loginAccessCookie("af-author6@example.com");
         Cookie csrfCookie = fetchCsrfCookie();
 
-        CreateArticleRequest createArticle = new CreateArticleRequest(null, EntityType.GENERIC, "fa",
-                uniqueSlug("multi-lang"), "Title fa", simpleBody("fa body"), null);
+        CreateArticleRequest createArticle = new CreateArticleRequest(null, "fa",
+                uniqueSlug("multi-lang"), "Title fa", simpleBody("fa body"), null, null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -392,8 +444,8 @@ class ArticleFlowIntegrationTests {
         Cookie csrfCookie = fetchCsrfCookie();
 
         String sharedSlug = uniqueSlug("shared-slug");
-        CreateArticleRequest first = new CreateArticleRequest(null, EntityType.GENERIC, "fa",
-                sharedSlug, "First", simpleBody("body"), null);
+        CreateArticleRequest first = new CreateArticleRequest(null, "fa",
+                sharedSlug, "First", simpleBody("body"), null, null);
         mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -401,8 +453,8 @@ class ArticleFlowIntegrationTests {
                         .content(objectMapper.writeValueAsString(first)))
                 .andExpect(status().isCreated());
 
-        CreateArticleRequest second = new CreateArticleRequest(null, EntityType.GENERIC, "en",
-                sharedSlug, "Second", simpleBody("body"), null);
+        CreateArticleRequest second = new CreateArticleRequest(null, "en",
+                sharedSlug, "Second", simpleBody("body"), null, null);
         mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -421,8 +473,8 @@ class ArticleFlowIntegrationTests {
         Cookie accessCookie = loginAccessCookie("af-author8@example.com");
         Cookie csrfCookie = fetchCsrfCookie();
 
-        CreateArticleRequest createArticle = new CreateArticleRequest(null, EntityType.GENERIC, "fa",
-                uniqueSlug("patch-draft"), "Original title", simpleBody("original"), "orig summary");
+        CreateArticleRequest createArticle = new CreateArticleRequest(null, "fa",
+                uniqueSlug("patch-draft"), "Original title", simpleBody("original"), "orig summary", null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -434,7 +486,7 @@ class ArticleFlowIntegrationTests {
 
         UUID revisionId = firstRevisionId(articleId, accessCookie);
 
-        UpdateRevisionRequest update = new UpdateRevisionRequest("Edited title", nestedBody(), "edited summary");
+        UpdateRevisionRequest update = new UpdateRevisionRequest("Edited title", nestedBody(), "edited summary", null);
         mockMvc.perform(patch("/api/articles/" + articleId + "/translations/fa/revisions/" + revisionId)
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -496,7 +548,7 @@ class ArticleFlowIntegrationTests {
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue())))
                 .andExpect(status().isOk());
 
-        UpdateRevisionRequest update = new UpdateRevisionRequest("New title", simpleBody("new"), null);
+        UpdateRevisionRequest update = new UpdateRevisionRequest("New title", simpleBody("new"), null, null);
         mockMvc.perform(patch("/api/articles/" + articleId + "/translations/fa/revisions/" + revisionId)
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -523,7 +575,7 @@ class ArticleFlowIntegrationTests {
         Cookie otherAccess = loginAccessCookie("af-other11@example.com");
         Cookie otherCsrf = fetchCsrfCookie();
 
-        UpdateRevisionRequest update = new UpdateRevisionRequest("Hijacked title", simpleBody("hijack"), null);
+        UpdateRevisionRequest update = new UpdateRevisionRequest("Hijacked title", simpleBody("hijack"), null, null);
         mockMvc.perform(patch("/api/articles/" + articleId + "/translations/fa/revisions/" + revisionId)
                         .cookie(otherAccess, otherCsrf)
                         .header("X-XSRF-TOKEN", maskCsrfToken(otherCsrf.getValue()))
@@ -581,13 +633,16 @@ class ArticleFlowIntegrationTests {
                 .andExpect(jsonPath("$.code").value("REVISION_NOT_FOUND"));
     }
 
-    // The entityType filter is parsed manually (like SubjectService.parseKind), so a bad
+    // The subjectKind filter is parsed manually (like SubjectService.parseKind), so a bad
     // value must produce a translated 400 with a stable code, not a generic binding failure.
+    // GENERIC was a valid filter before subjectKind replaced entityType; it is not a kind.
     @Test
-    void listFilterWithInvalidEntityTypeIsRejected() throws Exception {
-        mockMvc.perform(get("/api/articles").param("language", "fa").param("entityType", "SEA_MONSTER"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_ENTITY_TYPE"));
+    void listFilterWithInvalidSubjectKindIsRejected() throws Exception {
+        for (String invalid : List.of("SEA_MONSTER", "GENERIC")) {
+            mockMvc.perform(get("/api/articles").param("language", "fa").param("subjectKind", invalid))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("INVALID_SUBJECT_KIND"));
+        }
     }
 
     // language is required: omitting it is a 400 (not an unfiltered list across every
@@ -628,8 +683,8 @@ class ArticleFlowIntegrationTests {
     void anonymousMutationIsUnauthorized() throws Exception {
         Cookie csrfCookie = fetchCsrfCookie();
 
-        CreateArticleRequest request = new CreateArticleRequest(null, EntityType.GENERIC, "fa",
-                uniqueSlug("anon-mutation"), "Title", simpleBody("body"), null);
+        CreateArticleRequest request = new CreateArticleRequest(null, "fa",
+                uniqueSlug("anon-mutation"), "Title", simpleBody("body"), null, null);
         mockMvc.perform(post("/api/articles")
                         .cookie(csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -646,8 +701,8 @@ class ArticleFlowIntegrationTests {
         Cookie accessCookie = loginAccessCookie("af-unverified1@example.com");
         Cookie csrfCookie = fetchCsrfCookie();
 
-        CreateArticleRequest request = new CreateArticleRequest(null, EntityType.GENERIC, "fa",
-                uniqueSlug("unverified-mutation"), "Title", simpleBody("body"), null);
+        CreateArticleRequest request = new CreateArticleRequest(null, "fa",
+                uniqueSlug("unverified-mutation"), "Title", simpleBody("body"), null, null);
         mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -662,8 +717,8 @@ class ArticleFlowIntegrationTests {
         registerVerifiedContributor("afauth14", "af-author14@example.com");
         Cookie accessCookie = loginAccessCookie("af-author14@example.com");
 
-        CreateArticleRequest request = new CreateArticleRequest(null, EntityType.GENERIC, "fa",
-                uniqueSlug("no-csrf"), "Title", simpleBody("body"), null);
+        CreateArticleRequest request = new CreateArticleRequest(null, "fa",
+                uniqueSlug("no-csrf"), "Title", simpleBody("body"), null, null);
         mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -680,8 +735,8 @@ class ArticleFlowIntegrationTests {
         Cookie accessCookie = loginAccessCookie("af-author15@example.com");
         Cookie csrfCookie = fetchCsrfCookie();
 
-        CreateArticleRequest request = new CreateArticleRequest(null, EntityType.GENERIC, "fa",
-                uniqueSlug("raw-csrf"), "Title", simpleBody("body"), null);
+        CreateArticleRequest request = new CreateArticleRequest(null, "fa",
+                uniqueSlug("raw-csrf"), "Title", simpleBody("body"), null, null);
         mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", csrfCookie.getValue())
@@ -694,8 +749,8 @@ class ArticleFlowIntegrationTests {
     // don't care about the create response's own assertions.
     private UUID[] createArticleAndReturnArticleAndRevisionId(Cookie accessCookie, Cookie csrfCookie, String slug)
             throws Exception {
-        CreateArticleRequest createArticle = new CreateArticleRequest(null, EntityType.GENERIC, "fa",
-                slug, "Title", simpleBody("body"), null);
+        CreateArticleRequest createArticle = new CreateArticleRequest(null, "fa",
+                slug, "Title", simpleBody("body"), null, null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -715,7 +770,11 @@ class ArticleFlowIntegrationTests {
     // moderator approves a revision (Phase 3), so it is not a way to reach a draft. Read as the
     // author, since a draft is hidden from everyone else.
     private UUID firstRevisionId(UUID articleId, Cookie authorAccessCookie) throws Exception {
-        String revisions = mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa/revisions")
+        return firstRevisionId(articleId, "fa", authorAccessCookie);
+    }
+
+    private UUID firstRevisionId(UUID articleId, String language, Cookie authorAccessCookie) throws Exception {
+        String revisions = mockMvc.perform(get("/api/articles/" + articleId + "/translations/" + language + "/revisions")
                         .cookie(authorAccessCookie))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
@@ -1046,12 +1105,12 @@ class ArticleFlowIntegrationTests {
     // --- Regression coverage for what this change could plausibly have broken ---
 
     // SecurityConfig gained a new permitAll entry for GET /api/articles/** and a comment
-    // explaining articles carry no role check at all, unlike subjects. This proves that
-    // change didn't leak into the subject chain: subjects/sources reads are still public,
-    // and POST /api/subjects is still moderator-gated -- a plain verified contributor (which
-    // is now enough to write an article) still gets 403 there.
+    // explaining articles carry no role check at all. This proves that change didn't leak into
+    // the subject chain: subjects/sources reads are still public, and there is no direct subject
+    // create for a verified contributor (who can write an article) to reach -- POST /api/subjects
+    // was removed in favour of moderated proposals, so it answers 405 rather than creating one.
     @Test
-    void subjectsAndSourcesReadsStillPublicAndSubjectCreateStillModeratorGated() throws Exception {
+    void subjectsAndSourcesReadsStillPublicAndThereIsNoDirectSubjectCreate() throws Exception {
         mockMvc.perform(get("/api/subjects")).andExpect(status().isOk());
         mockMvc.perform(get("/api/sources")).andExpect(status().isOk());
 
@@ -1059,13 +1118,14 @@ class ArticleFlowIntegrationTests {
         Cookie accessCookie = loginAccessCookie("af-reg1@example.com");
         Cookie csrfCookie = fetchCsrfCookie();
 
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.PORT, null, null, null, null);
+        long subjectsBefore = subjectRepository.count();
         mockMvc.perform(post("/api/subjects")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
+                        .content("{\"kind\":\"PORT\"}"))
+                .andExpect(status().isMethodNotAllowed());
+        assertThat(subjectRepository.count()).isEqualTo(subjectsBefore);
     }
 
     // Nine new handlers were added to the shared GlobalExceptionHandler. This proves an

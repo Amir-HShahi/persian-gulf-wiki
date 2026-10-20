@@ -2,11 +2,16 @@ package com.persiangulfwiki.core.moderation.exception;
 
 import com.persiangulfwiki.core.common.exception.ForbiddenException;
 
+import java.io.Serial;
+
 // 403 rather than 409: the caller holds the MODERATOR role, so the request is well-formed and
 // the task is in a decidable state -- it is this particular moderator who may not act on it,
 // which is an authorization outcome. Reuses ForbiddenException, the base Phase 2 introduced
 // for exactly this shape of domain-level ownership check (see NotRevisionAuthorException).
 public class NotTaskClaimantException extends ForbiddenException {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private static final String DEFAULT_MESSAGE = "caller is not the moderator who claimed this task";
 

@@ -8,7 +8,6 @@ import com.persiangulfwiki.core.TestcontainersConfiguration;
 import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
 import com.persiangulfwiki.core.article.dto.UpdateRevisionRequest;
 import com.persiangulfwiki.core.article.entity.ArticleRevision;
-import com.persiangulfwiki.core.article.entity.EntityType;
 import com.persiangulfwiki.core.article.entity.RevisionStatus;
 import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
@@ -28,8 +27,9 @@ import com.persiangulfwiki.core.moderation.entity.Decision;
 import com.persiangulfwiki.core.moderation.entity.ModerationTask;
 import com.persiangulfwiki.core.moderation.entity.ModerationTaskState;
 import com.persiangulfwiki.core.moderation.repository.ModerationTaskRepository;
-import com.persiangulfwiki.core.subject.dto.CreateSubjectRequest;
+import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
+import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 import com.persiangulfwiki.core.user.entity.Role;
 import com.persiangulfwiki.core.user.entity.User;
 import com.persiangulfwiki.core.user.entity.UserRole;
@@ -111,6 +111,9 @@ class ModerationFlowIntegrationTests {
     @Autowired
     private MediaMetadataVersionRepository mediaMetadataVersionRepository;
 
+    @Autowired
+    private SubjectRepository subjectRepository;
+
     // --- Account / session helpers (same dance as ArticleFlowIntegrationTests) ---
 
     private void registerContributor(String username, String email) throws Exception {
@@ -185,21 +188,15 @@ class ModerationFlowIntegrationTests {
         return prefix + "-" + UUID.randomUUID();
     }
 
-    private UUID createIslandSubject(Cookie accessCookie, Cookie csrfCookie) throws Exception {
-        CreateSubjectRequest request = new CreateSubjectRequest(SubjectKind.ISLAND, null, null, null, null);
-        String created = mockMvc.perform(post("/api/subjects")
-                        .cookie(accessCookie, csrfCookie)
-                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
-        return UUID.fromString(JsonPath.read(created, "$.data.id"));
+    // Seeded directly: the only API path to a subject is now a moderated proposal, which
+    // SubjectRevisionFlowIntegrationTests covers; these tests only need an id to bind to.
+    private UUID createIslandSubject() {
+        return subjectRepository.save(Subject.builder().kind(SubjectKind.ISLAND).build()).getId();
     }
 
     private Draft createDraft(Cookie accessCookie, Cookie csrfCookie, String slug) throws Exception {
-        CreateArticleRequest createArticle = new CreateArticleRequest(null, EntityType.GENERIC, "fa",
-                slug, "Title", simpleBody("body"), null);
+        CreateArticleRequest createArticle = new CreateArticleRequest(null, "fa",
+                slug, "Title", simpleBody("body"), null, null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -215,8 +212,8 @@ class ModerationFlowIntegrationTests {
     // the articles table is shared with every other test in the suite.
     private Draft createSubjectBoundDraft(Cookie accessCookie, Cookie csrfCookie, UUID subjectId, String slug,
             String title, String summary) throws Exception {
-        CreateArticleRequest createArticle = new CreateArticleRequest(subjectId, null, "fa", slug, title,
-                simpleBody("body"), summary);
+        CreateArticleRequest createArticle = new CreateArticleRequest(subjectId, "fa", slug, title,
+                simpleBody("body"), summary, null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(accessCookie, csrfCookie)
                         .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
@@ -262,7 +259,7 @@ class ModerationFlowIntegrationTests {
 
     private ResultActions patchRevision(Cookie accessCookie, Cookie csrfCookie, Draft draft, String title)
             throws Exception {
-        UpdateRevisionRequest update = new UpdateRevisionRequest(title, simpleBody("edited"), "edited summary");
+        UpdateRevisionRequest update = new UpdateRevisionRequest(title, simpleBody("edited"), "edited summary", null);
         return mockMvc.perform(patch("/api/articles/" + draft.articleId()
                         + "/translations/fa/revisions/" + draft.revisionId())
                 .cookie(accessCookie, csrfCookie)
@@ -348,21 +345,21 @@ class ModerationFlowIntegrationTests {
         User moderator = seedModerator("mfmod1", "mf-mod1@example.com");
         Cookie modAccess = loginAccessCookie("mf-mod1@example.com");
         Cookie modCsrf = fetchCsrfCookie();
-        UUID subjectId = createIslandSubject(modAccess, modCsrf);
+        UUID subjectId = createIslandSubject();
 
         registerVerifiedContributor("mfauth1", "mf-author1@example.com");
         Cookie authorAccess = loginAccessCookie("mf-author1@example.com");
         Cookie authorCsrf = fetchCsrfCookie();
 
-        CreateArticleRequest createArticle = new CreateArticleRequest(subjectId, null, "fa",
-                uniqueSlug("hormuz"), "Hormuz Island", simpleBody("An island."), "Summary.");
+        CreateArticleRequest createArticle = new CreateArticleRequest(subjectId, "fa",
+                uniqueSlug("hormuz"), "Hormuz Island", simpleBody("An island."), "Summary.", null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(authorAccess, authorCsrf)
                         .header("X-XSRF-TOKEN", maskCsrfToken(authorCsrf.getValue()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createArticle)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.entityType").value("ISLAND"))
+                .andExpect(jsonPath("$.data.subjectKind").value("ISLAND"))
                 .andReturn().getResponse().getContentAsString();
         UUID articleId = UUID.fromString(JsonPath.read(created, "$.data.id"));
         Draft draft = new Draft(articleId, firstRevisionId(articleId, authorAccess));
@@ -827,7 +824,7 @@ class ModerationFlowIntegrationTests {
         seedModerator("mfmod16", "mf-mod16@example.com");
         Cookie modAccess = loginAccessCookie("mf-mod16@example.com");
         Cookie modCsrf = fetchCsrfCookie();
-        UUID subjectId = createIslandSubject(modAccess, modCsrf);
+        UUID subjectId = createIslandSubject();
 
         User author = registerVerifiedContributor("mfauth16", "mf-author16@example.com");
         Cookie authorAccess = loginAccessCookie("mf-author16@example.com");
@@ -845,19 +842,19 @@ class ModerationFlowIntegrationTests {
 
         mockMvc.perform(get("/api/articles").param("language", "fa").param("subjectId", subjectId.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", hasSize(1)))
-                .andExpect(jsonPath("$.data[0].id").value(approved.articleId().toString()))
-                .andExpect(jsonPath("$.data[0].subjectId").value(subjectId.toString()))
-                .andExpect(jsonPath("$.data[0].entityType").value("ISLAND"))
-                .andExpect(jsonPath("$.data[0].language").value("fa"))
-                .andExpect(jsonPath("$.data[0].slug").value(approvedSlug))
-                .andExpect(jsonPath("$.data[0].title").value("First approved title"))
-                .andExpect(jsonPath("$.data[0].summary").value("First approved summary"))
-                .andExpect(jsonPath("$.data[0].currentRevisionId").value(approved.revisionId().toString()));
+                .andExpect(jsonPath("$.data.items", hasSize(1)))
+                .andExpect(jsonPath("$.data.items[0].id").value(approved.articleId().toString()))
+                .andExpect(jsonPath("$.data.items[0].subjectId").value(subjectId.toString()))
+                .andExpect(jsonPath("$.data.items[0].subjectKind").value("ISLAND"))
+                .andExpect(jsonPath("$.data.items[0].language").value("fa"))
+                .andExpect(jsonPath("$.data.items[0].slug").value(approvedSlug))
+                .andExpect(jsonPath("$.data.items[0].title").value("First approved title"))
+                .andExpect(jsonPath("$.data.items[0].summary").value("First approved summary"))
+                .andExpect(jsonPath("$.data.items[0].currentRevisionId").value(approved.revisionId().toString()));
 
         mockMvc.perform(get("/api/articles").param("language", "en").param("subjectId", subjectId.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", hasSize(0)));
+                .andExpect(jsonPath("$.data.items", hasSize(0)));
 
         // No endpoint creates a follow-up revision on an already-approved translation yet, so
         // the second and third revisions are inserted directly; the second is then published
@@ -888,17 +885,17 @@ class ModerationFlowIntegrationTests {
 
         mockMvc.perform(get("/api/articles").param("language", "fa").param("subjectId", subjectId.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", hasSize(1)))
-                .andExpect(jsonPath("$.data[0].id").value(approved.articleId().toString()))
-                .andExpect(jsonPath("$.data[0].title").value("Second approved title"))
-                .andExpect(jsonPath("$.data[0].summary").value("Second approved summary"))
-                .andExpect(jsonPath("$.data[0].currentRevisionId").value(secondApproved.getId().toString()));
+                .andExpect(jsonPath("$.data.items", hasSize(1)))
+                .andExpect(jsonPath("$.data.items[0].id").value(approved.articleId().toString()))
+                .andExpect(jsonPath("$.data.items[0].title").value("Second approved title"))
+                .andExpect(jsonPath("$.data.items[0].summary").value("Second approved summary"))
+                .andExpect(jsonPath("$.data.items[0].currentRevisionId").value(secondApproved.getId().toString()));
 
         // Adjacent behavior: the article-level read is unchanged by the list's new shape.
         mockMvc.perform(get("/api/articles/" + approved.articleId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(approved.articleId().toString()))
-                .andExpect(jsonPath("$.data.entityType").value("ISLAND"))
+                .andExpect(jsonPath("$.data.subjectKind").value("ISLAND"))
                 .andExpect(jsonPath("$.data.title").doesNotExist());
     }
 

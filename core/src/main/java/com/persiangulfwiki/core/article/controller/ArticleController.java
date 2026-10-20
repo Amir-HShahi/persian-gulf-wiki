@@ -11,6 +11,8 @@ import com.persiangulfwiki.core.article.service.ArticleRevisionService;
 import com.persiangulfwiki.core.article.service.ArticleService;
 import com.persiangulfwiki.core.article.service.ArticleTranslationService;
 import com.persiangulfwiki.core.common.dto.ApiResult;
+import com.persiangulfwiki.core.common.dto.PageResponse;
+import com.persiangulfwiki.core.config.SupportedLocales;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -68,7 +70,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/articles")
 @RequiredArgsConstructor
-@Tag(name = "Articles", description = "The wiki entries. An article carries identity and typed classification only -- "
+@Tag(name = "Articles", description = "The wiki entries. An article carries identity and the subject it is about only -- "
         + "its actual text lives per language in its translations, and each translation's "
         + "content history lives in its revisions. Nothing here is publish-visible on its own; "
         + "moderation status lives entirely on the revision. Reading is open to everyone, but only "
@@ -92,19 +94,22 @@ public class ArticleController {
 
     @Operation(summary = "Create an article", description = "Creates the article together with its first translation (in `canonicalLanguage`) "
             + "and that translation's first draft revision, in a single step -- there is no "
-            + "separate call to add the initial content afterwards. When `subjectId` is given, "
-            + "`entityType` is derived from that subject and must be omitted; when `subjectId` "
-            + "is omitted, `entityType` must be sent as GENERIC. `slug` must not already be in "
-            + "use by any translation of any article.")
+            + "separate call to add the initial content afterwards. `subjectId` is optional: the "
+            + "article's `subjectKind` is always that subject's kind, and null when no subject is "
+            + "given. A `subjectId` of a subject that was merged into another binds the article to that other "
+            + "subject (see the response's `subjectId`). `slug` must not already be in use by any translation of any article. A subject link in `body` "
+            + "(`{\"type\": \"subjectLink\", \"subjectId\": \"…\"}`, anywhere in the tree) must name an existing "
+            + "subject; an article may hold at most 1000 of them.")
     @ApiResponse(responseCode = "201", description = "The created article.")
-    @ApiResponse(responseCode = "400", description = "One of: field validation failed (see `errors`); `entityType` was supplied "
-            + "together with `subjectId`; `entityType` is missing or is not GENERIC when "
-            + "`subjectId` is omitted.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "400", description = "Field validation failed (see `errors`), including a subject link in `body` "
+            + "that names no existing subject, reported at the link's path (e.g. `body.content[2].subjectId`), and "
+            + "more than 5 `topicIds` or one that names no topic, reported at `topicIds`.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "Either the account's email address is not yet verified, or the CSRF header is "
             + "missing or does not match the cookie -- both surface as a plain 403; read `detail` "
             + "for which one occurred.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    @ApiResponse(responseCode = "404", description = "`subjectId` was given but no subject with that id exists.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "404", description = "`subjectId` was given but no subject with that id exists, or it has "
+            + "been deleted.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "409", description = "`slug` is already in use by another translation.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = "CSRF token. Call GET /api/auth/csrf first to receive the XSRF-TOKEN cookie, "
             + "then encode its value and send the encoded result in this header — see the API "
@@ -144,26 +149,38 @@ public class ArticleController {
             + "language, or whose translation has not been approved yet, are left out. `title` and "
             + "`summary` come from that translation's most recently approved revision -- older "
             + "approved revisions and unreviewed drafts are never shown. Newest article first. "
-            + "Optionally filtered by subject and/or typed classification, and paged.")
-    @ApiResponse(responseCode = "200", description = "One page of articles. An out-of-range page is an empty list, not an error.")
-    @ApiResponse(responseCode = "400", description = "`language` is missing, blank or longer than 20 characters; `entityType` is not "
-            + "one of ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, GENERIC (case-insensitive); or "
-            + "`page`/`size` is outside its allowed range.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+            + "Articles about a deleted subject are never listed. Optionally filtered by subject, subject "
+            + "kind and/or topic (all given filters must match), and paged.")
+    @ApiResponse(responseCode = "200", description = "One page of articles, with the total number of matching articles across all "
+            + "pages. An out-of-range page has an empty `items` list, not an error.")
+    @ApiResponse(responseCode = "400", description = "`language` is missing, blank or longer than 20 characters; `subjectKind` is not "
+            + "one of ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, FISHING_GROUND, PROVINCE "
+            + "(case-insensitive); or `page`/`size` is outside "
+            + "its allowed range.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "language", required = true, description = "BCP-47 language tag of the translation to list, e.g. \"fa\", \"en\", \"ar\". Matched exactly.")
-    @Parameter(name = "subjectId", description = "Optional filter: only articles bound to this subject.")
-    @Parameter(name = "entityType", description = "Optional filter: ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, or GENERIC (case-insensitive).")
+    @Parameter(name = "subjectId", description = "Optional filter: only articles bound to this subject. A subject that "
+            + "was merged into another filters on that other subject, which now holds its articles.")
+    @Parameter(name = "subjectKind", description = "Optional filter: only articles whose subject is of this kind -- ISLAND, PORT, "
+            + "OIL_FIELD, SPECIES, STRAIT, FISHING_GROUND or PROVINCE (case-insensitive). Articles with "
+            + "no subject never match it.")
+    @Parameter(name = "topic", description = "Optional filter: only articles about this topic, by its `slug` from "
+            + "GET /api/topics. An article's topics are those of its original-language translation's latest "
+            + "approved version and apply to all its translations, so the `total` here equals that topic's "
+            + "`articleCount` from GET /api/topics with the same `language`. An unknown or archived topic "
+            + "gives an empty page, not an error.")
     @Parameter(name = "page", description = "Zero-based page index.")
     @Parameter(name = "size", description = "Page size, 1 to 100.")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public ApiResult<List<ArticleListItemResponse>> list(
+    public ApiResult<PageResponse<ArticleListItemResponse>> list(
             @RequestParam @NotBlank(message = "{validation.language.required}")
                     @Size(max = 20, message = "{validation.language.tooLong}") String language,
             @RequestParam(required = false) UUID subjectId,
-            @RequestParam(required = false) String entityType,
+            @RequestParam(required = false) String subjectKind,
+            @RequestParam(required = false) String topic,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(MAX_PAGE_SIZE) int size) {
-        List<ArticleListItemResponse> data = articleService.list(language, subjectId, entityType, PageRequest.of(page, size));
+        PageResponse<ArticleListItemResponse> data = articleService.list(language, subjectId, subjectKind, topic, PageRequest.of(page, size));
         String message = messageSource.getMessage("success.articlesList", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }
@@ -174,7 +191,9 @@ public class ArticleController {
             + "people who can see it: its creator, anyone who wrote a revision in one of its "
             + "translations, and moderators/admins.")
     @ApiResponse(responseCode = "201", description = "The created translation.")
-    @ApiResponse(responseCode = "400", description = "Request failed field validation.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "400", description = "Request failed field validation (see `errors`), including a subject link "
+            + "in `body` that names no existing subject, reported at the link's path (e.g. "
+            + "`body.content[2].subjectId`).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "Either the account's email address is not yet verified, or the CSRF header is "
             + "missing or does not match the cookie.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
@@ -218,11 +237,15 @@ public class ArticleController {
         return ApiResult.of(data, message);
     }
 
-    @Operation(summary = "Update a draft revision", description = "Replaces `title`, `body` and `summary` on an existing revision in place. Only "
+    @Operation(summary = "Update a draft revision", description = "Replaces `title`, `body` and `summary` on an existing revision in place, and its "
+            + "topics when `topicIds` is sent (left out, they stay as they are). Only "
             + "allowed while the revision's status is DRAFT or CHANGES_REQUESTED, and only by "
             + "the account that authored it.")
     @ApiResponse(responseCode = "200", description = "The updated revision.")
-    @ApiResponse(responseCode = "400", description = "Request failed field validation.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "400", description = "Request failed field validation (see `errors`), including a subject link "
+            + "in `body` that names no existing subject, reported at the link's path (e.g. "
+            + "`body.content[2].subjectId`); more than 5 `topicIds`, one that names no topic, or any on a revision "
+            + "not in the article's original language, reported at `topicIds`.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "Either the caller is not the revision's author, the account's email address is "
             + "not yet verified, or the CSRF header is missing or does not match the cookie -- "
@@ -240,7 +263,8 @@ public class ArticleController {
     @ResponseStatus(HttpStatus.OK)
     public ApiResult<RevisionResponse> updateRevision(@PathVariable UUID articleId, @PathVariable String language,
             @PathVariable UUID revisionId, @Valid @RequestBody UpdateRevisionRequest request) {
-        RevisionResponse data = articleRevisionService.update(currentUserId(), articleId, language, revisionId, request);
+        RevisionResponse data = articleRevisionService.update(currentUserId(), articleId, language, revisionId, request,
+                readerLanguage());
         String message = messageSource.getMessage("success.revisionUpdated", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }
@@ -263,7 +287,8 @@ public class ArticleController {
     @ResponseStatus(HttpStatus.OK)
     public ApiResult<List<RevisionResponse>> listRevisions(@PathVariable UUID articleId, @PathVariable String language) {
         List<RevisionResponse> data =
-                articleRevisionService.list(articleId, language, currentUserIdOrNull(), isCurrentUserModerator());
+                articleRevisionService.list(articleId, language, currentUserIdOrNull(), isCurrentUserModerator(),
+                        readerLanguage());
         String message = messageSource.getMessage("success.revisionsList", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }
@@ -284,7 +309,7 @@ public class ArticleController {
     public ApiResult<RevisionResponse> getRevision(
             @PathVariable UUID articleId, @PathVariable String language, @PathVariable UUID revisionId) {
         RevisionResponse data = articleRevisionService.get(
-                articleId, language, revisionId, currentUserIdOrNull(), isCurrentUserModerator());
+                articleId, language, revisionId, currentUserIdOrNull(), isCurrentUserModerator(), readerLanguage());
         String message = messageSource.getMessage("success.revisionFetched", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }
@@ -309,9 +334,16 @@ public class ArticleController {
     @ResponseStatus(HttpStatus.OK)
     public ApiResult<RevisionResponse> submitRevision(
             @PathVariable UUID articleId, @PathVariable String language, @PathVariable UUID revisionId) {
-        RevisionResponse data = articleRevisionService.submit(currentUserId(), articleId, language, revisionId);
+        RevisionResponse data =
+                articleRevisionService.submit(currentUserId(), articleId, language, revisionId, readerLanguage());
         String message = messageSource.getMessage("success.revisionSubmitted", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
+    }
+
+    // The language subject links are named in: fa, en or ar from Accept-Language, else fa. Not the
+    // translation's own language, which the path carries.
+    private static String readerLanguage() {
+        return SupportedLocales.normalize(LocaleContextHolder.getLocale()).getLanguage();
     }
 
     private UUID currentUserId() {
