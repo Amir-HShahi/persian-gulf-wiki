@@ -2,7 +2,12 @@ package com.persiangulfwiki.core.auth.exception;
 
 import com.persiangulfwiki.core.common.exception.ConflictException;
 
+import java.io.Serial;
+
 public class DuplicateUserException extends ConflictException {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private static final String DEFAULT_MESSAGE = "username or email already in use";
     private static final String DEFAULT_MESSAGE_KEY = "error.duplicateUser.generic";

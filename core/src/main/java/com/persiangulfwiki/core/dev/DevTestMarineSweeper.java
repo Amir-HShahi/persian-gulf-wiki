@@ -33,10 +33,10 @@ public class DevTestMarineSweeper {
     @Value("${app.dev.test-marine-ttl-hours}")
     private final long testMarineTtlHours;
 
-    // :45, the free slot between the other dev sweepers. Marine rows reference nothing else,
+    // :55, the free slot after the other dev sweepers. Marine rows reference nothing else,
     // so ordering against them does not matter beyond not piling up in the same minute.
     // @Transactional sits here because the call below is a self-invocation.
-    @Scheduled(cron = "0 45 * * * *")
+    @Scheduled(cron = "0 55 * * * *")
     @Transactional
     public void sweepExpiredTestStations() {
         deleteOlderThan(Instant.now().minus(testMarineTtlHours, ChronoUnit.HOURS));

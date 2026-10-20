@@ -37,6 +37,7 @@ import java.util.List;
 @EnableConfigurationProperties(MarineDataProperties.class)
 public class MarineDataConfig implements CachingConfigurer {
 
+    public static final String CACHE_MANAGER = "marineCacheManager";
     public static final String LATEST_CACHE = "marine-latest";
     public static final String SERIES_CACHE = "marine-series";
 
@@ -48,8 +49,8 @@ public class MarineDataConfig implements CachingConfigurer {
     // Each cache is serialized as its one concrete type, with no default typing. A
     // polymorphic serializer would write class names into Redis and trust them on the way
     // back, which turns write access to Redis into a deserialization gadget.
-    @Bean
-    CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+    @Bean(CACHE_MANAGER)
+    CacheManager marineCacheManager(RedisConnectionFactory connectionFactory) {
         JsonMapper mapper = JsonMapper.builder().build();
         JavaType latestType = mapper.getTypeFactory().constructCollectionType(List.class, MarineMetricResponse.class);
         JavaType seriesType = mapper.getTypeFactory().constructType(MarineSeriesResponse.class);

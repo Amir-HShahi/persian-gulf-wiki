@@ -1,5 +1,7 @@
 package com.persiangulfwiki.core.common.exception;
 
+import java.io.Serial;
+
 // New base class, added alongside NotFoundException/ConflictException/BadRequestException:
 // until Phase 2, every domain-thrown (non-@PreAuthorize) 403 case was handled by Spring
 // Security's own AccessDeniedException via GlobalExceptionHandler.handleAccessDenied.
@@ -8,6 +10,9 @@ package com.persiangulfwiki.core.common.exception;
 // rather than either misusing AccessDeniedException (a Spring Security type, not a domain
 // one) or being left as a raw RuntimeException with no status mapping.
 public class ForbiddenException extends RuntimeException {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public ForbiddenException(String message) {
         super(message);

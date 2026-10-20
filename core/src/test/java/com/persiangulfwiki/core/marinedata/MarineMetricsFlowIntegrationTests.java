@@ -10,6 +10,7 @@ import com.persiangulfwiki.core.marinedata.repository.MarineSourceSyncRepository
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.cache.CacheManager;
@@ -53,6 +54,7 @@ class MarineMetricsFlowIntegrationTests {
     private TransactionTemplate transactionTemplate;
 
     @Autowired
+    @Qualifier(MarineDataConfig.CACHE_MANAGER)
     private CacheManager cacheManager;
 
     @Autowired

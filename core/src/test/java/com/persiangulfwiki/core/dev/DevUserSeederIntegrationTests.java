@@ -1,7 +1,9 @@
 package com.persiangulfwiki.core.dev;
 
 import com.persiangulfwiki.core.TestcontainersConfiguration;
+import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.user.entity.Role;
+import com.persiangulfwiki.core.user.entity.UserRole;
 import com.persiangulfwiki.core.user.repository.UserRepository;
 import com.persiangulfwiki.core.user.repository.UserRoleRepository;
 
@@ -46,6 +48,20 @@ class DevUserSeederIntegrationTests {
         assertThat(userRoleRepository.existsByRole(Role.EXPERT_REVIEWER)).isTrue();
         assertThat(userRoleRepository.existsByRole(Role.ADMIN)).isTrue();
         assertThat(userRoleRepository.countByRole(Role.CONTRIBUTOR)).isEqualTo(6L);
+    }
+
+    // An expert reviewer role with no expertise may verify nothing, so the seeded reviewer gets one;
+    // every other seeded role stays global.
+    @Test
+    @Transactional
+    void seededReviewerIsAnIslandExpert() {
+        assertThat(userRoleRepository.findAll())
+                .filteredOn(role -> role.getRole() == Role.EXPERT_REVIEWER)
+                .extracting(UserRole::getExpertise)
+                .containsExactly(SubjectKind.ISLAND);
+        assertThat(userRoleRepository.findAll())
+                .filteredOn(role -> role.getRole() != Role.EXPERT_REVIEWER)
+                .allSatisfy(role -> assertThat(role.getExpertise()).isNull());
     }
 
     @Test

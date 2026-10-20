@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.cache.Cache;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -36,6 +37,7 @@ public class MarineDataIngestService {
     private final MarineMetricReadingRepository readingRepository;
     private final MarineSourceSyncRepository syncRepository;
     private final TransactionTemplate transactionTemplate;
+    @Qualifier(MarineDataConfig.CACHE_MANAGER)
     private final CacheManager cacheManager;
 
     /**

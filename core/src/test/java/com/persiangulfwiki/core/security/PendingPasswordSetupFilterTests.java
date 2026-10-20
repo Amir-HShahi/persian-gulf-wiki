@@ -92,7 +92,7 @@ class PendingPasswordSetupFilterTests {
     void pendingScopeTokenIsStillBlockedFromWritesOnPublicPaths() throws Exception {
         String token = jwtService.generatePendingPasswordSetupToken(UUID.randomUUID());
 
-        mockMvc.perform(post("/api/subjects")
+        mockMvc.perform(post("/api/subject-revisions")
                         .with(xsrf())
                         .cookie(new jakarta.servlet.http.Cookie(ACCESS_TOKEN_COOKIE, token))
                         .contentType(MediaType.APPLICATION_JSON)

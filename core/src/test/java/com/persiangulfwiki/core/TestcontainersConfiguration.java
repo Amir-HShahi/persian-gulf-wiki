@@ -94,7 +94,11 @@ public class TestcontainersConfiguration {
 	@Bean
 	@ServiceConnection(name = "redis")
 	GenericContainer<?> redisContainer() {
-		return new GenericContainer<>(DockerImageName.parse("redis:latest")).withExposedPorts(6379);
+		// Built in two steps so the container itself is what is returned: Spring stops it with
+		// the context, and a chained withExposedPorts(...) result hides that from leak analysis.
+		GenericContainer<?> redis = new GenericContainer<>(DockerImageName.parse("redis:latest"));
+		redis.withExposedPorts(6379);
+		return redis;
 	}
 
 }

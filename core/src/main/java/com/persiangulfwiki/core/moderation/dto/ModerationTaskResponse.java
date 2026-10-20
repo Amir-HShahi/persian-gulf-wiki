@@ -14,16 +14,19 @@ import java.util.UUID;
 // picking up a returned task needs to read what the previous round asked for before deciding
 // it again.
 //
-// Exactly one of revisionId and mediaMetadataVersionId is non-null: which one says what kind
-// of thing the task judges, and so which detail route a client follows to show it.
+// Exactly one of revisionId, mediaMetadataVersionId and subjectRevisionId is non-null: which one
+// says what kind of thing the task judges, and so which detail route a client follows to show it.
 public record ModerationTaskResponse(
         UUID id,
-        @Schema(description = "The article revision this task judges. Null when the task judges a media metadata "
-                + "version instead.", nullable = true)
+        @Schema(description = "The article revision this task judges. Null when the task judges something else.",
+                nullable = true)
         UUID revisionId,
-        @Schema(description = "The gallery item metadata version this task judges. Null when the task judges an "
-                + "article revision instead. Media tasks accept only APPROVE and REJECT.", nullable = true)
+        @Schema(description = "The gallery item metadata version this task judges. Null when the task judges "
+                + "something else. Media tasks accept only APPROVE and REJECT.", nullable = true)
         UUID mediaMetadataVersionId,
+        @Schema(description = "The subject revision (a proposed new subject, or an edit of one) this task judges. "
+                + "Null when the task judges something else.", nullable = true)
+        UUID subjectRevisionId,
         ModerationTaskState state,
         UUID claimedBy,
         Instant claimedAt,

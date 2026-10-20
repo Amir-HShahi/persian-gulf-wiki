@@ -1,6 +1,7 @@
 package com.persiangulfwiki.core.dev;
 
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
+import com.persiangulfwiki.core.subject.service.SubjectInfoboxCacheService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ import java.time.temporal.ChronoUnit;
 public class DevTestSubjectSweeper {
 
     private final SubjectRepository subjectRepository;
+    private final SubjectInfoboxCacheService subjectInfoboxCacheService;
 
     @Value("${app.dev.test-subject-ttl-hours}")
     private final long testSubjectTtlHours;
@@ -52,6 +54,8 @@ public class DevTestSubjectSweeper {
         long deleted = subjectRepository.deleteByDevMarkerAndCreatedAtBefore(DevTestFixtures.MARKER, threshold);
         if (deleted > 0) {
             log.info("swept {} minted test subject(s) older than the {}h TTL", deleted, testSubjectTtlHours);
+            // Cached infoboxes may show what was just deleted.
+            subjectInfoboxCacheService.evictAll();
         }
         return deleted;
     }

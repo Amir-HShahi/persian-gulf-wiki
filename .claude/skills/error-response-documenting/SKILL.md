@@ -37,10 +37,16 @@ Every error response in the app — built by `GlobalExceptionHandler`, a securit
 - `timestamp` — ISO-8601 instant, server clock.
 - `traceId` — correlation id from MDC; may be `null` if no trace context was set (document this,
   don't imply it's always populated).
-- `errors` — **only** present on `400 VALIDATION_FAILED` responses from `@Valid @RequestBody`
-  failures (`GlobalExceptionHandler.handleMethodArgumentNotValid`), an array of
-  `{ "field": string, "message": string }`. No other handler sets this key. Don't document it on
-  any response whose code isn't `VALIDATION_FAILED`.
+- `errors` — an array of `{ "field": string, "message": string }`, present on exactly two codes:
+  - `400 VALIDATION_FAILED` — `@Valid`/parameter constraint failures
+    (`handleMethodArgumentNotValid`, `handleHandlerMethodValidationException`) and the
+    service-side input checks reported the same way (subject payload, subject filters, article
+    body links, main article).
+  - `409 SUBJECT_MERGE_INVALID` — a subject merge whose combined payload fails the field
+    vocabulary; each `field` is a path into the merged payload (e.g. `payload.aliases.fa`), not
+    into the request. Approved by the user: the moderator needs to know which field to fix before
+    retrying.
+  Don't document it on any other code.
 
 If `GlobalExceptionHandler` gains a new extension property (`setProperty(...)` call) or a new
 override branch, update this shape here first — every `@ApiResponse` that references

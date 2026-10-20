@@ -20,6 +20,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.cache.Cache;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -55,6 +56,7 @@ public class DevTestMarineController {
 
     private final MarineMetricReadingRepository readingRepository;
     private final MarineSourceSyncRepository syncRepository;
+    @Qualifier(MarineDataConfig.CACHE_MANAGER)
     private final CacheManager cacheManager;
 
     @Operation(summary = "Mint a disposable test station", description = "Creates a new station with the given readings "

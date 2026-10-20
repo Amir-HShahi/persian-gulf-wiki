@@ -19,12 +19,13 @@ import org.jspecify.annotations.Nullable;
 import java.time.Instant;
 import java.util.UUID;
 
-// One thing awaiting a policy judgement, and the moderator queue's unit of work. The thing is
-// either an article revision or a media metadata version -- exactly one of revisionId and
-// mediaMetadataVersionId is set (ck_moderation_tasks_exactly_one_target, V18).
+// One thing awaiting a policy judgement, and the moderator queue's unit of work. The thing is an
+// article revision, a media metadata version or a subject revision -- exactly one of revisionId,
+// mediaMetadataVersionId and subjectRevisionId is set (ck_moderation_tasks_exactly_one_target,
+// V18, widened in V24).
 //
-// At most one task ever exists per target (uq_moderation_tasks_revision, V17, and
-// uq_moderation_tasks_media_metadata_version, V18). A rejected revision does not get a second
+// At most one task ever exists per target (uq_moderation_tasks_revision, V17,
+// uq_moderation_tasks_media_metadata_version, V18, and uq_moderation_tasks_subject_revision, V24). A rejected revision does not get a second
 // task -- the author writes a new revision, and that new revision gets its own; the same holds
 // for a rejected metadata version. This is why ModerationService's submit path is an
 // open-or-reopen on a single findByRevisionId rather than anything that has to reason about
@@ -48,6 +49,9 @@ public class ModerationTask extends AuditableEntity {
 
     @Column(name = "media_metadata_version_id", updatable = false)
     private @Nullable UUID mediaMetadataVersionId;
+
+    @Column(name = "subject_revision_id", updatable = false)
+    private @Nullable UUID subjectRevisionId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

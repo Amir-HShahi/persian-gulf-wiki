@@ -16,7 +16,6 @@ import lombok.Setter;
 
 import org.locationtech.jts.geom.Point;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 // Shares its primary key with the subject it details, via @MapsId: subject_id is both the
@@ -45,9 +44,6 @@ public class Island {
     @OneToOne(optional = false)
     @JoinColumn(name = "subject_id")
     private Subject subject;
-
-    @Column(name = "area_km2", precision = 12, scale = 4)
-    private BigDecimal areaKm2;
 
     // SRID 4326 is fixed in the column type by V15; SubjectService stamps it on every
     // geometry it parses, because JTS defaults a freshly-read WKT geometry to SRID 0 and

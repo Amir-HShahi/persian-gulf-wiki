@@ -47,7 +47,7 @@ public class MarineMetricService {
     // One entry per (metric, station) that has at least one reading — stations come from the
     // data, not from config, so a station dropped from config keeps showing (and going stale)
     // rather than vanishing, and a dev fixture station shows up like a real one.
-    @Cacheable(cacheNames = MarineDataConfig.LATEST_CACHE, key = "'all'")
+    @Cacheable(cacheManager = MarineDataConfig.CACHE_MANAGER, cacheNames = MarineDataConfig.LATEST_CACHE, key = "'all'")
     @Transactional(readOnly = true)
     public List<MarineMetricResponse> latest() {
         List<MarineMetricResponse> cards = new ArrayList<>();
@@ -60,7 +60,7 @@ public class MarineMetricService {
 
     // Cached only on success: an invalid key or range throws before anything is stored, so a
     // caller cannot fill the cache with junk keys.
-    @Cacheable(cacheNames = MarineDataConfig.SERIES_CACHE, key = "#metricKey + ':' + #stationKey + ':' + #range.toUpperCase()")
+    @Cacheable(cacheManager = MarineDataConfig.CACHE_MANAGER, cacheNames = MarineDataConfig.SERIES_CACHE, key = "#metricKey + ':' + #stationKey + ':' + #range.toUpperCase()")
     @Transactional(readOnly = true)
     public MarineSeriesResponse series(String metricKey, String stationKey, String range) {
         MarineMetric metric = MarineMetric.fromKey(metricKey)

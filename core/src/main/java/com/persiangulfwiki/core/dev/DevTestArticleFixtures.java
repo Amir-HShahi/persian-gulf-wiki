@@ -3,7 +3,6 @@ package com.persiangulfwiki.core.dev;
 import com.persiangulfwiki.core.article.entity.Article;
 import com.persiangulfwiki.core.article.entity.ArticleRevision;
 import com.persiangulfwiki.core.article.entity.ArticleTranslation;
-import com.persiangulfwiki.core.article.entity.EntityType;
 import com.persiangulfwiki.core.article.entity.RevisionStatus;
 import com.persiangulfwiki.core.article.entity.TranslationState;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
@@ -11,9 +10,11 @@ import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 import com.persiangulfwiki.core.dev.dto.DevTestArticleRequest;
 import com.persiangulfwiki.core.dev.dto.DevTestArticleResponse;
-import com.persiangulfwiki.core.subject.entity.Subject;
+import com.persiangulfwiki.core.dev.exception.DevTestMainArticleTakenException;
+import com.persiangulfwiki.core.dev.exception.InvalidDevTestArticleRequestException;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
+import com.persiangulfwiki.core.topic.service.TopicService;
 import com.persiangulfwiki.core.user.entity.User;
 import com.persiangulfwiki.core.user.repository.UserRepository;
 
@@ -22,7 +23,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
 import java.util.UUID;
+
+import tools.jackson.databind.ObjectMapper;
 
 // The one place a marked article + canonical translation + first revision is minted, shared by
 // DevTestArticleController and by the media and moderation fixture controllers, which mint a
@@ -60,6 +64,8 @@ class DevTestArticleFixtures {
     private final ArticleRevisionRepository articleRevisionRepository;
     private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
+    private final TopicService topicService;
+    private final ObjectMapper objectMapper;
 
     DevTestArticleResponse mint(DevTestArticleRequest request) {
         String slug = request.slug() != null ? request.slug() : DevTestFixtures.MARKER + "-article-" + randomSlug();
@@ -70,14 +76,25 @@ class DevTestArticleFixtures {
         String title = request.title() != null ? request.title() : "e2e article " + slug;
         String summary = request.summary() != null ? request.summary() : "e2e summary";
 
-        EntityType entityType = resolveEntityType(request.subjectId(), request.entityType());
+        // Checked up front so an unknown subject is the documented 404, not a foreign-key
+        // violation surfacing as a 409 from the insert below.
+        if (request.subjectId() != null && !subjectRepository.existsById(request.subjectId())) {
+            throw new SubjectNotFoundException();
+        }
+        Set<UUID> topicIds = request.topicIds() != null ? request.topicIds() : Set.of();
+        // The same check as the API, archived topics included -- a deliberate exception to fixtures
+        // bypassing the service path (decided with the user): a suite reaches "revision keeps an
+        // archived topic" by minting the article first, then archiving through PATCH
+        // /api/admin/topics/{id}.
+        topicService.requireAssignable(topicIds, Set.of());
         UUID authorUserId = resolveAuthorUserId(request.authorUserId());
+        boolean isMain = resolveIsMain(request, revisionStatus);
 
         Article article = articleRepository.save(Article.builder()
                 .subjectId(request.subjectId())
-                .entityType(entityType)
                 .canonicalLanguage(canonicalLanguage)
                 .createdByUserId(authorUserId)
+                .isMain(isMain)
                 .devMarker(DevTestFixtures.MARKER)
                 .build());
 
@@ -88,16 +105,18 @@ class DevTestArticleFixtures {
                 .translationState(translationState)
                 .build());
 
-        ArticleRevision revision = articleRevisionRepository.save(ArticleRevision.builder()
+        ArticleRevision revision = ArticleRevision.builder()
                 .translationId(translation.getId())
                 .revisionNumber(1)
                 .parentRevisionId(null)
                 .title(title)
-                .body(MINIMAL_BODY_JSON)
+                .body(request.body() != null ? objectMapper.writeValueAsString(request.body()) : MINIMAL_BODY_JSON)
                 .summary(summary)
                 .status(revisionStatus)
                 .authorId(authorUserId)
-                .build());
+                .build();
+        revision.setTopicIds(topicIds);
+        revision = articleRevisionRepository.save(revision);
 
         // Mirrors the production invariant rather than the old unconditional assignment: a
         // translation's currentRevisionId names approved content only (see
@@ -113,25 +132,34 @@ class DevTestArticleFixtures {
             articleTranslationRepository.save(translation);
         }
 
-        return new DevTestArticleResponse(
-                article.getId(), translation.getId(), revision.getId(), canonicalLanguage, slug, revisionStatus);
+        return new DevTestArticleResponse(article.getId(), translation.getId(), revision.getId(), canonicalLanguage,
+                slug, revisionStatus, isMain);
     }
 
-    // Derivation mirrors ArticleService.resolveEntityType for the subjectId != null case
-    // (read the bound Subject's kind), but does not reproduce its cross-field rejection: a
-    // caller-supplied entityType alongside subjectId is silently ignored rather than throwing
-    // EntityTypeNotDerivableException, since this endpoint already bypasses the service
-    // layer's other invariants and a fixture caller has no reason to send both. When
-    // subjectId is null, unlike the production path (which only ever accepts GENERIC), any
-    // requested value is honored -- including STRAIT, which EntityType's own comment says is
-    // "selectable directly for a subject-less article" but which the real create endpoint
-    // cannot reach until a STRAIT SubjectKind exists.
-    private EntityType resolveEntityType(UUID subjectId, EntityType requestedEntityType) {
-        if (subjectId != null) {
-            Subject subject = subjectRepository.findById(subjectId).orElseThrow(SubjectNotFoundException::new);
-            return EntityType.valueOf(subject.getKind().name());
+    // Null applies the real rule (SubjectArticleService.promoteIfSubjectHasNoMain): an APPROVED
+    // article is main when its subject has none yet. True never demotes an existing main article,
+    // which may not be one this fixture minted.
+    private boolean resolveIsMain(DevTestArticleRequest request, RevisionStatus revisionStatus) {
+        UUID subjectId = request.subjectId();
+        if (Boolean.FALSE.equals(request.isMain())) {
+            return false;
         }
-        return requestedEntityType != null ? requestedEntityType : EntityType.GENERIC;
+        if (subjectId == null) {
+            if (Boolean.TRUE.equals(request.isMain())) {
+                throw new InvalidDevTestArticleRequestException("a main article needs a subject");
+            }
+            return false;
+        }
+        if (request.isMain() == null && revisionStatus != RevisionStatus.APPROVED) {
+            return false;
+        }
+        // The lock real approvals take, so a concurrent one can't also make an article main.
+        subjectRepository.findByIdForUpdate(subjectId);
+        boolean hasMain = articleRepository.findMainBySubjectId(subjectId).isPresent();
+        if (hasMain && Boolean.TRUE.equals(request.isMain())) {
+            throw new DevTestMainArticleTakenException();
+        }
+        return !hasMain;
     }
 
     // article_revisions.author_id is NOT NULL with no ON DELETE action (V16) -- inserting an
@@ -156,7 +184,7 @@ class DevTestArticleFixtures {
     // The disposable-mint path below survives only for the case where the seeded account is
     // genuinely absent (someone deleted it by hand), so this endpoint still works rather than
     // failing on a missing fixture.
-    private UUID resolveAuthorUserId(UUID requestedAuthorUserId) {
+    UUID resolveAuthorUserId(UUID requestedAuthorUserId) {
         if (requestedAuthorUserId != null) {
             return requestedAuthorUserId;
         }

@@ -1,6 +1,7 @@
 package com.persiangulfwiki.core.dev;
 
 import com.persiangulfwiki.core.source.repository.SourceRepository;
+import com.persiangulfwiki.core.subject.service.SubjectInfoboxCacheService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 public class DevTestSourceSweeper {
 
     private final SourceRepository sourceRepository;
+    private final SubjectInfoboxCacheService subjectInfoboxCacheService;
 
     @Value("${app.dev.test-source-ttl-hours}")
     private final long testSourceTtlHours;
@@ -38,6 +40,8 @@ public class DevTestSourceSweeper {
         long deleted = sourceRepository.deleteByDevMarkerAndCreatedAtBefore(DevTestFixtures.MARKER, threshold);
         if (deleted > 0) {
             log.info("swept {} minted test source(s) older than the {}h TTL", deleted, testSourceTtlHours);
+            // Cached infoboxes may show what was just deleted.
+            subjectInfoboxCacheService.evictAll();
         }
         return deleted;
     }

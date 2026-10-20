@@ -4,5 +4,5 @@ import com.persiangulfwiki.core.subject.entity.SubjectKind;
 
 import java.util.UUID;
 
-public record DevTestSubjectResponse(UUID subjectId, SubjectKind kind, boolean hasDetailRow) {
+public record DevTestSubjectResponse(UUID subjectId, SubjectKind kind, boolean hasDetailRow, boolean isDeleted) {
 }

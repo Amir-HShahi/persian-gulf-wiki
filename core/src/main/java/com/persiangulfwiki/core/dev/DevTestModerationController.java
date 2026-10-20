@@ -15,6 +15,8 @@ import com.persiangulfwiki.core.moderation.entity.ModerationTaskState;
 import com.persiangulfwiki.core.moderation.exception.ModerationTaskNotFoundException;
 import com.persiangulfwiki.core.moderation.repository.ModerationDecisionRepository;
 import com.persiangulfwiki.core.moderation.repository.ModerationTaskRepository;
+import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotFoundException;
+import com.persiangulfwiki.core.subject.repository.SubjectRevisionRepository;
 import com.persiangulfwiki.core.user.entity.User;
 import com.persiangulfwiki.core.user.repository.UserRepository;
 
@@ -76,22 +78,23 @@ public class DevTestModerationController {
     private final ModerationDecisionRepository moderationDecisionRepository;
     private final ArticleRevisionRepository articleRevisionRepository;
     private final MediaMetadataVersionRepository mediaMetadataVersionRepository;
+    private final SubjectRevisionRepository subjectRevisionRepository;
     private final UserRepository userRepository;
     private final DevTestArticleFixtures articleFixtures;
 
     @Operation(summary = "Mint a disposable test moderation task", description = "Creates a moderation task marked as machine-minted, pointing at an existing "
             + "revision. Every field of the request body is optional. With no target "
             + "sent, a throwaway article with a revision awaiting review is minted and judged; "
-            + "otherwise the revision id (or, instead, mediaMetadataVersionId) must name one that exists. state defaults to open but accepts "
+            + "otherwise the revision id (or, instead, mediaMetadataVersionId or subjectRevisionId) must name one that exists. state defaults to open but accepts "
             + "claimed or decided directly, and a decision can be seeded onto the task's "
             + "history in the same call -- states the normal claim/decide endpoints can only "
             + "reach through a full review round performed by a real moderator account.")
     @ApiResponse(responseCode = "201", description = "The created task, and the id of the seeded decision if one was requested.")
-    @ApiResponse(responseCode = "404", description = "The revision id or metadata version id sent does not name an existing "
-            + "revision / metadata version.")
-    @ApiResponse(responseCode = "409", description = "A task already exists for that revision or metadata version -- at most one task can "
+    @ApiResponse(responseCode = "404", description = "The revision id, metadata version id or subject revision id sent does not "
+            + "name an existing revision / metadata version / subject revision.")
+    @ApiResponse(responseCode = "409", description = "A task already exists for that target -- at most one task can "
             + "ever exist per target, so a second one has to be a new revision/version instead -- or "
-            + "both a revision id and a metadata version id were sent.")
+            + "more than one target was sent.")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Transactional
@@ -99,7 +102,7 @@ public class DevTestModerationController {
     // DevTestArticleController: there is no message worth translating for a machine caller.
     public DevTestModerationResponse mint(@RequestBody(required = false) DevTestModerationRequest request) {
         DevTestModerationRequest safeRequest =
-                request != null ? request : new DevTestModerationRequest(null, null, null, null, null, null);
+                request != null ? request : new DevTestModerationRequest(null, null, null, null, null, null, null);
 
         // Checked up front rather than left to the foreign key, which would surface as a 500.
         // A null id is folded into the same 404 for the same reason: "no such revision" is the
@@ -107,15 +110,20 @@ public class DevTestModerationController {
         // GlobalExceptionHandler entry plus three translated messages for a machine caller.
         UUID revisionId = safeRequest.revisionId();
         UUID mediaMetadataVersionId = safeRequest.mediaMetadataVersionId();
-        if (revisionId == null && mediaMetadataVersionId == null) {
+        UUID subjectRevisionId = safeRequest.subjectRevisionId();
+        if (revisionId == null && mediaMetadataVersionId == null && subjectRevisionId == null) {
             // No target named: mint a throwaway article whose first revision is awaiting review,
             // so a suite does not have to set one up first. Marked like any article fixture, so
             // DevTestArticleSweeper reclaims it; the task's revision_id CASCADE takes the task.
             revisionId = articleFixtures.mint(new DevTestArticleRequest(
-                    null, null, null, null, RevisionStatus.PENDING, null, null, null, null)).revisionId();
+                    null, null, null, RevisionStatus.PENDING, null, null, null, null, null, null, null)).revisionId();
         } else if (mediaMetadataVersionId != null) {
             if (!mediaMetadataVersionRepository.existsById(mediaMetadataVersionId)) {
                 throw new MediaNotFoundException();
+            }
+        } else if (subjectRevisionId != null) {
+            if (!subjectRevisionRepository.existsById(subjectRevisionId)) {
+                throw new SubjectRevisionNotFoundException();
             }
         } else if (revisionId == null || !articleRevisionRepository.existsById(revisionId)) {
             throw new RevisionNotFoundException();
@@ -130,6 +138,7 @@ public class DevTestModerationController {
         ModerationTask task = moderationTaskRepository.saveAndFlush(ModerationTask.builder()
                 .revisionId(revisionId)
                 .mediaMetadataVersionId(mediaMetadataVersionId)
+                .subjectRevisionId(subjectRevisionId)
                 .state(state)
                 // Written as a pair, always: ck_moderation_tasks_claim_pair (V17) rejects a
                 // row with one of the two set and the other null, and it is enforced in the
@@ -145,7 +154,7 @@ public class DevTestModerationController {
                 : null;
 
         return new DevTestModerationResponse(task.getId(), revisionId, state, claimantUserId, decisionId,
-                mediaMetadataVersionId);
+                mediaMetadataVersionId, subjectRevisionId);
     }
 
     @Operation(summary = "Delete a minted test moderation task", description = "Deletes a task previously created by this endpoint. Refuses anything else -- a "

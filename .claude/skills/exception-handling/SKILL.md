@@ -10,7 +10,12 @@ package com.persiangulfwiki.core.<feature>.exception;
 
 import com.persiangulfwiki.core.common.exception.<CorrespondingBaseException>;
 
+import java.io.Serial;
+
 public class <Name>Exception extends <CorrespondingBaseException> {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private static final String DEFAULT_MESSAGE = "<lowercase technical message>";
 
@@ -24,6 +29,7 @@ public class <Name>Exception extends <CorrespondingBaseException> {
 }
 ```
 
+- Always a `serialVersionUID` (`@Serial`, `1L`): every exception is `Serializable` through `RuntimeException`, and VS Code's Java checker flags a class without one. The codebase is kept free of those warnings. An instance field whose type isn't `Serializable` (e.g. a `List`) is `transient`.
 - Always both constructors — no-arg using `DEFAULT_MESSAGE`, and a `String message` overload. Never add other constructors (no cause-chaining constructor unless a real call site needs one).
 - `DEFAULT_MESSAGE` is a technical, lowercase, English string for logs only — it is never what the client sees (see step 3).
 - Package is `com.persiangulfwiki.core.<feature>.exception`, matching the throwing feature's package (package-by-feature).
@@ -71,7 +77,12 @@ package com.persiangulfwiki.core.user.exception;
 
 import com.persiangulfwiki.core.common.exception.ConflictException;
 
+import java.io.Serial;
+
 public class SessionAlreadyRevokedException extends ConflictException {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private static final String DEFAULT_MESSAGE = "session already revoked";
 

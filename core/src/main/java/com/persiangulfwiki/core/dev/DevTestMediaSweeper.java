@@ -1,6 +1,7 @@
 package com.persiangulfwiki.core.dev;
 
 import com.persiangulfwiki.core.media.repository.ArticleMediaRepository;
+import com.persiangulfwiki.core.subject.service.SubjectInfoboxCacheService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 public class DevTestMediaSweeper {
 
     private final ArticleMediaRepository articleMediaRepository;
+    private final SubjectInfoboxCacheService subjectInfoboxCacheService;
 
     @Value("${app.dev.test-media-ttl-hours}")
     private final long testMediaTtlHours;
@@ -50,6 +52,8 @@ public class DevTestMediaSweeper {
         long deleted = articleMediaRepository.deleteByDevMarkerAndCreatedAtBefore(DevTestFixtures.MARKER, threshold);
         if (deleted > 0) {
             log.info("swept {} minted test gallery item(s) older than the {}h TTL", deleted, testMediaTtlHours);
+            // Cached infoboxes may show what was just deleted.
+            subjectInfoboxCacheService.evictAll();
         }
         return deleted;
     }
