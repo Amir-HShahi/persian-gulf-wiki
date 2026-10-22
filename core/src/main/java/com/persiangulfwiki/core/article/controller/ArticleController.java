@@ -1,5 +1,6 @@
 package com.persiangulfwiki.core.article.controller;
 
+import com.persiangulfwiki.core.article.dto.ArticleBySlugResponse;
 import com.persiangulfwiki.core.article.dto.ArticleListItemResponse;
 import com.persiangulfwiki.core.article.dto.ArticleResponse;
 import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
@@ -139,6 +140,26 @@ public class ArticleController {
     @ResponseStatus(HttpStatus.OK)
     public ApiResult<ArticleResponse> get(@PathVariable UUID articleId) {
         ArticleResponse data = articleService.get(articleId, currentUserIdOrNull(), isCurrentUserModerator());
+        String message = messageSource.getMessage("success.articleFetched", null, LocaleContextHolder.getLocale());
+        return ApiResult.of(data, message);
+    }
+
+    @Operation(summary = "Get an article by slug", description = "Everything the article page shows, by the slug of one of "
+            + "its translations: the article, that translation, and the translation's most recently approved revision "
+            + "with its full `body`. Open to everyone; no account is required, and the result is the same whoever "
+            + "asks -- unreviewed drafts are never returned here, not even to their authors. An article whose "
+            + "subject has been deleted is still returned. Subject names in `subjectLinks` follow `Accept-Language`.")
+    @ApiResponse(responseCode = "200", description = "The article as readers see it in the slug's language.")
+    @ApiResponse(responseCode = "400", description = "The slug is longer than 200 characters.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "404", description = "No translation has this slug, or it has no approved revision "
+            + "yet.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @Parameter(name = "slug", description = "The translation's slug, matched exactly. Slugs are unique across all "
+            + "articles and languages, so the slug also picks the language.")
+    @GetMapping("/by-slug/{slug}")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResult<ArticleBySlugResponse> getBySlug(
+            @PathVariable @Size(max = 200, message = "{validation.slug.tooLong}") String slug) {
+        ArticleBySlugResponse data = articleService.getBySlug(slug, readerLanguage());
         String message = messageSource.getMessage("success.articleFetched", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }

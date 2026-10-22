@@ -1,8 +1,12 @@
 package com.persiangulfwiki.core.article.service;
 
+import com.persiangulfwiki.core.article.dto.ArticleBySlugResponse;
 import com.persiangulfwiki.core.article.dto.ArticleListItemResponse;
 import com.persiangulfwiki.core.article.dto.ArticleResponse;
 import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
+import com.persiangulfwiki.core.article.dto.PublishedRevisionResponse;
+import com.persiangulfwiki.core.article.dto.PublishedTranslationResponse;
+import com.persiangulfwiki.core.article.dto.TranslationSlugResponse;
 import com.persiangulfwiki.core.article.entity.Article;
 import com.persiangulfwiki.core.article.entity.ArticleRevision;
 import com.persiangulfwiki.core.article.entity.ArticleTranslation;
@@ -29,6 +33,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -37,6 +42,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +58,8 @@ public class ArticleService {
     private final SubjectRepository subjectRepository;
     private final SubjectService subjectService;
     private final TopicService topicService;
+    private final SubjectLinkService subjectLinkService;
+    private final ObjectMapper objectMapper;
 
     // Article + its canonical translation + that translation's first DRAFT revision, written
     // together or not at all: an article with zero translations can never be reached by
@@ -105,6 +115,41 @@ public class ArticleService {
             throw new ArticleNotFoundException();
         }
         return toResponse(article, article.getSubjectId() == null ? null : findSubjectKind(article.getSubjectId()));
+    }
+
+    // The reader page, by a translation's slug. Approved content only, whoever asks: a translation
+    // with nothing approved is 404 even to its authors and moderators, who read drafts through the
+    // id-based routes. Unlike list(), an article about a deleted subject is still served.
+    @Transactional(readOnly = true)
+    public ArticleBySlugResponse getBySlug(String slug, String readerLanguage) {
+        ArticleTranslation translation = articleTranslationRepository.findBySlug(slug)
+                .filter(found -> found.getCurrentRevisionId() != null)
+                .orElseThrow(ArticleNotFoundException::new);
+        Article article = articleRepository.findById(translation.getArticleId())
+                .orElseThrow(ArticleNotFoundException::new);
+        ArticleRevision revision = articleRevisionRepository.findById(translation.getCurrentRevisionId())
+                .orElseThrow(ArticleNotFoundException::new);
+        SubjectKind subjectKind = article.getSubjectId() == null ? null
+                : subjectRepository.findById(article.getSubjectId()).map(Subject::getKind).orElse(null);
+        JsonNode body = objectMapper.readTree(revision.getBody());
+
+        List<TranslationSlugResponse> otherTranslations = articleTranslationRepository
+                .findByArticleIdInAndCurrentRevisionIdIsNotNull(List.of(article.getId()))
+                .stream()
+                .filter(other -> !other.getId().equals(translation.getId()))
+                .sorted(Comparator.comparing(ArticleTranslation::getLanguage))
+                .map(other -> new TranslationSlugResponse(other.getLanguage(), other.getSlug()))
+                .toList();
+
+        return new ArticleBySlugResponse(article.getId(), article.getSubjectId(), subjectKind, article.isMain(),
+                article.getCanonicalLanguage(), article.getCreatedAt(), article.getUpdatedAt(),
+                new PublishedTranslationResponse(translation.getId(), translation.getLanguage(), translation.getSlug(),
+                        translation.getTranslationState(), translation.getUpdatedAt()),
+                new PublishedRevisionResponse(revision.getId(), revision.getRevisionNumber(), revision.getTitle(),
+                        revision.getSummary(), body, revision.getCreatedAt()),
+                subjectLinkService.resolve(List.of(body), readerLanguage),
+                articleRevisionService.liveTopicIds(article.getId()),
+                otherTranslations);
     }
 
     // Only translations with an approved revision are listed: title/summary come from

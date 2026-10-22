@@ -40,6 +40,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
@@ -1138,5 +1139,132 @@ class ArticleFlowIntegrationTests {
                 .andExpect(jsonPath("$.code").value("SUBJECT_NOT_FOUND"))
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.traceId").exists());
+    }
+
+    // --- Slug lookup: the reader page ---
+
+    private UUID createArticleWithSlug(@Nullable UUID subjectId, String slug, Cookie accessCookie, Cookie csrfCookie)
+            throws Exception {
+        CreateArticleRequest request = new CreateArticleRequest(subjectId, "fa", slug, "Title fa", nestedBody(),
+                "Summary fa.", null);
+        String created = mockMvc.perform(post("/api/articles")
+                        .cookie(accessCookie, csrfCookie)
+                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        return UUID.fromString(com.jayway.jsonpath.JsonPath.read(created, "$.data.id"));
+    }
+
+    private void addTranslation(UUID articleId, String language, String slug, Cookie accessCookie, Cookie csrfCookie)
+            throws Exception {
+        CreateTranslationRequest request = new CreateTranslationRequest(
+                language, slug, "Title " + language, simpleBody(language + " body"), null);
+        mockMvc.perform(post("/api/articles/" + articleId + "/translations")
+                        .cookie(accessCookie, csrfCookie)
+                        .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
+    }
+
+    // An anonymous reader gets the slug's translation with its approved body, and only the other
+    // approved languages in otherTranslations -- the draft ar translation is left out. Author ids
+    // are never exposed. The id route is checked in the same pass: "by-slug" must not shadow it.
+    @Test
+    void anonymousReaderGetsApprovedArticleBySlugWithOnlyApprovedOtherTranslations() throws Exception {
+        UUID subjectId = createIslandSubject();
+        registerVerifiedContributor("afslug1", "af-slug1@example.com");
+        Cookie accessCookie = loginAccessCookie("af-slug1@example.com");
+        Cookie csrfCookie = fetchCsrfCookie();
+
+        String faSlug = uniqueSlug("slug-fa");
+        String enSlug = uniqueSlug("slug-en");
+        UUID articleId = createArticleWithSlug(subjectId, faSlug, accessCookie, csrfCookie);
+        UUID faRevisionId = firstRevisionId(articleId, accessCookie);
+        articleRevisionService.applyModerationOutcome(faRevisionId, RevisionStatus.APPROVED);
+        addTranslation(articleId, "en", enSlug, accessCookie, csrfCookie);
+        articleRevisionService.applyModerationOutcome(firstRevisionId(articleId, "en", accessCookie),
+                RevisionStatus.APPROVED);
+        addTranslation(articleId, "ar", uniqueSlug("slug-ar"), accessCookie, csrfCookie);
+
+        mockMvc.perform(get("/api/articles/by-slug/" + faSlug))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(articleId.toString()))
+                .andExpect(jsonPath("$.data.subjectId").value(subjectId.toString()))
+                .andExpect(jsonPath("$.data.subjectKind").value("ISLAND"))
+                .andExpect(jsonPath("$.data.isMain").isBoolean())
+                .andExpect(jsonPath("$.data.canonicalLanguage").value("fa"))
+                .andExpect(jsonPath("$.data.translation.language").value("fa"))
+                .andExpect(jsonPath("$.data.translation.slug").value(faSlug))
+                .andExpect(jsonPath("$.data.translation.translationState").value("UP_TO_DATE"))
+                .andExpect(jsonPath("$.data.revision.id").value(faRevisionId.toString()))
+                .andExpect(jsonPath("$.data.revision.title").value("Title fa"))
+                .andExpect(jsonPath("$.data.revision.summary").value("Summary fa."))
+                .andExpect(jsonPath("$.data.revision.body.children[1].items[2]").value("three"))
+                .andExpect(jsonPath("$.data.revision.authorId").doesNotExist())
+                .andExpect(jsonPath("$.data.createdByUserId").doesNotExist())
+                .andExpect(jsonPath("$.data.subjectLinks").isMap())
+                .andExpect(jsonPath("$.data.topicIds").isArray())
+                .andExpect(jsonPath("$.data.otherTranslations.length()").value(1))
+                .andExpect(jsonPath("$.data.otherTranslations[0].language").value("en"))
+                .andExpect(jsonPath("$.data.otherTranslations[0].slug").value(enSlug));
+
+        mockMvc.perform(get("/api/articles/by-slug/" + enSlug))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.translation.language").value("en"))
+                .andExpect(jsonPath("$.data.revision.title").value("Title en"))
+                .andExpect(jsonPath("$.data.otherTranslations[0].language").value("fa"));
+
+        mockMvc.perform(get("/api/articles/" + articleId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(articleId.toString()));
+    }
+
+    // Drafts are never served by slug, not even to their author, who reads them by id instead.
+    @Test
+    void draftOnlyTranslationIsNotFoundBySlugEvenForItsAuthor() throws Exception {
+        registerVerifiedContributor("afslug2", "af-slug2@example.com");
+        Cookie accessCookie = loginAccessCookie("af-slug2@example.com");
+        Cookie csrfCookie = fetchCsrfCookie();
+        String slug = uniqueSlug("slug-draft");
+        createArticleWithSlug(null, slug, accessCookie, csrfCookie);
+
+        mockMvc.perform(get("/api/articles/by-slug/" + slug).cookie(accessCookie))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("ARTICLE_NOT_FOUND"));
+        mockMvc.perform(get("/api/articles/by-slug/" + slug))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void unknownSlugIsNotFoundAndOverlongSlugIsRejected() throws Exception {
+        mockMvc.perform(get("/api/articles/by-slug/" + uniqueSlug("missing")))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("ARTICLE_NOT_FOUND"));
+        mockMvc.perform(get("/api/articles/by-slug/" + "a".repeat(201)))
+                .andExpect(status().isBadRequest());
+    }
+
+    // Unlike the list, which hides articles about a deleted subject, the slug lookup still serves them.
+    @Test
+    void articleAboutDeletedSubjectIsStillServedBySlug() throws Exception {
+        UUID subjectId = createIslandSubject();
+        registerVerifiedContributor("afslug3", "af-slug3@example.com");
+        Cookie accessCookie = loginAccessCookie("af-slug3@example.com");
+        Cookie csrfCookie = fetchCsrfCookie();
+        String slug = uniqueSlug("slug-deleted-subject");
+        UUID articleId = createArticleWithSlug(subjectId, slug, accessCookie, csrfCookie);
+        articleRevisionService.applyModerationOutcome(firstRevisionId(articleId, accessCookie), RevisionStatus.APPROVED);
+
+        Subject subject = subjectRepository.findById(subjectId).orElseThrow();
+        subject.setDeletedAt(Instant.now());
+        subjectRepository.save(subject);
+
+        mockMvc.perform(get("/api/articles/by-slug/" + slug))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(articleId.toString()))
+                .andExpect(jsonPath("$.data.subjectKind").value("ISLAND"));
     }
 }
