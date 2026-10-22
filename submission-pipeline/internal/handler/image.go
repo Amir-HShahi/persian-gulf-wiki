@@ -20,9 +20,14 @@ import (
 )
 
 // ImagePayload is the job payload core enqueues for an image submission.
+//
+// DeclaredSHA256 is the hash the uploader declared, as standard padded base64.
+// When it is set, the file is refused unless its bytes hash to it. When it is
+// empty the file is not checked, but its hash is still reported.
 type ImagePayload struct {
-	SubmissionID string `json:"submission_id"`
-	ObjectKey    string `json:"object_key"`
+	SubmissionID   string `json:"submission_id"`
+	ObjectKey      string `json:"object_key"`
+	DeclaredSHA256 string `json:"declared_sha256,omitempty"`
 }
 
 // validSubmissionID is what a submission id may look like. It becomes a prefix
@@ -70,6 +75,9 @@ func (h *Image) Handle(ctx context.Context, log *slog.Logger, _ pgx.Tx, job queu
 	if !validSubmissionID.MatchString(payload.SubmissionID) || payload.ObjectKey == "" {
 		return reject("malformed_payload", nil), nil
 	}
+	if payload.DeclaredSHA256 != "" && !validDeclaredSHA256(payload.DeclaredSHA256) {
+		return reject("malformed_payload", nil), nil
+	}
 
 	log = log.With("submission_id", payload.SubmissionID)
 
@@ -109,6 +117,20 @@ func (h *Image) Handle(ctx context.Context, log *slog.Logger, _ pgx.Tx, job queu
 	}
 
 	log.Debug("source downloaded", "bytes", size)
+
+	// Checked before anything decodes the file: one that is not what the
+	// uploader sent never reaches libvips. The hash is reported either way,
+	// because core stores it and finds duplicate uploads by it.
+	sum, err := sha256Base64(src)
+	if err != nil {
+		return queue.Result{}, fmt.Errorf("hashing %s: %w", payload.ObjectKey, err)
+	}
+	if payload.DeclaredSHA256 != "" && sum != payload.DeclaredSHA256 {
+		return reject("checksum_mismatch", map[string]string{
+			"declared": payload.DeclaredSHA256,
+			"actual":   sum,
+		}), nil
+	}
 
 	processed, err := imagepipe.Process(ctx, src, outDir, h.Options)
 	if err != nil {
@@ -167,6 +189,7 @@ func (h *Image) Handle(ctx context.Context, log *slog.Logger, _ pgx.Tx, job queu
 			Width:    processed.Source.Width,
 			Height:   processed.Source.Height,
 			Format:   processed.Source.Format,
+			SHA256:   sum,
 			Variants: variants,
 			Original: &queue.Original{
 				Key:         origKey,

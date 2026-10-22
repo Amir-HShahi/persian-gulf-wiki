@@ -137,6 +137,10 @@ type ImageResult struct {
 	Format   string    `json:"format"`
 	Variants []Variant `json:"variants"`
 
+	// SHA256 is the hash of the uploaded bytes, as standard padded base64.
+	// Computed by the worker, so unlike the declared one it can be trusted.
+	SHA256 string `json:"sha256"`
+
 	// Original is the untouched upload, saved beside the variants so it outlives
 	// whatever the raw bucket's own lifecycle does to the staging copy.
 	//
