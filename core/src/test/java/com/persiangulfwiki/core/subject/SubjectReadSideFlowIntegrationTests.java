@@ -2,6 +2,8 @@ package com.persiangulfwiki.core.subject;
 
 import com.jayway.jsonpath.JsonPath;
 import com.persiangulfwiki.core.TestcontainersConfiguration;
+import com.persiangulfwiki.core.article.entity.FeaturedArticle;
+import com.persiangulfwiki.core.article.repository.FeaturedArticleRepository;
 import com.persiangulfwiki.core.attribute.entity.AttributeDefinition;
 import com.persiangulfwiki.core.attribute.entity.AttributeValueType;
 import com.persiangulfwiki.core.attribute.repository.AttributeDefinitionRepository;
@@ -127,6 +129,9 @@ class SubjectReadSideFlowIntegrationTests {
 
     @Autowired
     private LabelRepository labelRepository;
+
+    @Autowired
+    private FeaturedArticleRepository featuredArticleRepository;
 
     // --- Helpers ---
 
@@ -489,6 +494,24 @@ class SubjectReadSideFlowIntegrationTests {
         assertThat(JsonPath.<String>read(listed, "$.data.items[0].slug")).isEqualTo(article.slug());
         assertThat(JsonPath.<Integer>read(listed, "$.data.total")).isEqualTo(1);
         assertThat(JsonPath.<Map<String, String>>read(listed, "$.data.items[0].badges")).isEmpty();
+
+        // The home page's featured-article card shows the same image, read off the article's subject.
+        FeaturedArticle window = featuredArticleRepository.save(FeaturedArticle.builder()
+                .articleId(article.id())
+                .startsAt(Instant.now())
+                .build());
+        try {
+            mockMvc.perform(get("/api/featured-articles/current").param("language", "fa"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.articleId").value(article.id().toString()))
+                    .andExpect(jsonPath("$.data.subjectId").value(islandId.toString()))
+                    .andExpect(jsonPath("$.data.subjectKind").value("ISLAND"))
+                    .andExpect(jsonPath("$.data.mainImage.mediaId").value(imageId.toString()))
+                    .andExpect(jsonPath("$.data.mainImage.variants[*].url")
+                            .value(containsInAnyOrder(publicUrl + "640.webp", publicUrl + "1280.webp")));
+        } finally {
+            featuredArticleRepository.delete(window);
+        }
 
         // Back to awaiting review: dropped too, rather than handed out with signed URLs.
         ArticleMedia pending = articleMediaRepository.findById(imageId).orElseThrow();

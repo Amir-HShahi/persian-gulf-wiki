@@ -24,7 +24,9 @@ import com.persiangulfwiki.core.label.exception.UnsupportedLabelLanguageExceptio
 import com.persiangulfwiki.core.article.exception.ArticleNotFoundException;
 import com.persiangulfwiki.core.article.exception.DuplicateSlugException;
 import com.persiangulfwiki.core.article.exception.DuplicateTranslationLanguageException;
+import com.persiangulfwiki.core.article.exception.FeaturedArticleNotFoundException;
 import com.persiangulfwiki.core.article.exception.InvalidArticleBodyException;
+import com.persiangulfwiki.core.article.exception.InvalidFeaturedArticleWindowException;
 import com.persiangulfwiki.core.article.exception.InvalidMainArticleException;
 import com.persiangulfwiki.core.article.exception.NotRevisionAuthorException;
 import com.persiangulfwiki.core.article.exception.RevisionNotEditableException;
@@ -535,6 +537,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problemDetail = ProblemDetails.of(
                 HttpStatus.BAD_REQUEST, resolve("error.validationFailed"), "VALIDATION_FAILED", request);
         problemDetail.setProperty("errors", List.of(new FieldViolation("topicIds", resolve(ex.getMessageKey()))));
+        return problemDetail;
+    }
+
+    @ExceptionHandler(FeaturedArticleNotFoundException.class)
+    public ProblemDetail handleFeaturedArticleNotFound(FeaturedArticleNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.featuredArticleNotFound"),
+                "FEATURED_ARTICLE_NOT_FOUND", request);
+    }
+
+    // VALIDATION_FAILED on `endsAt`, like InvalidMainArticleException on `articleId`.
+    @ExceptionHandler(InvalidFeaturedArticleWindowException.class)
+    public ProblemDetail handleInvalidFeaturedArticleWindow(InvalidFeaturedArticleWindowException ex,
+            HttpServletRequest request) {
+        ProblemDetail problemDetail = ProblemDetails.of(
+                HttpStatus.BAD_REQUEST, resolve("error.validationFailed"), "VALIDATION_FAILED", request);
+        problemDetail.setProperty("errors",
+                List.of(new FieldViolation("endsAt", resolve("validation.featuredArticle.endsAt.notAfterStart"))));
         return problemDetail;
     }
 

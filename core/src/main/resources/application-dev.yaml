@@ -86,3 +86,6 @@ app:
     # TTL for the stations minted by POST /api/dev/marine-readings, reclaimed hourly by
     # DevTestMarineSweeper at :55. Same reasoning as the TTLs above.
     test-marine-ttl-hours: ${DEV_TEST_MARINE_TTL_HOURS:6}
+    # TTL for the windows minted by POST /api/dev/test-featured-articles, reclaimed hourly by
+    # DevTestFeaturedArticleSweeper at :05. Same reasoning as the TTLs above.
+    test-featured-article-ttl-hours: ${DEV_TEST_FEATURED_ARTICLE_TTL_HOURS:6}
