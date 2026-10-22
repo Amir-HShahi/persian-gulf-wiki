@@ -34,6 +34,7 @@ const (
 	RejectCorrupt     = "corrupt_file"
 	RejectUnsupported = "unsupported_format"
 	RejectTooLarge    = "dimensions_too_large"
+	RejectAspect      = "panorama_aspect_ratio"
 )
 
 // Options controls validation limits and output quality.
@@ -61,6 +62,17 @@ type Options struct {
 	// PlaceholderWidth is the width of the inline preview returned with the
 	// variants. Zero means no placeholder.
 	PlaceholderWidth int
+
+	// Labels names the variant of a width, which is also its file name. A
+	// width with no entry is named "w" and its width, as photo variants are.
+	Labels map[int]string
+
+	// AspectRatio, when not zero, is the width-to-height ratio every image
+	// must have, give or take AspectTolerance. Panoramas use it: an
+	// equirectangular 360 degree image is exactly 2:1, and anything else would
+	// be drawn distorted by the viewer.
+	AspectRatio     float64
+	AspectTolerance float64
 }
 
 // MaxPlaceholderBytes is the longest data URI core stores as a placeholder. A
@@ -90,6 +102,21 @@ func DefaultOptions() Options {
 		// browser's smoothing turns it into a recognisable blur of the photo.
 		PlaceholderWidth: 24,
 	}
+}
+
+// PanoramaOptions is DefaultOptions for 360 degree panoramas, as core's
+// contract (docs/MEDIA_PIPELINE.md) sets them: 2:1, and variants 2k, 4k and 8k
+// wide, named by those labels.
+func PanoramaOptions() Options {
+	opt := DefaultOptions()
+	opt.Widths = []int{2048, 4096, 8192}
+	opt.Labels = map[int]string{2048: "2k", 4096: "4k", 8192: "8k"}
+	// 16384 x 8192 is the largest panorama a viewer is expected to take, and is
+	// 134 MP: over the photo limit, so panoramas get a budget of their own.
+	opt.MaxPixels = 135_000_000
+	opt.AspectRatio = 2
+	opt.AspectTolerance = 0.01
+	return opt
 }
 
 // Info describes the source image as read from its header.
@@ -166,6 +193,20 @@ func check(info Info, opt Options) *Rejection {
 		}
 	}
 
+	if opt.AspectRatio > 0 {
+		ratio := float64(info.Width) / float64(info.Height)
+		if math.Abs(ratio-opt.AspectRatio) > opt.AspectTolerance {
+			return &Rejection{
+				Code: RejectAspect,
+				Detail: map[string]string{
+					"width":  itoa(info.Width),
+					"height": itoa(info.Height),
+					"ratio":  fmt.Sprintf("%.3f", ratio),
+				},
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -210,7 +251,10 @@ func scaledHeight(srcW, srcH, targetW int) int {
 	return h
 }
 
-func label(width int) string {
+func label(opt Options, width int) string {
+	if l, ok := opt.Labels[width]; ok {
+		return l
+	}
 	return "w" + itoa(width)
 }
 

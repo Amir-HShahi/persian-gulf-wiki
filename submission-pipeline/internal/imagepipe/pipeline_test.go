@@ -130,3 +130,41 @@ func TestDefaultOptionsAreSane(t *testing.T) {
 		t.Error("MaxPixels is so high that MaxDimension alone decides every case")
 	}
 }
+
+func TestCheckHoldsPanoramasToTwoToOne(t *testing.T) {
+	opt := PanoramaOptions()
+	cases := []struct {
+		w, h int
+		ok   bool
+	}{
+		{8192, 4096, true},
+		{5760, 2880, true}, // a common 360 camera size
+		{4100, 2048, true}, // 2.002, inside the tolerance
+		{4000, 3000, false},
+		{4096, 4096, false},
+		{2048, 1024 + 20, false},
+	}
+	for _, c := range cases {
+		r := check(Info{Width: c.w, Height: c.h}, opt)
+		if c.ok && r != nil {
+			t.Errorf("%dx%d rejected: %+v", c.w, c.h, r)
+		}
+		if !c.ok && (r == nil || r.Code != RejectAspect) {
+			t.Errorf("%dx%d: got %+v, want %q", c.w, c.h, r, RejectAspect)
+		}
+	}
+
+	// Photos have no shape rule.
+	if r := check(Info{Width: 4000, Height: 3000}, DefaultOptions()); r != nil {
+		t.Errorf("a 4:3 photo was rejected: %+v", r)
+	}
+}
+
+func TestPanoramaBudgetTakesTheLargestViewerSize(t *testing.T) {
+	if r := check(Info{Width: 16384, Height: 8192}, PanoramaOptions()); r != nil {
+		t.Errorf("16384x8192 rejected: %+v", r)
+	}
+	if r := check(Info{Width: 20000, Height: 10000}, PanoramaOptions()); r == nil || r.Code != RejectTooLarge {
+		t.Errorf("20000x10000: got %+v, want %q", r, RejectTooLarge)
+	}
+}

@@ -338,3 +338,48 @@ func TestProcessOmitsThePlaceholderWhenTurnedOff(t *testing.T) {
 		t.Errorf("placeholder produced although turned off")
 	}
 }
+
+func TestProcessMakesPanoramaVariantsByCoreLabels(t *testing.T) {
+	dir := t.TempDir()
+	src := writeJPEG(t, dir, "pano.jpg", 4096, 2048, 0)
+
+	opt := PanoramaOptions()
+	opt.Effort = 0
+	res, err := Process(context.Background(), src, outDir(t, dir), opt)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 8k would be an upscale; 4k is the source's own width and is kept.
+	want := map[string][2]int{"2k": {2048, 1024}, "4k": {4096, 2048}}
+	if len(res.Variants) != len(want) {
+		t.Fatalf("got %d variants, want %d: %+v", len(res.Variants), len(want), res.Variants)
+	}
+	for _, v := range res.Variants {
+		w, ok := want[v.Label]
+		if !ok {
+			t.Errorf("unexpected variant %q", v.Label)
+			continue
+		}
+		if v.Width != w[0] || v.Height != w[1] {
+			t.Errorf("%s = %dx%d, want %dx%d", v.Label, v.Width, v.Height, w[0], w[1])
+		}
+		if filepath.Base(v.Path) != v.Label+".webp" {
+			t.Errorf("%s written as %s", v.Label, filepath.Base(v.Path))
+		}
+	}
+	if res.Placeholder == "" {
+		t.Error("no placeholder for a panorama")
+	}
+}
+
+func TestProcessRejectsAPanoramaThatIsNotTwoToOne(t *testing.T) {
+	dir := t.TempDir()
+	src := writeJPEG(t, dir, "photo.jpg", 3000, 2000, 0)
+
+	_, err := Process(context.Background(), src, outDir(t, dir), PanoramaOptions())
+	var rej *Rejection
+	if !errors.As(err, &rej) || rej.Code != RejectAspect {
+		t.Fatalf("err = %v, want a %q rejection", err, RejectAspect)
+	}
+}

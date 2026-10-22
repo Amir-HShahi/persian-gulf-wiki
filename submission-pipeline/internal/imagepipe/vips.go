@@ -106,7 +106,7 @@ func Process(ctx context.Context, srcPath, outDir string, opt Options) (Result, 
 
 		v, err := variant(srcPath, outDir, w, info, opt)
 		if err != nil {
-			return Result{}, fmt.Errorf("building %s variant: %w", label(w), err)
+			return Result{}, fmt.Errorf("building %s variant: %w", label(opt, w), err)
 		}
 		result.Variants = append(result.Variants, v)
 	}
@@ -189,13 +189,13 @@ func variant(srcPath, outDir string, width int, info Info, opt Options) (Variant
 		return Variant{}, err
 	}
 
-	path := filepath.Join(outDir, label(width)+".webp")
+	path := filepath.Join(outDir, label(opt, width)+".webp")
 	if err := os.WriteFile(path, buf, 0o644); err != nil {
 		return Variant{}, err
 	}
 
 	return Variant{
-		Label:  label(width),
+		Label:  label(opt, width),
 		Width:  img.Width(),
 		Height: img.Height(),
 		Path:   path,
