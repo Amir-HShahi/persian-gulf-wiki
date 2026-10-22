@@ -76,6 +76,13 @@ exist: treat "relation does not exist" as "nothing yet".
 |---|---|---|
 | `status = 'done'`, `result.outcome = 'ok'` | processed | `ok` |
 | `status = 'done'`, `result.outcome = 'rejected'` | the file was refused, never retried | `rejected`, with `result.reason.code` |
+
+Rejection codes are yours, so `MediaFailureCode.fromPipelineCode` maps them as it is:
+`unsupported_format`, `corrupt_file`, `dimensions_too_large` (every size limit: side,
+pixel count and file size) and `checksum_mismatch`. Two more can appear that are not about
+the file, so they land on your generic `rejected`: `object_missing` (the staging object is
+gone) and `malformed_payload` (the job row itself is wrong). `panorama_aspect_ratio` is
+never sent, because the worker has no panorama job yet.
 | `status = 'failed'` | the worker gave up after its retries; `last_error` says why | `failed` → `processing_error` |
 
 Retry window: 5 attempts with 30 s backoff doubling, plus up to a 5 min job timeout each. That
@@ -93,6 +100,7 @@ is well inside the 60-minute stuck-processing sweep, which can stay as it is.
 | `media.placeholder` | `image.placeholder`: `data:image/webp;base64,...`, 24 px wide, under 16 KiB, so your `PLACEHOLDER` check passes as is. Left out (not empty) if one could not be made small enough. |
 | `media.width` / `media.height` | `image.width` / `image.height` (after EXIF rotation) |
 | `media.variants[].size` | `image.variants[].label` (`w320`, `w640`, ...) |
+| `media.variants[].format` | same name, always `webp` |
 | `media.variants[].key/bytes/width/height` | same names |
 
 Example `result`:
@@ -106,7 +114,7 @@ Example `result`:
     "sha256": "n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=",
     "placeholder": "data:image/webp;base64,UklGRjAAAABXRUJQVlA4...",
     "variants": [
-      {"label": "w320", "key": "pending/9b1e7c3a/w320.webp", "width": 320, "height": 427, "bytes": 11874}
+      {"label": "w320", "format": "webp", "key": "pending/9b1e7c3a/w320.webp", "width": 320, "height": 427, "bytes": 11874}
     ],
     "original": {"key": "originals/9b1e7c3a/original.jpg", "bytes": 2481152, "content_type": "image/jpeg"}
   }

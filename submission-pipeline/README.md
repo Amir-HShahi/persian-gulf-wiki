@@ -162,25 +162,29 @@ notification is ever missed, the worker's polling picks the job up anyway.
     "sha256": "n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=",
     "placeholder": "data:image/webp;base64,UklGRjAAAABXRUJQVlA4...",
     "variants": [
-      {"label": "w320", "key": "pending/9b1e7c3a/w320.webp", "width": 320, "height": 427, "bytes": 11874}
+      {"label": "w320", "format": "webp", "key": "pending/9b1e7c3a/w320.webp", "width": 320, "height": 427, "bytes": 11874}
     ],
     "original": {"key": "originals/9b1e7c3a/original.jpg", "bytes": 2481152, "content_type": "image/jpeg"}
   }
 }
 ```
 
-`width`/`height` are the image as displayed (after rotation). For a refusal:
-`"outcome": "rejected", "reason": {"code": "image_unreadable"}`.
+`width`/`height` are the image as displayed (after rotation). Every variant carries
+`format` (`webp`). For a refusal:
+`"outcome": "rejected", "reason": {"code": "corrupt_file"}`.
+
+The codes about the file are core's own (`MediaFailureCode`), so the uploader sees
+a translated message for each. `reason.detail` is for the logs only; for
+`dimensions_too_large`, `detail.limit` says which limit (`side`, `pixels` or `bytes`).
 
 | Reason code | When |
 |---|---|
-| `image_unreadable` | Not an image, or corrupt. |
-| `image_too_many_pixels` | Over 100 megapixels. |
-| `image_dimension_too_large` | A side over 30,000 px. |
-| `file_too_large` | Over `WORKER_MAX_FILE_BYTES`. |
-| `object_missing` | `object_key` is not in the raw bucket. |
+| `unsupported_format` | The file does not start like any image format. |
+| `corrupt_file` | It starts like an image but cannot be read. |
+| `dimensions_too_large` | A side over 30,000 px, over 100 megapixels, or over `WORKER_MAX_FILE_BYTES`. |
 | `checksum_mismatch` | The file's SHA-256 is not `declared_sha256`. |
-| `malformed_payload` | Bad JSON, an invalid `submission_id`, or a `declared_sha256` that is not base64 of 32 bytes. |
+| `object_missing` | `object_key` is not in the raw bucket. Not about the file, so core shows its generic "rejected". |
+| `malformed_payload` | Bad JSON, an invalid `submission_id`, or a `declared_sha256` that is not base64 of 32 bytes. A bug in whoever enqueued the job; core shows its generic "rejected". |
 
 ### Retries and crashes
 
