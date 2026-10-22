@@ -53,10 +53,14 @@ func originalKey(submissionID, ext string) string {
 	return path.Join(originalPrefix, submissionID, "original."+ext)
 }
 
-// derivedContentType is what every variant is stored as. imagepipe only ever
-// writes WebP, so this is a fact about that package rather than a choice made
-// here; if it learns another output format this has to follow the file.
-const derivedContentType = "image/webp"
+// derivedContentType and derivedFormat are what every variant is stored as and
+// reported as. imagepipe only ever writes WebP, so this is a fact about that
+// package rather than a choice made here; if it learns another output format
+// these have to follow the file. Core refuses a variant without a format.
+const (
+	derivedContentType = "image/webp"
+	derivedFormat      = "webp"
+)
 
 type Image struct {
 	Store         *storage.Client
@@ -173,6 +177,7 @@ func (h *Image) Handle(ctx context.Context, log *slog.Logger, _ pgx.Tx, job queu
 
 		variants = append(variants, queue.Variant{
 			Label:  v.Label,
+			Format: derivedFormat,
 			Key:    key,
 			Width:  v.Width,
 			Height: v.Height,

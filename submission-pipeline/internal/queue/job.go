@@ -163,6 +163,7 @@ type Original struct {
 
 type Variant struct {
 	Label  string `json:"label"`
+	Format string `json:"format"`
 	Key    string `json:"key"`
 	Width  int    `json:"width"`
 	Height int    `json:"height"`
