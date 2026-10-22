@@ -1,0 +1,117 @@
+{
+  "key": "coral-bleaching-persian-gulf",
+  "topics": ["pollution-and-environment", "marine-life", "geography-and-climate"],
+  "canonicalLanguage": "en",
+  "gallery": ["acropora-coral", "butterflyfish-coral", "reef-fish-school"],
+  "history": { "revisions": 3, "contributors": 3, "outdated": ["fa"] },
+  "translations": {
+    "fa": {
+      "slug": "سفیدشدگی-مرجان‌ها-در-خلیج-فارس",
+      "title": "سفیدشدگی مرجان‌ها در خلیج فارس",
+      "summary": "چرا مرجان‌های خلیج فارس، با وجود سازگاری کم‌نظیر با گرما، در موج‌های گرمای دریایی سفید می‌شوند و می‌میرند.",
+      "lead": [
+        "**سفیدشدگی مرجان‌ها** پدیده‌ای است که در آن مرجان‌ها بر اثر فشار گرمایی، جلبک‌های همزیست درون بافت خود را بیرون می‌رانند و رنگ خود را از دست می‌دهند. اگر دمای آب زود به حالت عادی بازنگردد، مرجان از گرسنگی می‌میرد. صخره‌های مرجانی خلیج فارس در سه دههٔ گذشته چند بار دچار سفیدشدگی گسترده شده‌اند.{{sheppard-gulf-reefs}}",
+        "این رویدادها به‌ویژه مرجان‌های شاخه‌ای و میزی‌شکل مانند [[acropora-downingi|آکروپورا]] را از میان برده‌اند که زمانی سازندگان اصلی صخره‌ها بودند.{{burt-gulf-corals}}"
+      ],
+      "sections": [
+        {
+          "heading": "مرجان‌هایی در مرز تحمل",
+          "blocks": [
+            { "p": "مرجان‌های خلیج فارس در گرم‌ترین دریای جهان برای مرجان‌ها زندگی می‌کنند. دمای آب در تابستان به بیش از ۳۴ درجهٔ سلسیوس می‌رسد که برای بیشتر مرجان‌های اقیانوس‌ها کشنده است. این مرجان‌ها طی هزاران سال با چنین شرایطی سازگار شده‌اند، اما تنها یک یا دو درجه گرم‌تر شدن آب در تابستان‌های استثنایی، آن‌ها را از مرز تحمل می‌گذراند.{{sheppard-gulf-reefs}}" }
+          ]
+        },
+        {
+          "heading": "رویدادهای بزرگ",
+          "blocks": [
+            { "p": "نخستین رویداد گستردهٔ ثبت‌شده در سال ۱۹۹۶ رخ داد و دو سال بعد، در جریان پدیدهٔ ال‌نینوی ۱۹۹۸، بخش بزرگی از مرجان‌های جنوب خلیج فارس مردند. رویدادهای ۲۰۱۰ و ۲۰۱۷ نیز آسیب‌های گسترده‌ای پدید آوردند و در برخی صخره‌های امارات و قطر، پوشش مرجان زنده به کمتر از یک‌پنجم میزان پیشین رسید.{{sheppard-gulf-reefs}}{{ropme-soe-2021}}" },
+            { "ul": ["۱۹۹۶: نخستین سفیدشدگی گستردهٔ ثبت‌شده", "۱۹۹۸: مرگ گستردهٔ آکروپوراها", "۲۰۱۰: سفیدشدگی در جنوب خلیج", "۲۰۱۷: یکی از شدیدترین رویدادها"] }
+          ]
+        },
+        {
+          "heading": "مرجان‌های ایران",
+          "blocks": [
+            { "p": "صخره‌های مرجانی پیرامون جزایر [[kish-island|کیش]]، [[larak-island|لارک]]، [[hormuz-island|هرمز]] و [[abu-musa-island|ابوموسی]] نیز از سفیدشدگی آسیب دیده‌اند، هرچند داده‌های پایش در آب‌های ایران کمتر است. پژوهش‌ها نشان می‌دهند که صخره‌های شرقی خلیج فارس، که آب خنک‌تر دریای عمان به آن‌ها می‌رسد، بهتر بازیابی شده‌اند.{{burt-gulf-corals}}" }
+          ]
+        },
+        {
+          "heading": "امید به آینده",
+          "blocks": [
+            { "p": "مرجان‌هایی که از رویدادهای سفیدشدگی جان سالم به در برده‌اند، ممکن است مقاوم‌ترین مرجان‌های جهان باشند. دانشمندان این مرجان‌ها را برای پرورش در نوزادگاه‌های زیردریایی و بازسازی صخره‌ها، و حتی برای پژوهش دربارهٔ آیندهٔ صخره‌های مرجانی در اقیانوس‌های گرم‌شونده، به کار می‌برند. کاهش فشارهای محلی مانند آلودگی و لایروبی، شانس بازیابی صخره‌ها را افزایش می‌دهد.{{burt-gulf-corals}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "coral-bleaching-in-the-persian-gulf",
+      "title": "Coral bleaching in the Persian Gulf",
+      "summary": "Why the Persian Gulf's corals, though uniquely adapted to heat, bleach and die during marine heatwaves.",
+      "lead": [
+        "**Coral bleaching** happens when heat stress makes corals expel the symbiotic algae living in their tissue and lose their colour. If the water does not soon return to normal, the coral starves to death. The reefs of the Persian Gulf have suffered several mass bleaching events over the past three decades.{{sheppard-gulf-reefs}}",
+        "These events have hit branching and table corals such as [[acropora-downingi|Acropora]] especially hard, though they were once the main reef builders.{{burt-gulf-corals}}"
+      ],
+      "sections": [
+        {
+          "heading": "Corals at the limit",
+          "blocks": [
+            { "p": "The corals of the Persian Gulf live in the hottest sea on Earth for corals. Summer water temperatures exceed 34 °C, lethal for most ocean corals. Over thousands of years these corals have adapted to such conditions, but a summer just one or two degrees warmer than usual pushes them past their limit.{{sheppard-gulf-reefs}}" }
+          ]
+        },
+        {
+          "heading": "Major events",
+          "blocks": [
+            { "p": "The first recorded mass event came in 1996, and two years later, during the 1998 El Niño, a large share of the corals in the southern Gulf died. Events in 2010 and 2017 also caused widespread damage, and on some reefs off the UAE and Qatar live coral cover fell to less than a fifth of its former level.{{sheppard-gulf-reefs}}{{ropme-soe-2021}}" },
+            { "ul": ["1996: first recorded mass bleaching", "1998: mass death of Acropora", "2010: bleaching in the southern Gulf", "2017: one of the most severe events"] }
+          ]
+        },
+        {
+          "heading": "Iran's reefs",
+          "blocks": [
+            { "p": "The reefs around [[kish-island|Kish]], [[larak-island|Larak]], [[hormuz-island|Hormuz]] and [[abu-musa-island|Abu Musa]] have also bleached, though monitoring data from Iranian waters are scarcer. Studies suggest that reefs in the eastern Gulf, which receive cooler water from the Gulf of Oman, have recovered better.{{burt-gulf-corals}}" }
+          ]
+        },
+        {
+          "heading": "Hope for the future",
+          "blocks": [
+            { "p": "Corals that survived the bleaching events may be among the most heat-tolerant in the world. Scientists are using them to grow corals in underwater nurseries for reef restoration, and to study the future of coral reefs in warming oceans. Reducing local pressures such as pollution and dredging improves the reefs' chances of recovery.{{burt-gulf-corals}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "ابيضاض-المرجان-في-الخليج",
+      "title": "ابيضاض المرجان في الخليج الفارسي",
+      "summary": "لماذا يبيضّ مرجان الخليج الفارسي ويموت في موجات الحر البحرية رغم تكيفه الفريد مع الحرارة.",
+      "lead": [
+        "يحدث **ابيضاض المرجان** حين يدفع الإجهاد الحراري المرجانَ إلى طرد الطحالب التكافلية التي تعيش في نسيجه فيفقد لونه، وإن لم تعد المياه سريعًا إلى حالتها الطبيعية يموت المرجان جوعًا. وقد تعرضت شعاب الخليج الفارسي لعدة موجات ابيضاض واسعة خلال العقود الثلاثة الماضية.{{sheppard-gulf-reefs}}",
+        "وأصابت هذه الموجات بشدة خاصة المرجان المتفرع والطاولي مثل [[acropora-downingi|الأكروبورا]]، الذي كان يومًا بانيَ الشعاب الرئيسي.{{burt-gulf-corals}}"
+      ],
+      "sections": [
+        {
+          "heading": "مرجان عند حدود التحمل",
+          "blocks": [
+            { "p": "يعيش مرجان الخليج في أحرّ بحار الأرض بالنسبة إلى المرجان؛ إذ تتجاوز حرارة المياه صيفًا ٣٤ درجة مئوية، وهي حرارة قاتلة لمعظم مرجان المحيطات. وقد تكيف هذا المرجان عبر آلاف السنين مع هذه الظروف، لكن صيفًا أدفأ من المعتاد بدرجة أو درجتين يتجاوز به حدود تحمله.{{sheppard-gulf-reefs}}" }
+          ]
+        },
+        {
+          "heading": "الموجات الكبرى",
+          "blocks": [
+            { "p": "سُجّلت أول موجة واسعة عام ١٩٩٦، وبعد عامين، خلال ظاهرة النينيو عام ١٩٩٨، مات جزء كبير من مرجان جنوب الخليج. كما سبّبت موجتا ٢٠١٠ و٢٠١٧ أضرارًا واسعة، وانخفض الغطاء المرجاني الحي في بعض شعاب الإمارات وقطر إلى أقل من خُمس مستواه السابق.{{sheppard-gulf-reefs}}{{ropme-soe-2021}}" },
+            { "ul": ["١٩٩٦: أول ابيضاض واسع مسجّل", "١٩٩٨: موت واسع للأكروبورا", "٢٠١٠: ابيضاض في جنوب الخليج", "٢٠١٧: من أشد الموجات"] }
+          ]
+        },
+        {
+          "heading": "شعاب إيران",
+          "blocks": [
+            { "p": "تعرضت الشعاب حول [[kish-island|كيش]] و[[larak-island|لارك]] و[[hormuz-island|هرمز]] و[[abu-musa-island|أبو موسى]] للابيضاض أيضًا، وإن كانت بيانات الرصد في المياه الإيرانية أقل. وتشير الدراسات إلى أن شعاب شرق الخليج، التي تصلها مياه أبرد من بحر عُمان، تعافت بصورة أفضل.{{burt-gulf-corals}}" }
+          ]
+        },
+        {
+          "heading": "الأمل في المستقبل",
+          "blocks": [
+            { "p": "قد يكون المرجان الذي نجا من موجات الابيضاض من أكثر المرجان تحملًا للحرارة في العالم، ويستخدمه العلماء في تنمية المرجان في مشاتل تحت الماء لاستعادة الشعاب، ولدراسة مستقبل الشعاب المرجانية في المحيطات التي ترتفع حرارتها. ويزيد الحد من الضغوط المحلية كالتلوث والتجريف فرص تعافي الشعاب.{{burt-gulf-corals}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

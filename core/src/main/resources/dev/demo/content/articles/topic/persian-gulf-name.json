@@ -1,0 +1,117 @@
+{
+  "key": "persian-gulf-name",
+  "topics": ["history-and-archaeology", "geography-and-climate", "culture-and-ethnography"],
+  "canonicalLanguage": "fa",
+  "gallery": ["persian-gulf-modis", "middle-east-modis"],
+  "history": { "revisions": 7, "contributors": 9 },
+  "translations": {
+    "fa": {
+      "slug": "نام-خلیج-فارس",
+      "title": "نام خلیج فارس",
+      "summary": "پیشینهٔ نام «خلیج فارس» در نوشته‌های یونانی، رومی، عربی و اسلامی و جایگاه آن در منابع جغرافیایی جهان.",
+      "lead": [
+        "**نام خلیج فارس** یکی از کهن‌ترین نام‌های جغرافیایی جهان است که بیش از دو هزار و پانصد سال در منابع گوناگون به کار رفته است. جغرافی‌دانان یونانی و رومی این دریا را «سینوس پرسیکوس» (Sinus Persicus)، یعنی خلیج پارس، می‌نامیدند و نویسندگان مسلمان سده‌های میانه آن را «بحر فارس» یا «خلیج فارس» خوانده‌اند.{{iranica-persian-gulf}}",
+        "سازمان ملل متحد و سازمان بین‌المللی آب‌نگاری نیز «خلیج فارس» را نام رسمی این آبراه می‌دانند و در اسناد خود به کار می‌برند.{{iho-limits}}"
+      ],
+      "sections": [
+        {
+          "heading": "در منابع باستانی",
+          "blocks": [
+            { "p": "کهن‌ترین اشاره‌های شناخته‌شده به این دریا در سنگ‌نوشته‌های هخامنشی دیده می‌شود. داریوش بزرگ در کتیبهٔ کانال سوئز از «دریایی که از پارس می‌آید» یاد کرده است. پس از او، هرودوت، استرابون، بطلمیوس و پلینی، همگی این دریا را با نام پارس پیوند داده‌اند. نقشه‌های بطلمیوس، که تا سدهٔ شانزدهم میلادی پایهٔ نقشه‌نگاری اروپا بود، این دریا را «Sinus Persicus» نشان می‌دادند.{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "در منابع عربی و اسلامی",
+          "blocks": [
+            { "p": "جغرافی‌دانان و تاریخ‌نگاران مسلمان، از جمله ابن‌خردادبه، اصطخری، مسعودی، مقدسی و ابن‌حوقل، این دریا را «بحر فارس» نامیده‌اند. در این منابع، بحر فارس گاه به معنای گسترده‌تری، یعنی بخش شمال غربی اقیانوس هند، نیز به کار رفته است. کاربرد این نام در نوشته‌های عربی تا سدهٔ بیستم میلادی رایج بود.{{iranica-persian-gulf}}{{dehkhoda-lexicon}}" },
+            { "ul": ["المسالک و الممالک ابن‌خردادبه", "مسالک الممالک اصطخری", "مروج الذهب مسعودی", "احسن التقاسیم مقدسی"] }
+          ]
+        },
+        {
+          "heading": "مناقشهٔ نام در دوران معاصر",
+          "blocks": [
+            { "p": "از دههٔ ۱۹۶۰ میلادی، با گسترش جریان‌های ملی‌گرایانهٔ عربی، کاربرد نام‌های دیگری برای این دریا در برخی کشورهای عربی رواج یافت. این موضوع به مناقشه‌ای فرهنگی و سیاسی میان ایران و برخی همسایگان تبدیل شده است. با این حال، سازمان ملل متحد در دستورالعمل‌های ویرایشی خود بر کاربرد نام «خلیج فارس» تأکید کرده و بیشتر اطلس‌ها و نهادهای علمی بین‌المللی همین نام را به کار می‌برند.{{iho-limits}}" }
+          ]
+        },
+        {
+          "heading": "مرزهای جغرافیایی",
+          "blocks": [
+            { "p": "بر پایهٔ تعریف سازمان بین‌المللی آب‌نگاری، مرز جنوب شرقی خلیج فارس خطی است که از راس الحد در شبه‌جزیرهٔ مسندم به دماغهٔ کوه مبارک در کرانهٔ ایران کشیده می‌شود. بدین ترتیب، [[strait-of-hormuz|تنگهٔ هرمز]] دروازهٔ پیوند خلیج فارس با دریای عمان به شمار می‌آید. مساحت خلیج فارس حدود ۲۵۱ هزار کیلومتر مربع و میانگین ژرفای آن تنها حدود ۵۰ متر است.{{iho-limits}}{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "name-of-the-persian-gulf",
+      "title": "Name of the Persian Gulf",
+      "summary": "The history of the name \"Persian Gulf\" in Greek, Roman, Arabic and Islamic writing and its place in the world's geographical sources.",
+      "lead": [
+        "The **name of the Persian Gulf** is one of the oldest geographical names in the world, used in sources of many kinds for more than two and a half thousand years. Greek and Roman geographers called the sea Sinus Persicus, \"the Persian gulf\", and Muslim writers of the Middle Ages called it Bahr Fars or Khalij Fars.{{iranica-persian-gulf}}",
+        "The United Nations and the International Hydrographic Organization also treat \"Persian Gulf\" as the official name of the waterway and use it in their documents.{{iho-limits}}"
+      ],
+      "sections": [
+        {
+          "heading": "In ancient sources",
+          "blocks": [
+            { "p": "The earliest known references to the sea appear in Achaemenid inscriptions. In his Suez canal inscription, Darius the Great speaks of \"the sea that goes from Persia\". After him Herodotus, Strabo, Ptolemy and Pliny all linked the sea with the name of Persia. Ptolemy's maps, the basis of European cartography until the sixteenth century, showed it as Sinus Persicus.{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "In Arabic and Islamic sources",
+          "blocks": [
+            { "p": "Muslim geographers and historians including Ibn Khordadbeh, Istakhri, Masudi, Muqaddasi and Ibn Hawqal called the sea Bahr Fars, \"the Sea of Persia\". In these sources the name was sometimes used more broadly for the north-western Indian Ocean as well. Its use in Arabic writing remained common until the twentieth century.{{iranica-persian-gulf}}{{dehkhoda-lexicon}}" },
+            { "ul": ["Ibn Khordadbeh, Book of Roads and Kingdoms", "Istakhri, Routes of the Realms", "Masudi, Meadows of Gold", "Muqaddasi, The Best Divisions"] }
+          ]
+        },
+        {
+          "heading": "The modern naming dispute",
+          "blocks": [
+            { "p": "From the 1960s, with the rise of Arab nationalism, other names for the sea came into use in some Arab countries. The question has become a cultural and political dispute between Iran and some of its neighbours. The United Nations nevertheless insists on \"Persian Gulf\" in its editorial guidelines, and most international atlases and scientific bodies use the same name.{{iho-limits}}" }
+          ]
+        },
+        {
+          "heading": "Geographical limits",
+          "blocks": [
+            { "p": "As defined by the International Hydrographic Organization, the south-eastern limit of the Persian Gulf is a line from Ras al-Hadd on the Musandam Peninsula to Ras al-Kuh on the Iranian coast, making the [[strait-of-hormuz|Strait of Hormuz]] the gateway between the Gulf and the Gulf of Oman. The Persian Gulf covers about 251,000 square kilometres and has an average depth of only about 50 metres.{{iho-limits}}{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "اسم-الخليج-الفارسي",
+      "title": "اسم الخليج الفارسي",
+      "summary": "تاريخ اسم «الخليج الفارسي» في الكتابات اليونانية والرومانية والعربية والإسلامية ومكانته في المصادر الجغرافية العالمية.",
+      "lead": [
+        "**اسم الخليج الفارسي** من أقدم الأسماء الجغرافية في العالم، إذ استُعمل في مصادر متنوعة منذ أكثر من ألفين وخمسمئة عام. فقد سمّى الجغرافيون اليونانيون والرومان هذا البحر «سينوس بيرسيكوس»، أي خليج فارس، وسمّاه الكتّاب المسلمون في العصور الوسطى «بحر فارس» أو «الخليج الفارسي».{{iranica-persian-gulf}}",
+        "وتعتمد الأمم المتحدة والمنظمة الهيدروغرافية الدولية كذلك «الخليج الفارسي» اسمًا رسميًا لهذا الممر المائي وتستعمله في وثائقهما.{{iho-limits}}"
+      ],
+      "sections": [
+        {
+          "heading": "في المصادر القديمة",
+          "blocks": [
+            { "p": "ترد أقدم الإشارات المعروفة إلى هذا البحر في النقوش الأخمينية؛ إذ يذكر داريوش الكبير في نقش قناة السويس «البحر الذي يأتي من فارس». ومن بعده ربط هيرودوت وسترابون وبطليموس وبلينيوس جميعًا هذا البحر باسم فارس، وكانت خرائط بطليموس، أساس الخرائط الأوروبية حتى القرن السادس عشر، تسميه «Sinus Persicus».{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "في المصادر العربية والإسلامية",
+          "blocks": [
+            { "p": "سمّى الجغرافيون والمؤرخون المسلمون، ومنهم ابن خرداذبه والإصطخري والمسعودي والمقدسي وابن حوقل، هذا البحر «بحر فارس»، واستُعمل الاسم أحيانًا بمعنى أوسع يشمل شمال غرب المحيط الهندي. وظل شائعًا في الكتابات العربية حتى القرن العشرين.{{iranica-persian-gulf}}{{dehkhoda-lexicon}}" },
+            { "ul": ["المسالك والممالك لابن خرداذبه", "مسالك الممالك للإصطخري", "مروج الذهب للمسعودي", "أحسن التقاسيم للمقدسي"] }
+          ]
+        },
+        {
+          "heading": "الخلاف المعاصر على الاسم",
+          "blocks": [
+            { "p": "منذ ستينيات القرن العشرين، ومع صعود التيارات القومية العربية، شاعت في بعض الدول العربية أسماء أخرى لهذا البحر، وتحولت المسألة إلى خلاف ثقافي وسياسي بين إيران وبعض جيرانها. ومع ذلك تؤكد الأمم المتحدة في إرشاداتها التحريرية استعمال اسم «الخليج الفارسي»، وتستعمله معظم الأطالس والهيئات العلمية الدولية.{{iho-limits}}" }
+          ]
+        },
+        {
+          "heading": "الحدود الجغرافية",
+          "blocks": [
+            { "p": "وفق تعريف المنظمة الهيدروغرافية الدولية، فإن الحد الجنوبي الشرقي للخليج الفارسي خط يمتد من رأس الحد في شبه جزيرة مسندم إلى رأس الكوه على الساحل الإيراني، فيكون [[strait-of-hormuz|مضيق هرمز]] بوابة الخليج إلى بحر عُمان. وتبلغ مساحة الخليج نحو ٢٥١ ألف كيلومتر مربع، ومتوسط عمقه نحو ٥٠ مترًا فقط.{{iho-limits}}{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

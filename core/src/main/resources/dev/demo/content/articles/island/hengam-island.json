@@ -1,0 +1,310 @@
+{
+  "key": "hengam-island",
+  "subject": {
+    "kind": "ISLAND",
+    "names": {
+      "fa": "جزیرهٔ هنگام",
+      "en": "Hengam Island",
+      "ar": "جزيرة هنگام"
+    },
+    "aliases": {
+      "fa": [
+        "هنگام",
+        "هنجام"
+      ],
+      "en": [
+        "Hengam",
+        "Henjam"
+      ],
+      "ar": [
+        "هنجام",
+        "هنگام"
+      ]
+    },
+    "geometry": "POINT(55.88 26.64)",
+    "facts": [
+      {
+        "attribute": "located_in",
+        "values": [
+          {
+            "subject": "strait-of-hormuz"
+          }
+        ]
+      },
+      {
+        "attribute": "area",
+        "values": [
+          {
+            "number": 34,
+            "source": "ncc-gazetteer"
+          }
+        ]
+      },
+      {
+        "attribute": "place_features",
+        "values": [
+          {
+            "option": "UNESCO_GEOPARK"
+          },
+          {
+            "option": "PROTECTED_AREA"
+          }
+        ]
+      },
+      {
+        "attribute": "country",
+        "values": [
+          {
+            "option": "IR"
+          }
+        ]
+      },
+      {
+        "attribute": "province",
+        "values": [
+          {
+            "subject": "hormozgan-province"
+          }
+        ]
+      },
+      {
+        "attribute": "county",
+        "values": [
+          {
+            "localized": {
+              "fa": "قشم",
+              "en": "Qeshm",
+              "ar": "قشم"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "district",
+        "values": [
+          {
+            "localized": {
+              "fa": "بخش شهاب",
+              "en": "Shahab District",
+              "ar": "قسم شهاب"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "population",
+        "values": [
+          {
+            "number": 512,
+            "asOf": "2016-01-01",
+            "source": "sci-census-2016"
+          }
+        ]
+      },
+      {
+        "attribute": "ethnic_groups",
+        "values": [
+          {
+            "localized": {
+              "fa": "فارس‌ها و عرب‌ها",
+              "en": "Persians and Arabs",
+              "ar": "الفرس والعرب"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "languages",
+        "values": [
+          {
+            "option": "FA"
+          },
+          {
+            "option": "AR"
+          }
+        ]
+      }
+    ]
+  },
+  "topics": [
+    "islands",
+    "marine-life",
+    "culture-and-ethnography"
+  ],
+  "canonicalLanguage": "fa",
+  "gallery": [
+    "bottlenose-dolphin",
+    "iss-47-gulf",
+    "fishing-dhow"
+  ],
+  "panorama": "pano-rocky-beach",
+  "history": {
+    "revisions": 5,
+    "contributors": 4
+  },
+  "verification": "VERIFIED",
+  "translations": {
+    "fa": {
+      "slug": "جزیره-هنگام",
+      "title": "جزیرهٔ هنگام",
+      "summary": "جزیره‌ای کوچک در جنوب قشم که به دلفین‌های گوژپشت، ساحل نقره‌ای و بازارچهٔ زنان صنعتگر شهرت دارد.",
+      "lead": [
+        "**جزیرهٔ هنگام** جزیره‌ای کوچک با مساحتی حدود ۳۴ کیلومتر مربع است که در دو کیلومتری جنوب [[qeshm-island|قشم]] و در کنار [[strait-of-hormuz|تنگهٔ هرمز]] قرار دارد.{{ncc-gazetteer}} هنگام به خاطر گروه‌های [[indo-pacific-humpback-dolphin|دلفین گوژپشت]] که در آب‌های پیرامونش دیده می‌شوند، یکی از محبوب‌ترین مقصدهای گردشگری طبیعت در خلیج فارس است.",
+        "سه روستای جزیره، یعنی هنگام قدیم، هنگام جدید و غیل، جمعیتی نزدیک به پانصد نفر دارند که بیشتر به صیادی و گردشگری مشغول‌اند.{{sci-census-2016}}"
+      ],
+      "sections": [
+        {
+          "heading": "طبیعت",
+          "blocks": [
+            {
+              "p": "صبح‌ها قایق‌های صیادی گردشگران را به دریای جنوب جزیره می‌برند تا گروه‌های دلفین را ببینند. افزون بر دلفین‌ها، [[hawksbill-turtle|لاک‌پشت پوزه‌عقابی]] در ساحل‌های شنی هنگام تخم می‌گذارد و صخره‌های مرجانی جنوب جزیره زیستگاه ماهی‌های رنگارنگ است.{{doe-protected-areas}}"
+            },
+            {
+              "p": "ساحل نقره‌ای هنگام، که ماسه‌هایش به سبب کانی‌های درخشان برق می‌زنند، و درهٔ نمکی جزیره از پدیده‌های زمین‌شناختی آن‌اند و بخشی از مسیرهای ژئوپارک قشم به شمار می‌روند.{{unesco-qeshm-geopark}}"
+            }
+          ]
+        },
+        {
+          "heading": "تاریخ",
+          "blocks": [
+            {
+              "p": "در آغاز سدهٔ بیستم، بریتانیا ایستگاه تلگراف و انبار زغال‌سنگ کشتی‌های خود را در هنگام برپا کرد. ساختمان‌های سنگی این دوره، از جمله اسکله و خانه‌های کارکنان تلگراف‌خانه، هنوز در روستای هنگام قدیم برجاست.{{potter-gulf-history}} در گورستان کهن جزیره نیز سنگ‌قبرهایی با نقش‌های دریایی دیده می‌شود."
+            }
+          ]
+        },
+        {
+          "heading": "مردم و صنایع دستی",
+          "blocks": [
+            {
+              "p": "زنان هنگام با مهره، صدف و پارچه‌های رنگی زیورآلات و عروسک‌های محلی می‌سازند و در بازارچه‌ای کنار اسکله به گردشگران می‌فروشند. این بازارچه یکی از نمونه‌های موفق گردشگری اجتماع‌محور در جزایر هرمزگان است و درآمد آن به خانواده‌های جزیره می‌رسد."
+            },
+            {
+              "ul": [
+                "تماشای دلفین‌ها در دریا",
+                "ساحل نقره‌ای",
+                "تلگراف‌خانهٔ بریتانیایی",
+                "بازارچهٔ زنان صنعتگر"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "دسترسی و بهترین زمان سفر",
+          "blocks": [
+            {
+              "p": "برای رسیدن به هنگام باید از اسکلهٔ شیب‌دراز در جنوب قشم سوار قایق شد؛ سفری کوتاه که حدود ده دقیقه طول می‌کشد. بهترین زمان سفر از آبان تا فروردین است که هوا معتدل است و دریا آرام‌تر. در تابستان گرما و رطوبت بسیار بالاست و تماشای دلفین‌ها تنها در ساعت‌های آغازین صبح دلپذیر است. گردشگران می‌توانند در خانه‌های بومی روستاها اقامت کنند و غذاهای دریایی محلی را در کنار خانواده‌های صیاد بچشند."
+            }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "hengam-island",
+      "title": "Hengam Island",
+      "summary": "A small island south of Qeshm known for its humpback dolphins, silver beach and women's handicraft market.",
+      "lead": [
+        "**Hengam Island** is a small island of about 34 square kilometres lying two kilometres south of [[qeshm-island|Qeshm]], beside the [[strait-of-hormuz|Strait of Hormuz]].{{ncc-gazetteer}} Thanks to the groups of [[indo-pacific-humpback-dolphin|humpback dolphins]] seen in its waters, Hengam is one of the most popular nature destinations in the Persian Gulf.",
+        "The island's three villages — Old Hengam, New Hengam and Gheil — have close to five hundred inhabitants, most of whom live from fishing and tourism.{{sci-census-2016}}"
+      ],
+      "sections": [
+        {
+          "heading": "Nature",
+          "blocks": [
+            {
+              "p": "In the mornings fishing boats take visitors to the sea south of the island to watch the dolphins. Besides dolphins, the [[hawksbill-turtle|hawksbill turtle]] nests on Hengam's sandy beaches, and the coral reefs to the south are home to colourful reef fish.{{doe-protected-areas}}"
+            },
+            {
+              "p": "Hengam's Silver Beach, whose sand glitters with shiny minerals, and the island's salt valley are among its geological features and form part of the Qeshm geopark routes.{{unesco-qeshm-geopark}}"
+            }
+          ]
+        },
+        {
+          "heading": "History",
+          "blocks": [
+            {
+              "p": "In the early twentieth century Britain set up a telegraph station and a coaling depot for its ships on Hengam. Stone buildings from that period, including the jetty and the telegraph staff houses, still stand in Old Hengam.{{potter-gulf-history}} The island's old cemetery has gravestones carved with maritime motifs."
+            }
+          ]
+        },
+        {
+          "heading": "People and handicrafts",
+          "blocks": [
+            {
+              "p": "The women of Hengam make jewellery and local dolls from beads, shells and coloured fabric and sell them to visitors at a small market by the jetty. The market is one of the successful examples of community-based tourism in the Hormozgan islands, and its income goes to island families."
+            },
+            {
+              "ul": [
+                "Dolphin watching at sea",
+                "The Silver Beach",
+                "The British telegraph station",
+                "The women's handicraft market"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Getting there and when to go",
+          "blocks": [
+            {
+              "p": "Hengam is reached by boat from Shibderaz pier on the south coast of Qeshm, a short crossing of about ten minutes. The best time to visit is from November to March, when the weather is mild and the sea calmer. In summer the heat and humidity are intense, and dolphin watching is pleasant only in the early morning. Visitors can stay in village homes and try local seafood with fishing families."
+            }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "جزيرة-هنجام",
+      "title": "جزيرة هنگام",
+      "summary": "جزيرة صغيرة جنوب قشم تشتهر بالدلافين الحدباء والشاطئ الفضي وسوق الحرفيات.",
+      "lead": [
+        "**جزيرة هنگام** جزيرة صغيرة مساحتها نحو ٣٤ كيلومترًا مربعًا، تقع على بعد كيلومترين جنوب [[qeshm-island|قشم]] بجوار [[strait-of-hormuz|مضيق هرمز]].{{ncc-gazetteer}} وبفضل مجموعات [[indo-pacific-humpback-dolphin|الدلافين الحدباء]] التي تُشاهد في مياهها، تُعدّ هنگام من أشهر وجهات السياحة الطبيعية في الخليج الفارسي.",
+        "ويقطن قرى الجزيرة الثلاث، هنگام القديمة وهنگام الجديدة وغيل، نحو خمسمئة نسمة يعيش معظمهم من الصيد والسياحة.{{sci-census-2016}}"
+      ],
+      "sections": [
+        {
+          "heading": "الطبيعة",
+          "blocks": [
+            {
+              "p": "تنقل قوارب الصيد الزوار صباحًا إلى البحر جنوب الجزيرة لمشاهدة الدلافين. وإلى جانب الدلافين تضع [[hawksbill-turtle|السلحفاة صقرية المنقار]] بيضها على شواطئ هنگام الرملية، وتؤوي الشعاب المرجانية في الجنوب أسماك الشعاب الملوّنة.{{doe-protected-areas}}"
+            },
+            {
+              "p": "ويُعدّ الشاطئ الفضي، الذي تتلألأ رماله بمعادن لامعة، ووادي الملح من الظواهر الجيولوجية في الجزيرة، وهما جزء من مسارات متنزه قشم الجيولوجي.{{unesco-qeshm-geopark}}"
+            }
+          ]
+        },
+        {
+          "heading": "التاريخ",
+          "blocks": [
+            {
+              "p": "في أوائل القرن العشرين أقامت بريطانيا في هنگام محطة للبرق ومستودعًا للفحم لسفنها، وما تزال المباني الحجرية من تلك الحقبة، ومنها الرصيف وبيوت موظفي البرق، قائمة في هنگام القديمة.{{potter-gulf-history}} وفي مقبرة الجزيرة القديمة شواهد قبور منقوشة بزخارف بحرية."
+            }
+          ]
+        },
+        {
+          "heading": "السكان والحرف اليدوية",
+          "blocks": [
+            {
+              "p": "تصنع نساء هنگام الحلي والدمى المحلية من الخرز والأصداف والأقمشة الملوّنة، ويبعنها للزوار في سوق صغيرة بجوار الرصيف. وتُعدّ هذه السوق من الأمثلة الناجحة للسياحة المجتمعية في جزر هرمزغان، ويعود دخلها إلى أسر الجزيرة."
+            },
+            {
+              "ul": [
+                "مشاهدة الدلافين في البحر",
+                "الشاطئ الفضي",
+                "محطة البرق البريطانية",
+                "سوق الحرفيات"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "الوصول وأفضل وقت للزيارة",
+          "blocks": [
+            {
+              "p": "يُوصل إلى هنگام بالقارب من رصيف شيب دراز على الساحل الجنوبي لقشم، في رحلة قصيرة تستغرق نحو عشر دقائق. وأفضل وقت للزيارة من نوفمبر إلى مارس حين يكون الطقس معتدلًا والبحر أهدأ، أما في الصيف فالحرارة والرطوبة شديدتان، ولا تطيب مشاهدة الدلافين إلا في الصباح الباكر. ويمكن للزوار الإقامة في بيوت القرى وتذوق المأكولات البحرية المحلية مع أسر الصيادين."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

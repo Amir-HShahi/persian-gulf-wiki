@@ -1,0 +1,120 @@
+{
+  "key": "abu-musa-island",
+  "subject": {
+    "kind": "ISLAND",
+    "names": { "fa": "جزیرهٔ ابوموسی", "en": "Abu Musa Island", "ar": "جزيرة أبو موسى" },
+    "aliases": { "fa": ["ابوموسی"], "en": ["Abu Musa"], "ar": ["أبو موسى"] },
+    "geometry": "POINT(55.03 25.87)",
+    "facts": [
+      { "attribute": "area", "values": [ { "number": 12.8, "source": "ncc-gazetteer" } ] },
+      { "attribute": "place_features", "values": [ { "option": "PROTECTED_AREA" } ] },
+      { "attribute": "country", "values": [ { "option": "IR" } ] },
+      { "attribute": "province", "values": [ { "subject": "hormozgan-province" } ] },
+      { "attribute": "county", "values": [ { "localized": { "fa": "ابوموسی", "en": "Abu Musa", "ar": "أبو موسى" } } ] },
+      { "attribute": "district", "values": [ { "localized": { "fa": "بخش مرکزی", "en": "Central District", "ar": "القسم المركزي" } } ] },
+      { "attribute": "population", "values": [ { "number": 2001, "asOf": "2016-01-01", "source": "sci-census-2016" } ] },
+      { "attribute": "ethnic_groups", "values": [ { "localized": { "fa": "فارس‌ها و عرب‌ها", "en": "Persians and Arabs", "ar": "الفرس والعرب" } } ] },
+      { "attribute": "languages", "values": [ { "option": "FA" }, { "option": "AR" } ] }
+    ]
+  },
+  "topics": ["islands", "geography-and-climate", "history-and-archaeology"],
+  "canonicalLanguage": "fa",
+  "gallery": ["uae-coast-iss", "acropora-coral"],
+  "history": { "revisions": 6, "contributors": 5 },
+  "verification": "STALE",
+  "translations": {
+    "fa": {
+      "slug": "جزیره-ابوموسی",
+      "title": "جزیرهٔ ابوموسی",
+      "summary": "جزیره‌ای کوچک در جنوب خلیج فارس که کانون شهرستان ابوموسی در استان هرمزگان است.",
+      "lead": [
+        "**جزیرهٔ ابوموسی** جزیره‌ای کوچک با مساحتی حدود ۱۳ کیلومتر مربع است که در جنوب غربی [[strait-of-hormuz|تنگهٔ هرمز]] و در میانهٔ راه کرانه‌های ایران و امارات متحده عربی قرار دارد.{{ncc-gazetteer}} این جزیره مرکز شهرستان ابوموسی در [[hormozgan-province|استان هرمزگان]] است و جزایر تنب بزرگ و تنب کوچک نیز در همین شهرستان جای دارند.",
+        "ابوموسی از سال ۱۹۷۱ میلادی زیر ادارهٔ ایران است و امارات متحده عربی نیز ادعای حاکمیت بر آن را دارد؛ موضوعی که در روابط دو کشور همچنان مطرح است.{{potter-gulf-history}}"
+      ],
+      "sections": [
+        {
+          "heading": "جغرافیا",
+          "blocks": [
+            { "p": "ابوموسی جزیره‌ای کم‌ارتفاع است که تنها یک تپهٔ آتشفشانی به نام کوه حلوا در بخش جنوبی آن سر برآورده است. خاک سرخ جزیره، همانند [[hormuz-island|هرمز]]، سرشار از اکسید آهن است و در گذشته استخراج و صادر می‌شد.{{ncc-coastal-atlas}} آب‌های اطراف جزیره ژرف و زلال‌اند و صخره‌های مرجانی آن از سالم‌ترین مرجان‌های این بخش از خلیج فارس به شمار می‌روند.{{burt-gulf-corals}}" },
+            { "p": "سواحل شمالی ابوموسی محل تخم‌گذاری [[hawksbill-turtle|لاک‌پشت پوزه‌عقابی]] و [[green-turtle|لاک‌پشت سبز]] است و این ساحل‌ها در فصل تخم‌گذاری حفاظت می‌شوند.{{doe-protected-areas}}" }
+          ]
+        },
+        {
+          "heading": "تاریخ",
+          "blocks": [
+            { "p": "جزیره در سده‌های گذشته بخشی از قلمرو حاکمان بندر لنگه و کرانه‌های شمالی خلیج فارس بود و صیادان و مروارید‌جویان دو سوی خلیج در آن رفت‌وآمد داشتند. در سدهٔ نوزدهم و بیستم، با گسترش نفوذ بریتانیا در خلیج فارس، وضعیت جزیره از موضوعات اختلاف میان ایران و شیخ‌نشین‌های جنوب خلیج شد.{{potter-gulf-history}}" },
+            { "p": "در سال ۱۹۷۱، هم‌زمان با خروج نیروهای بریتانیا از خلیج فارس، یادداشت تفاهمی میان ایران و شارجه دربارهٔ ادارهٔ جزیره امضا شد و از آن پس نیروهای ایرانی در ابوموسی مستقرند." }
+          ]
+        },
+        {
+          "heading": "مردم و اقتصاد",
+          "blocks": [
+            { "p": "بر پایهٔ سرشماری ۱۳۹۵، حدود دو هزار نفر در جزیره زندگی می‌کردند.{{sci-census-2016}} صیادی، خدمات اداری و فعالیت‌های مرتبط با میدان نفتی مبارک در نزدیکی جزیره، پیشه‌های اصلی ساکنان‌اند. آب آشامیدنی جزیره از آب‌شیرین‌کن تأمین می‌شود و پروازها و کشتی‌های منظم آن را به [[bandar-abbas|بندرعباس]] و [[bandar-lengeh|بندر لنگه]] پیوند می‌دهند." }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "abu-musa-island",
+      "title": "Abu Musa Island",
+      "summary": "A small island in the southern Persian Gulf and the seat of Abu Musa County in Hormozgan Province.",
+      "lead": [
+        "**Abu Musa Island** is a small island of about 13 square kilometres lying south-west of the [[strait-of-hormuz|Strait of Hormuz]], roughly halfway between the coasts of Iran and the United Arab Emirates.{{ncc-gazetteer}} It is the seat of Abu Musa County in [[hormozgan-province|Hormozgan Province]], which also includes the Greater and Lesser Tunb islands.",
+        "Abu Musa has been administered by Iran since 1971, and the United Arab Emirates also claims sovereignty over it; the question remains an issue in relations between the two countries.{{potter-gulf-history}}"
+      ],
+      "sections": [
+        {
+          "heading": "Geography",
+          "blocks": [
+            { "p": "Abu Musa is low-lying, with a single volcanic hill, Mount Halva, rising in the south. Like [[hormuz-island|Hormuz]], its red soil is rich in iron oxide and was once mined and exported.{{ncc-coastal-atlas}} The surrounding waters are deep and clear, and its coral reefs are among the healthiest in this part of the Persian Gulf.{{burt-gulf-corals}}" },
+            { "p": "The northern beaches are nesting sites of the [[hawksbill-turtle|hawksbill turtle]] and the [[green-turtle|green turtle]] and are protected during the nesting season.{{doe-protected-areas}}" }
+          ]
+        },
+        {
+          "heading": "History",
+          "blocks": [
+            { "p": "In past centuries the island belonged to the domain of the rulers of Bandar Lengeh and the northern Gulf coast, and fishermen and pearl divers from both shores came and went. In the nineteenth and twentieth centuries, as British influence in the Gulf grew, the island's status became a matter of dispute between Iran and the sheikhdoms of the southern Gulf.{{potter-gulf-history}}" },
+            { "p": "In 1971, as British forces withdrew from the Gulf, a memorandum of understanding on the administration of the island was signed between Iran and Sharjah, and Iranian forces have been stationed on Abu Musa since then." }
+          ]
+        },
+        {
+          "heading": "People and economy",
+          "blocks": [
+            { "p": "According to the 2016 census, about two thousand people lived on the island.{{sci-census-2016}} Fishing, public services and work linked to the nearby Mubarak oil field are the main occupations. Drinking water comes from a desalination plant, and regular flights and boats link the island to [[bandar-abbas|Bandar Abbas]] and [[bandar-lengeh|Bandar Lengeh]]." }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "جزيرة-أبو-موسى",
+      "title": "جزيرة أبو موسى",
+      "summary": "جزيرة صغيرة في جنوب الخليج الفارسي ومركز مقاطعة أبو موسى في محافظة هرمزغان.",
+      "lead": [
+        "**جزيرة أبو موسى** جزيرة صغيرة مساحتها نحو ١٣ كيلومترًا مربعًا، تقع جنوب غرب [[strait-of-hormuz|مضيق هرمز]] في منتصف الطريق تقريبًا بين ساحلي إيران والإمارات العربية المتحدة.{{ncc-gazetteer}} وهي مركز مقاطعة أبو موسى في [[hormozgan-province|محافظة هرمزغان]]، التي تضم أيضًا جزيرتي طنب الكبرى وطنب الصغرى.",
+        "وتخضع أبو موسى للإدارة الإيرانية منذ عام ١٩٧١، فيما تطالب الإمارات العربية المتحدة أيضًا بالسيادة عليها، وما تزال المسألة قائمة في العلاقات بين البلدين.{{potter-gulf-history}}"
+      ],
+      "sections": [
+        {
+          "heading": "الجغرافيا",
+          "blocks": [
+            { "p": "أبو موسى جزيرة منخفضة لا يرتفع فيها سوى تل بركاني واحد هو جبل حلوى في الجنوب. وتربتها الحمراء، مثل [[hormuz-island|هرمز]]، غنية بأكسيد الحديد، وكانت تُستخرج وتُصدَّر في الماضي.{{ncc-coastal-atlas}} والمياه المحيطة بها عميقة وصافية، وتُعدّ شعابها المرجانية من أكثر الشعاب سلامة في هذا الجزء من الخليج.{{burt-gulf-corals}}" },
+            { "p": "وتُعدّ شواطئها الشمالية مواقع لتعشيش [[hawksbill-turtle|السلحفاة صقرية المنقار]] و[[green-turtle|السلحفاة الخضراء]]، وتحظى بالحماية خلال موسم التعشيش.{{doe-protected-areas}}" }
+          ]
+        },
+        {
+          "heading": "التاريخ",
+          "blocks": [
+            { "p": "كانت الجزيرة في القرون الماضية ضمن نطاق حكام بندر لنجة والساحل الشمالي للخليج، وكان الصيادون وغواصو اللؤلؤ من الضفتين يترددون عليها. وفي القرنين التاسع عشر والعشرين، ومع تنامي النفوذ البريطاني في الخليج، أصبح وضع الجزيرة موضع خلاف بين إيران ومشيخات جنوب الخليج.{{potter-gulf-history}}" },
+            { "p": "وفي عام ١٩٧١، مع انسحاب القوات البريطانية من الخليج، وُقّعت مذكرة تفاهم بين إيران والشارقة بشأن إدارة الجزيرة، ومنذ ذلك الحين تتمركز القوات الإيرانية في أبو موسى." }
+          ]
+        },
+        {
+          "heading": "السكان والاقتصاد",
+          "blocks": [
+            { "p": "بلغ عدد سكان الجزيرة نحو ألفي نسمة وفق تعداد عام ٢٠١٦.{{sci-census-2016}} ويمثل صيد الأسماك والخدمات العامة والعمل المرتبط بحقل مبارك النفطي القريب أهم المهن. وتأتي مياه الشرب من محطة تحلية، وتربط رحلات جوية وبحرية منتظمة الجزيرة بـ[[bandar-abbas|بندر عباس]] و[[bandar-lengeh|بندر لنجة]]." }
+          ]
+        }
+      ]
+    }
+  }
+}

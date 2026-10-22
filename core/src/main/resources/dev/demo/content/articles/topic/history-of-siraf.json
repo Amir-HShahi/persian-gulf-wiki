@@ -1,0 +1,117 @@
+{
+  "key": "history-of-siraf",
+  "topics": ["history-and-archaeology", "ports-and-oil-terminals", "economy-and-trade"],
+  "canonicalLanguage": "fa",
+  "gallery": ["persian-gulf-modis-autumn", "bahrain-fort"],
+  "history": { "revisions": 5, "contributors": 4, "outdated": ["ar"] },
+  "translations": {
+    "fa": {
+      "slug": "تاریخ-سیراف",
+      "title": "تاریخ سیراف",
+      "summary": "بندر سیراف، بزرگ‌ترین بندر بازرگانی خلیج فارس در سده‌های نخستین اسلامی، که کشتی‌هایش تا چین و شرق آفریقا می‌رفتند.",
+      "lead": [
+        "**سیراف** بندری کهن در کرانهٔ شمالی خلیج فارس، در [[bushehr-province|استان بوشهر]] امروزی، بود که در سده‌های سوم و چهارم هجری بزرگ‌ترین بندر بازرگانی خلیج فارس و یکی از ثروتمندترین شهرهای جهان اسلام به شمار می‌رفت. کشتی‌های سیرافی کالاهای ایران و عراق را به هند، سریلانکا، جنوب شرقی آسیا، چین و شرق آفریقا می‌بردند.{{iranica-siraf}}",
+        "ویرانه‌های سیراف در کنار روستای بندر طاهری امروزی برجاست و کاوش‌های باستان‌شناختی آن، تصویری کم‌نظیر از زندگی یک بندر بزرگ سده‌های میانه به دست داده است.{{whitehouse-siraf}}"
+      ],
+      "sections": [
+        {
+          "heading": "دوران شکوفایی",
+          "blocks": [
+            { "p": "سیراف از دوران ساسانی بندری فعال بود، اما اوج شکوفایی آن در سده‌های سوم و چهارم هجری بود. جغرافی‌دانان آن روزگار، مانند اصطخری و مقدسی، از خانه‌های چندطبقه با چوب ساج هندی، ثروت بی‌اندازهٔ بازرگانان و بازارهای پررونق سیراف یاد کرده‌اند. گفته شده است که برخی بازرگانان سیرافی چهل سال از عمر خود را در سفرهای دریایی گذرانده بودند.{{iranica-siraf}}" }
+          ]
+        },
+        {
+          "heading": "راه دریایی چین",
+          "blocks": [
+            { "p": "سیراف آغازگاه «راه دریایی ابریشم» میان خلیج فارس و چین بود. سفر از سیراف به بندر گوانگژو در جنوب چین، با بادهای موسمی، چند ماه به درازا می‌کشید. سفال‌های چینی، ابریشم، کافور و ادویه از شرق به سیراف می‌رسید و از آنجا به بصره و بغداد فرستاده می‌شد. کتاب «اخبار الصین و الهند»، که در همین دوران نوشته شده، شرح سفرهای دریانوردان سیرافی را در بر دارد.{{potter-gulf-history}}" },
+            { "ul": ["سفال و ابریشم چینی", "ادویه و چوب ساج هندی", "مروارید خلیج فارس", "اسب و پارچه‌های ایرانی"] }
+          ]
+        },
+        {
+          "heading": "افول",
+          "blocks": [
+            { "p": "در سال ۳۶۶ هجری (۹۷۷ میلادی) زلزله‌ای ویرانگر، که هفت روز ادامه داشت، بخش بزرگی از سیراف را ویران کرد. همزمان، آشفتگی‌های سیاسی در خلافت عباسی و جابه‌جا شدن مسیرهای بازرگانی به سوی دریای سرخ، از رونق آن کاست. بازرگانی خلیج فارس به [[kish-island|کیش]] و سپس به [[hormuz-island|هرمز]] منتقل شد و سیراف به روستایی کوچک بدل گشت.{{iranica-siraf}}" }
+          ]
+        },
+        {
+          "heading": "کاوش‌های باستان‌شناختی",
+          "blocks": [
+            { "p": "کاوش‌های گستردهٔ سیراف در سال‌های ۱۹۶۶ تا ۱۹۷۳ میلادی به سرپرستی دیوید وایت‌هاوس انجام شد. باستان‌شناسان بقایای مسجد جامع، بازار، خانه‌های بزرگ، گورستان‌های صخره‌ای و هزاران قطعه سفال وارداتی از چین و عراق را یافتند.{{whitehouse-siraf}} امروز بخشی از این آثار در موزه‌ها نگهداری می‌شود و بافت تاریخی بندر طاهری با گورهای صخره‌ای کوه‌های پشت آن، مقصد گردشگران و پژوهشگران است." }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "history-of-siraf",
+      "title": "History of Siraf",
+      "summary": "Siraf, the greatest trading port of the Persian Gulf in the early Islamic centuries, whose ships sailed as far as China and East Africa.",
+      "lead": [
+        "**Siraf** was an ancient port on the northern shore of the Persian Gulf, in today's [[bushehr-province|Bushehr Province]], which in the ninth and tenth centuries was the largest trading port of the Gulf and one of the richest cities of the Islamic world. Its ships carried the goods of Iran and Iraq to India, Sri Lanka, South-East Asia, China and East Africa.{{iranica-siraf}}",
+        "The ruins of Siraf stand beside the present-day village of Bandar Taheri, and their excavation has given a rare picture of life in a great medieval port.{{whitehouse-siraf}}"
+      ],
+      "sections": [
+        {
+          "heading": "Golden age",
+          "blocks": [
+            { "p": "Siraf was already an active port in the Sasanian period, but it reached its height in the ninth and tenth centuries. Geographers of the time such as Istakhri and Muqaddasi described its multi-storey houses of Indian teak, the immense wealth of its merchants and its busy markets. Some Sirafi merchants were said to have spent forty years of their lives at sea.{{iranica-siraf}}" }
+          ]
+        },
+        {
+          "heading": "The sea route to China",
+          "blocks": [
+            { "p": "Siraf was the starting point of the maritime silk road between the Persian Gulf and China. The voyage from Siraf to Guangzhou in southern China took several months with the monsoon winds. Chinese ceramics, silk, camphor and spices reached Siraf from the east and were sent on to Basra and Baghdad. The Accounts of China and India, written in this period, describe the voyages of Sirafi sailors.{{potter-gulf-history}}" },
+            { "ul": ["Chinese ceramics and silk", "Spices and Indian teak", "Persian Gulf pearls", "Persian horses and textiles"] }
+          ]
+        },
+        {
+          "heading": "Decline",
+          "blocks": [
+            { "p": "In 977 a devastating earthquake that lasted seven days destroyed much of Siraf. At the same time, political turmoil in the Abbasid caliphate and the shift of trade routes towards the Red Sea sapped its prosperity. The trade of the Gulf moved to [[kish-island|Kish]] and then to [[hormuz-island|Hormuz]], and Siraf shrank to a small village.{{iranica-siraf}}" }
+          ]
+        },
+        {
+          "heading": "Archaeological excavations",
+          "blocks": [
+            { "p": "Extensive excavations at Siraf were carried out from 1966 to 1973 under David Whitehouse. Archaeologists found the remains of the great mosque, the bazaar, large houses, rock-cut cemeteries and thousands of sherds of pottery imported from China and Iraq.{{whitehouse-siraf}} Some of these finds are now in museums, and the historic fabric of Bandar Taheri, with the rock tombs in the hills behind it, draws visitors and researchers." }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "تاريخ-سيراف",
+      "title": "تاريخ سيراف",
+      "summary": "سيراف، أكبر موانئ التجارة في الخليج الفارسي في القرون الإسلامية الأولى، التي أبحرت سفنها حتى الصين وشرق أفريقيا.",
+      "lead": [
+        "**سيراف** ميناء قديم على الساحل الشمالي للخليج الفارسي، في [[bushehr-province|محافظة بوشهر]] الحالية، كان في القرنين الثالث والرابع الهجريين أكبر موانئ التجارة في الخليج ومن أغنى مدن العالم الإسلامي، تحمل سفنه بضائع إيران والعراق إلى الهند وسريلانكا وجنوب شرق آسيا والصين وشرق أفريقيا.{{iranica-siraf}}",
+        "وتقوم أطلال سيراف بجوار قرية بندر طاهري الحالية، وقد قدّمت التنقيبات فيها صورة نادرة عن الحياة في ميناء كبير من العصور الوسطى.{{whitehouse-siraf}}"
+      ],
+      "sections": [
+        {
+          "heading": "عصر الازدهار",
+          "blocks": [
+            { "p": "كانت سيراف ميناءً نشطًا منذ العهد الساساني، لكنها بلغت ذروتها في القرنين الثالث والرابع الهجريين. ووصف جغرافيو ذلك العصر، كالإصطخري والمقدسي، بيوتها متعددة الطوابق المبنية بخشب الساج الهندي، وثروة تجارها الهائلة، وأسواقها المزدحمة، وقيل إن بعض تجار سيراف أمضوا أربعين عامًا من أعمارهم في البحر.{{iranica-siraf}}" }
+          ]
+        },
+        {
+          "heading": "الطريق البحري إلى الصين",
+          "blocks": [
+            { "p": "كانت سيراف منطلق طريق الحرير البحري بين الخليج والصين، وكانت الرحلة منها إلى غوانغتشو في جنوب الصين تستغرق عدة أشهر مع الرياح الموسمية. وكان الخزف الصيني والحرير والكافور والتوابل تصل من الشرق إلى سيراف ثم تُرسل إلى البصرة وبغداد. ويصف كتاب «أخبار الصين والهند»، الذي كُتب في هذه الحقبة، رحلات البحارة السيرافيين.{{potter-gulf-history}}" },
+            { "ul": ["الخزف والحرير الصينيان", "التوابل وخشب الساج الهندي", "لؤلؤ الخليج", "الخيول والمنسوجات الفارسية"] }
+          ]
+        },
+        {
+          "heading": "الأفول",
+          "blocks": [
+            { "p": "في عام ٣٦٦ هـ (٩٧٧ م) دمّر زلزال مدمر استمر سبعة أيام جزءًا كبيرًا من سيراف، وفي الوقت نفسه أضعفت الاضطرابات السياسية في الخلافة العباسية وتحوّل طرق التجارة نحو البحر الأحمر ازدهارها. فانتقلت تجارة الخليج إلى [[kish-island|كيش]] ثم إلى [[hormuz-island|هرمز]]، وتقلصت سيراف إلى قرية صغيرة.{{iranica-siraf}}" }
+          ]
+        },
+        {
+          "heading": "التنقيبات الأثرية",
+          "blocks": [
+            { "p": "أُجريت تنقيبات واسعة في سيراف من عام ١٩٦٦ إلى ١٩٧٣ بإشراف ديفيد وايتهاوس، فعثر الأثريون على بقايا المسجد الجامع والسوق والبيوت الكبيرة والمقابر الصخرية وآلاف الكسر الفخارية المستوردة من الصين والعراق.{{whitehouse-siraf}} ويُحفظ بعض هذه اللقى اليوم في المتاحف، ويجذب النسيج التاريخي لبندر طاهري، بمقابره الصخرية في التلال خلفه، الزوار والباحثين." }
+          ]
+        }
+      ]
+    }
+  }
+}

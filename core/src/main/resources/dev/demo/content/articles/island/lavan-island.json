@@ -1,0 +1,276 @@
+{
+  "key": "lavan-island",
+  "subject": {
+    "kind": "ISLAND",
+    "names": {
+      "fa": "جزیرهٔ لاوان",
+      "en": "Lavan Island",
+      "ar": "جزيرة لاوان"
+    },
+    "aliases": {
+      "fa": [
+        "لاوان",
+        "شیخ شعیب"
+      ],
+      "en": [
+        "Lavan",
+        "Sheikh Shoaib"
+      ],
+      "ar": [
+        "لاوان",
+        "شيخ شعيب"
+      ]
+    },
+    "geometry": "POINT(53.36 26.80)",
+    "facts": [
+      {
+        "attribute": "area",
+        "values": [
+          {
+            "number": 76,
+            "source": "ncc-gazetteer"
+          }
+        ]
+      },
+      {
+        "attribute": "place_features",
+        "values": [
+          {
+            "option": "PROTECTED_AREA"
+          }
+        ]
+      },
+      {
+        "attribute": "country",
+        "values": [
+          {
+            "option": "IR"
+          }
+        ]
+      },
+      {
+        "attribute": "province",
+        "values": [
+          {
+            "subject": "hormozgan-province"
+          }
+        ]
+      },
+      {
+        "attribute": "county",
+        "values": [
+          {
+            "localized": {
+              "fa": "بندر لنگه",
+              "en": "Bandar Lengeh",
+              "ar": "بندر لنجة"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "district",
+        "values": [
+          {
+            "localized": {
+              "fa": "بخش کیش",
+              "en": "Kish District",
+              "ar": "قسم كيش"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "population",
+        "values": [
+          {
+            "number": 1592,
+            "asOf": "2016-01-01",
+            "source": "sci-census-2016"
+          }
+        ]
+      },
+      {
+        "attribute": "ethnic_groups",
+        "values": [
+          {
+            "localized": {
+              "fa": "عرب‌ها و فارس‌ها",
+              "en": "Arabs and Persians",
+              "ar": "العرب والفرس"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "languages",
+        "values": [
+          {
+            "option": "AR"
+          },
+          {
+            "option": "FA"
+          }
+        ]
+      }
+    ]
+  },
+  "topics": [
+    "islands",
+    "ports-and-oil-terminals",
+    "pollution-and-environment"
+  ],
+  "canonicalLanguage": "fa",
+  "gallery": [
+    "tanker-omala",
+    "dubai-islands-iss"
+  ],
+  "history": {
+    "revisions": 2,
+    "contributors": 2,
+    "outdated": [
+      "ar"
+    ]
+  },
+  "verification": "NONE",
+  "translations": {
+    "fa": {
+      "slug": "جزیره-لاوان",
+      "title": "جزیرهٔ لاوان",
+      "summary": "جزیره‌ای در غرب کیش با پالایشگاه و پایانهٔ صادرات نفت، که پیش‌تر شیخ شعیب نامیده می‌شد.",
+      "lead": [
+        "**جزیرهٔ لاوان** جزیره‌ای کشیده با مساحتی حدود ۷۶ کیلومتر مربع است که در غرب [[kish-island|کیش]] و در ۱۸ کیلومتری کرانهٔ [[hormozgan-province|استان هرمزگان]] قرار دارد.{{ncc-gazetteer}} این جزیره تا دهه‌های گذشته «شیخ شعیب» نامیده می‌شد و امروز میزبان پالایشگاه و پایانهٔ صادراتی نفت میدان‌های دریایی جنوب خلیج فارس است.{{eia-iran-2024}}",
+        "لاوان با ساحل‌های شنی و صخره‌های مرجانی، یکی از زیستگاه‌های مهم تخم‌گذاری [[hawksbill-turtle|لاک‌پشت پوزه‌عقابی]] در خلیج فارس است."
+      ],
+      "sections": [
+        {
+          "heading": "پایانهٔ نفتی و پالایشگاه",
+          "blocks": [
+            {
+              "p": "نفت خام میدان‌های دریایی سلمان، رسالت و رشادت با خط لوله به لاوان می‌رسد و پس از ذخیره‌سازی، از اسکلهٔ جزیره بارگیری می‌شود.{{nioc-kharg}} پالایشگاه لاوان، که در دههٔ ۱۳۵۰ خورشیدی ساخته شد، بخشی از این نفت را به فراورده‌هایی چون بنزین و نفت گاز تبدیل می‌کند و سوخت جزایر و بندرهای غرب هرمزگان را تأمین می‌کند."
+            },
+            {
+              "p": "میدان [[salman-field|سلمان]] یکی از میدان‌های مشترک ایران و امارات است و لاوان مهم‌ترین تکیه‌گاه بهره‌برداری ایران از آن به شمار می‌رود."
+            }
+          ]
+        },
+        {
+          "heading": "طبیعت",
+          "blocks": [
+            {
+              "p": "سواحل شمالی و غربی لاوان هر سال میزبان ده‌ها لانهٔ لاک‌پشت پوزه‌عقابی است و محیط‌بانان در فصل تخم‌گذاری، لانه‌ها را از گزند روباه‌ها و رفت‌وآمد خودروها حفظ می‌کنند.{{doe-protected-areas}} با این حال، نزدیکی تأسیسات نفتی به زیستگاه‌ها، خطر نشت نفت و آلودگی را همواره در پی دارد.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "مردم",
+          "blocks": [
+            {
+              "p": "روستاهای لاوان و بندر کوچک جزیره، جمعیتی حدود هزار و ششصد نفر دارند که بیشتر عرب‌زبان‌اند و به صیادی، تجارت دریایی و کار در تأسیسات نفتی مشغول‌اند.{{sci-census-2016}} پیوندهای خانوادگی میان مردم لاوان و کرانه‌های جنوبی خلیج فارس دیرینه است و لنج‌های تجاری هنوز میان جزیره و بندرهای امارات رفت‌وآمد می‌کنند."
+            }
+          ]
+        },
+        {
+          "heading": "دسترسی",
+          "blocks": [
+            {
+              "p": "لاوان فرودگاهی کوچک دارد که پروازهای محدودی آن را به [[kish-island|کیش]] و تهران پیوند می‌دهد، و قایق‌ها و لنج‌ها نیز میان جزیره و بندرهای خشکی چون بندر مقام و چیرویه رفت‌وآمد می‌کنند. به دلیل وجود تأسیسات نفتی، سفر گردشگران به بخش‌هایی از جزیره نیازمند هماهنگی پیشین است. آب آشامیدنی از آب‌شیرین‌کن پالایشگاه تأمین می‌شود و برق جزیره از نیروگاه همین مجموعه می‌آید."
+            }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "lavan-island",
+      "title": "Lavan Island",
+      "summary": "An island west of Kish with an oil refinery and export terminal, formerly known as Sheikh Shoaib.",
+      "lead": [
+        "**Lavan Island** is an elongated island of about 76 square kilometres lying west of [[kish-island|Kish]] and 18 kilometres off the coast of [[hormozgan-province|Hormozgan Province]].{{ncc-gazetteer}} Until recent decades it was called Sheikh Shoaib, and today it hosts the refinery and export terminal for the offshore oil fields of the southern Persian Gulf.{{eia-iran-2024}}",
+        "With its sandy beaches and coral reefs, Lavan is one of the important nesting sites of the [[hawksbill-turtle|hawksbill turtle]] in the Persian Gulf."
+      ],
+      "sections": [
+        {
+          "heading": "Oil terminal and refinery",
+          "blocks": [
+            {
+              "p": "Crude from the offshore Salman, Resalat and Reshadat fields reaches Lavan by pipeline and, after storage, is loaded at the island's jetty.{{nioc-kharg}} The Lavan refinery, built in the 1970s, turns part of this oil into products such as petrol and gas oil and supplies fuel to the islands and ports of western Hormozgan."
+            },
+            {
+              "p": "The [[salman-field|Salman]] field is shared between Iran and the UAE, and Lavan is the main base for Iran's production from it."
+            }
+          ]
+        },
+        {
+          "heading": "Nature",
+          "blocks": [
+            {
+              "p": "Every year the northern and western shores of Lavan host dozens of hawksbill turtle nests, and rangers protect them from foxes and vehicles during the nesting season.{{doe-protected-areas}} Yet the closeness of the oil facilities to these habitats always carries a risk of spills and pollution.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "People",
+          "blocks": [
+            {
+              "p": "The villages and small port of Lavan have about sixteen hundred inhabitants, mostly Arabic-speaking, who work in fishing, maritime trade and the oil facilities.{{sci-census-2016}} Family ties between the people of Lavan and the southern shores of the Gulf go back a long way, and trading dhows still sail between the island and the ports of the UAE."
+            }
+          ]
+        },
+        {
+          "heading": "Access",
+          "blocks": [
+            {
+              "p": "Lavan has a small airport with limited flights to [[kish-island|Kish]] and Tehran, and boats and dhows sail between the island and mainland ports such as Bandar Moqam and Chiruyeh. Because of the oil facilities, visits to parts of the island need to be arranged in advance. Drinking water comes from the refinery's desalination plant, and the island's electricity from the same complex's power station."
+            }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "جزيرة-لاوان",
+      "title": "جزيرة لاوان",
+      "summary": "جزيرة غرب كيش فيها مصفاة ومحطة لتصدير النفط، كانت تُعرف سابقًا باسم شيخ شعيب.",
+      "lead": [
+        "**جزيرة لاوان** جزيرة مستطيلة مساحتها نحو ٧٦ كيلومترًا مربعًا، تقع غرب [[kish-island|كيش]] وعلى بعد ١٨ كيلومترًا من ساحل [[hormozgan-province|محافظة هرمزغان]].{{ncc-gazetteer}} وكانت تُسمّى حتى عقود قريبة «شيخ شعيب»، وتحتضن اليوم المصفاة ومحطة التصدير لحقول النفط البحرية في جنوب الخليج الفارسي.{{eia-iran-2024}}",
+        "وبشواطئها الرملية وشعابها المرجانية، تُعدّ لاوان من المواقع المهمة لتعشيش [[hawksbill-turtle|السلحفاة صقرية المنقار]] في الخليج."
+      ],
+      "sections": [
+        {
+          "heading": "المحطة النفطية والمصفاة",
+          "blocks": [
+            {
+              "p": "يصل النفط الخام من حقول سلمان ورسالت ورشادت البحرية إلى لاوان عبر الأنابيب، ويُحمَّل بعد تخزينه من رصيف الجزيرة.{{nioc-kharg}} وتحوّل مصفاة لاوان، التي بُنيت في سبعينيات القرن العشرين، جزءًا من هذا النفط إلى منتجات مثل البنزين وزيت الغاز، وتزوّد جزر غرب هرمزغان وموانئها بالوقود."
+            },
+            {
+              "p": "ويُعدّ حقل [[salman-field|سلمان]] من الحقول المشتركة بين إيران والإمارات، ولاوان أهم قاعدة لإنتاج إيران منه."
+            }
+          ]
+        },
+        {
+          "heading": "الطبيعة",
+          "blocks": [
+            {
+              "p": "تستقبل الشواطئ الشمالية والغربية للاوان كل عام عشرات أعشاش السلحفاة صقرية المنقار، ويحميها حراس البيئة من الثعالب والمركبات في موسم التعشيش.{{doe-protected-areas}} غير أن قرب المنشآت النفطية من هذه الموائل يحمل دائمًا خطر التسرب والتلوث.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "السكان",
+          "blocks": [
+            {
+              "p": "يقطن قرى لاوان وميناءها الصغير نحو ألف وستمئة نسمة، أغلبهم من الناطقين بالعربية، ويعملون في الصيد والتجارة البحرية والمنشآت النفطية.{{sci-census-2016}} والروابط العائلية بين أهل لاوان والسواحل الجنوبية للخليج قديمة، ولا تزال المراكب التجارية تبحر بين الجزيرة وموانئ الإمارات."
+            }
+          ]
+        },
+        {
+          "heading": "الوصول",
+          "blocks": [
+            {
+              "p": "في لاوان مطار صغير تربطه رحلات محدودة بـ[[kish-island|كيش]] وطهران، وتبحر القوارب والمراكب بين الجزيرة وموانئ البر مثل بندر مقام وجيرويه. وبسبب المنشآت النفطية تحتاج زيارة بعض أجزاء الجزيرة إلى تنسيق مسبق. وتأتي مياه الشرب من محطة التحلية التابعة للمصفاة، والكهرباء من محطة الطاقة في المجمع نفسه."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

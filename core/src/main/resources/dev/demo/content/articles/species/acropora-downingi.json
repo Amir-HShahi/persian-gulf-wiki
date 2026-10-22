@@ -1,0 +1,132 @@
+{
+  "key": "acropora-downingi",
+  "subject": {
+    "kind": "SPECIES",
+    "names": { "fa": "مرجان شاخ‌گوزنی خلیج فارس", "en": "Downing's table coral", "ar": "مرجان داوننغ الطاولي" },
+    "aliases": { "fa": ["آکروپورا داونینگی", "مرجان میزی"], "en": ["Acropora downingi", "Gulf table coral"], "ar": ["أكروبورا داوننغي"] },
+    "geometry": "POLYGON((50.5 27.5, 53.5 26.8, 56.0 26.3, 56.2 25.4, 54.0 24.4, 51.5 24.6, 50.3 26.0, 50.5 27.5))",
+    "facts": [
+      { "attribute": "scientific_name", "values": [ { "text": "Acropora downingi" } ] },
+      { "attribute": "category", "values": [ { "option": "CORAL" } ] },
+      { "attribute": "iucn_status", "values": [ { "option": "VU" } ] },
+      { "attribute": "habitat", "values": [ { "option": "CORAL_REEF" } ] },
+      { "attribute": "species_features", "values": [ { "option": "ENDEMIC" } ] },
+      { "attribute": "max_length", "values": [ { "number": 150, "source": "burt-gulf-corals" } ] }
+    ]
+  },
+  "topics": ["marine-life", "pollution-and-environment", "islands"],
+  "canonicalLanguage": "fa",
+  "gallery": ["acropora-coral", "butterflyfish-coral", "reef-fish-school"],
+  "history": { "revisions": 3, "contributors": 2 },
+  "verification": "VERIFIED",
+  "translations": {
+    "fa": {
+      "slug": "مرجان-شاخ‌گوزنی-خلیج-فارس",
+      "title": "مرجان شاخ‌گوزنی خلیج فارس",
+      "summary": "مرجانی میزی‌شکل و بومی منطقهٔ عربی که از سازندگان اصلی صخره‌های مرجانی خلیج فارس است و از سفیدشدگی آسیب فراوان دیده است.",
+      "lead": [
+        "**مرجان شاخ‌گوزنی خلیج فارس** یا آکروپورا داونینگی (نام علمی: *Acropora downingi*) گونه‌ای مرجان سنگی از سردهٔ آکروپوراست که کلونی‌های میزی‌شکل و پهن آن، تا چند دهه پیش چشم‌انداز غالب صخره‌های مرجانی کم‌عمق خلیج فارس بود. این مرجان بومی خلیج فارس، دریای عمان و دریای عرب است و در فهرست سرخ جهانی در ردهٔ «آسیب‌پذیر» قرار دارد.{{burt-gulf-corals}}{{iucn-redlist-2024}}",
+        "صخره‌های مرجانی پیرامون [[kish-island|کیش]]، [[abu-musa-island|ابوموسی]] و [[larak-island|لارک]] از زیستگاه‌های این گونه در آب‌های ایران‌اند."
+      ],
+      "sections": [
+        {
+          "heading": "ویژگی‌ها",
+          "blocks": [
+            { "p": "کلونی‌های این مرجان صفحه‌هایی افقی و پهن می‌سازند که بر پایه‌ای کوتاه قرار گرفته‌اند و قطرشان به یک و نیم متر می‌رسد. سطح بالایی صفحه‌ها از شاخه‌های کوتاه و عمودی پوشیده است و رنگ زنده‌ٔ آن قهوه‌ای کرم تا سبز مایل به زرد است. رنگ مرجان از جلبک‌های همزیستی به نام زوگزانتلا می‌آید که درون بافت آن زندگی و با فتوسنتز بخش بزرگی از غذای مرجان را فراهم می‌کنند.{{burt-gulf-corals}}" }
+          ]
+        },
+        {
+          "heading": "سازگاری با شرایط دشوار",
+          "blocks": [
+            { "p": "مرجان‌های خلیج فارس در یکی از سخت‌ترین محیط‌های دریایی جهان زندگی می‌کنند: دمای آب در تابستان از ۳۴ درجهٔ سلسیوس می‌گذرد و در زمستان به کمتر از ۱۸ درجه می‌رسد، و شوری آب بسیار بالاتر از اقیانوس آزاد است. به همین دلیل، دانشمندان این مرجان‌ها را «آزمایشگاه طبیعی» برای شناخت سازگاری مرجان‌ها با گرمایش جهانی می‌دانند.{{sheppard-gulf-reefs}}" }
+          ]
+        },
+        {
+          "heading": "سفیدشدگی",
+          "blocks": [
+            { "p": "هنگامی که دمای آب بیش از اندازه بالا می‌رود، مرجان جلبک‌های همزیست خود را بیرون می‌راند و سفید می‌شود. اگر این وضعیت طولانی شود، مرجان می‌میرد. رویدادهای سفیدشدگی سال‌های ۱۹۹۶، ۱۹۹۸ و ۲۰۱۷ بخش بزرگی از کلونی‌های آکروپورا را در جنوب خلیج فارس از میان بردند و در برخی صخره‌ها پوشش این سرده به کمتر از یک‌دهم کاهش یافت.{{sheppard-gulf-reefs}}{{ropme-soe-2021}}" },
+            { "ul": ["افزایش دمای آب در تابستان", "لایروبی و رسوب‌گذاری", "آلودگی نفتی و پساب‌ها", "تخریب فیزیکی با لنگر و تور"] }
+          ]
+        },
+        {
+          "heading": "حفاظت و بازسازی",
+          "blocks": [
+            { "p": "پژوهشگران در کشورهای حاشیهٔ خلیج فارس با پرورش قطعات مرجان در نوزادگاه‌های زیردریایی و کاشت آن‌ها بر صخره‌های آسیب‌دیده، می‌کوشند پوشش مرجانی را بازگردانند. مرجان‌های این منطقه، که در برابر گرما مقاوم‌ترند، ممکن است در آینده برای بازسازی صخره‌های دیگر اقیانوس‌ها نیز به کار آیند.{{burt-gulf-corals}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "downings-table-coral",
+      "title": "Downing's table coral",
+      "summary": "A table-forming coral native to the Arabian region, a main reef builder of the Persian Gulf that has suffered heavily from bleaching.",
+      "lead": [
+        "**Downing's table coral** (*Acropora downingi*) is a stony coral whose broad, table-shaped colonies dominated the shallow reefs of the Persian Gulf until a few decades ago. It is native to the Persian Gulf, the Gulf of Oman and the Arabian Sea and is listed as Vulnerable on the IUCN Red List.{{burt-gulf-corals}}{{iucn-redlist-2024}}",
+        "The reefs around [[kish-island|Kish]], [[abu-musa-island|Abu Musa]] and [[larak-island|Larak]] are among its habitats in Iranian waters."
+      ],
+      "sections": [
+        {
+          "heading": "Description",
+          "blocks": [
+            { "p": "Its colonies form broad horizontal plates on a short stalk, up to one and a half metres across. The upper surface is covered with short upright branches, and the living colour ranges from creamy brown to yellowish green. The colour comes from symbiotic algae called zooxanthellae, which live in the coral's tissue and supply much of its food through photosynthesis.{{burt-gulf-corals}}" }
+          ]
+        },
+        {
+          "heading": "Adapted to extremes",
+          "blocks": [
+            { "p": "Persian Gulf corals live in one of the harshest marine environments on Earth: summer water temperatures exceed 34 °C, winter temperatures fall below 18 °C, and salinity is far higher than in the open ocean. Scientists therefore see these corals as a \"natural laboratory\" for understanding how corals may adapt to global warming.{{sheppard-gulf-reefs}}" }
+          ]
+        },
+        {
+          "heading": "Bleaching",
+          "blocks": [
+            { "p": "When the water gets too hot, the coral expels its symbiotic algae and turns white; if this lasts, the coral dies. Bleaching events in 1996, 1998 and 2017 killed a large part of the Acropora colonies in the southern Gulf, and on some reefs the cover of the genus fell to less than a tenth.{{sheppard-gulf-reefs}}{{ropme-soe-2021}}" },
+            { "ul": ["Rising summer water temperatures", "Dredging and sedimentation", "Oil pollution and effluent", "Physical damage from anchors and nets"] }
+          ]
+        },
+        {
+          "heading": "Conservation and restoration",
+          "blocks": [
+            { "p": "Researchers in the Gulf states are trying to restore coral cover by growing coral fragments in underwater nurseries and planting them on damaged reefs. Because they tolerate heat better, the corals of this region may one day also help restore reefs in other oceans.{{burt-gulf-corals}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "مرجان-داوننغ-الطاولي",
+      "title": "مرجان داوننغ الطاولي",
+      "summary": "مرجان طاولي الشكل أصيل في المنطقة العربية، من أهم بناة الشعاب في الخليج الفارسي، وقد تضرر كثيرًا من الابيضاض.",
+      "lead": [
+        "**مرجان داوننغ الطاولي** (الاسم العلمي: *Acropora downingi*) مرجان صخري من جنس الأكروبورا، كانت مستعمراته العريضة الطاولية تهيمن على الشعاب الضحلة في الخليج الفارسي حتى عقود قليلة مضت. وهو أصيل في الخليج الفارسي وبحر عُمان وبحر العرب، ومصنف «معرّضًا للخطر» في القائمة الحمراء.{{burt-gulf-corals}}{{iucn-redlist-2024}}",
+        "وتُعدّ الشعاب حول [[kish-island|كيش]] و[[abu-musa-island|أبو موسى]] و[[larak-island|لارك]] من موائله في المياه الإيرانية."
+      ],
+      "sections": [
+        {
+          "heading": "الوصف",
+          "blocks": [
+            { "p": "تشكّل مستعمراته صفائح أفقية عريضة على ساق قصيرة يصل قطرها إلى متر ونصف، ويغطي سطحها العلوي فروع قصيرة قائمة، ويتراوح لونه الحي بين البني الكريمي والأخضر المصفر. ويأتي اللون من طحالب تكافلية تُسمّى الزوزانثيلا تعيش في نسيج المرجان وتوفر بالبناء الضوئي جزءًا كبيرًا من غذائه.{{burt-gulf-corals}}" }
+          ]
+        },
+        {
+          "heading": "التكيف مع الظروف القاسية",
+          "blocks": [
+            { "p": "تعيش مرجانيات الخليج في واحدة من أقسى البيئات البحرية على الأرض؛ إذ تتجاوز حرارة المياه صيفًا ٣٤ درجة مئوية وتهبط شتاءً دون ١٨ درجة، والملوحة أعلى بكثير منها في المحيط المفتوح، ولذلك يعدّها العلماء «مختبرًا طبيعيًا» لفهم تكيف المرجان مع الاحترار العالمي.{{sheppard-gulf-reefs}}" }
+          ]
+        },
+        {
+          "heading": "الابيضاض",
+          "blocks": [
+            { "p": "حين تشتد حرارة المياه يطرد المرجان طحالبه التكافلية فيبيضّ، وإن طال ذلك يموت. وقد قتلت موجات الابيضاض في أعوام ١٩٩٦ و١٩٩٨ و٢٠١٧ جزءًا كبيرًا من مستعمرات الأكروبورا في جنوب الخليج، وانخفض غطاء هذا الجنس في بعض الشعاب إلى أقل من العُشر.{{sheppard-gulf-reefs}}{{ropme-soe-2021}}" },
+            { "ul": ["ارتفاع حرارة المياه صيفًا", "التجريف والترسيب", "التلوث النفطي والمخلفات", "الأضرار المادية من المراسي والشباك"] }
+          ]
+        },
+        {
+          "heading": "الحماية والاستعادة",
+          "blocks": [
+            { "p": "يحاول الباحثون في دول الخليج استعادة الغطاء المرجاني بتنمية قطع المرجان في مشاتل تحت الماء وزراعتها على الشعاب المتضررة. ولأن مرجانيات هذه المنطقة أكثر تحملًا للحرارة، فقد تُستخدم يومًا في استعادة الشعاب في محيطات أخرى.{{burt-gulf-corals}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

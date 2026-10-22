@@ -1,0 +1,132 @@
+{
+  "key": "pearl-oyster",
+  "subject": {
+    "kind": "SPECIES",
+    "names": { "fa": "صدف مروارید خلیج فارس", "en": "Gulf pearl oyster", "ar": "محار اللؤلؤ الخليجي" },
+    "aliases": { "fa": ["صدف مروارید", "محار"], "en": ["Rayed pearl oyster", "Pinctada radiata"], "ar": ["المحار", "صدف اللؤلؤ"] },
+    "geometry": "POLYGON((48 30, 50.5 29.5, 54 27, 56.5 27.2, 57 25.5, 56.3 24.5, 54 24, 51.5 24.5, 50 26, 48.5 28, 48 30))",
+    "facts": [
+      { "attribute": "scientific_name", "values": [ { "text": "Pinctada radiata" } ] },
+      { "attribute": "category", "values": [ { "option": "MOLLUSC" } ] },
+      { "attribute": "iucn_status", "values": [ { "option": "LC" } ] },
+      { "attribute": "habitat", "values": [ { "option": "CORAL_REEF" }, { "option": "SEAGRASS" } ] },
+      { "attribute": "species_features", "values": [ { "option": "FISHERY" } ] },
+      { "attribute": "max_length", "values": [ { "number": 10, "source": "carpenter-living-resources" } ] }
+    ]
+  },
+  "topics": ["marine-life", "history-and-archaeology", "culture-and-ethnography"],
+  "canonicalLanguage": "fa",
+  "gallery": ["acropora-coral", "butterflyfish-coral"],
+  "history": { "revisions": 4, "contributors": 4 },
+  "verification": "VERIFIED",
+  "translations": {
+    "fa": {
+      "slug": "صدف-مروارید-خلیج-فارس",
+      "title": "صدف مروارید خلیج فارس",
+      "summary": "نرم‌تنی دوکفه‌ای که مرواریدهای طبیعی خلیج فارس از آن به دست می‌آمد و هزاران سال پایهٔ اقتصاد کرانه‌های این دریا بود.",
+      "lead": [
+        "**صدف مروارید خلیج فارس** (نام علمی: *Pinctada radiata*) نرم‌تنی دوکفه‌ای از خانوادهٔ صدف‌های مروارید است که در آب‌های گرم و کم‌عمق خلیج فارس، دریای سرخ و شرق مدیترانه زندگی می‌کند. مرواریدهای طبیعی خلیج فارس، که در تاریخ به نام «مروارید بحرینی» یا «مروارید پارسی» شهرت داشتند، بیشتر از این گونه به دست می‌آمدند.{{carpenter-living-resources}}",
+        "صید مروارید تا آغاز سدهٔ بیستم مهم‌ترین فعالیت اقتصادی کرانه‌های خلیج فارس، از [[bandar-lengeh|بندر لنگه]] تا بحرین و قطر، بود.{{potter-gulf-history}}"
+      ],
+      "sections": [
+        {
+          "heading": "ویژگی‌ها",
+          "blocks": [
+            { "p": "صدف این گونه گرد یا بیضی و نسبتاً نازک است و طول آن به حدود ۱۰ سانتی‌متر می‌رسد. رویهٔ بیرونی پوسته با نوارهای شعاعی قهوه‌ای، سبز یا ارغوانی پوشیده است و درون آن لایه‌ای درخشان از صدف، یا «مادر مروارید»، دارد. صدف‌ها با رشته‌های ابریشمی به نام بیسوس به سنگ‌ها و بستر دریا می‌چسبند.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "پیدایش مروارید",
+          "blocks": [
+            { "p": "مروارید طبیعی زمانی پدید می‌آید که جسمی بیگانه، مانند انگلی کوچک یا دانهٔ شن، به درون بافت صدف راه یابد و جانور برای دفاع، لایه‌لایه مادهٔ صدفی را گرد آن ترشح کند. از هر چند هزار صدف، تنها شمار اندکی مروارید باارزش دارند. آب‌های کم‌عمق، گرم و پرنمک خلیج فارس و آمیختگی آب شیرین چشمه‌های زیردریایی، مرواریدهایی با درخشش و رنگ ویژه پدید می‌آورد.{{burt-gulf-corals}}" }
+          ]
+        },
+        {
+          "heading": "تاریخ صید مروارید",
+          "blocks": [
+            { "p": "شواهد باستان‌شناختی نشان می‌دهد که مردم کرانه‌های خلیج فارس بیش از هفت هزار سال پیش مروارید را می‌شناختند. در سده‌های نوزدهم و آغاز بیستم، هر تابستان هزاران لنج غواصی رهسپار صیدگاه‌های مروارید می‌شدند و غواصان بی‌هیچ وسیلهٔ تنفسی، با سنگی بسته به پا، بارها در روز به ژرفای ده تا بیست متری فرو می‌رفتند.{{potter-gulf-history}}" },
+            { "p": "با عرضهٔ مروارید پرورشی ژاپنی و رکود بزرگ اقتصادی در دههٔ ۱۹۳۰، بازار مروارید طبیعی فروریخت و با کشف نفت، این پیشهٔ کهن تقریباً از میان رفت." }
+          ]
+        },
+        {
+          "heading": "وضعیت امروز",
+          "blocks": [
+            { "p": "صدف مروارید هنوز در صخره‌ها و علفزارهای خلیج فارس فراوان است و در فهرست سرخ جهانی در معرض تهدید شمرده نمی‌شود. با این حال، لایروبی، ساخت جزایر مصنوعی و افزایش دمای آب، برخی از صیدگاه‌های تاریخی آن را از میان برده است. بحرین مسیر میراث صید مروارید را در فهرست میراث جهانی یونسکو ثبت کرده است.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "gulf-pearl-oyster",
+      "title": "Gulf pearl oyster",
+      "summary": "The bivalve that yielded the natural pearls of the Persian Gulf and underpinned the economy of its shores for thousands of years.",
+      "lead": [
+        "The **Gulf pearl oyster** (*Pinctada radiata*) is a bivalve mollusc of the pearl oyster family living in the warm, shallow waters of the Persian Gulf, the Red Sea and the eastern Mediterranean. The natural pearls of the Gulf, famous in history as \"Bahraini\" or \"Persian\" pearls, came mostly from this species.{{carpenter-living-resources}}",
+        "Until the early twentieth century, pearling was the most important economic activity on the Persian Gulf coasts, from [[bandar-lengeh|Bandar Lengeh]] to Bahrain and Qatar.{{potter-gulf-history}}"
+      ],
+      "sections": [
+        {
+          "heading": "Description",
+          "blocks": [
+            { "p": "The shell is round to oval and fairly thin, reaching about 10 centimetres. The outer surface has radiating bands of brown, green or purple, and the inside is lined with shining nacre, or mother-of-pearl. The oysters attach to rocks and the seabed with silky threads called byssus.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "How pearls form",
+          "blocks": [
+            { "p": "A natural pearl forms when a foreign body, such as a small parasite or a grain of sand, gets into the oyster's tissue and the animal secretes layer upon layer of nacre around it in defence. Only a few oysters in several thousand hold a valuable pearl. The shallow, warm, salty water of the Gulf, mixed with fresh water from submarine springs, produces pearls of a particular lustre and colour.{{burt-gulf-corals}}" }
+          ]
+        },
+        {
+          "heading": "History of pearling",
+          "blocks": [
+            { "p": "Archaeological evidence shows that people on the Gulf coasts knew pearls more than seven thousand years ago. In the nineteenth and early twentieth centuries thousands of diving dhows sailed for the pearl banks every summer, and divers with no breathing equipment, weighted with a stone tied to the foot, dived many times a day to ten or twenty metres.{{potter-gulf-history}}" },
+            { "p": "With the arrival of Japanese cultured pearls and the Great Depression of the 1930s, the natural pearl market collapsed, and with the discovery of oil this ancient trade all but disappeared." }
+          ]
+        },
+        {
+          "heading": "Status today",
+          "blocks": [
+            { "p": "The pearl oyster is still common on the reefs and seagrass beds of the Persian Gulf and is not considered threatened. Dredging, artificial islands and warming water have nevertheless destroyed some historic pearl banks. Bahrain's Pearling Path has been inscribed on the UNESCO World Heritage List.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "محار-اللؤلؤ-الخليجي",
+      "title": "محار اللؤلؤ الخليجي",
+      "summary": "الرخوي ذو المصراعين الذي أنتج لؤلؤ الخليج الفارسي الطبيعي، وقام عليه اقتصاد سواحله آلاف السنين.",
+      "lead": [
+        "**محار اللؤلؤ الخليجي** (الاسم العلمي: *Pinctada radiata*) رخوي ذو مصراعين من فصيلة محار اللؤلؤ، يعيش في المياه الدافئة الضحلة للخليج الفارسي والبحر الأحمر وشرق المتوسط. وكان معظم لؤلؤ الخليج الطبيعي، الذي اشتهر تاريخيًا باسم «اللؤلؤ البحريني» أو «اللؤلؤ الفارسي»، يُستخرج من هذا النوع.{{carpenter-living-resources}}",
+        "وظل الغوص على اللؤلؤ حتى أوائل القرن العشرين أهم نشاط اقتصادي على سواحل الخليج، من [[bandar-lengeh|بندر لنجة]] إلى البحرين وقطر.{{potter-gulf-history}}"
+      ],
+      "sections": [
+        {
+          "heading": "الوصف",
+          "blocks": [
+            { "p": "صدفته مستديرة إلى بيضاوية ورقيقة نسبيًا، ويبلغ طولها نحو ١٠ سنتيمترات، وسطحها الخارجي مزين بأشرطة شعاعية بنية أو خضراء أو أرجوانية، وباطنها مبطن بطبقة لامعة من عرق اللؤلؤ. ويلتصق المحار بالصخور وقاع البحر بخيوط حريرية تُسمّى البيسوس.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "كيف يتكوّن اللؤلؤ",
+          "blocks": [
+            { "p": "يتكوّن اللؤلؤ الطبيعي حين يدخل جسم غريب، كطفيلي صغير أو حبة رمل، إلى نسيج المحار، فيفرز الحيوان دفاعًا عن نفسه طبقة تلو أخرى من عرق اللؤلؤ حوله. ولا يحمل لؤلؤة ثمينة إلا عدد قليل من بين آلاف المحار. وتنتج مياه الخليج الضحلة الدافئة المالحة، الممزوجة بمياه عذبة من ينابيع تحت البحر، لؤلؤًا ذا بريق ولون مميزين.{{burt-gulf-corals}}" }
+          ]
+        },
+        {
+          "heading": "تاريخ الغوص على اللؤلؤ",
+          "blocks": [
+            { "p": "تدل الشواهد الأثرية على أن سكان سواحل الخليج عرفوا اللؤلؤ قبل أكثر من سبعة آلاف عام. وفي القرن التاسع عشر وأوائل العشرين كانت آلاف سفن الغوص تبحر كل صيف إلى المغاصات، ويغوص الغواصون دون أي أداة للتنفس، بحجر مربوط بالقدم، مرات كثيرة في اليوم إلى عمق عشرة أو عشرين مترًا.{{potter-gulf-history}}" },
+            { "p": "ومع ظهور اللؤلؤ الياباني المستزرع والكساد الكبير في ثلاثينيات القرن العشرين انهارت سوق اللؤلؤ الطبيعي، ومع اكتشاف النفط كادت هذه المهنة العريقة تختفي." }
+          ]
+        },
+        {
+          "heading": "الوضع اليوم",
+          "blocks": [
+            { "p": "لا يزال محار اللؤلؤ شائعًا في شعاب الخليج ومروج أعشابه، ولا يُعدّ مهددًا، غير أن التجريف والجزر الاصطناعية وارتفاع حرارة المياه دمّرت بعض المغاصات التاريخية. وقد أُدرج «طريق اللؤلؤ» في البحرين في قائمة التراث العالمي لليونسكو.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

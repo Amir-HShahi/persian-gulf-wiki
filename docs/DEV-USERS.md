@@ -1,6 +1,6 @@
 # Dev Users
 
-Two populations, both on `@dev.local`, kept apart by the `e2e-` prefix: named fixtures a human logs into, and disposable accounts a test suite mints.
+Three populations, all on `@dev.local`, kept apart by their prefixes: named fixtures a human logs into, disposable accounts a test suite mints (`e2e-`), and the people behind the demo dataset (`demo-`).
 
 ## Seeded Fixture Accounts
 
@@ -45,3 +45,17 @@ DELETE /api/dev/test-users/{userId} # 204, or 404 if unknown *or* not an e2e- ac
 **Plaintext password** exists only in the response body; the row stores the BCrypt hash and nothing logs it.
 
 **Cleanup.** `DevTestUserSweeper` deletes `e2e-`-prefixed users past `app.dev.test-user-ttl-hours` (default 6, `DEV_TEST_USER_TTL_HOURS`), hourly at `:30`. The `e2e-` prefix — not the shared `@dev.local` domain — is what keeps the sweeper and the `DELETE` route off the seeded fixtures above. Every FK to `users(id)` is `ON DELETE CASCADE`/`SET NULL`, so removing the row takes its roles and tokens with it.
+
+## Demo Accounts
+
+`POST /api/dev/demo-content` (`DevDemoContentController`) creates the people behind its demo articles, so contributor counts, revision histories and expert badges look real. They are listed in `core/src/main/resources/dev/demo/content/users.json` and share the password **`Dev-Password1!`**.
+
+| Email | Role |
+| --- | --- |
+| `demo-sara-ahmadi@dev.local` … `demo-zahra-kazemi@dev.local` (15 accounts) | `CONTRIBUTOR` |
+| `demo-mina-moderator@dev.local` | `MODERATOR` |
+| `demo-shirin-marine@dev.local` | `EXPERT_REVIEWER` (expertise `SPECIES`) |
+| `demo-hassan-islands@dev.local` | `EXPERT_REVIEWER` (expertise `ISLAND`) |
+| `demo-farhad-ports@dev.local` | `EXPERT_REVIEWER` (expertise `PORT`) |
+
+A third population next to the two above, kept apart by its own `demo-` prefix: no sweeper touches it, and the `e2e-` routes can't delete it. `DELETE /api/dev/demo-content` removes it, except an account that still authored something made by hand (a revision, an upload); that one stays until the content it authored is gone.

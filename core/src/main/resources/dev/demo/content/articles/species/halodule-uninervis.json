@@ -1,0 +1,131 @@
+{
+  "key": "halodule-uninervis",
+  "subject": {
+    "kind": "SPECIES",
+    "names": { "fa": "علف دریایی هالودول", "en": "Narrowleaf seagrass", "ar": "عشب البحر الهالودولي" },
+    "aliases": { "fa": ["هالودول", "علف دریایی"], "en": ["Halodule uninervis", "Shoal grass"], "ar": ["هالودول"] },
+    "geometry": "POLYGON((48 30, 50.5 29.5, 54 27, 56.5 27.2, 57 25.5, 56.3 24.5, 54 24, 51.5 24.5, 50 26, 48.5 28, 48 30))",
+    "facts": [
+      { "attribute": "scientific_name", "values": [ { "text": "Halodule uninervis" } ] },
+      { "attribute": "category", "values": [ { "option": "SEA_PLANT" } ] },
+      { "attribute": "iucn_status", "values": [ { "option": "LC" } ] },
+      { "attribute": "habitat", "values": [ { "option": "SEAGRASS" } ] },
+      { "attribute": "max_length", "values": [ { "number": 15, "source": "carpenter-living-resources" } ] }
+    ]
+  },
+  "topics": ["plants-and-algae", "marine-life"],
+  "canonicalLanguage": "fa",
+  "gallery": ["scorpionfish-seagrass", "dugong"],
+  "history": { "revisions": 2, "contributors": 2 },
+  "verification": "STALE",
+  "translations": {
+    "fa": {
+      "slug": "علف-دریایی-هالودول",
+      "title": "علف دریایی هالودول",
+      "summary": "گیاهی گلدار و زیرآبی که علفزارهای کم‌عمق خلیج فارس را می‌سازد و خوراک اصلی گاو دریایی است.",
+      "lead": [
+        "**علف دریایی هالودول** (نام علمی: *Halodule uninervis*) گیاهی گلدار و زیرآبی است که در آب‌های کم‌عمق و گرم اقیانوس هند و غرب اقیانوس آرام می‌روید. علف‌های دریایی، برخلاف جلبک‌ها، گیاهانی واقعی با ریشه، ساقه، برگ و گل‌اند که میلیون‌ها سال پیش از خشکی به دریا بازگشته‌اند.{{carpenter-living-resources}}",
+        "هالودول یکی از فراوان‌ترین علف‌های دریایی خلیج فارس است و علفزارهای آن خوراک اصلی [[dugong|گاو دریایی]] و [[green-turtle|لاک‌پشت سبز]] و زیستگاه نوزادان [[penaeus-semisulcatus|میگو]] به شمار می‌روند."
+      ],
+      "sections": [
+        {
+          "heading": "ویژگی‌ها",
+          "blocks": [
+            { "p": "برگ‌های این گیاه باریک و نواری‌اند و طولشان به حدود ۱۵ سانتی‌متر می‌رسد. نوک هر برگ سه دندانهٔ کوچک دارد که میانی آن کوتاه‌تر است؛ نشانه‌ای که هالودول را از دیگر علف‌های دریایی جدا می‌کند. ساقه‌های زیرزمینی خزنده، گیاه را در بستر ماسه‌ای یا گلی نگه می‌دارند و به آن امکان می‌دهند به سرعت گسترش یابد.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "زیستگاه",
+          "blocks": [
+            { "p": "هالودول در آب‌های کمتر از ده متر ژرفا، در بسترهای نرم و در مناطق جزرومدی می‌روید. این گیاه گرما و شوری بالا را بهتر از بسیاری از علف‌های دریایی تحمل می‌کند و از همین رو در خلیج فارس، که آبش بسیار گرم و شور است، گسترش زیادی دارد. علفزارهای بزرگ آن در آب‌های میان قطر و بحرین، کرانهٔ امارات و بخش‌هایی از سواحل بوشهر دیده می‌شوند.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "اهمیت علفزارهای دریایی",
+          "blocks": [
+            { "p": "علفزارهای دریایی از پربارترین زیست‌بوم‌های زمین‌اند. آن‌ها رسوبات را به دام می‌اندازند و آب را زلال می‌کنند، از فرسایش بستر جلوگیری می‌کنند، اکسیژن تولید می‌کنند و مقدار زیادی کربن را در رسوبات خود نگه می‌دارند. ماهی‌ها، میگوها، [[pearl-oyster|صدف‌ها]] و خرچنگ‌های فراوانی دست‌کم بخشی از زندگی خود را در این علفزارها می‌گذرانند.{{carpenter-living-resources}}" },
+            { "ul": ["خوراک گاو دریایی و لاک‌پشت سبز", "زیستگاه نوزادان میگو و ماهی", "ذخیرهٔ کربن آبی", "تثبیت بستر و زلال‌سازی آب"] }
+          ]
+        },
+        {
+          "heading": "تهدیدها",
+          "blocks": [
+            { "p": "لایروبی، ساخت جزایر مصنوعی و پروژه‌های ساحلی، افزایش رسوب و کدورت آب، ورود پساب‌ها و موج‌های گرمای دریایی، علفزارهای خلیج فارس را کاهش داده‌اند. از میان رفتن این علفزارها مستقیماً بقای گاو دریایی را در منطقه تهدید می‌کند.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "narrowleaf-seagrass",
+      "title": "Narrowleaf seagrass",
+      "summary": "A flowering underwater plant that forms the shallow seagrass meadows of the Persian Gulf and is the dugong's main food.",
+      "lead": [
+        "**Narrowleaf seagrass** (*Halodule uninervis*) is a flowering underwater plant of the warm, shallow waters of the Indian Ocean and western Pacific. Unlike algae, seagrasses are true plants with roots, stems, leaves and flowers that returned to the sea from land millions of years ago.{{carpenter-living-resources}}",
+        "Halodule is one of the most common seagrasses in the Persian Gulf, and its meadows are the main food of the [[dugong|dugong]] and the [[green-turtle|green turtle]] and a nursery for young [[penaeus-semisulcatus|shrimp]]."
+      ],
+      "sections": [
+        {
+          "heading": "Description",
+          "blocks": [
+            { "p": "The leaves are narrow and strap-like, up to about 15 centimetres long. Each leaf tip has three small teeth, the middle one shortest — a feature that distinguishes Halodule from other seagrasses. Creeping underground stems anchor the plant in sand or mud and let it spread quickly.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "Habitat",
+          "blocks": [
+            { "p": "Halodule grows in water less than ten metres deep, on soft bottoms and in the intertidal zone. It tolerates heat and high salinity better than many seagrasses, which is why it is widespread in the very warm, salty Persian Gulf. Large meadows grow between Qatar and Bahrain, along the UAE coast and in parts of the Bushehr coast.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "Why seagrass meadows matter",
+          "blocks": [
+            { "p": "Seagrass meadows are among the most productive ecosystems on Earth. They trap sediment and clear the water, prevent seabed erosion, produce oxygen and lock away large amounts of carbon in their sediments. Many fish, shrimp, [[pearl-oyster|oysters]] and crabs spend at least part of their lives in them.{{carpenter-living-resources}}" },
+            { "ul": ["Food for dugongs and green turtles", "Nursery for young shrimp and fish", "A blue carbon store", "Stabilises the seabed and clears the water"] }
+          ]
+        },
+        {
+          "heading": "Threats",
+          "blocks": [
+            { "p": "Dredging, artificial islands and coastal projects, rising sediment and turbidity, effluent and marine heatwaves have shrunk the seagrass meadows of the Persian Gulf. Their loss directly threatens the survival of the dugong in the region.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "عشب-البحر-الهالودولي",
+      "title": "عشب البحر الهالودولي",
+      "summary": "نبات زهري مغمور يكوّن مروج الأعشاب البحرية الضحلة في الخليج الفارسي، وهو الغذاء الرئيسي للأطوم.",
+      "lead": [
+        "**عشب البحر الهالودولي** (الاسم العلمي: *Halodule uninervis*) نبات زهري مغمور ينمو في المياه الضحلة الدافئة للمحيط الهندي وغرب المحيط الهادئ. والأعشاب البحرية، على خلاف الطحالب، نباتات حقيقية لها جذور وسيقان وأوراق وأزهار، عادت من البر إلى البحر قبل ملايين السنين.{{carpenter-living-resources}}",
+        "والهالودول من أكثر الأعشاب البحرية شيوعًا في الخليج الفارسي، ومروجه الغذاء الرئيسي لـ[[dugong|الأطوم]] و[[green-turtle|السلحفاة الخضراء]] وحاضنة لصغار [[penaeus-semisulcatus|الروبيان]]."
+      ],
+      "sections": [
+        {
+          "heading": "الوصف",
+          "blocks": [
+            { "p": "أوراقه ضيقة شريطية يصل طولها إلى نحو ١٥ سنتيمترًا، وفي طرف كل ورقة ثلاثة أسنان صغيرة أوسطها أقصرها، وهي سمة تميز الهالودول عن غيره. وتثبّت السيقان الزاحفة تحت الأرض النبات في الرمل أو الطين وتتيح له الانتشار بسرعة.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "الموطن",
+          "blocks": [
+            { "p": "ينمو الهالودول في مياه يقل عمقها عن عشرة أمتار، على القيعان الرخوة وفي منطقة المد والجزر، ويتحمل الحرارة والملوحة العالية أكثر من كثير من الأعشاب البحرية، ولذلك ينتشر في مياه الخليج شديدة الحرارة والملوحة. وتوجد مروجه الكبيرة بين قطر والبحرين وعلى ساحل الإمارات وفي أجزاء من ساحل بوشهر.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "أهمية مروج الأعشاب البحرية",
+          "blocks": [
+            { "p": "تُعدّ مروج الأعشاب البحرية من أكثر النظم البيئية إنتاجًا على الأرض؛ فهي تحتجز الرواسب وتصفّي الماء، وتمنع تعرية القاع، وتنتج الأكسجين، وتخزّن كميات كبيرة من الكربون في رواسبها. ويقضي كثير من الأسماك والروبيان و[[pearl-oyster|المحار]] والسرطانات جزءًا من حياتها فيها على الأقل.{{carpenter-living-resources}}" },
+            { "ul": ["غذاء للأطوم والسلحفاة الخضراء", "حاضنة لصغار الروبيان والأسماك", "مخزن للكربون الأزرق", "تثبيت القاع وتصفية الماء"] }
+          ]
+        },
+        {
+          "heading": "التهديدات",
+          "blocks": [
+            { "p": "قلّص التجريف والجزر الاصطناعية والمشاريع الساحلية، وارتفاع الرواسب وعكارة المياه، والمخلفات، وموجات الحر البحرية مروج الأعشاب البحرية في الخليج، ويهدد فقدانها بقاء الأطوم في المنطقة مباشرة.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

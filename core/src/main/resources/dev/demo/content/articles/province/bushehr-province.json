@@ -1,0 +1,125 @@
+{
+  "key": "bushehr-province",
+  "subject": {
+    "kind": "PROVINCE",
+    "names": { "fa": "استان بوشهر", "en": "Bushehr Province", "ar": "محافظة بوشهر" },
+    "aliases": { "fa": ["بوشهر"], "en": ["Bushire Province"], "ar": ["بوشهر"] },
+    "geometry": "POLYGON((50.1 30.0, 51.0 29.6, 51.6 28.5, 52.6 27.9, 52.3 27.4, 51.3 27.9, 50.7 28.9, 50.1 29.3, 50.1 30.0))",
+    "facts": []
+  },
+  "topics": ["geography-and-climate", "economy-and-trade", "culture-and-ethnography"],
+  "canonicalLanguage": "fa",
+  "gallery": ["gulf-night-iss", "persian-gulf-modis-autumn"],
+  "history": { "revisions": 3, "contributors": 3 },
+  "verification": "NONE",
+  "translations": {
+    "fa": {
+      "slug": "استان-بوشهر",
+      "title": "استان بوشهر",
+      "summary": "استانی در کرانهٔ شمالی خلیج فارس با بلندترین خط ساحلی ایران در این دریا، میدان پارس جنوبی و بندر تاریخی بوشهر.",
+      "lead": [
+        "**استان بوشهر** در جنوب غربی ایران و در کرانهٔ شمالی خلیج فارس جای دارد و مرکز آن [[bushehr-port|بندر بوشهر]] است. این استان با حدود ۷۰۰ کیلومتر ساحل، بلندترین خط ساحلی ایران را در خلیج فارس دارد و میزبان تأسیسات پالایشی [[south-pars|میدان گازی پارس جنوبی]] در عسلویه و کنگان است.{{ncc-coastal-atlas}}{{pogc-south-pars}}",
+        "جزیرهٔ [[kharg-island|خارک]]، بزرگ‌ترین پایانهٔ صادرات نفت خام ایران، و بندر تاریخی سیراف نیز در قلمرو این استان قرار دارند."
+      ],
+      "sections": [
+        {
+          "heading": "جغرافیا و اقلیم",
+          "blocks": [
+            { "p": "سرزمین بوشهر جلگه‌ای پست و گرم است که از دهانهٔ رود هندیجان در شمال تا خلیج نای‌بند در جنوب کشیده شده است. تابستان‌های طولانی، شرجی و بسیار گرم و زمستان‌های معتدل ویژگی اقلیم آن است و رودخانه‌های مند و حله، با آب شور و فصلی، مهم‌ترین رودهای استان‌اند.{{irimo-climate}}" },
+            { "p": "تالاب‌های ساحلی و خورهای استان، به‌ویژه خور شیرینو و پارک ملی دریایی نای‌بند، زیستگاه مرجان‌ها، لاک‌پشت‌های دریایی و پرندگان مهاجرند.{{doe-protected-areas}}" }
+          ]
+        },
+        {
+          "heading": "تاریخ",
+          "blocks": [
+            { "p": "پیشینهٔ شهرنشینی در این سرزمین به دوران ایلامیان می‌رسد و شهر کهن ریشهر در نزدیکی بوشهر امروزی از مراکز مهم آن روزگار بوده است. در سده‌های نخستین اسلامی، بندر سیراف مهم‌ترین بندر بازرگانی خلیج فارس بود و کشتی‌هایش تا چین و شرق آفریقا می‌رفتند.{{iranica-siraf}} نادرشاه افشار در سدهٔ هجدهم بوشهر را پایگاه ناوگان ایران کرد و از آن پس این شهر تا اوایل سدهٔ بیستم دروازهٔ دریایی اصلی ایران بود.{{iranica-bushehr}}" }
+          ]
+        },
+        {
+          "heading": "اقتصاد",
+          "blocks": [
+            { "p": "اقتصاد استان بیش از هر چیز بر نفت و گاز تکیه دارد. منطقهٔ ویژهٔ اقتصادی انرژی پارس در عسلویه، پالایشگاه‌های گاز، مجتمع‌های پتروشیمی و پایانهٔ نفتی خارک، استان بوشهر را به یکی از ستون‌های درآمد ارزی ایران تبدیل کرده‌اند.{{eia-iran-2024}} صید میگو و ماهی، نخلستان‌های دشتستان و بازرگانی دریایی پیشه‌های دیرینه‌تر مردم این سرزمین‌اند.{{fao-fishery-gulf}}" }
+          ]
+        },
+        {
+          "heading": "فرهنگ",
+          "blocks": [
+            { "p": "موسیقی بوشهری با سازهایی چون نی‌انبان و دمام، و آیین‌های شروه‌خوانی و سنج و دمام در ماه محرم، از شناخته‌شده‌ترین جلوه‌های فرهنگ این استان‌اند. خانه‌های بافت تاریخی بوشهر با بادگیرها و شناشیل‌های چوبی، نمونه‌ای از معماری سازگار با گرما و رطوبت کرانهٔ خلیج فارس به شمار می‌آیند.{{iranica-bushehr}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "bushehr-province",
+      "title": "Bushehr Province",
+      "summary": "A province on the northern shore of the Persian Gulf with Iran's longest Gulf coastline, the South Pars gas field and the historic port of Bushehr.",
+      "lead": [
+        "**Bushehr Province** lies in south-western Iran on the northern shore of the Persian Gulf, with its capital at the port of [[bushehr-port|Bushehr]]. With about 700 kilometres of shoreline it has Iran's longest coastline on the Gulf, and it hosts the onshore processing plants of the [[south-pars|South Pars gas field]] at Asaluyeh and Kangan.{{ncc-coastal-atlas}}{{pogc-south-pars}}",
+        "[[kharg-island|Kharg Island]], Iran's largest crude oil export terminal, and the historic port of Siraf also lie within the province."
+      ],
+      "sections": [
+        {
+          "heading": "Geography and climate",
+          "blocks": [
+            { "p": "Bushehr is a low, hot coastal plain that runs from the mouth of the Hendijan river in the north to Nayband Bay in the south. Long, humid and very hot summers and mild winters define its climate, and the Mond and Helleh, saline and seasonal rivers, are its main watercourses.{{irimo-climate}}" },
+            { "p": "The province's coastal wetlands and creeks, especially the Shirinu creek and the Nayband Marine National Park, are home to corals, sea turtles and migratory birds.{{doe-protected-areas}}" }
+          ]
+        },
+        {
+          "heading": "History",
+          "blocks": [
+            { "p": "Urban life here goes back to the Elamites, and the ancient town of Rishahr near today's Bushehr was an important centre of that age. In the early Islamic centuries the port of Siraf was the leading trading port of the Persian Gulf, with ships sailing as far as China and East Africa.{{iranica-siraf}} In the eighteenth century Nader Shah made Bushehr the base of the Persian fleet, and the town remained Iran's main gateway to the sea until the early twentieth century.{{iranica-bushehr}}" }
+          ]
+        },
+        {
+          "heading": "Economy",
+          "blocks": [
+            { "p": "The economy rests above all on oil and gas. The Pars Special Economic Energy Zone at Asaluyeh, its gas refineries and petrochemical complexes, and the Kharg oil terminal make the province one of the pillars of Iran's export income.{{eia-iran-2024}} Shrimp and fish catches, the date groves of Dashtestan and maritime trade are older livelihoods.{{fao-fishery-gulf}}" }
+          ]
+        },
+        {
+          "heading": "Culture",
+          "blocks": [
+            { "p": "Bushehri music, played on the ney-anban bagpipe and the dammam drum, and the sharveh chants and drum processions of Muharram, are among the best-known expressions of the province's culture. The houses of Bushehr's historic quarter, with their wind catchers and carved wooden balconies, show an architecture adapted to the heat and humidity of the Gulf coast.{{iranica-bushehr}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "محافظة-بوشهر",
+      "title": "محافظة بوشهر",
+      "summary": "محافظة على الساحل الشمالي للخليج الفارسي تملك أطول ساحل إيراني على الخليج، وتضم حقل بارس الجنوبي وميناء بوشهر التاريخي.",
+      "lead": [
+        "**محافظة بوشهر** تقع في جنوب غرب إيران على الساحل الشمالي للخليج الفارسي، وعاصمتها [[bushehr-port|ميناء بوشهر]]. ويبلغ طول ساحلها نحو ٧٠٠ كيلومتر، وهو أطول ساحل إيراني على الخليج، وتحتضن منشآت المعالجة البرية لـ[[south-pars|حقل بارس الجنوبي للغاز]] في عسلوية وكنكان.{{ncc-coastal-atlas}}{{pogc-south-pars}}",
+        "وتقع ضمن المحافظة أيضًا [[kharg-island|جزيرة خارك]]، أكبر محطة لتصدير النفط الخام في إيران، وميناء سيراف التاريخي."
+      ],
+      "sections": [
+        {
+          "heading": "الجغرافيا والمناخ",
+          "blocks": [
+            { "p": "بوشهر سهل ساحلي منخفض وحار يمتد من مصب نهر هنديجان شمالًا إلى خليج نايبند جنوبًا. ويتسم مناخها بصيف طويل رطب شديد الحرارة وشتاء معتدل، ونهرا مند وحلة، وهما نهران مالحان موسميان، أهم أنهارها.{{irimo-climate}}" },
+            { "p": "وتؤوي الأراضي الرطبة والأخوار الساحلية فيها، ولا سيما خور شيرينو ومتنزه نايبند البحري الوطني، المرجان والسلاحف البحرية والطيور المهاجرة.{{doe-protected-areas}}" }
+          ]
+        },
+        {
+          "heading": "التاريخ",
+          "blocks": [
+            { "p": "تعود الحياة الحضرية في هذه المنطقة إلى العيلاميين، وكانت مدينة ريشهر القديمة قرب بوشهر الحالية من مراكزها المهمة. وفي القرون الإسلامية الأولى كان ميناء سيراف أهم موانئ التجارة في الخليج، تبحر سفنه حتى الصين وشرق أفريقيا.{{iranica-siraf}} وفي القرن الثامن عشر جعل نادر شاه بوشهر قاعدة للأسطول الإيراني، وظلت المدينة بوابة إيران البحرية الرئيسية حتى أوائل القرن العشرين.{{iranica-bushehr}}" }
+          ]
+        },
+        {
+          "heading": "الاقتصاد",
+          "blocks": [
+            { "p": "يعتمد اقتصاد المحافظة قبل كل شيء على النفط والغاز؛ إذ تجعل منطقة بارس الاقتصادية الخاصة للطاقة في عسلوية، بمصافي الغاز ومجمعات البتروكيماويات فيها، ومحطة خارك النفطية، بوشهرَ إحدى ركائز الدخل التصديري لإيران.{{eia-iran-2024}} أما صيد الروبيان والأسماك وبساتين النخيل في دشتستان والتجارة البحرية فهي مهن أقدم.{{fao-fishery-gulf}}" }
+          ]
+        },
+        {
+          "heading": "الثقافة",
+          "blocks": [
+            { "p": "تُعدّ الموسيقى البوشهرية بآلتي الني انبان والدمام، وإنشاد الشروة ومواكب الطبول في شهر محرم، من أشهر مظاهر ثقافة المحافظة. كما تمثل بيوت الحي التاريخي في بوشهر، بملاقفها وشرفاتها الخشبية المنقوشة، عمارةً متكيفة مع حرارة ساحل الخليج ورطوبته.{{iranica-bushehr}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.ChecksumMode;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
@@ -101,6 +102,15 @@ public class S3MediaStorage implements MediaStorage {
                         .checksumMode(ChecksumMode.ENABLED)
                         .build())
                 .map(response -> new StoredObject(response.contentLength(), response.checksumSHA256()));
+    }
+
+    @Override
+    public void put(StorageBucket bucket, String key, byte[] bytes, String contentType) {
+        s3Client.putObject(PutObjectRequest.builder()
+                .bucket(bucketName(bucket))
+                .key(key)
+                .contentType(contentType)
+                .build(), RequestBody.fromBytes(bytes));
     }
 
     // Cache-Control can only be set on a copy by replacing the object's metadata wholesale, and

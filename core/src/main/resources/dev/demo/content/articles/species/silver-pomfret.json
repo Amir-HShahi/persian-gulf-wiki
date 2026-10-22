@@ -1,0 +1,132 @@
+{
+  "key": "silver-pomfret",
+  "subject": {
+    "kind": "SPECIES",
+    "names": { "fa": "حلوا سفید", "en": "Silver pomfret", "ar": "الزبيدي" },
+    "aliases": { "fa": ["ماهی حلوا", "حلوای سفید"], "en": ["White pomfret", "Pampus argenteus"], "ar": ["زبيدي", "البطّان الفضي"] },
+    "geometry": "POLYGON((48 30, 50.5 29.5, 54 27, 56.5 27.2, 57 25.5, 56.3 24.5, 54 24, 51.5 24.5, 50 26, 48.5 28, 48 30))",
+    "facts": [
+      { "attribute": "scientific_name", "values": [ { "text": "Pampus argenteus" } ] },
+      { "attribute": "category", "values": [ { "option": "FISH" } ] },
+      { "attribute": "iucn_status", "values": [ { "option": "VU" } ] },
+      { "attribute": "habitat", "values": [ { "option": "PELAGIC" }, { "option": "MUDFLAT" } ] },
+      { "attribute": "species_features", "values": [ { "option": "FISHERY" } ] },
+      { "attribute": "max_length", "values": [ { "number": 60, "source": "carpenter-living-resources" } ] }
+    ]
+  },
+  "topics": ["marine-life", "economy-and-trade", "pollution-and-environment"],
+  "canonicalLanguage": "fa",
+  "gallery": ["reef-fish-school", "fishing-dhow"],
+  "history": { "revisions": 2, "contributors": 2, "outdated": ["en"] },
+  "verification": "NONE",
+  "translations": {
+    "fa": {
+      "slug": "حلوا-سفید",
+      "title": "حلوا سفید",
+      "summary": "ماهی نقره‌ای و پهن شمال خلیج فارس که از گران‌ترین ماهی‌های بازار است و ذخایرش به‌شدت کاهش یافته است.",
+      "lead": [
+        "**حلوا سفید** (نام علمی: *Pampus argenteus*) ماهی‌ای با بدن پهن، فشرده و نقره‌ای از خانوادهٔ حلواماهیان است که در آب‌های ساحلی شمال اقیانوس هند و غرب اقیانوس آرام زندگی می‌کند. این ماهی در خلیج فارس، به‌ویژه در آب‌های [[khuzestan-province|خوزستان]] و کویت، از گران‌ترین ماهی‌های خوراکی است.{{carpenter-living-resources}}",
+        "کاهش شدید صید حلوا سفید در دهه‌های اخیر، آن را به یکی از نمادهای بحران ذخایر ماهی در شمال خلیج فارس تبدیل کرده است و در فهرست سرخ جهانی در ردهٔ «آسیب‌پذیر» قرار دارد.{{iucn-redlist-2024}}"
+      ],
+      "sections": [
+        {
+          "heading": "ویژگی‌ها",
+          "blocks": [
+            { "p": "بدن حلوا سفید تقریباً لوزی‌شکل و بسیار فشرده است و رنگ نقره‌ای درخشانی دارد که در پشت به خاکستری مایل به آبی می‌زند. باله‌های پشتی و مخرجی آن بلند و داسی‌شکل‌اند و بالهٔ شکمی ندارد. دهان کوچک و پوزهٔ گرد، آن را از ماهی‌های همانند جدا می‌کند. طول آن به حدود ۶۰ سانتی‌متر می‌رسد، اما بیشتر ماهی‌های صیدشده ۲۰ تا ۳۰ سانتی‌متر طول دارند.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "زیستگاه و تغذیه",
+          "blocks": [
+            { "p": "حلوا سفید در آب‌های ساحلی کم‌عمق با بستر گلی، به‌ویژه نزدیک دهانهٔ رودها، زندگی می‌کند و در گله‌های بزرگ در ستون آب شنا می‌کند. خوراک آن بیشتر عروس‌های دریایی کوچک، پلانکتون‌های جانوری و بی‌مهرگان ریز است. ورود آب شیرین و مواد غذایی اروندرود و کارون به شمال خلیج فارس، زیستگاه مناسبی برای آن پدید می‌آورد.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "کاهش ذخایر",
+          "blocks": [
+            { "p": "صید حلوا سفید در کویت و شمال خلیج فارس از دههٔ ۱۹۹۰ به بعد بیش از ۸۰ درصد کاهش یافته است. پژوهشگران صید بی‌رویه با تورهای گوشگیر و ترال، کاهش جریان آب شیرین رودها به دلیل سدسازی، و تخریب زیستگاه‌های ساحلی را علت‌های اصلی این کاهش می‌دانند.{{fao-fishery-gulf}}{{ropme-soe-2021}}" },
+            { "ul": ["سدسازی بر دجله، فرات و کارون", "صید بیش از حد و صید ماهی‌های نابالغ", "افزایش شوری آب‌های ساحلی", "آلودگی صنعتی در خورها"] }
+          ]
+        },
+        {
+          "heading": "مدیریت و حفاظت",
+          "blocks": [
+            { "p": "کویت و ایران برای حلوا سفید دوره‌های ممنوعیت صید در فصل تخم‌ریزی و حداقل اندازهٔ چشمهٔ تور تعیین کرده‌اند. پرورش این گونه در مراکز تحقیقاتی آزموده شده اما هنوز در مقیاس تجاری موفق نبوده است. بازگرداندن جریان طبیعی آب شیرین به شمال خلیج فارس، یکی از پیش‌شرط‌های بازسازی ذخایر این ماهی و بسیاری دیگر از گونه‌های ساحلی دانسته می‌شود.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "silver-pomfret",
+      "title": "Silver pomfret",
+      "summary": "A flat, silvery fish of the northern Persian Gulf, one of the most expensive in the market, whose stocks have collapsed.",
+      "lead": [
+        "The **silver pomfret** (*Pampus argenteus*) is a fish of the butterfish family with a broad, compressed, silvery body, found in the coastal waters of the northern Indian Ocean and western Pacific. In the Persian Gulf, especially off [[khuzestan-province|Khuzestan]] and Kuwait, it is one of the most expensive food fish.{{carpenter-living-resources}}",
+        "The sharp fall in pomfret catches in recent decades has made it a symbol of the fish-stock crisis in the northern Gulf, and it is listed as Vulnerable on the IUCN Red List.{{iucn-redlist-2024}}"
+      ],
+      "sections": [
+        {
+          "heading": "Description",
+          "blocks": [
+            { "p": "The body is almost diamond-shaped and very compressed, bright silver shading to bluish grey on the back. The dorsal and anal fins are long and sickle-shaped, and there are no pelvic fins. A small mouth and rounded snout set it apart from similar fish. It reaches about 60 centimetres, though most fish caught are 20 to 30 centimetres long.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "Habitat and diet",
+          "blocks": [
+            { "p": "The silver pomfret lives in shallow coastal water over muddy bottoms, especially near river mouths, and swims in large shoals in the water column. It feeds mainly on small jellyfish, zooplankton and tiny invertebrates. Fresh water and nutrients from the Arvand and Karun create suitable habitat for it in the northern Gulf.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "Stock decline",
+          "blocks": [
+            { "p": "Pomfret catches in Kuwait and the northern Persian Gulf have fallen by more than 80 per cent since the 1990s. Researchers blame overfishing with gillnets and trawls, reduced river flow because of dams, and the loss of coastal habitat.{{fao-fishery-gulf}}{{ropme-soe-2021}}" },
+            { "ul": ["Dams on the Tigris, Euphrates and Karun", "Overfishing and catches of juveniles", "Rising salinity in coastal waters", "Industrial pollution in creeks"] }
+          ]
+        },
+        {
+          "heading": "Management and conservation",
+          "blocks": [
+            { "p": "Kuwait and Iran have set closed seasons during spawning and minimum mesh sizes for the pomfret fishery. Hatchery rearing has been tried at research centres but has not yet succeeded commercially. Restoring the natural flow of fresh water into the northern Gulf is seen as a precondition for rebuilding the stocks of this and many other coastal species.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "الزبيدي",
+      "title": "الزبيدي",
+      "summary": "سمكة فضية مفلطحة في شمال الخليج الفارسي، من أغلى الأسماك في السوق، انهار مخزونها.",
+      "lead": [
+        "**الزبيدي** (الاسم العلمي: *Pampus argenteus*) سمكة من فصيلة البطانيات ذات جسم عريض مضغوط فضي اللون، تعيش في المياه الساحلية لشمال المحيط الهندي وغرب المحيط الهادئ. وهي في الخليج الفارسي، ولا سيما قبالة [[khuzestan-province|خوزستان]] والكويت، من أغلى أسماك المائدة.{{carpenter-living-resources}}",
+        "وقد جعلها التراجع الحاد في مصيدها خلال العقود الأخيرة رمزًا لأزمة المخزون السمكي في شمال الخليج، وهي مصنفة «معرّضة للخطر» في القائمة الحمراء.{{iucn-redlist-2024}}"
+      ],
+      "sections": [
+        {
+          "heading": "الوصف",
+          "blocks": [
+            { "p": "جسمها شبه معيّني شديد الانضغاط، فضي لامع يميل إلى الرمادي المزرق على الظهر، وزعنفتاها الظهرية والشرجية طويلتان منجليتان، ولا زعانف حوضية لها. ويميزها فم صغير وخطم مستدير عن الأسماك المشابهة، ويبلغ طولها نحو ٦٠ سنتيمترًا، وإن كان معظم المصيد بين ٢٠ و٣٠ سنتيمترًا.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "الموطن والغذاء",
+          "blocks": [
+            { "p": "يعيش الزبيدي في المياه الساحلية الضحلة فوق القيعان الطينية، ولا سيما قرب مصبات الأنهار، ويسبح في أسراب كبيرة في عمود الماء، ويتغذى أساسًا على قناديل البحر الصغيرة والعوالق الحيوانية واللافقاريات الدقيقة. وتهيئ المياه العذبة والمغذيات القادمة من أروند وكارون موطنًا ملائمًا له في شمال الخليج.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "تراجع المخزون",
+          "blocks": [
+            { "p": "تراجع مصيد الزبيدي في الكويت وشمال الخليج بأكثر من ٨٠ في المئة منذ تسعينيات القرن العشرين، ويعزو الباحثون ذلك إلى الصيد الجائر بالشباك الخيشومية وشباك الجرف، وتراجع تدفق الأنهار بسبب السدود، وفقدان الموائل الساحلية.{{fao-fishery-gulf}}{{ropme-soe-2021}}" },
+            { "ul": ["السدود على دجلة والفرات وكارون", "الصيد الجائر وصيد الصغار", "ارتفاع ملوحة المياه الساحلية", "التلوث الصناعي في الأخوار"] }
+          ]
+        },
+        {
+          "heading": "الإدارة والحماية",
+          "blocks": [
+            { "p": "حددت الكويت وإيران مواسم حظر خلال التكاثر وأحجامًا دنيا لفتحات الشباك في مصائد الزبيدي. وجُرّبت تربيته في مراكز البحوث لكنها لم تنجح تجاريًا بعد. ويُعدّ استعادة التدفق الطبيعي للمياه العذبة إلى شمال الخليج شرطًا أساسيًا لإعادة بناء مخزون هذه السمكة وكثير من الأنواع الساحلية الأخرى.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

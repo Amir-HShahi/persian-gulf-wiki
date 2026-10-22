@@ -1,0 +1,112 @@
+{
+  "key": "khuran-strait",
+  "subject": {
+    "kind": "STRAIT",
+    "names": { "fa": "تنگهٔ خوران", "en": "Khuran Strait", "ar": "مضيق خوران" },
+    "aliases": { "fa": ["خور خوران", "تنگه خوران"], "en": ["Clarence Strait", "Khuran Straits"], "ar": ["خور خوران"] },
+    "geometry": "POLYGON((55.6 26.9, 56.2 27.0, 56.3 26.9, 55.7 26.75, 55.6 26.9))",
+    "facts": [
+      { "attribute": "country", "values": [ { "option": "IR" } ] }
+    ]
+  },
+  "topics": ["plants-and-algae", "geography-and-climate", "shipping-and-transit"],
+  "canonicalLanguage": "fa",
+  "gallery": ["mangrove-channel", "mangrove-forest", "grey-mangrove"],
+  "history": { "revisions": 3, "contributors": 2 },
+  "verification": "STALE",
+  "translations": {
+    "fa": {
+      "slug": "تنگه-خوران",
+      "title": "تنگهٔ خوران",
+      "summary": "آبراهی کم‌عمق میان جزیرهٔ قشم و خشکی ایران که بزرگ‌ترین جنگل‌های حرای کشور را در خود جای داده است.",
+      "lead": [
+        "**تنگهٔ خوران** آبراهی باریک و کم‌عمق است که [[qeshm-island|جزیرهٔ قشم]] را از کرانهٔ [[hormozgan-province|استان هرمزگان]] جدا می‌کند. پهنای این تنگه در باریک‌ترین بخش به کمتر از دو کیلومتر می‌رسد و در گذشته دریانوردان اروپایی آن را «تنگهٔ کلارنس» می‌نامیدند.{{ncc-gazetteer}}",
+        "خوران با جزرومد شدید، پهنه‌های گلی گسترده و جنگل‌های انبوه [[grey-mangrove|حرا]]، یکی از مهم‌ترین تالاب‌های ساحلی ایران است و در فهرست تالاب‌های بین‌المللی کنوانسیون رامسر جای دارد.{{unesco-ramsar-hara}}"
+      ],
+      "sections": [
+        {
+          "heading": "جغرافیا",
+          "blocks": [
+            { "p": "بستر تنگه از مجموعه‌ای از کانال‌های جزرومدی، جزیره‌های کوچک گلی و پهنه‌های ماسه‌ای تشکیل شده است که در هنگام جزر از آب بیرون می‌آیند. اختلاف ارتفاع آب در هنگام مد و جزر در این ناحیه به بیش از سه متر می‌رسد و جریان‌های تند جزرومدی، کانال‌ها را همواره از نو شکل می‌دهند.{{ncc-coastal-atlas}}" },
+            { "p": "روستاهای لافت، طبل و کوهستان در کرانهٔ قشم و بندرهای خمیر و پل در کرانهٔ خشکی، از سکونتگاه‌های کهن کنار این آبراه‌اند. پل خلیج فارس، که قرار است قشم را به خشکی وصل کند، از روی همین تنگه طراحی شده است." }
+          ]
+        },
+        {
+          "heading": "منطقهٔ حفاظت‌شدهٔ حرا",
+          "blocks": [
+            { "p": "حدود ۸۵ هزار هکتار از تالاب‌ها و جنگل‌های تنگهٔ خوران با نام «منطقهٔ حفاظت‌شدهٔ حرا» و «ذخیره‌گاه زیستکرهٔ حرا» زیر نظر سازمان حفاظت محیط زیست اداره می‌شود.{{doe-protected-areas}} گونهٔ غالب این جنگل‌ها حرا (Avicennia marina) است که با ریشه‌های هوایی‌اش در خاک شور و بی‌اکسیژن پهنه‌های گلی زنده می‌ماند.{{doe-mangroves}}" },
+            { "p": "این زیستگاه پناهگاه ده‌ها هزار پرندهٔ مهاجر زمستان‌گذران، از جمله [[greater-flamingo|فلامینگوی بزرگ]]، حواصیل‌ها و [[crab-plover|سلیم‌خرچنگ‌خوار]] است و خورهای آن زیستگاه پرورش نوزادان میگو و ماهی‌های تجاری به شمار می‌روند.{{unesco-ramsar-hara}}" }
+          ]
+        },
+        {
+          "heading": "تهدیدها",
+          "blocks": [
+            { "p": "توسعهٔ صنعتی، لایروبی کانال‌ها برای کشتی‌رانی، چرای شتر از سرشاخه‌های حرا و آلودگی نفتی از بزرگ‌ترین تهدیدهای این زیست‌بوم‌اند. پایش ماهواره‌ای نشان می‌دهد که سطح جنگل‌های حرا در دهه‌های اخیر با وجود این فشارها تقریباً پایدار مانده، اما سلامت درختان در برخی خورها کاهش یافته است.{{doe-mangroves}}{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "khuran-strait",
+      "title": "Khuran Strait",
+      "summary": "A shallow channel between Qeshm Island and the Iranian mainland that holds the country's largest mangrove forests.",
+      "lead": [
+        "The **Khuran Strait** is a narrow, shallow channel that separates [[qeshm-island|Qeshm Island]] from the coast of [[hormozgan-province|Hormozgan Province]]. At its narrowest it is less than two kilometres wide; European sailors once called it the Clarence Strait.{{ncc-gazetteer}}",
+        "With its strong tides, broad mudflats and dense [[grey-mangrove|mangrove]] forests, the Khuran is one of Iran's most important coastal wetlands and is listed as a wetland of international importance under the Ramsar Convention.{{unesco-ramsar-hara}}"
+      ],
+      "sections": [
+        {
+          "heading": "Geography",
+          "blocks": [
+            { "p": "The bed of the strait is a maze of tidal channels, small mud islands and sand flats that emerge at low tide. The tidal range here exceeds three metres, and strong tidal currents keep reshaping the channels.{{ncc-coastal-atlas}}" },
+            { "p": "The villages of Laft, Tabl and Kuhestan on the Qeshm side and the ports of Khamir and Pol on the mainland are old settlements along the waterway. The planned Persian Gulf Bridge, meant to link Qeshm to the mainland, is designed to cross the strait." }
+          ]
+        },
+        {
+          "heading": "The Hara Protected Area",
+          "blocks": [
+            { "p": "Some 85,000 hectares of the strait's wetlands and forests are managed by the Department of Environment as the Hara Protected Area and the Hara Biosphere Reserve.{{doe-protected-areas}} The dominant species is the grey mangrove (Avicennia marina), which survives in the salty, oxygen-poor mud thanks to its aerial roots.{{doe-mangroves}}" },
+            { "p": "The site shelters tens of thousands of wintering migratory birds, among them the [[greater-flamingo|greater flamingo]], herons and the [[crab-plover|crab plover]], and its creeks are nursery grounds for young shrimp and commercially important fish.{{unesco-ramsar-hara}}" }
+          ]
+        },
+        {
+          "heading": "Threats",
+          "blocks": [
+            { "p": "Industrial development, dredging of shipping channels, camels browsing on mangrove shoots and oil pollution are the main threats to the ecosystem. Satellite monitoring shows that the area of mangrove forest has stayed roughly stable in recent decades despite these pressures, but tree health has declined in some creeks.{{doe-mangroves}}{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "مضيق-خوران",
+      "title": "مضيق خوران",
+      "summary": "قناة ضحلة بين جزيرة قشم والبر الإيراني تضم أكبر غابات القرم في البلاد.",
+      "lead": [
+        "**مضيق خوران** قناة ضيقة ضحلة تفصل [[qeshm-island|جزيرة قشم]] عن ساحل [[hormozgan-province|محافظة هرمزغان]]، ويقل عرضها في أضيق نقطة عن كيلومترين. وكان البحارة الأوروبيون يسمونها قديمًا مضيق كلارنس.{{ncc-gazetteer}}",
+        "وبمدّه وجزره القويين وسهوله الطينية الواسعة وغابات [[grey-mangrove|القرم]] الكثيفة، يُعدّ خوران من أهم الأراضي الرطبة الساحلية في إيران، وهو مدرج ضمن الأراضي الرطبة ذات الأهمية الدولية وفق اتفاقية رامسار.{{unesco-ramsar-hara}}"
+      ],
+      "sections": [
+        {
+          "heading": "الجغرافيا",
+          "blocks": [
+            { "p": "قاع المضيق متاهة من القنوات المدّية والجزر الطينية الصغيرة والمسطحات الرملية التي تنكشف عند الجزر. ويتجاوز مدى المد والجزر هنا ثلاثة أمتار، وتعيد التيارات المدّية القوية تشكيل القنوات باستمرار.{{ncc-coastal-atlas}}" },
+            { "p": "وتُعدّ قرى لافت وطبل وكوهستان على جانب قشم وميناءا خمير وپل على البر من المستوطنات القديمة على هذا الممر المائي. ومن المقرر أن يعبر جسر الخليج الفارسي، الذي يُخطط لربط قشم بالبر، هذا المضيق." }
+          ]
+        },
+        {
+          "heading": "منطقة حرا المحمية",
+          "blocks": [
+            { "p": "تدير دائرة البيئة نحو ٨٥ ألف هكتار من أراضي المضيق الرطبة وغاباته بوصفها منطقة حرا المحمية ومحمية حرا للمحيط الحيوي.{{doe-protected-areas}} والنوع السائد فيها هو القرم الرمادي (Avicennia marina) الذي يعيش في الطين المالح الفقير بالأكسجين بفضل جذوره الهوائية.{{doe-mangroves}}" },
+            { "p": "ويؤوي الموقع عشرات الآلاف من الطيور المهاجرة الشاتية، منها [[greater-flamingo|النحام الكبير]] ومالك الحزين و[[crab-plover|الحنكور]]، وتُعدّ أخواره حاضنات لصغار الروبيان والأسماك ذات الأهمية التجارية.{{unesco-ramsar-hara}}" }
+          ]
+        },
+        {
+          "heading": "التهديدات",
+          "blocks": [
+            { "p": "تمثل التنمية الصناعية وتجريف قنوات الملاحة ورعي الإبل لأغصان القرم والتلوث النفطي أبرز التهديدات لهذا النظام البيئي. ويُظهر الرصد بالأقمار الصناعية أن مساحة غابات القرم بقيت مستقرة تقريبًا في العقود الأخيرة رغم هذه الضغوط، لكن صحة الأشجار تراجعت في بعض الأخوار.{{doe-mangroves}}{{ropme-soe-2021}} ولهذا تنفّذ الجهات المحلية برامج لزراعة شتلات القرم وتنظيم الرعي والصيد في المنطقة." }
+          ]
+        }
+      ]
+    }
+  }
+}

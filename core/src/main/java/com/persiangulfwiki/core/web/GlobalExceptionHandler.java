@@ -15,6 +15,7 @@ import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeGroupKeyEx
 import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeKeyException;
 import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeOptionCodeException;
 import com.persiangulfwiki.core.dev.exception.DevTestAttributeGroupInUseException;
+import com.persiangulfwiki.core.dev.exception.DevDemoContentBusyException;
 import com.persiangulfwiki.core.dev.exception.DevTestMainArticleTakenException;
 import com.persiangulfwiki.core.dev.exception.DevTestSubjectRevisionLiveException;
 import com.persiangulfwiki.core.dev.exception.DevTestTopicInUseException;
@@ -721,6 +722,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DevTestMainArticleTakenException.class)
     public ProblemDetail handleDevTestMainArticleTaken(DevTestMainArticleTakenException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestMainArticleTaken"), "DEV_TEST_MAIN_ARTICLE_TAKEN", request);
+    }
+
+    @ExceptionHandler(DevDemoContentBusyException.class)
+    public ProblemDetail handleDevDemoContentBusy(DevDemoContentBusyException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devDemoContentBusy"), "DEV_DEMO_CONTENT_BUSY", request);
     }
 
     @ExceptionHandler(DevTestTopicInUseException.class)

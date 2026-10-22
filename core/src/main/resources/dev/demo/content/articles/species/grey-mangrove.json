@@ -1,0 +1,131 @@
+{
+  "key": "grey-mangrove",
+  "subject": {
+    "kind": "SPECIES",
+    "names": { "fa": "حرا", "en": "Grey mangrove", "ar": "القرم الرمادي" },
+    "aliases": { "fa": ["درخت حرا", "مانگرو"], "en": ["White mangrove", "Avicennia marina"], "ar": ["القرم", "الشورى"] },
+    "geometry": "POLYGON((55.4 27.0, 56.3 27.1, 57.3 26.0, 56.9 25.6, 55.6 26.6, 55.4 27.0))",
+    "facts": [
+      { "attribute": "scientific_name", "values": [ { "text": "Avicennia marina" } ] },
+      { "attribute": "category", "values": [ { "option": "SEA_PLANT" } ] },
+      { "attribute": "iucn_status", "values": [ { "option": "LC" } ] },
+      { "attribute": "habitat", "values": [ { "option": "MANGROVE" }, { "option": "MUDFLAT" } ] },
+      { "attribute": "max_length", "values": [ { "number": 1000, "source": "doe-mangroves" } ] }
+    ]
+  },
+  "topics": ["plants-and-algae", "marine-life", "pollution-and-environment"],
+  "canonicalLanguage": "fa",
+  "gallery": ["grey-mangrove", "mangrove-forest", "mangrove-channel"],
+  "history": { "revisions": 6, "contributors": 7 },
+  "verification": "VERIFIED",
+  "translations": {
+    "fa": {
+      "slug": "درخت-حرا",
+      "title": "حرا",
+      "summary": "درختچه‌ای شورپسند که در پهنه‌های جزرومدی کرانهٔ هرمزگان جنگل‌های انبوه می‌سازد و زیستگاه ده‌ها گونهٔ آبزی و پرنده است.",
+      "lead": [
+        "**حرا** (نام علمی: *Avicennia marina*) درخت یا درختچه‌ای همیشه‌سبز و شورپسند است که در پهنه‌های جزرومدی سواحل گرم اقیانوس هند و غرب اقیانوس آرام می‌روید. نام علمی این گیاه به احترام ابن‌سینا (Avicenna)، دانشمند ایرانی، برگزیده شده است. حرا گونهٔ غالب جنگل‌های مانگرو در ایران است.{{doe-mangroves}}",
+        "گسترده‌ترین رویشگاه حرا در ایران در [[khuran-strait|تنگهٔ خوران]] میان [[qeshm-island|جزیرهٔ قشم]] و خشکی قرار دارد و رویشگاه‌های کوچک‌تری در سواحل سیریک، جاسک و [[bushehr-province|بوشهر]] نیز دیده می‌شود.{{unesco-ramsar-hara}}"
+      ],
+      "sections": [
+        {
+          "heading": "ویژگی‌ها",
+          "blocks": [
+            { "p": "حرا معمولاً سه تا ده متر ارتفاع دارد و برگ‌های چرمی، بیضی و سبز تیرهٔ آن در پشت به رنگ خاکستری نقره‌ای است. از سطح برگ‌ها نمک اضافه دفع می‌شود و گاه بلورهای نمک بر آن‌ها دیده می‌شود. گل‌های کوچک زرد و خوشبوی آن در بهار می‌شکفند و میوه‌ای سبز و بادامی‌شکل پدید می‌آورند.{{doe-mangroves}}" }
+          ]
+        },
+        {
+          "heading": "سازگاری با محیط جزرومدی",
+          "blocks": [
+            { "p": "شگفت‌انگیزترین ویژگی حرا ریشه‌های هوایی آن است: صدها ریشهٔ مدادی‌شکل به نام «پنوماتوفور» از گل بیرون می‌آیند و در هنگام جزر، هوا را به ریشه‌های زیرین می‌رسانند که در گل بی‌اکسیژن فرو رفته‌اند. دانه‌های حرا پیش از جدا شدن از درخت جوانه می‌زنند و با جریان آب جابه‌جا می‌شوند تا در گل تازه‌ای ریشه بدوانند.{{doe-mangroves}}" },
+            { "ul": ["ریشه‌های هوایی برای تنفس", "دفع نمک از برگ‌ها", "زنده‌زایی دانه‌ها", "تحمل غرقاب روزانه"] }
+          ]
+        },
+        {
+          "heading": "نقش در زیست‌بوم",
+          "blocks": [
+            { "p": "جنگل‌های حرا زیستگاه پرورش نوزادان [[penaeus-semisulcatus|میگو]] و ماهی‌های تجاری، پناهگاه خرچنگ‌ها و نرم‌تنان، و محل استراحت و تغذیهٔ پرندگان مهاجری چون حواصیل‌ها و [[greater-flamingo|فلامینگو]] هستند. این جنگل‌ها ساحل را در برابر فرسایش و طوفان حفظ می‌کنند و چند برابر جنگل‌های خشکی، کربن را در خاک خود ذخیره می‌کنند.{{unesco-ramsar-hara}}" }
+          ]
+        },
+        {
+          "heading": "تهدیدها و حفاظت",
+          "blocks": [
+            { "p": "چرای شتر، برداشت چوب در گذشته، توسعهٔ صنعتی و بندری، لایروبی کانال‌ها و آلودگی نفتی از تهدیدهای جنگل‌های حرای ایران‌اند. منطقهٔ حفاظت‌شده و ذخیره‌گاه زیستکرهٔ حرا در تنگهٔ خوران برای حفاظت از این جنگل‌ها پدید آمده و برنامه‌های نهال‌کاری حرا با مشارکت مردم محلی در قشم و سیریک اجرا می‌شود.{{doe-protected-areas}}{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "grey-mangrove",
+      "title": "Grey mangrove",
+      "summary": "A salt-tolerant tree that forms dense forests on the tidal flats of Hormozgan and shelters dozens of marine species and birds.",
+      "lead": [
+        "The **grey mangrove** (*Avicennia marina*) is an evergreen, salt-tolerant tree or shrub that grows on the tidal flats of the warm coasts of the Indian Ocean and western Pacific. Its scientific name honours Avicenna (Ibn Sina), the Persian scholar. It is the dominant mangrove species in Iran.{{doe-mangroves}}",
+        "Iran's largest stand of grey mangrove lies in the [[khuran-strait|Khuran Strait]] between [[qeshm-island|Qeshm Island]] and the mainland, with smaller stands along the coasts of Sirik, Jask and [[bushehr-province|Bushehr]].{{unesco-ramsar-hara}}"
+      ],
+      "sections": [
+        {
+          "heading": "Description",
+          "blocks": [
+            { "p": "The grey mangrove usually grows three to ten metres tall. Its leathery, oval leaves are dark green above and silvery grey beneath. Excess salt is excreted through the leaves, and salt crystals can sometimes be seen on them. Small, fragrant yellow flowers open in spring and produce green, almond-shaped fruit.{{doe-mangroves}}" }
+          ]
+        },
+        {
+          "heading": "Adapted to the tides",
+          "blocks": [
+            { "p": "Its most remarkable feature is its aerial roots: hundreds of pencil-like pneumatophores stick up out of the mud and, at low tide, carry air to the roots buried in oxygen-poor mud below. Its seeds germinate before leaving the tree and drift on the current until they take root in fresh mud.{{doe-mangroves}}" },
+            { "ul": ["Aerial roots for breathing", "Salt excretion through the leaves", "Seeds that sprout on the tree", "Tolerance of daily flooding"] }
+          ]
+        },
+        {
+          "heading": "Role in the ecosystem",
+          "blocks": [
+            { "p": "Mangrove forests are nurseries for young [[penaeus-semisulcatus|shrimp]] and commercial fish, shelter crabs and molluscs, and are resting and feeding grounds for migratory birds such as herons and the [[greater-flamingo|greater flamingo]]. They protect the shore against erosion and storms and store several times more carbon in their soil than forests on land.{{unesco-ramsar-hara}}" }
+          ]
+        },
+        {
+          "heading": "Threats and conservation",
+          "blocks": [
+            { "p": "Camel browsing, past wood cutting, industrial and port development, channel dredging and oil pollution threaten Iran's mangroves. The Hara Protected Area and Biosphere Reserve in the Khuran Strait was created to protect them, and mangrove planting programmes run with local people on Qeshm and at Sirik.{{doe-protected-areas}}{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "القرم-الرمادي",
+      "title": "القرم الرمادي",
+      "summary": "شجرة متحملة للملوحة تكوّن غابات كثيفة على المسطحات المدّية في هرمزغان، وتؤوي عشرات الأنواع البحرية والطيور.",
+      "lead": [
+        "**القرم الرمادي** (الاسم العلمي: *Avicennia marina*) شجرة أو شجيرة دائمة الخضرة متحملة للملوحة، تنمو على المسطحات المدّية في السواحل الدافئة للمحيط الهندي وغرب المحيط الهادئ. ويكرّم اسمها العلمي العالمَ الفارسي ابن سينا (Avicenna)، وهي النوع السائد في غابات المانغروف في إيران.{{doe-mangroves}}",
+        "ويقع أكبر تجمع للقرم في إيران في [[khuran-strait|مضيق خوران]] بين [[qeshm-island|جزيرة قشم]] والبر، مع تجمعات أصغر على سواحل سيريك وجاسك و[[bushehr-province|بوشهر]].{{unesco-ramsar-hara}}"
+      ],
+      "sections": [
+        {
+          "heading": "الوصف",
+          "blocks": [
+            { "p": "يبلغ ارتفاع القرم الرمادي عادة ثلاثة إلى عشرة أمتار، وأوراقه جلدية بيضاوية خضراء داكنة من الأعلى ورمادية فضية من الأسفل، ويُطرح الملح الزائد عبر الأوراق فتُرى عليها أحيانًا بلورات الملح. وتتفتح أزهاره الصفراء الصغيرة العطرة في الربيع لتعطي ثمرة خضراء لوزية الشكل.{{doe-mangroves}}" }
+          ]
+        },
+        {
+          "heading": "التكيف مع المد والجزر",
+          "blocks": [
+            { "p": "أبرز ما يميزه جذوره الهوائية: مئات الجذور التنفسية الشبيهة بأقلام الرصاص تبرز من الطين، وتنقل الهواء عند الجزر إلى الجذور المدفونة في الطين الفقير بالأكسجين. وتنبت بذوره قبل أن تنفصل عن الشجرة، ثم تنجرف مع التيار حتى تتجذر في طين جديد.{{doe-mangroves}}" },
+            { "ul": ["جذور هوائية للتنفس", "طرح الملح عبر الأوراق", "بذور تنبت على الشجرة", "تحمّل الغمر اليومي"] }
+          ]
+        },
+        {
+          "heading": "دوره في النظام البيئي",
+          "blocks": [
+            { "p": "تُعدّ غابات القرم حاضنات لصغار [[penaeus-semisulcatus|الروبيان]] والأسماك التجارية، وتؤوي السرطانات والرخويات، وهي مواقع راحة وتغذية للطيور المهاجرة مثل مالك الحزين و[[greater-flamingo|النحام الكبير]]. كما تحمي الساحل من التعرية والعواصف، وتخزّن في تربتها أضعاف ما تخزنه الغابات البرية من الكربون.{{unesco-ramsar-hara}}" }
+          ]
+        },
+        {
+          "heading": "التهديدات والحماية",
+          "blocks": [
+            { "p": "يهدد غابات القرم في إيران رعي الإبل، وقطع الأخشاب في الماضي، والتنمية الصناعية والمينائية، وتجريف القنوات، والتلوث النفطي. وقد أُنشئت منطقة حرا المحمية ومحمية المحيط الحيوي في مضيق خوران لحمايتها، وتُنفَّذ برامج لزراعة القرم بمشاركة الأهالي في قشم وسيريك.{{doe-protected-areas}}{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

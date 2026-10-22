@@ -1,0 +1,248 @@
+{
+  "key": "whale-shark",
+  "subject": {
+    "kind": "SPECIES",
+    "names": {
+      "fa": "کوسهٔ نهنگ",
+      "en": "Whale shark",
+      "ar": "القرش الحوتي"
+    },
+    "aliases": {
+      "fa": [
+        "کوسه نهنگ",
+        "بمبک"
+      ],
+      "en": [
+        "Rhincodon typus"
+      ],
+      "ar": [
+        "الحوت الكوسج",
+        "اللخمة الحوتية"
+      ]
+    },
+    "geometry": "POLYGON((48 30, 50.5 29.5, 54 27, 56.5 27.2, 57 25.5, 56.3 24.5, 54 24, 51.5 24.5, 50 26, 48.5 28, 48 30))",
+    "facts": [
+      {
+        "attribute": "scientific_name",
+        "values": [
+          {
+            "text": "Rhincodon typus"
+          }
+        ]
+      },
+      {
+        "attribute": "category",
+        "values": [
+          {
+            "option": "FISH"
+          }
+        ]
+      },
+      {
+        "attribute": "iucn_status",
+        "values": [
+          {
+            "option": "EN"
+          }
+        ]
+      },
+      {
+        "attribute": "habitat",
+        "values": [
+          {
+            "option": "PELAGIC"
+          },
+          {
+            "option": "CORAL_REEF"
+          }
+        ]
+      },
+      {
+        "attribute": "species_features",
+        "values": [
+          {
+            "option": "MIGRATORY"
+          }
+        ]
+      },
+      {
+        "attribute": "max_length",
+        "values": [
+          {
+            "number": 1880,
+            "source": "iucn-redlist-2024"
+          }
+        ]
+      }
+    ]
+  },
+  "topics": [
+    "marine-life",
+    "shipping-and-transit"
+  ],
+  "canonicalLanguage": "fa",
+  "gallery": [
+    "whale-shark",
+    "reef-fish-school"
+  ],
+  "history": {
+    "revisions": 4,
+    "contributors": 4
+  },
+  "verification": "VERIFIED",
+  "translations": {
+    "fa": {
+      "slug": "کوسه-نهنگ",
+      "title": "کوسهٔ نهنگ",
+      "summary": "بزرگ‌ترین ماهی جهان، کوسه‌ای آرام و پلانکتون‌خوار که هر سال به آب‌های گرم خلیج فارس می‌آید.",
+      "lead": [
+        "**کوسهٔ نهنگ** (نام علمی: *Rhincodon typus*) بزرگ‌ترین ماهی زندهٔ جهان است که طولش به نزدیک ۱۹ متر می‌رسد. این کوسهٔ آرام و بی‌آزار، برخلاف نامش، با صافی‌کردن آب از پلانکتون‌ها و ماهی‌های ریز تغذیه می‌کند و هیچ خطری برای انسان ندارد.{{iucn-redlist-2024}}",
+        "کوسه‌های نهنگ در ماه‌های گرم سال در آب‌های خلیج فارس، به‌ویژه پیرامون [[larak-island|لارک]]، [[hormuz-fishing-grounds|صیدگاه‌های تنگهٔ هرمز]] و میدان‌های نفتی دریایی قطر، دیده می‌شوند."
+      ],
+      "sections": [
+        {
+          "heading": "ویژگی‌ها",
+          "blocks": [
+            {
+              "p": "پوست کوسهٔ نهنگ خاکستری مایل به آبی است و با خال‌های سفید و نوارهای روشن پوشیده شده؛ الگوی خال‌های هر جانور مانند اثر انگشت یکتاست و پژوهشگران از عکس آن برای شناسایی تک‌تک کوسه‌ها استفاده می‌کنند. دهان پهن آن در جلوی سر قرار دارد و می‌تواند تا ۱٫۵ متر باز شود.{{iucn-redlist-2024}}"
+            }
+          ]
+        },
+        {
+          "heading": "تغذیه",
+          "blocks": [
+            {
+              "p": "کوسهٔ نهنگ با شنای آرام و دهان باز یا با مکیدن آب، پلانکتون‌ها، تخم ماهی، لارو میگو و ماهی‌های ریز را از آب جدا می‌کند. تجمع آن‌ها در خلیج فارس اغلب با تخم‌ریزی دسته‌جمعی ماهی‌ها و شکوفایی پلانکتون‌ها در تابستان هم‌زمان است.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "کوچ و پراکنش",
+          "blocks": [
+            {
+              "p": "این ماهی در همهٔ اقیانوس‌های گرمسیری زندگی می‌کند و مسافت‌های بسیار طولانی را می‌پیماید. ردیابی ماهواره‌ای کوسه‌های نشانه‌گذاری‌شده در قطر نشان داده است که برخی از آن‌ها پس از تابستان از راه [[strait-of-hormuz|تنگهٔ هرمز]] به دریای عمان و دریای عرب می‌روند.{{iucn-redlist-2024}}"
+            },
+            {
+              "ul": [
+                "حضور فصلی در خلیج فارس",
+                "تجمع در نزدیکی سکوهای نفتی",
+                "مهاجرت از تنگهٔ هرمز",
+                "زیست در آب‌های سطحی و ژرف"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "تهدیدها و حفاظت",
+          "blocks": [
+            {
+              "p": "صید هدفمند برای باله و گوشت در برخی کشورها، گرفتار شدن در تورها و برخورد با کشتی‌ها، جمعیت جهانی کوسهٔ نهنگ را در سه نسل گذشته به نیمه رسانده است. به همین سبب، این گونه در فهرست سرخ در ردهٔ «در معرض خطر» قرار گرفته و تجارت بین‌المللی آن زیر نظارت کنوانسیون سایتس است.{{iucn-redlist-2024}} در آب‌های پرتردد خلیج فارس، برخورد با کشتی‌ها خطر ویژه‌ای برای این غول آرام است."
+            }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "whale-shark",
+      "title": "Whale shark",
+      "summary": "The world's largest fish, a gentle plankton-feeding shark that visits the warm waters of the Persian Gulf every year.",
+      "lead": [
+        "The **whale shark** (*Rhincodon typus*) is the largest living fish in the world, reaching nearly 19 metres in length. Despite its name, this slow, harmless shark feeds by filtering plankton and tiny fish from the water and poses no danger to people.{{iucn-redlist-2024}}",
+        "Whale sharks are seen in the warm months in the Persian Gulf, especially around [[larak-island|Larak]], on the [[hormuz-fishing-grounds|Strait of Hormuz fishing grounds]] and at Qatar's offshore oil fields."
+      ],
+      "sections": [
+        {
+          "heading": "Description",
+          "blocks": [
+            {
+              "p": "The skin is bluish grey, covered with white spots and pale stripes; each animal's spot pattern is as unique as a fingerprint, and researchers use photographs of it to identify individuals. The wide mouth sits at the front of the head and can open up to 1.5 metres.{{iucn-redlist-2024}}"
+            }
+          ]
+        },
+        {
+          "heading": "Feeding",
+          "blocks": [
+            {
+              "p": "The whale shark swims slowly with its mouth open, or sucks in water, to sieve out plankton, fish eggs, shrimp larvae and small fish. Its gatherings in the Persian Gulf often coincide with mass fish spawning and plankton blooms in summer.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "Migration and range",
+          "blocks": [
+            {
+              "p": "The species lives in all tropical oceans and travels very long distances. Satellite tracking of sharks tagged in Qatar has shown that some leave after the summer through the [[strait-of-hormuz|Strait of Hormuz]] for the Gulf of Oman and the Arabian Sea.{{iucn-redlist-2024}}"
+            },
+            {
+              "ul": [
+                "Seasonal presence in the Persian Gulf",
+                "Gatherings near oil platforms",
+                "Migration through the Strait of Hormuz",
+                "Lives at the surface and in deep water"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Threats and conservation",
+          "blocks": [
+            {
+              "p": "Targeted fishing for fins and meat in some countries, entanglement in nets and ship strikes have halved the global population over the past three generations. The species is therefore listed as Endangered, and its international trade is regulated under CITES.{{iucn-redlist-2024}} In the busy waters of the Persian Gulf, ship strikes are a particular danger to this gentle giant."
+            }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "القرش-الحوتي",
+      "title": "القرش الحوتي",
+      "summary": "أكبر سمكة في العالم، قرش هادئ يتغذى على العوالق ويزور المياه الدافئة للخليج الفارسي كل عام.",
+      "lead": [
+        "**القرش الحوتي** (الاسم العلمي: *Rhincodon typus*) أكبر سمكة حية في العالم، يقارب طولها ١٩ مترًا. ورغم اسمه فهذا القرش البطيء المسالم يتغذى بترشيح العوالق والأسماك الدقيقة من الماء، ولا يشكّل أي خطر على الإنسان.{{iucn-redlist-2024}}",
+        "ويُشاهد القرش الحوتي في الأشهر الحارة في الخليج الفارسي، ولا سيما حول [[larak-island|لارك]] وفي [[hormuz-fishing-grounds|مصائد مضيق هرمز]] وعند حقول النفط البحرية القطرية."
+      ],
+      "sections": [
+        {
+          "heading": "الوصف",
+          "blocks": [
+            {
+              "p": "جلده رمادي مائل إلى الزرقة تغطيه بقع بيضاء وخطوط فاتحة، ونمط البقع لكل فرد فريد كبصمة الإصبع، ويستخدم الباحثون صوره لتمييز الأفراد. وفمه العريض في مقدمة الرأس ويمكن أن ينفتح حتى ١٫٥ متر.{{iucn-redlist-2024}} وقد يصل وزن البالغ إلى أكثر من عشرين طنًا."
+            }
+          ]
+        },
+        {
+          "heading": "التغذية",
+          "blocks": [
+            {
+              "p": "يسبح القرش الحوتي ببطء وفمه مفتوح، أو يمتص الماء، ليرشّح منه العوالق وبيض الأسماك ويرقات الروبيان والأسماك الصغيرة. وكثيرًا ما تتزامن تجمعاته في الخليج مع وضع الأسماك بيوضها جماعيًا وتكاثر العوالق في الصيف.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "الهجرة والانتشار",
+          "blocks": [
+            {
+              "p": "يعيش هذا النوع في جميع المحيطات الاستوائية ويقطع مسافات طويلة جدًا. وأظهر التتبع بالأقمار الصناعية لأسماك موسومة في قطر أن بعضها يغادر بعد الصيف عبر [[strait-of-hormuz|مضيق هرمز]] إلى بحر عُمان وبحر العرب.{{iucn-redlist-2024}}"
+            },
+            {
+              "ul": [
+                "حضور موسمي في الخليج الفارسي",
+                "تجمعات قرب المنصات النفطية",
+                "هجرة عبر مضيق هرمز",
+                "يعيش في المياه السطحية والعميقة"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "التهديدات والحماية",
+          "blocks": [
+            {
+              "p": "أدى الصيد المتعمد للزعانف واللحم في بعض البلدان، والوقوع في الشباك، والاصطدام بالسفن إلى انخفاض أعداده عالميًا إلى النصف خلال الأجيال الثلاثة الماضية، ولذلك صُنّف «مهددًا بالانقراض»، وتخضع تجارته الدولية لاتفاقية سايتس.{{iucn-redlist-2024}} وفي مياه الخليج المزدحمة يمثل الاصطدام بالسفن خطرًا خاصًا على هذا العملاق الهادئ."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

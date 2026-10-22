@@ -1,0 +1,132 @@
+{
+  "key": "crab-plover",
+  "subject": {
+    "kind": "SPECIES",
+    "names": { "fa": "سلیم خرچنگ‌خوار", "en": "Crab plover", "ar": "الحنكور" },
+    "aliases": { "fa": ["خرچنگ‌خوار"], "en": ["Dromas ardeola"], "ar": ["زقزاق السرطان", "الحنكور"] },
+    "geometry": "POLYGON((48 30, 50.5 29.5, 54 27, 56.5 27.2, 57 25.5, 56.3 24.5, 54 24, 51.5 24.5, 50 26, 48.5 28, 48 30))",
+    "facts": [
+      { "attribute": "scientific_name", "values": [ { "text": "Dromas ardeola" } ] },
+      { "attribute": "category", "values": [ { "option": "BIRD" } ] },
+      { "attribute": "iucn_status", "values": [ { "option": "LC" } ] },
+      { "attribute": "habitat", "values": [ { "option": "MUDFLAT" } ] },
+      { "attribute": "species_features", "values": [ { "option": "MIGRATORY" } ] },
+      { "attribute": "max_length", "values": [ { "number": 41, "source": "iucn-redlist-2024" } ] }
+    ]
+  },
+  "topics": ["marine-life", "islands"],
+  "canonicalLanguage": "fa",
+  "gallery": ["mudflat-sandpipers", "land-crab"],
+  "history": { "revisions": 2, "contributors": 2 },
+  "verification": "VERIFIED",
+  "translations": {
+    "fa": {
+      "slug": "سلیم-خرچنگ‌خوار",
+      "title": "سلیم خرچنگ‌خوار",
+      "summary": "پرنده‌ای کنارآبزی و سیاه‌وسفید که در لانه‌های زیرزمینی بر جزایر شنی خلیج فارس جوجه می‌آورد و تقریباً تنها از خرچنگ تغذیه می‌کند.",
+      "lead": [
+        "**سلیم خرچنگ‌خوار** (نام علمی: *Dromas ardeola*) پرنده‌ای کنارآبزی است که تنها عضو خانوادهٔ خود به شمار می‌رود. این پرنده در کرانه‌های اقیانوس هند، از شرق آفریقا تا هند، زندگی می‌کند و جزایر کم‌ارتفاع و شنی خلیج فارس از مهم‌ترین زادگاه‌های آن در جهان‌اند.{{iucn-redlist-2024}}",
+        "نام این پرنده از خوراک اصلی‌اش گرفته شده است: خرچنگ‌هایی که در پهنه‌های جزرومدی، از جمله در [[khuran-strait|تنگهٔ خوران]] و کرانه‌های [[bushehr-province|بوشهر]]، شکار می‌کند."
+      ],
+      "sections": [
+        {
+          "heading": "ویژگی‌ها",
+          "blocks": [
+            { "p": "سلیم خرچنگ‌خوار پرنده‌ای به طول حدود ۴۰ سانتی‌متر با پرهای سفید و پشت و بال‌های سیاه است. نوک سیاه، ستبر و خنجرمانند آن برای شکستن پوستهٔ خرچنگ‌ها ساخته شده و پاهای بلند و خاکستری مایل به آبی آن، راه رفتن در گل را آسان می‌کند. این پرنده پرسروصداست و گروه‌هایش با صداهای بلند و پیاپی شناخته می‌شوند." }
+          ]
+        },
+        {
+          "heading": "تغذیه",
+          "blocks": [
+            { "p": "سلیم خرچنگ‌خوار بیشتر در هنگام جزر و اغلب در شامگاه و شب شکار می‌کند. این پرنده آرام در پهنهٔ گلی راه می‌رود، خرچنگی را که از لانه بیرون آمده می‌گیرد، آن را با تکان‌های تند بی‌حرکت می‌کند و می‌شکند. خرچنگ‌های کوچک را درسته می‌بلعد و خرچنگ‌های بزرگ را تکه‌تکه می‌کند. گاه نرم‌تنان و کرم‌های دریایی نیز می‌خورد.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "لانه‌سازی شگفت‌انگیز",
+          "blocks": [
+            { "p": "سلیم خرچنگ‌خوار تنها پرندهٔ کنارآبزی است که در لانه‌های زیرزمینی جوجه می‌آورد. این پرندگان در کلنی‌های بزرگ، در تپه‌های شنی جزایر کوچک، تونل‌هایی به درازای یک تا دو متر حفر می‌کنند و در انتهای آن یک تخم سفید و بزرگ می‌گذارند. دمای پایدارتر درون تونل، تخم را از گرمای سوزان تابستان خلیج فارس در امان نگه می‌دارد. والدین تا مدت‌ها پس از بیرون آمدن جوجه، برای آن خرچنگ می‌آورند.{{doe-protected-areas}}" },
+            { "ul": ["کلنی‌های زادآوری در جزایر شنی", "تونل‌های یک تا دو متری", "یک تخم در هر لانه", "مراقبت طولانی والدین از جوجه"] }
+          ]
+        },
+        {
+          "heading": "حفاظت",
+          "blocks": [
+            { "p": "این گونه در فهرست سرخ جهانی «کمترین نگرانی» شمرده می‌شود، اما بخش بزرگی از جمعیت جهانی آن تنها در چند کلنی بزرگ زادآوری می‌کند. از همین رو، رفت‌وآمد انسان و قایق‌ها به جزایر زادآوری، ساخت‌وساز ساحلی و جانوران مهاجم مانند گربه و موش، می‌توانند به‌سرعت جمعیت آن را کاهش دهند. حفاظت از جزایر کوچک و بی‌سکنهٔ خلیج فارس برای بقای این پرنده حیاتی است.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "crab-plover",
+      "title": "Crab plover",
+      "summary": "A black-and-white shorebird that raises its young in burrows on the sandy islands of the Persian Gulf and lives almost entirely on crabs.",
+      "lead": [
+        "The **crab plover** (*Dromas ardeola*) is a shorebird and the only member of its family. It lives along the coasts of the Indian Ocean from East Africa to India, and the low, sandy islands of the Persian Gulf are among its most important breeding sites in the world.{{iucn-redlist-2024}}",
+        "It is named for its main food: the crabs it hunts on tidal flats, including in the [[khuran-strait|Khuran Strait]] and along the coast of [[bushehr-province|Bushehr]]."
+      ],
+      "sections": [
+        {
+          "heading": "Description",
+          "blocks": [
+            { "p": "The crab plover is about 40 centimetres long, with white plumage and a black back and wings. Its heavy, dagger-like black bill is built for breaking crab shells, and its long, bluish-grey legs make walking in mud easy. It is noisy, and its flocks are known for their loud, repeated calls." }
+          ]
+        },
+        {
+          "heading": "Feeding",
+          "blocks": [
+            { "p": "The crab plover hunts mostly at low tide, often at dusk and at night. It walks slowly across the mudflat, seizes a crab that has left its burrow, stuns it with sharp shakes and breaks it open. Small crabs are swallowed whole and large ones taken apart. It sometimes also eats molluscs and marine worms.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "Remarkable nesting",
+          "blocks": [
+            { "p": "The crab plover is the only shorebird that nests in burrows. In large colonies on the sand dunes of small islands, the birds dig tunnels one to two metres long and lay a single large white egg at the end. The steadier temperature inside the tunnel protects the egg from the scorching Gulf summer. The parents keep bringing crabs to the chick long after it hatches.{{doe-protected-areas}}" },
+            { "ul": ["Breeding colonies on sandy islands", "Tunnels one to two metres long", "One egg per nest", "Long parental care"] }
+          ]
+        },
+        {
+          "heading": "Conservation",
+          "blocks": [
+            { "p": "The species is listed as Least Concern, but much of its world population breeds in only a few large colonies. Visits by people and boats to breeding islands, coastal construction and invasive animals such as cats and rats can therefore quickly reduce its numbers. Protecting the small, uninhabited islands of the Persian Gulf is vital to its survival.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "الحنكور",
+      "title": "الحنكور",
+      "summary": "طائر شاطئي أبيض وأسود يربي صغاره في جحور على الجزر الرملية في الخليج الفارسي، ويقتات على السرطانات تقريبًا وحدها.",
+      "lead": [
+        "**الحنكور** (الاسم العلمي: *Dromas ardeola*) طائر شاطئي هو العضو الوحيد في فصيلته، يعيش على سواحل المحيط الهندي من شرق أفريقيا إلى الهند، وتُعدّ الجزر الرملية المنخفضة في الخليج الفارسي من أهم مواقع تكاثره في العالم.{{iucn-redlist-2024}}",
+        "وقد سُمّي في لغات كثيرة باسم غذائه الرئيسي: السرطانات التي يصطادها في المسطحات المدّية، ومنها [[khuran-strait|مضيق خوران]] وساحل [[bushehr-province|بوشهر]]."
+      ],
+      "sections": [
+        {
+          "heading": "الوصف",
+          "blocks": [
+            { "p": "يبلغ طول الحنكور نحو ٤٠ سنتيمترًا، وريشه أبيض مع ظهر وجناحين سوداوين، ومنقاره الأسود الثقيل الشبيه بالخنجر مهيأ لكسر أصداف السرطانات، وساقاه الطويلتان الرماديتان المزرقتان تسهّلان المشي في الطين. وهو طائر صاخب تُعرف أسرابه بنداءاتها العالية المتكررة." }
+          ]
+        },
+        {
+          "heading": "التغذية",
+          "blocks": [
+            { "p": "يصطاد الحنكور غالبًا عند الجزر، وكثيرًا في الغسق وفي الليل، فيمشي ببطء على السهل الطيني، ويقبض على السرطان الخارج من جحره، ويشلّه بهزات عنيفة ثم يكسره. ويبتلع السرطانات الصغيرة كاملة ويقطّع الكبيرة، وقد يأكل أحيانًا الرخويات والديدان البحرية.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "تعشيش فريد",
+          "blocks": [
+            { "p": "الحنكور هو الطائر الشاطئي الوحيد الذي يعشّش في جحور؛ إذ تحفر الطيور في مستعمرات كبيرة على كثبان الجزر الصغيرة أنفاقًا طولها متر إلى مترين، وتضع في نهايتها بيضة بيضاء كبيرة واحدة. وتحمي حرارة النفق الأكثر استقرارًا البيضة من قيظ صيف الخليج، ويظل الأبوان يحضران السرطانات للفرخ مدة طويلة بعد فقسه.{{doe-protected-areas}}" },
+            { "ul": ["مستعمرات تكاثر على الجزر الرملية", "أنفاق بطول متر إلى مترين", "بيضة واحدة في العش", "رعاية أبوية طويلة"] }
+          ]
+        },
+        {
+          "heading": "الحماية",
+          "blocks": [
+            { "p": "يُصنَّف النوع «غير مهدد»، لكن جزءًا كبيرًا من أعداده العالمية يتكاثر في عدد قليل من المستعمرات الكبيرة، ولذلك قد تؤدي زيارات البشر والقوارب لجزر التكاثر، والبناء الساحلي، والحيوانات الغازية كالقطط والجرذان إلى خفض أعداده بسرعة. وتُعدّ حماية الجزر الصغيرة غير المأهولة في الخليج أمرًا حيويًا لبقائه.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

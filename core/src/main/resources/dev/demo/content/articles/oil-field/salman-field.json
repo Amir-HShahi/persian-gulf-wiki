@@ -1,0 +1,235 @@
+{
+  "key": "salman-field",
+  "subject": {
+    "kind": "OIL_FIELD",
+    "names": {
+      "fa": "میدان نفتی سلمان",
+      "en": "Salman oil field",
+      "ar": "حقل سلمان النفطي"
+    },
+    "aliases": {
+      "fa": [
+        "سلمان",
+        "ساسان"
+      ],
+      "en": [
+        "Salman",
+        "Sassan",
+        "Abu al-Bukhoosh"
+      ],
+      "ar": [
+        "سلمان",
+        "أبو البخوش"
+      ]
+    },
+    "geometry": "POLYGON((53.4 25.8, 53.8 25.8, 53.8 25.5, 53.4 25.5, 53.4 25.8))",
+    "facts": [
+      {
+        "attribute": "area",
+        "values": [
+          {
+            "number": 450,
+            "source": "eia-iran-2024"
+          }
+        ]
+      },
+      {
+        "attribute": "country",
+        "values": [
+          {
+            "option": "IR"
+          },
+          {
+            "option": "AE"
+          }
+        ]
+      },
+      {
+        "attribute": "province",
+        "values": [
+          {
+            "subject": "hormozgan-province"
+          }
+        ]
+      }
+    ]
+  },
+  "topics": [
+    "ports-and-oil-terminals",
+    "economy-and-trade"
+  ],
+  "canonicalLanguage": "fa",
+  "gallery": [
+    "basrah-oil-terminal",
+    "tanker-omala"
+  ],
+  "history": {
+    "revisions": 2,
+    "contributors": 2
+  },
+  "verification": "NONE",
+  "translations": {
+    "fa": {
+      "slug": "میدان-نفتی-سلمان",
+      "title": "میدان نفتی سلمان",
+      "summary": "میدان نفت و گاز مشترک ایران و امارات در جنوب خلیج فارس که نفتش از جزیرهٔ لاوان صادر می‌شود.",
+      "lead": [
+        "**میدان نفتی سلمان** یکی از میدان‌های نفت و گاز مشترک ایران و امارات متحده عربی است که در جنوب خلیج فارس و در فاصلهٔ حدود ۱۴۰ کیلومتری جنوب [[lavan-island|جزیرهٔ لاوان]] قرار دارد. این میدان در دوران پیش از انقلاب «ساسان» نامیده می‌شد و بخش اماراتی آن «ابوالبخوش» نام دارد.{{eia-iran-2024}}",
+        "نفت استخراج‌شده از سلمان با خط لولهٔ زیردریایی به مخازن لاوان منتقل و از اسکلهٔ آن جزیره صادر می‌شود."
+      ],
+      "sections": [
+        {
+          "heading": "تاریخچه",
+          "blocks": [
+            {
+              "p": "سلمان در دههٔ ۱۹۶۰ میلادی کشف شد و بهره‌برداری از آن از اوایل دههٔ ۱۹۷۰ آغاز گردید. در جنگ ایران و عراق، سکوهای این میدان بارها آسیب دیدند و در سال ۱۹۸۸ در جریان درگیری‌های دریایی با نیروی دریایی آمریکا از کار افتادند.{{potter-gulf-history}} نوسازی سکوها و بازگشت میدان به تولید در دهه‌های بعد انجام شد."
+            }
+          ]
+        },
+        {
+          "heading": "ساختار و تولید",
+          "blocks": [
+            {
+              "p": "مخزن سلمان از لایه‌های کربناته در ژرفای بیش از دو هزار متری بستر دریا تشکیل شده و افزون بر نفت، دارای کلاهک گازی است. گاز همراه نفت پس از جداسازی، بخشی برای تزریق دوباره به مخزن و بخشی برای مصرف در لاوان به کار می‌رود.{{eia-iran-2024}}"
+            },
+            {
+              "p": "به دلیل مشترک بودن میدان، سرعت برداشت در دو سوی مرز بر میزان نفت قابل استحصال هر کشور اثر می‌گذارد. از این رو، توسعهٔ میدان‌های مشترکی چون سلمان، [[south-pars|پارس جنوبی]] و فرزاد، از اولویت‌های صنعت نفت ایران به شمار می‌رود."
+            },
+            {
+              "ul": [
+                "سکوهای تولید و فرآورش",
+                "خط لولهٔ زیردریایی به لاوان",
+                "واحد تزریق گاز",
+                "مشترک با میدان ابوالبخوش امارات"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "محیط زیست",
+          "blocks": [
+            {
+              "p": "سکوهای دریایی، مانند دیگر سازه‌های نفتی خلیج فارس، به زیستگاهی مصنوعی برای مرجان‌ها و ماهی‌ها تبدیل شده‌اند؛ اما در عین حال، نشت‌های کوچک نفت و آب‌های تولیدی همراه نفت، از منابع آلودگی دریایی منطقه‌اند.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "همکاری با امارات",
+          "blocks": [
+            {
+              "p": "ایران و امارات در دهه‌های گذشته گفت‌وگوهایی دربارهٔ بهره‌برداری هماهنگ از میدان‌های مشترک داشته‌اند و بخشی از گاز سلمان قرار بود از راه خط لوله به امارات صادر شود؛ طرحی که به دلیل اختلاف‌های قراردادی و تحریم‌ها هرگز به سرانجام نرسید. با این حال، وجود میدان‌های مشترکی چون سلمان، ضرورت تبادل داده‌های مخزن و هماهنگی میان شرکت‌های نفتی دو کشور را برجسته می‌کند.{{eia-iran-2024}}"
+            }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "salman-oil-field",
+      "title": "Salman oil field",
+      "summary": "An oil and gas field shared by Iran and the UAE in the southern Persian Gulf, whose crude is exported from Lavan Island.",
+      "lead": [
+        "The **Salman oil field** is an oil and gas field shared by Iran and the United Arab Emirates, lying in the southern Persian Gulf about 140 kilometres south of [[lavan-island|Lavan Island]]. It was called Sassan before the revolution, and its UAE part is known as Abu al-Bukhoosh.{{eia-iran-2024}}",
+        "Oil produced at Salman is piped under the sea to the tank farm on Lavan and exported from that island's jetty."
+      ],
+      "sections": [
+        {
+          "heading": "History",
+          "blocks": [
+            {
+              "p": "Salman was discovered in the 1960s and came into production in the early 1970s. During the Iran–Iraq War its platforms were damaged several times, and in 1988 they were knocked out during naval clashes with the United States Navy.{{potter-gulf-history}} The platforms were rebuilt and the field brought back into production in the following decades."
+            }
+          ]
+        },
+        {
+          "heading": "Structure and production",
+          "blocks": [
+            {
+              "p": "The Salman reservoir lies in carbonate layers more than two thousand metres below the seabed and has a gas cap as well as oil. Associated gas, once separated, is partly reinjected into the reservoir and partly used on Lavan.{{eia-iran-2024}}"
+            },
+            {
+              "p": "Because the field is shared, the rate of production on each side of the border affects how much oil each country can recover. Developing shared fields such as Salman, [[south-pars|South Pars]] and Farzad is therefore a priority for Iran's oil industry."
+            },
+            {
+              "ul": [
+                "Production and processing platforms",
+                "Subsea pipeline to Lavan",
+                "Gas reinjection unit",
+                "Shared with the UAE's Abu al-Bukhoosh field"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Environment",
+          "blocks": [
+            {
+              "p": "Like other oil structures in the Persian Gulf, the offshore platforms have become artificial reefs for corals and fish; at the same time, small oil leaks and produced water are sources of marine pollution in the region.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "Cooperation with the UAE",
+          "blocks": [
+            {
+              "p": "Iran and the UAE have held talks over the years on coordinated production from their shared fields, and part of Salman's gas was once meant to be exported to the UAE by pipeline — a plan never completed because of contract disputes and sanctions. Shared fields such as Salman nonetheless show the need for reservoir data exchange and coordination between the two countries' oil companies.{{eia-iran-2024}}"
+            }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "حقل-سلمان-النفطي",
+      "title": "حقل سلمان النفطي",
+      "summary": "حقل نفط وغاز مشترك بين إيران والإمارات في جنوب الخليج الفارسي، يُصدَّر نفطه من جزيرة لاوان.",
+      "lead": [
+        "**حقل سلمان النفطي** حقل نفط وغاز مشترك بين إيران والإمارات العربية المتحدة، يقع في جنوب الخليج الفارسي على بعد نحو ١٤٠ كيلومترًا جنوب [[lavan-island|جزيرة لاوان]]. وكان يُسمّى قبل الثورة «ساسان»، ويُعرف جزؤه الإماراتي باسم «أبو البخوش».{{eia-iran-2024}}",
+        "ويُنقل النفط المنتج في سلمان عبر أنبوب تحت البحر إلى خزانات لاوان، ويُصدَّر من رصيف تلك الجزيرة."
+      ],
+      "sections": [
+        {
+          "heading": "التاريخ",
+          "blocks": [
+            {
+              "p": "اكتُشف حقل سلمان في ستينيات القرن العشرين وبدأ إنتاجه في مطلع السبعينيات. وخلال الحرب الإيرانية العراقية تضررت منصاته مرات عدة، وفي عام ١٩٨٨ خرجت عن العمل خلال اشتباكات بحرية مع البحرية الأمريكية.{{potter-gulf-history}} ثم أُعيد بناء المنصات وعاد الحقل إلى الإنتاج في العقود التالية."
+            }
+          ]
+        },
+        {
+          "heading": "البنية والإنتاج",
+          "blocks": [
+            {
+              "p": "يقع مكمن سلمان في طبقات كربوناتية على عمق يزيد على ألفي متر تحت قاع البحر، وله غطاء غازي إلى جانب النفط. ويُعاد حقن جزء من الغاز المصاحب بعد فصله في المكمن، ويُستخدم جزء آخر في لاوان.{{eia-iran-2024}}"
+            },
+            {
+              "p": "ولأن الحقل مشترك، فإن معدل الإنتاج على كل جانب من الحدود يؤثر في كمية النفط التي يستطيع كل بلد استخراجها، ولذلك يُعدّ تطوير الحقول المشتركة مثل سلمان و[[south-pars|بارس الجنوبي]] وفرزاد من أولويات صناعة النفط الإيرانية."
+            },
+            {
+              "ul": [
+                "منصات الإنتاج والمعالجة",
+                "أنبوب تحت البحر إلى لاوان",
+                "وحدة إعادة حقن الغاز",
+                "مشترك مع حقل أبو البخوش الإماراتي"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "البيئة",
+          "blocks": [
+            {
+              "p": "أصبحت المنصات البحرية، مثل غيرها من المنشآت النفطية في الخليج، شعابًا اصطناعية للمرجان والأسماك، لكن التسربات النفطية الصغيرة والمياه المصاحبة للإنتاج تُعدّ في الوقت نفسه من مصادر التلوث البحري في المنطقة.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "التعاون مع الإمارات",
+          "blocks": [
+            {
+              "p": "أجرت إيران والإمارات على مر السنين محادثات بشأن الإنتاج المنسق من حقولهما المشتركة، وكان من المقرر تصدير جزء من غاز سلمان إلى الإمارات عبر أنبوب، وهو مشروع لم يكتمل بسبب خلافات تعاقدية والعقوبات. ومع ذلك تُبرز الحقول المشتركة مثل سلمان الحاجة إلى تبادل بيانات المكامن والتنسيق بين شركات النفط في البلدين.{{eia-iran-2024}}"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

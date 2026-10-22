@@ -19,6 +19,10 @@ public interface MediaStorage {
     // browser nor a shared cache keeps a copy of a not-yet-public object past the URL's life.
     String presignGet(StorageBucket bucket, String key, Duration ttl);
 
+    // Writes bytes the app already holds, overwriting any existing object. Every user-supplied file
+    // goes through presignPut instead; this is for files the app ships itself (the dev demo library).
+    void put(StorageBucket bucket, String key, byte[] bytes, String contentType);
+
     // Server-side copy within one bucket; the bytes never pass through this app. The copy keeps
     // the source's Content-Type and is served with the given Cache-Control. Overwrites an
     // existing target, so repeating a copy is harmless. False, with nothing written, when the

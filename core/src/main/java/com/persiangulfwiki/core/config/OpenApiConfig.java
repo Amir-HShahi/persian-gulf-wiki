@@ -65,7 +65,9 @@ public class OpenApiConfig {
             "Moderation",
             "Dev Test Moderation Tasks",
             "Marine Data",
-            "Dev Test Marine Data");
+            "Dev Test Marine Data",
+            // Mints no single feature's states but the whole demo dataset, so it closes the list.
+            "Dev Demo Content");
 
     // Flattens ApiResult<T> to T on every documented response — see the class javadoc and the
     // "Response envelope" section of the API description below.

@@ -1,0 +1,132 @@
+{
+  "key": "narrow-barred-spanish-mackerel",
+  "subject": {
+    "kind": "SPECIES",
+    "names": { "fa": "شیر ماهی", "en": "Narrow-barred Spanish mackerel", "ar": "الكنعد" },
+    "aliases": { "fa": ["شیرماهی", "قباد"], "en": ["Kingfish", "Scomberomorus commerson"], "ar": ["الكنعد", "الخباط"] },
+    "geometry": "POLYGON((48 30, 50.5 29.5, 54 27, 56.5 27.2, 57 25.5, 56.3 24.5, 54 24, 51.5 24.5, 50 26, 48.5 28, 48 30))",
+    "facts": [
+      { "attribute": "scientific_name", "values": [ { "text": "Scomberomorus commerson" } ] },
+      { "attribute": "category", "values": [ { "option": "FISH" } ] },
+      { "attribute": "iucn_status", "values": [ { "option": "NT" } ] },
+      { "attribute": "habitat", "values": [ { "option": "PELAGIC" } ] },
+      { "attribute": "species_features", "values": [ { "option": "FISHERY" }, { "option": "MIGRATORY" } ] },
+      { "attribute": "max_length", "values": [ { "number": 240, "source": "carpenter-living-resources" } ] }
+    ]
+  },
+  "topics": ["marine-life", "economy-and-trade", "culture-and-ethnography"],
+  "canonicalLanguage": "fa",
+  "gallery": ["reef-fish-school", "fishing-dhow"],
+  "history": { "revisions": 3, "contributors": 3 },
+  "verification": "NONE",
+  "translations": {
+    "fa": {
+      "slug": "شیر-ماهی",
+      "title": "شیر ماهی",
+      "summary": "ماهی سطح‌زی مهاجر و پرطرفدار خلیج فارس که گوشتش در آشپزی جنوب ایران جایگاه ویژه‌ای دارد.",
+      "lead": [
+        "**شیر ماهی** (نام علمی: *Scomberomorus commerson*) ماهی‌ای از خانوادهٔ تون‌ماهیان است که در آب‌های گرم اقیانوس هند و غرب اقیانوس آرام زندگی می‌کند. این ماهی در خلیج فارس و دریای عمان یکی از گران‌ترین و محبوب‌ترین ماهی‌های خوراکی است و در فهرست سرخ جهانی در ردهٔ «نزدیک به تهدید» قرار دارد.{{iucn-redlist-2024}}",
+        "شیر ماهی در مسیر کوچ سالانهٔ خود از [[strait-of-hormuz|تنگهٔ هرمز]] می‌گذرد و [[hormuz-fishing-grounds|صیدگاه‌های هرمز]] و [[larak-island|لارک]] از مهم‌ترین مکان‌های صید آن‌اند."
+      ],
+      "sections": [
+        {
+          "heading": "ویژگی‌ها",
+          "blocks": [
+            { "p": "بدن کشیده و دوکی شیر ماهی برای شنای سریع ساخته شده است. پشت آن آبی تیره و پهلوهایش نقره‌ای است و ده‌ها نوار عمودی موج‌دار و باریک بر پهلوهای بالغ‌ها دیده می‌شود. طول آن ممکن است به بیش از دو متر و وزنش به ۴۰ کیلوگرم برسد، هرچند بیشتر ماهی‌های صیدشده کوچک‌ترند.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "زیست و کوچ",
+          "blocks": [
+            { "p": "شیر ماهی شکارچی سریعی است که از ماهی‌های ریز مانند ساردین و موتو و ماهی مرکب تغذیه می‌کند. این ماهی‌ها هر سال میان خلیج فارس و دریای عمان کوچ می‌کنند: در بهار برای تخم‌ریزی به آب‌های گرم‌تر خلیج می‌آیند و در پاییز و زمستان به سوی دریای عمان بازمی‌گردند. پژوهش‌های ژنتیکی نشان داده‌اند که جمعیت شیر ماهی خلیج فارس و عمان یک ذخیرهٔ مشترک است.{{fao-fishery-gulf}}" }
+          ]
+        },
+        {
+          "heading": "صید و مدیریت",
+          "blocks": [
+            { "p": "شیر ماهی با قلاب کششی، تور گوشگیر سطحی و تور محاصره‌ای صید می‌شود. صید سنگین در دهه‌های اخیر، ذخایر آن را در سراسر منطقه کاهش داده و کشورهای شورای همکاری خلیج فارس و ایران برای آن حداقل اندازه و دوره‌های ممنوعیت صید تعیین کرده‌اند. همکاری منطقه‌ای برای مدیریت این ذخیرهٔ مشترک، یکی از نمونه‌های مهم دیپلماسی شیلاتی در خلیج فارس است.{{fao-fishery-gulf}}{{ropme-soe-2021}}" },
+            { "ul": ["قلاب کششی از لنج", "تور گوشگیر سطحی", "حداقل اندازهٔ ۶۵ سانتی‌متر در برخی کشورها", "ممنوعیت فصلی در دورهٔ تخم‌ریزی"] }
+          ]
+        },
+        {
+          "heading": "در فرهنگ و آشپزی",
+          "blocks": [
+            { "p": "شیر ماهی در آشپزی جنوب ایران و کشورهای عربی خلیج جایگاه ویژه‌ای دارد. قلیه‌ماهی، ماهی کبابی با ادویهٔ محلی و «مهیاوه»، چاشنی تخمیرشدهٔ ماهی، از غذاهای پرطرفدار آن‌اند. در بازارهای ماهی بندرعباس، فروش شیر ماهی تازه در صبح‌های زمستان یکی از صحنه‌های آشنای زندگی بندر است." }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "narrow-barred-spanish-mackerel",
+      "title": "Narrow-barred Spanish mackerel",
+      "summary": "A migratory pelagic fish much sought after in the Persian Gulf, central to the cooking of southern Iran.",
+      "lead": [
+        "The **narrow-barred Spanish mackerel** (*Scomberomorus commerson*), known locally as kingfish, is a member of the tuna and mackerel family found in the warm waters of the Indian Ocean and western Pacific. It is one of the most prized and expensive food fish in the Persian Gulf and the Gulf of Oman, and is listed as Near Threatened on the IUCN Red List.{{iucn-redlist-2024}}",
+        "On its yearly migration it passes through the [[strait-of-hormuz|Strait of Hormuz]], and the [[hormuz-fishing-grounds|Hormuz grounds]] and [[larak-island|Larak]] are among its most important fishing areas."
+      ],
+      "sections": [
+        {
+          "heading": "Description",
+          "blocks": [
+            { "p": "Its long, torpedo-shaped body is built for speed. The back is dark blue and the flanks silver, with dozens of narrow, wavy vertical bars on adults. It can exceed two metres and 40 kilograms, though most fish caught are smaller.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "Life and migration",
+          "blocks": [
+            { "p": "The kingfish is a fast predator of small fish such as sardines and anchovies and of squid. Every year it migrates between the Persian Gulf and the Gulf of Oman: in spring it moves into the warmer Gulf to spawn, and in autumn and winter it returns towards the Gulf of Oman. Genetic studies show that the Gulf and Oman populations form a single shared stock.{{fao-fishery-gulf}}" }
+          ]
+        },
+        {
+          "heading": "Fishing and management",
+          "blocks": [
+            { "p": "It is caught by trolling, surface gillnets and purse seines. Heavy fishing in recent decades has reduced stocks across the region, and the GCC states and Iran have set minimum sizes and closed seasons. Regional cooperation to manage this shared stock is an important example of fisheries diplomacy in the Persian Gulf.{{fao-fishery-gulf}}{{ropme-soe-2021}}" },
+            { "ul": ["Trolling from dhows", "Surface gillnets", "Minimum size of 65 cm in some countries", "Seasonal ban during spawning"] }
+          ]
+        },
+        {
+          "heading": "In culture and cooking",
+          "blocks": [
+            { "p": "Kingfish has a special place in the cooking of southern Iran and the Arab Gulf states. Qalieh mahi, grilled fish with local spices and mahyaveh, a fermented fish sauce, are favourite dishes. In the fish markets of Bandar Abbas, the sale of fresh kingfish on winter mornings is one of the familiar scenes of port life." }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "الكنعد",
+      "title": "الكنعد",
+      "summary": "سمكة سطحية مهاجرة مرغوبة جدًا في الخليج الفارسي، ولها مكانة محورية في مطبخ جنوب إيران والخليج.",
+      "lead": [
+        "**الكنعد** (الاسم العلمي: *Scomberomorus commerson*) سمكة من فصيلة الأسقمريات تعيش في المياه الدافئة للمحيط الهندي وغرب المحيط الهادئ، وهي من أثمن أسماك المائدة وأكثرها شعبية في الخليج الفارسي وبحر عُمان، ومصنفة «قريبة من التهديد» في القائمة الحمراء.{{iucn-redlist-2024}}",
+        "ويمر الكنعد في هجرته السنوية عبر [[strait-of-hormuz|مضيق هرمز]]، وتُعدّ [[hormuz-fishing-grounds|مصائد هرمز]] و[[larak-island|لارك]] من أهم مناطق صيده."
+      ],
+      "sections": [
+        {
+          "heading": "الوصف",
+          "blocks": [
+            { "p": "جسمه الطويل المغزلي مهيّأ للسرعة، وظهره أزرق داكن وجانباه فضيان، وعلى جانبي البالغ عشرات الأشرطة العمودية الضيقة المتموجة. وقد يتجاوز طوله مترين ووزنه ٤٠ كيلوغرامًا، وإن كانت معظم الأسماك المصيدة أصغر.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "الحياة والهجرة",
+          "blocks": [
+            { "p": "الكنعد مفترس سريع يتغذى على الأسماك الصغيرة كالسردين والأنشوجة وعلى الحبار، ويهاجر كل عام بين الخليج الفارسي وبحر عُمان: يدخل الخليج الأدفأ في الربيع ليتكاثر، ويعود نحو بحر عُمان في الخريف والشتاء. وتُظهر الدراسات الجينية أن مجموعتي الخليج وعُمان مخزون واحد مشترك.{{fao-fishery-gulf}}" }
+          ]
+        },
+        {
+          "heading": "الصيد والإدارة",
+          "blocks": [
+            { "p": "يُصاد بالخيط المجرور والشباك الخيشومية السطحية وشباك التطويق. وقد خفّض الصيد الكثيف في العقود الأخيرة مخزونه في المنطقة كلها، فحددت دول مجلس التعاون وإيران أحجامًا دنيا ومواسم حظر. ويُعدّ التعاون الإقليمي لإدارة هذا المخزون المشترك مثالًا مهمًا على دبلوماسية مصائد الأسماك في الخليج.{{fao-fishery-gulf}}{{ropme-soe-2021}}" },
+            { "ul": ["الصيد بالخيط المجرور من المراكب", "الشباك الخيشومية السطحية", "حد أدنى ٦٥ سنتيمترًا في بعض الدول", "حظر موسمي في فترة التكاثر"] }
+          ]
+        },
+        {
+          "heading": "في الثقافة والمطبخ",
+          "blocks": [
+            { "p": "للكنعد مكانة خاصة في مطبخ جنوب إيران ودول الخليج العربية، ومن أطباقه المحبوبة قلية السمك والسمك المشوي بالبهارات المحلية والمهياوة، وهي صلصة سمك مخمّرة. وفي أسواق السمك في بندر عباس يُعدّ بيع الكنعد الطازج في صباحات الشتاء من المشاهد المألوفة في حياة الميناء." }
+          ]
+        }
+      ]
+    }
+  }
+}

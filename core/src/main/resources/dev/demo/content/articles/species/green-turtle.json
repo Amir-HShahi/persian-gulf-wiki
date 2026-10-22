@@ -1,0 +1,246 @@
+{
+  "key": "green-turtle",
+  "subject": {
+    "kind": "SPECIES",
+    "names": {
+      "fa": "لاک‌پشت سبز",
+      "en": "Green turtle",
+      "ar": "السلحفاة الخضراء"
+    },
+    "aliases": {
+      "fa": [
+        "لاک‌پشت سبز دریایی"
+      ],
+      "en": [
+        "Green sea turtle",
+        "Chelonia mydas"
+      ],
+      "ar": [
+        "الحمسة"
+      ]
+    },
+    "geometry": "POLYGON((48 30, 50.5 29.5, 54 27, 56.5 27.2, 57 25.5, 56.3 24.5, 54 24, 51.5 24.5, 50 26, 48.5 28, 48 30))",
+    "facts": [
+      {
+        "attribute": "scientific_name",
+        "values": [
+          {
+            "text": "Chelonia mydas"
+          }
+        ]
+      },
+      {
+        "attribute": "category",
+        "values": [
+          {
+            "option": "REPTILE"
+          }
+        ]
+      },
+      {
+        "attribute": "iucn_status",
+        "values": [
+          {
+            "option": "EN"
+          }
+        ]
+      },
+      {
+        "attribute": "habitat",
+        "values": [
+          {
+            "option": "SEAGRASS"
+          },
+          {
+            "option": "CORAL_REEF"
+          }
+        ]
+      },
+      {
+        "attribute": "species_features",
+        "values": [
+          {
+            "option": "MIGRATORY"
+          }
+        ]
+      },
+      {
+        "attribute": "max_length",
+        "values": [
+          {
+            "number": 150,
+            "source": "iucn-redlist-2024"
+          }
+        ]
+      }
+    ]
+  },
+  "topics": [
+    "marine-life",
+    "pollution-and-environment"
+  ],
+  "canonicalLanguage": "fa",
+  "gallery": [
+    "green-turtle",
+    "scorpionfish-seagrass"
+  ],
+  "history": {
+    "revisions": 3,
+    "contributors": 3
+  },
+  "translations": {
+    "fa": {
+      "slug": "لاک‌پشت-سبز",
+      "title": "لاک‌پشت سبز",
+      "summary": "بزرگ‌ترین لاک‌پشت سخت‌لاک دریایی که از علف‌های دریایی تغذیه می‌کند و در سواحل خلیج فارس و دریای عمان تخم می‌گذارد.",
+      "lead": [
+        "**لاک‌پشت سبز** (نام علمی: *Chelonia mydas*) بزرگ‌ترین لاک‌پشت دریایی سخت‌لاک جهان است. نام این گونه نه از رنگ لاک، که از رنگ سبز چربی زیر پوستش گرفته شده که از رژیم گیاهی آن ناشی می‌شود. این لاک‌پشت در فهرست سرخ جهانی در ردهٔ «در معرض خطر» جای دارد.{{iucn-redlist-2024}}",
+        "در خلیج فارس، لاک‌پشت سبز در علفزارهای دریایی چرا می‌کند و در سواحل جزایری چون [[abu-musa-island|ابوموسی]] و کرانه‌های دریای عمان تخم می‌گذارد.{{doe-protected-areas}}"
+      ],
+      "sections": [
+        {
+          "heading": "ویژگی‌ها",
+          "blocks": [
+            {
+              "p": "لاک بیضی‌شکل و صاف آن به رنگ زیتونی تا قهوه‌ای با رگه‌های روشن است و طولش به حدود ۱۵۰ سانتی‌متر می‌رسد. وزن بالغ‌ها گاه از ۲۰۰ کیلوگرم می‌گذرد. برخلاف [[hawksbill-turtle|لاک‌پشت پوزه‌عقابی]]، سر لاک‌پشت سبز کوتاه و گرد است و تنها یک جفت صفحهٔ پیشانی دارد.{{iucn-redlist-2024}}"
+            }
+          ]
+        },
+        {
+          "heading": "تغذیه و نقش در زیست‌بوم",
+          "blocks": [
+            {
+              "p": "نوجوانان این گونه همه‌چیزخوارند، اما بالغ‌ها تقریباً یکسره گیاه‌خوارند و از [[halodule-uninervis|علف‌های دریایی]] و جلبک‌ها تغذیه می‌کنند. چرای آن‌ها، مانند چرای دام در مرتع، علفزارها را جوان و پربار نگه می‌دارد و به چرخهٔ مواد غذایی در بستر دریا کمک می‌کند.{{carpenter-living-resources}}"
+            }
+          ]
+        },
+        {
+          "heading": "کوچ و تخم‌گذاری",
+          "blocks": [
+            {
+              "p": "لاک‌پشت‌های سبز صدها تا هزاران کیلومتر میان علفزارهای تغذیه و ساحل‌های تخم‌گذاری کوچ می‌کنند و ماده‌ها برای تخم‌گذاری به همان ساحلی بازمی‌گردند که در آن از تخم بیرون آمده‌اند. ردیابی ماهواره‌ای نشان داده است که برخی لاک‌پشت‌های تخم‌گذار سواحل عمان برای تغذیه به خلیج فارس می‌آیند.{{ropme-soe-2021}}"
+            },
+            {
+              "ul": [
+                "تخم‌گذاری هر دو تا چهار سال",
+                "چند لانه در هر فصل",
+                "حدود ۱۰۰ تخم در هر لانه",
+                "بلوغ پس از ۲۰ تا ۳۰ سال"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "حفاظت",
+          "blocks": [
+            {
+              "p": "برداشت تخم و گوشت، گرفتار شدن در تورها، برخورد با قایق‌ها، بلعیدن پلاستیک و از میان رفتن علفزارهای دریایی، جمعیت این گونه را کاهش داده است. کشورهای حاشیهٔ خلیج فارس در چارچوب یادداشت تفاهم حفاظت از لاک‌پشت‌های دریایی اقیانوس هند، برنامه‌های پایش ساحل‌های تخم‌گذاری و آموزش صیادان را دنبال می‌کنند.{{ropme-soe-2021}}"
+            }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "green-turtle",
+      "title": "Green turtle",
+      "summary": "The largest hard-shelled sea turtle, a seagrass grazer that nests on the shores of the Persian Gulf and the Gulf of Oman.",
+      "lead": [
+        "The **green turtle** (*Chelonia mydas*) is the largest hard-shelled sea turtle in the world. Its name comes not from its shell but from the green colour of its body fat, a result of its plant diet. It is listed as Endangered on the IUCN Red List.{{iucn-redlist-2024}}",
+        "In the Persian Gulf the green turtle grazes on seagrass meadows and nests on the beaches of islands such as [[abu-musa-island|Abu Musa]] and along the Gulf of Oman.{{doe-protected-areas}}"
+      ],
+      "sections": [
+        {
+          "heading": "Description",
+          "blocks": [
+            {
+              "p": "Its smooth, oval shell is olive to brown with lighter streaks and reaches about 150 centimetres. Adults can weigh more than 200 kilograms. Unlike the [[hawksbill-turtle|hawksbill turtle]], it has a short, rounded head with a single pair of prefrontal scales.{{iucn-redlist-2024}} Hatchlings are only about five centimetres long when they leave the nest, and only a small fraction survive to adulthood."
+            }
+          ]
+        },
+        {
+          "heading": "Diet and role in the ecosystem",
+          "blocks": [
+            {
+              "p": "Young green turtles eat almost anything, but adults are nearly entirely herbivorous, feeding on [[halodule-uninervis|seagrass]] and algae. Like grazing livestock on a pasture, they keep seagrass meadows young and productive and help recycle nutrients on the seabed.{{carpenter-living-resources}}"
+            }
+          ]
+        },
+        {
+          "heading": "Migration and nesting",
+          "blocks": [
+            {
+              "p": "Green turtles migrate hundreds to thousands of kilometres between feeding grounds and nesting beaches, and females return to nest on the beach where they hatched. Satellite tracking has shown that some turtles nesting in Oman come into the Persian Gulf to feed.{{ropme-soe-2021}}"
+            },
+            {
+              "ul": [
+                "Nesting every two to four years",
+                "Several nests per season",
+                "About 100 eggs per nest",
+                "Maturity after 20 to 30 years"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Conservation",
+          "blocks": [
+            {
+              "p": "Egg and meat harvesting, entanglement in nets, boat strikes, swallowed plastic and the loss of seagrass meadows have reduced its numbers. Under the Indian Ocean sea turtle memorandum of understanding, the Gulf states run programmes to monitor nesting beaches and train fishermen.{{ropme-soe-2021}}"
+            }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "السلحفاة-الخضراء",
+      "title": "السلحفاة الخضراء",
+      "summary": "أكبر السلاحف البحرية ذات الدرقة الصلبة، ترعى الأعشاب البحرية وتعشّش على شواطئ الخليج الفارسي وبحر عُمان.",
+      "lead": [
+        "**السلحفاة الخضراء** (الاسم العلمي: *Chelonia mydas*) أكبر السلاحف البحرية ذات الدرقة الصلبة في العالم، ولا يأتي اسمها من لون درقتها بل من اللون الأخضر لدهونها، الناتج عن غذائها النباتي. وهي مصنفة «مهددة بالانقراض» في القائمة الحمراء.{{iucn-redlist-2024}}",
+        "وفي الخليج الفارسي ترعى السلحفاة الخضراء في مروج الأعشاب البحرية، وتعشّش على شواطئ جزر مثل [[abu-musa-island|أبو موسى]] وعلى سواحل بحر عُمان.{{doe-protected-areas}}"
+      ],
+      "sections": [
+        {
+          "heading": "الوصف",
+          "blocks": [
+            {
+              "p": "درقتها بيضاوية ملساء بلون زيتوني إلى بني مع خطوط فاتحة، ويبلغ طولها نحو ١٥٠ سنتيمترًا، وقد يتجاوز وزن البالغة ٢٠٠ كيلوغرام. وعلى خلاف [[hawksbill-turtle|السلحفاة صقرية المنقار]] فرأسها قصير مستدير وله زوج واحد من الحراشف الجبهية.{{iucn-redlist-2024}}"
+            }
+          ]
+        },
+        {
+          "heading": "الغذاء ودورها في النظام البيئي",
+          "blocks": [
+            {
+              "p": "صغار السلحفاة الخضراء تأكل كل شيء تقريبًا، أما البالغة فعاشبة بالكامل تقريبًا تتغذى على [[halodule-uninervis|الأعشاب البحرية]] والطحالب. ورعيها، كرعي الماشية في المراعي، يبقي المروج فتية منتجة ويساعد على تدوير المغذيات في قاع البحر.{{carpenter-living-resources}}"
+            }
+          ]
+        },
+        {
+          "heading": "الهجرة والتعشيش",
+          "blocks": [
+            {
+              "p": "تهاجر السلاحف الخضراء مئات إلى آلاف الكيلومترات بين مناطق التغذية وشواطئ التعشيش، وتعود الإناث لتعشّش على الشاطئ الذي فقست فيه. وقد أظهر التتبع بالأقمار الصناعية أن بعض السلاحف التي تعشّش في عُمان تدخل الخليج الفارسي للتغذية.{{ropme-soe-2021}}"
+            },
+            {
+              "ul": [
+                "التعشيش كل سنتين إلى أربع سنوات",
+                "عدة أعشاش في الموسم",
+                "نحو ١٠٠ بيضة في العش",
+                "البلوغ بعد ٢٠ إلى ٣٠ سنة"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "الحماية",
+          "blocks": [
+            {
+              "p": "خفّض جمع البيض واللحم، والوقوع في الشباك، والاصطدام بالقوارب، وابتلاع البلاستيك، وتدهور مروج الأعشاب البحرية أعدادها. وتنفذ دول الخليج، في إطار مذكرة التفاهم بشأن السلاحف البحرية في المحيط الهندي، برامج لرصد شواطئ التعشيش وتدريب الصيادين.{{ropme-soe-2021}}"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

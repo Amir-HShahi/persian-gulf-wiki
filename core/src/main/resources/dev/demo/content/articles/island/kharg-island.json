@@ -1,0 +1,293 @@
+{
+  "key": "kharg-island",
+  "subject": {
+    "kind": "ISLAND",
+    "names": {
+      "fa": "جزیرهٔ خارک",
+      "en": "Kharg Island",
+      "ar": "جزيرة خارك"
+    },
+    "aliases": {
+      "fa": [
+        "خارک"
+      ],
+      "en": [
+        "Kharg",
+        "Khark"
+      ],
+      "ar": [
+        "خارك",
+        "خرج"
+      ]
+    },
+    "geometry": "POINT(50.32 29.25)",
+    "facts": [
+      {
+        "attribute": "area",
+        "values": [
+          {
+            "number": 20,
+            "source": "ncc-gazetteer"
+          }
+        ]
+      },
+      {
+        "attribute": "place_features",
+        "values": [
+          {
+            "option": "PROTECTED_AREA"
+          }
+        ]
+      },
+      {
+        "attribute": "country",
+        "values": [
+          {
+            "option": "IR"
+          }
+        ]
+      },
+      {
+        "attribute": "province",
+        "values": [
+          {
+            "subject": "bushehr-province"
+          }
+        ]
+      },
+      {
+        "attribute": "county",
+        "values": [
+          {
+            "localized": {
+              "fa": "بوشهر",
+              "en": "Bushehr",
+              "ar": "بوشهر"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "district",
+        "values": [
+          {
+            "localized": {
+              "fa": "بخش خارک",
+              "en": "Khark District",
+              "ar": "قسم خارك"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "population",
+        "values": [
+          {
+            "number": 8193,
+            "asOf": "2016-01-01",
+            "source": "sci-census-2016-bushehr"
+          }
+        ]
+      },
+      {
+        "attribute": "ethnic_groups",
+        "values": [
+          {
+            "localized": {
+              "fa": "فارس‌ها",
+              "en": "Persians",
+              "ar": "الفرس"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "languages",
+        "values": [
+          {
+            "option": "FA"
+          }
+        ]
+      }
+    ]
+  },
+  "topics": [
+    "islands",
+    "ports-and-oil-terminals",
+    "economy-and-trade"
+  ],
+  "canonicalLanguage": "fa",
+  "gallery": [
+    "basrah-oil-terminal",
+    "basrah-tankers"
+  ],
+  "history": {
+    "revisions": 4,
+    "contributors": 3
+  },
+  "verification": "VERIFIED",
+  "translations": {
+    "fa": {
+      "slug": "جزیره-خارک",
+      "title": "جزیرهٔ خارک",
+      "summary": "جزیره‌ای کوچک در شمال خلیج فارس که بزرگ‌ترین پایانهٔ صادرات نفت خام ایران را در خود جای داده است.",
+      "lead": [
+        "**جزیرهٔ خارک** جزیره‌ای مرجانی با مساحتی حدود ۲۰ کیلومتر مربع است که در ۵۵ کیلومتری شمال غربی [[bushehr-port|بندر بوشهر]] قرار دارد و بخشی از [[bushehr-province|استان بوشهر]] به شمار می‌رود.{{ncc-gazetteer}} این جزیره با داشتن آب ژرف در نزدیکی ساحل، بزرگ‌ترین پایانهٔ صادرات نفت خام ایران است و نزدیک به ۹۰ درصد نفت صادراتی کشور از اسکله‌های آن بارگیری می‌شود.{{nioc-kharg}}{{eia-iran-2024}}",
+        "خارک افزون بر اهمیت اقتصادی، پیشینهٔ تاریخی کهنی دارد و آثاری از دوران هخامنشی، ساسانی و نخستین سده‌های مسیحیت در آن یافت شده است."
+      ],
+      "sections": [
+        {
+          "heading": "پایانهٔ نفتی",
+          "blocks": [
+            {
+              "p": "نخستین اسکلهٔ نفتی خارک در دههٔ ۱۳۳۰ خورشیدی ساخته شد و در دهه‌های بعد به مجموعه‌ای از اسکله‌های T شکل و آذرپاد تبدیل شد که می‌تواند بزرگ‌ترین نفتکش‌های جهان (VLCC) را پذیرا باشد.{{nioc-kharg}} نفت خام میدان‌های خشکی [[khuzestan-province|خوزستان]] و میدان‌های دریایی با خط لوله به مخازن جزیره می‌رسد و از آنجا به نفتکش‌ها منتقل می‌شود."
+            },
+            {
+              "ul": [
+                "ظرفیت ذخیره‌سازی بیش از ۲۰ میلیون بشکه",
+                "اسکلهٔ T برای نفتکش‌های غول‌پیکر",
+                "اسکلهٔ آذرپاد در غرب جزیره",
+                "پالایشگاه گاز و پتروشیمی خارک"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "تاریخ",
+          "blocks": [
+            {
+              "p": "در خارک گورهای سنگی تراشیده در صخره از دوران هخامنشی و اشکانی، بقایای یک صومعهٔ مسیحی نسطوری از سدهٔ ششم میلادی و آرامگاهی منسوب به محمد حنفیه برجاست.{{potter-gulf-history}} در سدهٔ هجدهم، هلندی‌ها به رهبری بارون کنیپ‌هاوزن پایگاهی تجاری در خارک ساختند که چند سال بعد به دست میرمهنا، فرمانروای بندر ریگ، از میان رفت.{{floor-persian-gulf}}"
+            },
+            {
+              "p": "در جنگ ایران و عراق، پایانهٔ نفتی خارک بارها هدف حملهٔ هوایی قرار گرفت، اما صادرات نفت از آن هرگز به‌طور کامل متوقف نشد."
+            }
+          ]
+        },
+        {
+          "heading": "طبیعت",
+          "blocks": [
+            {
+              "p": "با وجود فعالیت‌های صنعتی، صخره‌های مرجانی پیرامون خارک و جزیرهٔ کوچک‌تر خارکو هنوز زیستگاه ماهی‌ها و [[hawksbill-turtle|لاک‌پشت‌های دریایی]] است و خارکو به‌عنوان پناهگاه حیات وحش حفاظت می‌شود.{{doe-protected-areas}}"
+            }
+          ]
+        },
+        {
+          "heading": "زندگی روزمره",
+          "blocks": [
+            {
+              "p": "بیشتر ساکنان خارک کارکنان صنعت نفت و خانواده‌هایشان‌اند. شهرک‌های مسکونی، مدرسه، بیمارستان و فرودگاه کوچک جزیره را شرکت پایانه‌های نفتی ساخته است و کشتی‌های مسافربری خارک را به بندر گناوه و بوشهر پیوند می‌دهند."
+            }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "kharg-island",
+      "title": "Kharg Island",
+      "summary": "A small island in the northern Persian Gulf that hosts Iran's largest crude oil export terminal.",
+      "lead": [
+        "**Kharg Island** is a coral island of about 20 square kilometres lying 55 kilometres north-west of the port of [[bushehr-port|Bushehr]], within [[bushehr-province|Bushehr Province]].{{ncc-gazetteer}} Thanks to deep water close to its shore, it is Iran's largest crude oil export terminal: nearly 90 per cent of the country's oil exports are loaded at its jetties.{{nioc-kharg}}{{eia-iran-2024}}",
+        "Beyond its economic weight, Kharg has a long history, with remains from the Achaemenid and Sasanian periods and the first centuries of Christianity."
+      ],
+      "sections": [
+        {
+          "heading": "The oil terminal",
+          "blocks": [
+            {
+              "p": "Kharg's first oil jetty was built in the 1950s, and over the following decades it grew into a complex of T-shaped and Azarpad jetties able to receive the world's largest tankers (VLCCs).{{nioc-kharg}} Crude from the onshore fields of [[khuzestan-province|Khuzestan]] and from offshore fields reaches the island's tank farms by pipeline and is loaded onto tankers from there."
+            },
+            {
+              "ul": [
+                "Storage capacity of more than 20 million barrels",
+                "T-jetty for very large crude carriers",
+                "Azarpad jetty on the west of the island",
+                "Kharg gas plant and petrochemicals"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "History",
+          "blocks": [
+            {
+              "p": "Kharg has rock-cut tombs from the Achaemenid and Parthian periods, the remains of a sixth-century Nestorian Christian monastery, and a shrine attributed to Muhammad ibn al-Hanafiyya.{{potter-gulf-history}} In the eighteenth century the Dutch, led by Baron von Kniphausen, built a trading post on Kharg that was destroyed a few years later by Mir Mohanna, ruler of Bandar Rig.{{floor-persian-gulf}}"
+            },
+            {
+              "p": "During the Iran–Iraq War the Kharg terminal was repeatedly bombed from the air, but oil exports from it never stopped completely."
+            }
+          ]
+        },
+        {
+          "heading": "Nature",
+          "blocks": [
+            {
+              "p": "Despite the industrial activity, the coral reefs around Kharg and the smaller island of Khargu still shelter fish and [[hawksbill-turtle|sea turtles]], and Khargu is protected as a wildlife refuge.{{doe-protected-areas}}"
+            }
+          ]
+        },
+        {
+          "heading": "Daily life",
+          "blocks": [
+            {
+              "p": "Most of Kharg's residents are oil workers and their families. The housing estates, school, hospital and small airport were built by the oil terminals company, and passenger boats link Kharg to Bandar Genaveh and Bushehr."
+            }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "جزيرة-خارك",
+      "title": "جزيرة خارك",
+      "summary": "جزيرة صغيرة في شمال الخليج الفارسي تضم أكبر محطة لتصدير النفط الخام في إيران.",
+      "lead": [
+        "**جزيرة خارك** جزيرة مرجانية مساحتها نحو ٢٠ كيلومترًا مربعًا، تقع على بعد ٥٥ كيلومترًا شمال غرب [[bushehr-port|ميناء بوشهر]] ضمن [[bushehr-province|محافظة بوشهر]].{{ncc-gazetteer}} وبفضل المياه العميقة القريبة من شاطئها، فهي أكبر محطة لتصدير النفط الخام في إيران، إذ يُحمَّل من أرصفتها قرابة ٩٠ في المئة من صادرات البلاد النفطية.{{nioc-kharg}}{{eia-iran-2024}}",
+        "وإلى جانب أهميتها الاقتصادية، تملك خارك تاريخًا طويلًا، ففيها آثار من العهدين الأخميني والساساني ومن القرون المسيحية الأولى."
+      ],
+      "sections": [
+        {
+          "heading": "المحطة النفطية",
+          "blocks": [
+            {
+              "p": "بُني أول رصيف نفطي في خارك في خمسينيات القرن العشرين، وتطور في العقود التالية إلى مجمع من الأرصفة على شكل حرف T ورصيف آذرباد، قادر على استقبال أكبر ناقلات النفط في العالم.{{nioc-kharg}} ويصل النفط الخام من الحقول البرية في [[khuzestan-province|خوزستان]] ومن الحقول البحرية عبر الأنابيب إلى خزانات الجزيرة، ومنها يُحمَّل على الناقلات."
+            },
+            {
+              "ul": [
+                "سعة تخزين تتجاوز ٢٠ مليون برميل",
+                "رصيف T لناقلات النفط العملاقة",
+                "رصيف آذرباد غرب الجزيرة",
+                "مصنع غاز خارك والبتروكيماويات"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "التاريخ",
+          "blocks": [
+            {
+              "p": "في خارك مقابر منحوتة في الصخر من العهدين الأخميني والفرثي، وبقايا دير مسيحي نسطوري من القرن السادس، ومزار يُنسب إلى محمد بن الحنفية.{{potter-gulf-history}} وفي القرن الثامن عشر أقام الهولنديون بقيادة البارون فون كنيبهاوزن مركزًا تجاريًا في الجزيرة، دمّره بعد سنوات مير مهنا حاكم بندر ريگ.{{floor-persian-gulf}}"
+            },
+            {
+              "p": "وخلال الحرب الإيرانية العراقية تعرضت محطة خارك لغارات جوية متكررة، لكن صادرات النفط منها لم تتوقف تمامًا قط."
+            }
+          ]
+        },
+        {
+          "heading": "الطبيعة",
+          "blocks": [
+            {
+              "p": "ورغم النشاط الصناعي، لا تزال الشعاب المرجانية حول خارك وجزيرة خاركو الأصغر تؤوي الأسماك و[[hawksbill-turtle|السلاحف البحرية]]، وتحظى خاركو بالحماية بوصفها ملجأً للحياة البرية.{{doe-protected-areas}}"
+            }
+          ]
+        },
+        {
+          "heading": "الحياة اليومية",
+          "blocks": [
+            {
+              "p": "معظم سكان خارك من عاملي صناعة النفط وأسرهم، وقد بنت شركة المحطات النفطية الأحياء السكنية والمدرسة والمستشفى والمطار الصغير في الجزيرة، وتربط سفن الركاب خارك بميناءي كناوه وبوشهر."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

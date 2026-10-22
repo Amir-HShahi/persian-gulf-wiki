@@ -1,0 +1,263 @@
+{
+  "key": "bushehr-port",
+  "subject": {
+    "kind": "PORT",
+    "names": {
+      "fa": "بندر بوشهر",
+      "en": "Port of Bushehr",
+      "ar": "ميناء بوشهر"
+    },
+    "aliases": {
+      "fa": [
+        "بوشهر",
+        "ابوشهر"
+      ],
+      "en": [
+        "Bushehr",
+        "Bushire"
+      ],
+      "ar": [
+        "بوشهر",
+        "أبو شهر"
+      ]
+    },
+    "geometry": "POINT(50.84 28.97)",
+    "facts": [
+      {
+        "attribute": "country",
+        "values": [
+          {
+            "option": "IR"
+          }
+        ]
+      },
+      {
+        "attribute": "province",
+        "values": [
+          {
+            "subject": "bushehr-province"
+          }
+        ]
+      },
+      {
+        "attribute": "county",
+        "values": [
+          {
+            "localized": {
+              "fa": "بوشهر",
+              "en": "Bushehr",
+              "ar": "بوشهر"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "district",
+        "values": [
+          {
+            "localized": {
+              "fa": "بخش مرکزی",
+              "en": "Central District",
+              "ar": "القسم المركزي"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "population",
+        "values": [
+          {
+            "number": 223504,
+            "asOf": "2016-01-01",
+            "source": "sci-census-2016-bushehr"
+          }
+        ]
+      },
+      {
+        "attribute": "ethnic_groups",
+        "values": [
+          {
+            "localized": {
+              "fa": "فارس‌ها",
+              "en": "Persians",
+              "ar": "الفرس"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "languages",
+        "values": [
+          {
+            "option": "FA"
+          }
+        ]
+      }
+    ]
+  },
+  "topics": [
+    "ports-and-oil-terminals",
+    "history-and-archaeology",
+    "culture-and-ethnography"
+  ],
+  "canonicalLanguage": "fa",
+  "gallery": [
+    "persian-gulf-modis-autumn",
+    "fishing-dhow",
+    "gulf-night-iss"
+  ],
+  "history": {
+    "revisions": 5,
+    "contributors": 6
+  },
+  "verification": "STALE",
+  "translations": {
+    "fa": {
+      "slug": "بندر-بوشهر",
+      "title": "بندر بوشهر",
+      "summary": "مرکز استان بوشهر و یکی از کهن‌ترین بندرهای ایران که از سدهٔ هجدهم تا آغاز سدهٔ بیستم دروازهٔ دریایی اصلی کشور بود.",
+      "lead": [
+        "**بندر بوشهر** مرکز [[bushehr-province|استان بوشهر]] است که بر شبه‌جزیره‌ای باریک در کرانهٔ شمالی خلیج فارس ساخته شده است. بر پایهٔ سرشماری ۱۳۹۵، جمعیت این شهر بیش از دویست و بیست هزار نفر بوده است.{{sci-census-2016-bushehr}}",
+        "بوشهر از سدهٔ هجدهم تا آغاز سدهٔ بیستم مهم‌ترین بندر ایران بود و بافت تاریخی آن با خانه‌های بادگیردار و شناشیل‌های چوبی، یکی از ارزشمندترین مجموعه‌های معماری کرانهٔ خلیج فارس است.{{iranica-bushehr}}"
+      ],
+      "sections": [
+        {
+          "heading": "تاریخ",
+          "blocks": [
+            {
+              "p": "در نزدیکی بوشهر امروزی، شهر کهن ریشهر از دوران ایلامی تا ساسانی پابرجا بود. بوشهر به شکل امروزی را نادرشاه افشار در سال ۱۷۳۴ میلادی به‌عنوان پایگاه ناوگان ایران در خلیج فارس بنیاد نهاد.{{iranica-bushehr}} در سده‌های هجدهم و نوزدهم، کنسول‌گری‌ها و تجارت‌خانه‌های اروپایی در بوشهر جای گرفتند و نمایندگی سیاسی بریتانیا در خلیج فارس نیز سال‌ها در این شهر بود.{{potter-gulf-history}}"
+            },
+            {
+              "p": "مردم بوشهر در جنگ‌های ایران و بریتانیا در سال‌های ۱۸۵۶ و ۱۹۱۵ در برابر نیروهای بریتانیایی ایستادگی کردند. رئیسعلی دلواری، رهبر مبارزان تنگستانی، از چهره‌های نامدار این دوران است."
+            }
+          ]
+        },
+        {
+          "heading": "بندر و اقتصاد",
+          "blocks": [
+            {
+              "p": "بندر بوشهر امروز اسکله‌های بازرگانی، صیادی و مسافربری دارد و کشتی‌هایی میان آن و جزیرهٔ [[kharg-island|خارک]] و بندرهای کشورهای همسایه رفت‌وآمد می‌کنند.{{pmo-ports-2023}} صید میگو، به‌ویژه [[penaeus-semisulcatus|میگوی ببری سبز]]، از مهم‌ترین فعالیت‌های اقتصادی شهر است و اسکله‌های صیادی آن در فصل صید پرجنب‌وجوش‌اند.{{ifro-shrimp-stock}}"
+            },
+            {
+              "p": "نیروگاه اتمی بوشهر، نخستین نیروگاه هسته‌ای ایران، در حدود ۱۷ کیلومتری جنوب شهر قرار دارد."
+            }
+          ]
+        },
+        {
+          "heading": "بافت تاریخی",
+          "blocks": [
+            {
+              "p": "محله‌های کهن بوشهر، یعنی بهمنی، کوتی، شنبدی و دهدشتی، با کوچه‌های باریک رو به دریا و خانه‌های چندطبقه، برای گردش باد و کاهش گرمای تابستان طراحی شده‌اند. عمارت ملک، خانهٔ طبیب و کلیسای ارامنهٔ گریگور مقدس از بناهای شاخص این بافت‌اند.{{iranica-bushehr}} این خانه‌ها با دیوارهای ضخیم از سنگ مرجانی و ملات ساروج ساخته شده‌اند و اتاق‌های بلند و رو به دریای آن‌ها، در شب‌های تابستان جای خواب خانواده‌ها بوده است."
+            },
+            {
+              "ul": [
+                "عمارت ملک‌التجار",
+                "کلیسای گریگور مقدس",
+                "موزهٔ مردم‌شناسی دریا",
+                "ساحل و اسکلهٔ قدیم"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "port-of-bushehr",
+      "title": "Port of Bushehr",
+      "summary": "The capital of Bushehr Province and one of Iran's oldest ports, the country's main gateway to the sea from the eighteenth to the early twentieth century.",
+      "lead": [
+        "The **port of Bushehr** is the capital of [[bushehr-province|Bushehr Province]], built on a narrow peninsula on the northern shore of the Persian Gulf. According to the 2016 census the city had more than 220,000 inhabitants.{{sci-census-2016-bushehr}}",
+        "From the eighteenth to the early twentieth century Bushehr was Iran's most important port, and its historic quarter of wind-catcher houses and wooden balconies is one of the finest architectural ensembles on the Gulf coast.{{iranica-bushehr}}"
+      ],
+      "sections": [
+        {
+          "heading": "History",
+          "blocks": [
+            {
+              "p": "Near today's Bushehr stood the ancient town of Rishahr, inhabited from Elamite to Sasanian times. Modern Bushehr was founded by Nader Shah in 1734 as the base of Iran's Gulf fleet.{{iranica-bushehr}} In the eighteenth and nineteenth centuries European consulates and trading houses settled in Bushehr, and for many years the British Political Residency in the Persian Gulf was based in the town.{{potter-gulf-history}}"
+            },
+            {
+              "p": "The people of Bushehr resisted British forces in the Anglo-Persian conflicts of 1856 and 1915. Rais Ali Delvari, leader of the Tangestani fighters, is one of the best-known figures of that period."
+            }
+          ]
+        },
+        {
+          "heading": "Port and economy",
+          "blocks": [
+            {
+              "p": "Today the port of Bushehr has commercial, fishing and passenger piers, with ships sailing to [[kharg-island|Kharg Island]] and to ports in neighbouring countries.{{pmo-ports-2023}} Shrimp fishing, especially for the [[penaeus-semisulcatus|green tiger prawn]], is one of the city's main economic activities, and its fishing jetties are busy throughout the season.{{ifro-shrimp-stock}}"
+            },
+            {
+              "p": "The Bushehr nuclear power plant, Iran's first nuclear power station, lies about 17 kilometres south of the city."
+            }
+          ]
+        },
+        {
+          "heading": "The historic quarter",
+          "blocks": [
+            {
+              "p": "Bushehr's old quarters — Behmani, Kuti, Shanbadi and Dehdashti — with narrow lanes open to the sea and multi-storey houses, were designed to channel the wind and soften the summer heat. The Malek mansion, the Tabib house and the Armenian Church of Saint Gregory are among the landmarks of the quarter.{{iranica-bushehr}}"
+            },
+            {
+              "ul": [
+                "Malek al-Tojjar mansion",
+                "Church of Saint Gregory",
+                "Museum of Maritime Anthropology",
+                "The old shore and jetty"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "ميناء-بوشهر",
+      "title": "ميناء بوشهر",
+      "summary": "عاصمة محافظة بوشهر ومن أقدم موانئ إيران، وكان بوابة البلاد البحرية الرئيسية من القرن الثامن عشر حتى أوائل القرن العشرين.",
+      "lead": [
+        "**ميناء بوشهر** عاصمة [[bushehr-province|محافظة بوشهر]]، بُني على شبه جزيرة ضيقة على الساحل الشمالي للخليج الفارسي، وبلغ عدد سكانه وفق تعداد عام ٢٠١٦ أكثر من ٢٢٠ ألف نسمة.{{sci-census-2016-bushehr}}",
+        "وكانت بوشهر من القرن الثامن عشر حتى أوائل القرن العشرين أهم ميناء في إيران، ويُعدّ حيّها التاريخي ببيوته ذات الملاقف وشرفاته الخشبية من أثمن المجموعات المعمارية على ساحل الخليج.{{iranica-bushehr}}"
+      ],
+      "sections": [
+        {
+          "heading": "التاريخ",
+          "blocks": [
+            {
+              "p": "قرب بوشهر الحالية قامت مدينة ريشهر القديمة من العهد العيلامي حتى الساساني. أما بوشهر الحديثة فقد أسسها نادر شاه عام ١٧٣٤ قاعدةً للأسطول الإيراني في الخليج.{{iranica-bushehr}} وفي القرنين الثامن عشر والتاسع عشر استقرت فيها القنصليات والبيوت التجارية الأوروبية، وكان مقر المقيمية السياسية البريطانية في الخليج فيها لسنوات طويلة.{{potter-gulf-history}}"
+            },
+            {
+              "p": "وقاوم أهل بوشهر القوات البريطانية في الحربين الإيرانية البريطانية عامي ١٨٥٦ و١٩١٥، ويُعدّ رئيس علي دلواري قائد المقاتلين التنكستانيين من أشهر شخصيات تلك المرحلة."
+            }
+          ]
+        },
+        {
+          "heading": "الميناء والاقتصاد",
+          "blocks": [
+            {
+              "p": "يضم ميناء بوشهر اليوم أرصفة للتجارة والصيد والركاب، وتبحر السفن منه إلى [[kharg-island|جزيرة خارك]] وإلى موانئ الدول المجاورة.{{pmo-ports-2023}} ويُعدّ صيد الروبيان، ولا سيما [[penaeus-semisulcatus|الروبيان النمري الأخضر]]، من أهم الأنشطة الاقتصادية في المدينة، وتعجّ أرصفة الصيد بالحركة طوال الموسم.{{ifro-shrimp-stock}}"
+            },
+            {
+              "p": "وتقع محطة بوشهر للطاقة النووية، أول محطة نووية في إيران، على بعد نحو ١٧ كيلومترًا جنوب المدينة."
+            }
+          ]
+        },
+        {
+          "heading": "الحي التاريخي",
+          "blocks": [
+            {
+              "p": "صُممت أحياء بوشهر القديمة، بهمني وكوتي وشنبدي ودهدشتي، بأزقتها الضيقة المفتوحة على البحر وبيوتها متعددة الطوابق، لتوجيه الرياح وتلطيف حرارة الصيف. ومن أبرز معالمها قصر ملك التجار وبيت الطبيب وكنيسة القديس غريغوريوس الأرمنية.{{iranica-bushehr}}"
+            },
+            {
+              "ul": [
+                "قصر ملك التجار",
+                "كنيسة القديس غريغوريوس",
+                "متحف الأنثروبولوجيا البحرية",
+                "الشاطئ والرصيف القديم"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

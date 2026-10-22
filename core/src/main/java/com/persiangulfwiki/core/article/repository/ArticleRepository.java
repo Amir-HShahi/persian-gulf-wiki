@@ -59,4 +59,21 @@ public interface ArticleRepository extends JpaRepository<Article, UUID> {
     int demoteMainBySubjectId(@Param("subjectId") UUID subjectId);
 
     long deleteByDevMarkerAndCreatedAtBefore(String devMarker, Instant threshold);
+
+    // Used only by the dev demo-content seeder, to spread its articles over time. Both columns are
+    // stamped in @PrePersist, so a bulk update is the only way to set them; it also covers the
+    // article's translations, which the reader page shows as "last edited".
+    @Modifying
+    @Query(value = """
+            with moved as (
+                update articles set created_at = :createdAt, updated_at = :updatedAt where id = :articleId
+                returning id
+            )
+            update article_translations set created_at = :createdAt, updated_at = :updatedAt
+            where article_id in (select id from moved)
+            """, nativeQuery = true)
+    int backdate(@Param("articleId") UUID articleId, @Param("createdAt") Instant createdAt,
+            @Param("updatedAt") Instant updatedAt);
+
+    long countByDevMarker(String devMarker);
 }
