@@ -31,7 +31,7 @@ apply then changes nothing.
 
 ```sql
 INSERT INTO jobs (type, payload)
-VALUES ('image', :payload::jsonb)
+VALUES (:type, :payload::jsonb)   -- 'image' for IMAGE, 'panorama' for PANORAMA_360
 RETURNING id;
 ```
 
@@ -81,8 +81,8 @@ Rejection codes are yours, so `MediaFailureCode.fromPipelineCode` maps them as i
 `unsupported_format`, `corrupt_file`, `dimensions_too_large` (every size limit: side,
 pixel count and file size) and `checksum_mismatch`. Two more can appear that are not about
 the file, so they land on your generic `rejected`: `object_missing` (the staging object is
-gone) and `malformed_payload` (the job row itself is wrong). `panorama_aspect_ratio` is
-never sent, because the worker has no panorama job yet.
+gone) and `malformed_payload` (the job row itself is wrong). `panorama_aspect_ratio` comes
+from `panorama` jobs whose image is not 2:1 (within 2 ± 0.01).
 | `status = 'failed'` | the worker gave up after its retries; `last_error` says why | `failed` → `processing_error` |
 
 Retry window: 5 attempts with 30 s backoff doubling, plus up to a 5 min job timeout each. That
@@ -95,7 +95,7 @@ is well inside the 60-minute stuck-processing sweep, which can stay as it is.
 | `status` | `outcome` (the row's own `status` is the job's lifecycle, a different thing) |
 | `job_id` (UUID) | not needed: core already knows which row it read |
 | `submission_id` | in the row's `payload` |
-| `type` `media.image` | `type` `image` |
+| `type` `media.image` / `media.panorama` | `type` `image` / `panorama` |
 | `media.sha256` | `image.sha256` (recomputed by the worker, standard padded base64) |
 | `media.placeholder` | `image.placeholder`: `data:image/webp;base64,...`, 24 px wide, under 16 KiB, so your `PLACEHOLDER` check passes as is. Left out (not empty) if one could not be made small enough. |
 | `media.width` / `media.height` | `image.width` / `image.height` (after EXIF rotation) |
@@ -127,6 +127,11 @@ Variants are written to `pending/{mediaId}/w320.webp`, `w640.webp`, `w1280.webp`
 `w1920.webp` in the media bucket, so `MediaProcessingService`'s key check passes and your
 approve (move to `public/`) and clean-up (delete the prefix) work unchanged. The file names
 carry a `w` before the width; the check only looks at the prefix.
+
+Panoramas follow your §5 exactly: `pending/{mediaId}/2k.webp`, `4k.webp` and `8k.webp`
+(2048×1024, 4096×2048, 8192×4096), with `label` `2k`/`4k`/`8k` and `format` `webp`. KTX2
+is not made yet; WebP is the format your contract accepts until it is. The pixel budget is
+135 MP, as you suggested, so 16384×8192 fits.
 
 The original goes to `originals/{mediaId}/original.<ext>`, outside `pending/`, so publishing
 or rejecting an item never deletes it. **One thing for core to decide:** your 7-day sweep of

@@ -33,7 +33,7 @@ app ──SELECT search_articles(...)──▶ ranked hits + snippets
 | `cmd/worker` | The service. |
 | `cmd/imgpipe`, `cmd/normalize`, `cmd/tabular`, `cmd/search` | Small command-line tools over the packages above. |
 
-Only **image jobs** are wired into the worker today. `normalize` and `tabular`
+Only **image** and **panorama** jobs are wired into the worker today. `normalize` and `tabular`
 work as packages and CLIs but have no job type yet.
 
 ## Why it is built this way
@@ -123,9 +123,9 @@ notification is ever missed, the worker's polling picks the job up anyway.
 * Applies the EXIF rotation, converts colours to sRGB, and strips all metadata,
   GPS included.
 * Writes WebP (quality 85) at **320, 640, 1280 and 1920 px wide**. Height follows
-  the image's shape. A width at or above the source's is skipped rather than
-  upscaled, and an image narrower than all of them gets one variant at its own
-  width.
+  the image's shape. A width above the source's is skipped rather than upscaled
+  (the source's own width is kept: that is a re-encode), and an image narrower
+  than all of them gets one variant at its own width.
 * Makes a **placeholder**: the whole image 24 px wide as a low-quality WebP, returned
   inline in the result as a `data:image/webp;base64,…` URI (a few hundred bytes, never
   over 16 KiB). The frontend shows it stretched while the real variant loads, so there
@@ -185,6 +185,23 @@ a translated message for each. `reason.detail` is for the logs only; for
 | `checksum_mismatch` | The file's SHA-256 is not `declared_sha256`. |
 | `object_missing` | `object_key` is not in the raw bucket. Not about the file, so core shows its generic "rejected". |
 | `malformed_payload` | Bad JSON, an invalid `submission_id`, or a `declared_sha256` that is not base64 of 32 bytes. A bug in whoever enqueued the job; core shows its generic "rejected". |
+
+### Panoramas
+
+A 360 degree panorama is the same job with `type` `panorama`, the same payload, and
+the same result shape. The differences, from core's contract:
+
+* It must be **2:1** (width ÷ height within 2 ± 0.01), as equirectangular images are;
+  anything else is refused with `panorama_aspect_ratio`, before any decode.
+* Variants are **`2k` (2048×1024), `4k` (4096×2048) and `8k` (8192×4096)** WebP, at
+  `pending/<submission_id>/2k.webp` and so on, `label` being the size name. The same
+  rules apply: nothing upscaled, the source's own width kept.
+* The pixel budget is **135 MP** instead of 100, so a 16384×8192 panorama fits.
+
+```sql
+INSERT INTO jobs (type, payload)
+VALUES ('panorama', '{"submission_id": "9b1e7c3a", "object_key": "uploads/9b1e7c3a"}');
+```
 
 ### Retries and crashes
 
