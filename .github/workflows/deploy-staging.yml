@@ -24,7 +24,7 @@ jobs:
           VERSION=$(cd core && ./mvnw -q -Dexpression=project.version -DforceStdout help:evaluate)
           SHA=$(git rev-parse --short HEAD)
           echo "tag=${VERSION}-sha.${SHA}" >> "$GITHUB_OUTPUT"
-      - uses: docker/login-action@v3
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
