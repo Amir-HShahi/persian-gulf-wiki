@@ -70,3 +70,28 @@ app:
     bootstrap-email: ${ADMIN_BOOTSTRAP_EMAIL:}
     bootstrap-username: ${ADMIN_BOOTSTRAP_USERNAME:}
     bootstrap-password: ${ADMIN_BOOTSTRAP_PASSWORD:}
+  # Ingest is off here so no test reaches a real provider; the marinedata tests drive
+  # MarineDataIngestService directly with base URLs pointed at a local stub server.
+  marine-data:
+    ingest-enabled: false
+    connect-timeout: 2s
+    read-timeout: 5s
+    open-meteo-marine:
+      base-url: http://127.0.0.1:1
+      interval: 1h
+      lookback-days: 7
+      stations:
+        - { key: bushehr, latitude: 28.9, longitude: 50.6 }
+        - { key: asaluyeh, latitude: 27.4, longitude: 52.5 }
+    open-meteo-air-quality:
+      base-url: http://127.0.0.1:1
+      interval: 1h
+      lookback-days: 7
+      stations:
+        - { key: asaluyeh, latitude: 27.5, longitude: 52.6 }
+    noaa-erddap:
+      base-url: http://127.0.0.1:1
+      interval: 6h
+      lookback-days: 14
+      stations:
+        - { key: bushehr, latitude: 28.9, longitude: 50.6 }

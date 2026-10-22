@@ -5,6 +5,7 @@ import com.persiangulfwiki.core.TestcontainersConfiguration;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
 import com.persiangulfwiki.core.auth.dto.RegisterRequest;
 import com.persiangulfwiki.core.source.dto.CreateSourceRequest;
+import com.persiangulfwiki.core.source.repository.SourceRepository;
 import com.persiangulfwiki.core.user.entity.User;
 import com.persiangulfwiki.core.user.repository.UserRepository;
 
@@ -45,6 +46,9 @@ class SourceFlowIntegrationTests {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private SourceRepository sourceRepository;
 
     private User registerVerifiedContributor(String username, String email) throws Exception {
         RegisterRequest register = new RegisterRequest(username, email, PASSWORD);
@@ -195,6 +199,27 @@ class SourceFlowIntegrationTests {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[0].field").value("publishedOn"));
+    }
+
+    // The list carries one page of sources plus the total across all pages, open to anonymous callers.
+    @Test
+    void anonymousListReturnsOnePageAndTheTotalAcrossAllPages() throws Exception {
+        registerVerifiedContributor("srclist", "src-list@example.com");
+        Cookie accessCookie = loginAccessCookie("src-list@example.com");
+        Cookie csrfCookie = fetchCsrfCookie();
+        for (String title : new String[] {"Pearl Banks Atlas", "Strait Tide Tables"}) {
+            mockMvc.perform(post("/api/sources")
+                            .cookie(accessCookie, csrfCookie)
+                            .header("X-XSRF-TOKEN", maskCsrfToken(csrfCookie.getValue()))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(new CreateSourceRequest(title, null, null, null))))
+                    .andExpect(status().isCreated());
+        }
+
+        mockMvc.perform(get("/api/sources").param("size", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items.length()").value(1))
+                .andExpect(jsonPath("$.data.total").value(sourceRepository.count()));
     }
 
     @Test

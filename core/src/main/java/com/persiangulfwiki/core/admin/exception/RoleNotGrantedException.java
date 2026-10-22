@@ -2,10 +2,15 @@ package com.persiangulfwiki.core.admin.exception;
 
 import com.persiangulfwiki.core.common.exception.NotFoundException;
 
-// Thrown when revoking a (role, entityType) pair the target user doesn't actually hold —
+import java.io.Serial;
+
+// Thrown when revoking a (role, expertise) pair the target user doesn't actually hold —
 // mirrors SessionNotFoundException's NOT_FOUND shape rather than a plain 400, since this is
 // "that grant doesn't exist" in the same sense a missing session id doesn't exist.
 public class RoleNotGrantedException extends NotFoundException {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private static final String DEFAULT_MESSAGE = "role not granted";
 

@@ -1,6 +1,6 @@
 package com.persiangulfwiki.core.article.dto;
 
-import com.persiangulfwiki.core.article.entity.EntityType;
+import com.persiangulfwiki.core.subject.entity.SubjectKind;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -13,7 +13,7 @@ import java.util.UUID;
 public record ArticleListItemResponse(
         UUID id,
         UUID subjectId,
-        EntityType entityType,
+        @Schema(description = "The kind of the subject this article is about; null when the article has no subject.") SubjectKind subjectKind,
         String canonicalLanguage,
         UUID createdByUserId,
         Instant createdAt,

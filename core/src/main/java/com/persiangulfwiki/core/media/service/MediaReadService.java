@@ -122,6 +122,46 @@ public class MediaReadService {
         return toResponse(media, null, new Caller(callerUserId, isCallerModerator));
     }
 
+    /** False for anything but a public image (processed and approved) in an article bound to the subject. */
+    @Transactional(readOnly = true)
+    public boolean isPublishedImageOfSubject(UUID mediaId, UUID subjectId) {
+        return articleMediaRepository.existsPublishedImageOfSubject(mediaId, subjectId);
+    }
+
+    // What a subject card or infobox shows of its main image.
+    public record SubjectImage(UUID mediaId, @Nullable String placeholder, List<MediaVariantResponse> variants) {
+    }
+
+    /**
+     * The entries of {@code mediaIdBySubject} (subject id to media id) that pass
+     * {@link #isPublishedImageOfSubject}, with their previews, in two queries whatever the size.
+     */
+    // The URLs are built from the same loaded row whose status is checked, so an item hidden
+    // between the two queries is dropped rather than signed (toResponses signs anything not
+    // public). Article readability is not checked, unlike for a panorama link target: it would
+    // hide nothing, since the media id is shown anyway and the public URL is derived from it.
+    @Transactional(readOnly = true)
+    public Map<UUID, SubjectImage> publishedImagesOfSubjects(Map<UUID, UUID> mediaIdBySubject) {
+        if (mediaIdBySubject.isEmpty()) {
+            return Map.of();
+        }
+        Map<UUID, UUID> subjectByMedia = new HashMap<>();
+        articleMediaRepository.findPublishedImages(mediaIdBySubject.values())
+                .forEach(image -> subjectByMedia.put(image.getMediaId(), image.getSubjectId()));
+        Map<UUID, ArticleMedia> images = articleMediaRepository.findAllById(subjectByMedia.keySet()).stream()
+                .filter(media -> media.getType() == MediaKind.IMAGE && media.isPubliclyVisible())
+                .collect(Collectors.toMap(ArticleMedia::getId, Function.identity()));
+        Map<UUID, SubjectImage> retained = new HashMap<>();
+        mediaIdBySubject.forEach((subjectId, mediaId) -> {
+            ArticleMedia image = images.get(mediaId);
+            if (image != null && subjectId.equals(subjectByMedia.get(mediaId))) {
+                retained.put(subjectId, new SubjectImage(mediaId, image.getPlaceholder(),
+                        mediaVariantService.toResponses(image)));
+            }
+        });
+        return retained;
+    }
+
     // Moderators only; the caller (ModerationService, behind the moderator-only route) is the
     // authorization check.
     @Transactional(readOnly = true)

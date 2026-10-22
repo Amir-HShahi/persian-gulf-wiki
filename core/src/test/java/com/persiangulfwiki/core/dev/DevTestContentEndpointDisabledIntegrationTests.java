@@ -1,10 +1,14 @@
 package com.persiangulfwiki.core.dev;
 
 import com.persiangulfwiki.core.TestcontainersConfiguration;
+import com.persiangulfwiki.core.attribute.repository.AttributeDefinitionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
 import com.persiangulfwiki.core.moderation.repository.ModerationTaskRepository;
 import com.persiangulfwiki.core.source.repository.SourceRepository;
+import com.persiangulfwiki.core.subject.repository.ExpertVerificationRepository;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
+import com.persiangulfwiki.core.subject.repository.SubjectRevisionRepository;
+import com.persiangulfwiki.core.topic.repository.TopicRepository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +52,18 @@ class DevTestContentEndpointDisabledIntegrationTests {
     private ModerationTaskRepository moderationTaskRepository;
 
     @Autowired
+    private AttributeDefinitionRepository attributeDefinitionRepository;
+
+    @Autowired
+    private SubjectRevisionRepository subjectRevisionRepository;
+
+    @Autowired
+    private ExpertVerificationRepository expertVerificationRepository;
+
+    @Autowired
+    private TopicRepository topicRepository;
+
+    @Autowired
     private ApplicationContext applicationContext;
 
     @Test
@@ -56,7 +72,7 @@ class DevTestContentEndpointDisabledIntegrationTests {
         assertThat(applicationContext.getBeanNamesForType(DevTestSourceController.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestArticleController.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestModerationController.class)).isEmpty();
-        // The sweepers matter most of the eight: they are the ones that delete rows, on a
+        // The sweepers matter most: they are the ones that delete rows, on a
         // schedule rather than on a request, so an unprofiled copy would run in production
         // with nothing to trigger it and nothing to notice.
         assertThat(applicationContext.getBeanNamesForType(DevTestSubjectSweeper.class)).isEmpty();
@@ -65,6 +81,16 @@ class DevTestContentEndpointDisabledIntegrationTests {
         assertThat(applicationContext.getBeanNamesForType(DevTestModerationSweeper.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestMediaSweeper.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestMediaController.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestAttributeController.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestLabelController.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestAttributeSweeper.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestSubjectRevisionController.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestSubjectRevisionSweeper.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestExpertVerificationController.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestTopicController.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestTopicSweeper.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestMarineController.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevTestMarineSweeper.class)).isEmpty();
     }
 
     @Test
@@ -82,6 +108,18 @@ class DevTestContentEndpointDisabledIntegrationTests {
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(delete("/api/dev/test-media/{mediaId}", UUID.randomUUID()))
                 .andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/dev/test-attribute-definitions/{definitionId}", UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/dev/test-labels/{labelId}", UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/dev/test-subject-revisions/{revisionId}", UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/dev/test-expert-verifications/{verificationId}", UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/dev/test-topics/{topicId}", UUID.randomUUID()))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(delete("/api/dev/marine-readings/{stationKey}", "dev-test-abc"))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -90,6 +128,10 @@ class DevTestContentEndpointDisabledIntegrationTests {
         long sourcesBefore = sourceRepository.count();
         long articlesBefore = articleRepository.count();
         long moderationTasksBefore = moderationTaskRepository.count();
+        long definitionsBefore = attributeDefinitionRepository.count();
+        long subjectRevisionsBefore = subjectRevisionRepository.count();
+        long expertVerificationsBefore = expertVerificationRepository.count();
+        long topicsBefore = topicRepository.count();
 
         // 403 rather than 401 for the same reason as the user fixture route: the main chain's
         // CSRF filter runs ahead of authorization and /api/dev/** is not exempt from it, so
@@ -115,10 +157,42 @@ class DevTestContentEndpointDisabledIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/dev/test-attribute-groups")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/dev/test-attribute-definitions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"valueType\": \"BOOL\"}"))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/dev/test-labels")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/dev/test-subject-revisions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/dev/test-expert-verifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"subjectRevisionId\": \"%s\"}".formatted(UUID.randomUUID())))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/dev/test-topics")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/dev/marine-readings")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"metricKey\":\"pm10\",\"readings\":[{\"observedAt\":\"2026-01-01T00:00:00Z\",\"value\":1}]}"))
+                .andExpect(status().isForbidden());
 
         assertThat(subjectRepository.count()).isEqualTo(subjectsBefore);
         assertThat(sourceRepository.count()).isEqualTo(sourcesBefore);
         assertThat(articleRepository.count()).isEqualTo(articlesBefore);
         assertThat(moderationTaskRepository.count()).isEqualTo(moderationTasksBefore);
+        assertThat(attributeDefinitionRepository.count()).isEqualTo(definitionsBefore);
+        assertThat(subjectRevisionRepository.count()).isEqualTo(subjectRevisionsBefore);
+        assertThat(expertVerificationRepository.count()).isEqualTo(expertVerificationsBefore);
+        assertThat(topicRepository.count()).isEqualTo(topicsBefore);
     }
 }

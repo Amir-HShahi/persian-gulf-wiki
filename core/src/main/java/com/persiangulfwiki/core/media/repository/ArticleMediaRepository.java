@@ -5,6 +5,8 @@ import com.persiangulfwiki.core.media.entity.ProcessingStatus;
 import com.persiangulfwiki.core.media.entity.PublicationStatus;
 
 import jakarta.persistence.LockModeType;
+
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -13,6 +15,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -99,6 +102,35 @@ public interface ArticleMediaRepository extends JpaRepository<ArticleMedia, UUID
             """)
     int failProcessingUpdatedBefore(@Param("threshold") Instant threshold, @Param("failureCode") String failureCode,
             @Param("now") Instant now);
+
+    // A subject's main image candidate: a public IMAGE (READY and PUBLISHED) in the gallery of
+    // any article bound to that subject.
+    @Query("""
+            select count(m) > 0 from ArticleMedia m, Article a
+            where m.id = :mediaId and a.id = m.articleId and a.subjectId = :subjectId
+              and m.type = com.persiangulfwiki.core.media.entity.MediaKind.IMAGE
+              and m.processingStatus = com.persiangulfwiki.core.media.entity.ProcessingStatus.READY
+              and m.publicationStatus = com.persiangulfwiki.core.media.entity.PublicationStatus.PUBLISHED
+            """)
+    boolean existsPublishedImageOfSubject(@Param("mediaId") UUID mediaId, @Param("subjectId") UUID subjectId);
+
+    // The batch form of existsPublishedImageOfSubject: each of the ids that is a public IMAGE, with
+    // the subject its article is bound to (null for a subject-less article).
+    @Query("""
+            select m.id as mediaId, a.subjectId as subjectId from ArticleMedia m, Article a
+            where m.id in :mediaIds and a.id = m.articleId
+              and m.type = com.persiangulfwiki.core.media.entity.MediaKind.IMAGE
+              and m.processingStatus = com.persiangulfwiki.core.media.entity.ProcessingStatus.READY
+              and m.publicationStatus = com.persiangulfwiki.core.media.entity.PublicationStatus.PUBLISHED
+            """)
+    List<PublishedImage> findPublishedImages(@Param("mediaIds") Collection<UUID> mediaIds);
+
+    interface PublishedImage {
+
+        UUID getMediaId();
+
+        @Nullable UUID getSubjectId();
+    }
 
     List<ArticleMedia> findByProcessingStatusAndCreatedAtBefore(ProcessingStatus processingStatus, Instant threshold);
 

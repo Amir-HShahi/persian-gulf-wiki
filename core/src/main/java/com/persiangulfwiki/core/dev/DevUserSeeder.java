@@ -1,5 +1,6 @@
 package com.persiangulfwiki.core.dev;
 
+import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.user.entity.Role;
 import com.persiangulfwiki.core.user.entity.User;
 import com.persiangulfwiki.core.user.entity.UserRole;
@@ -43,6 +44,11 @@ public class DevUserSeeder implements ApplicationRunner {
     // password-change flows that re-validate the current password.
     private static final String DEV_PASSWORD = "Dev-Password1!";
 
+    // An expert reviewer role with no expertise may verify nothing (see ExpertVerificationService),
+    // so the seeded reviewer gets a real one. Written only alongside a newly created user, like
+    // every seeded role: a database seeded before this keeps its expertise-less role.
+    private static final SubjectKind REVIEWER_EXPERTISE = SubjectKind.ISLAND;
+
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
@@ -83,6 +89,7 @@ public class DevUserSeeder implements ApplicationRunner {
             userRoleRepository.save(UserRole.builder()
                     .user(user)
                     .role(role)
+                    .expertise(role == Role.EXPERT_REVIEWER ? REVIEWER_EXPERTISE : null)
                     .build());
         }
 

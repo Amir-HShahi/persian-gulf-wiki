@@ -5,7 +5,6 @@ import tools.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.persiangulfwiki.core.TestcontainersConfiguration;
 import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
-import com.persiangulfwiki.core.article.entity.EntityType;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
 import com.persiangulfwiki.core.auth.dto.RegisterRequest;
 import com.persiangulfwiki.core.media.entity.ArticleMedia;
@@ -183,8 +182,8 @@ class MediaProcessingFlowIntegrationTests {
     }
 
     private UUID createArticle(Account author) throws Exception {
-        CreateArticleRequest request = new CreateArticleRequest(null, EntityType.GENERIC, "fa",
-                "processing-" + UUID.randomUUID(), "Title", objectMapper.readTree("{\"text\":\"body\"}"), null);
+        CreateArticleRequest request = new CreateArticleRequest(null, "fa",
+                "processing-" + UUID.randomUUID(), "Title", objectMapper.readTree("{\"text\":\"body\"}"), null, null);
         String created = mockMvc.perform(post("/api/articles")
                         .cookie(author.accessCookie())
                         .with(xsrf())
@@ -240,6 +239,8 @@ class MediaProcessingFlowIntegrationTests {
     }
 
     private String jobIdFor(UUID mediaId) {
+        // read(...) takes generic varargs and is not @SafeVarargs; the array holds one offset.
+        @SuppressWarnings("unchecked")
         List<MapRecord<String, Object, Object>> jobs = redisTemplate.opsForStream().read(StreamOffset.fromStart(jobStream));
         return jobs.stream()
                 .filter(record -> mediaId.toString().equals(record.getValue().get("submission_id")))
@@ -620,6 +621,8 @@ class MediaProcessingFlowIntegrationTests {
             RecordId first = publishResult(okResult(reclaimable, sha256(reclaimable.file())));
             RecordId second = publishResult(okResult(poisoned, sha256(poisoned.file())));
             Consumer crashed = Consumer.from(consumerGroup, "crashed-" + UUID.randomUUID());
+            // read(...) takes generic varargs and is not @SafeVarargs; the array holds one offset.
+            @SuppressWarnings("unchecked")
             List<MapRecord<String, Object, Object>> taken = redisTemplate.opsForStream().read(crashed,
                     StreamReadOptions.empty().count(100), StreamOffset.create(resultStream, ReadOffset.lastConsumed()));
             assertThat(taken).extracting(MapRecord::getId).contains(first, second);

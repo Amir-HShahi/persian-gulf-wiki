@@ -2,9 +2,14 @@ package com.persiangulfwiki.core.moderation.exception;
 
 import com.persiangulfwiki.core.common.exception.BadRequestException;
 
+import java.io.Serial;
+
 // Media tasks take APPROVE/REJECT only: a contributor "changes" a media item's metadata by
 // proposing a new version, which gets its own task.
 public class RequestChangesNotSupportedException extends BadRequestException {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private static final String DEFAULT_MESSAGE = "request changes is not a valid decision for this task";
 

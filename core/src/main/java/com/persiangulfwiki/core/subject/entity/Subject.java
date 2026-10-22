@@ -16,13 +16,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.jspecify.annotations.Nullable;
+
 import java.time.Instant;
 import java.util.UUID;
 
 // Deliberately not an AuditableEntity: the schema gives a subject a created_at and no
-// updated_at, and a subject's own row never changes after insert — the mutable parts of a
-// subject live in its subtype row, its measurements and its labels. Inheriting an
-// updated_at that nothing ever advances would be a column that lies.
+// updated_at. The only column that ever changes after insert is deleted_at, which records its
+// own moment; the mutable parts of a subject live in its subtype row, its facts and its labels.
+// Inheriting an updated_at that nothing else advances would be a column that lies.
 //
 // Carries no name. Names are per-language and belong to the `labels` table; see the comment
 // on the subjects table in V15 for why duplicating one here would be a second source of
@@ -52,6 +54,15 @@ public class Subject {
     // See DevTestSubjects for what depends on that distinction.
     @Column(name = "dev_marker", length = 40)
     private String devMarker;
+
+    // Set by a soft delete or a merge (V29); a merged subject also has a SubjectRedirect. Hidden
+    // from every public read while set.
+    @Column(name = "deleted_at")
+    private @Nullable Instant deletedAt;
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
 
     @PrePersist
     void onCreate() {

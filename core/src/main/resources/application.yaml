@@ -149,6 +149,39 @@ app:
     # How long a FAILED item (and anything it left in storage) survives, so its uploader can
     # still read why it failed.
     failed-grace-days: 7
+  # Homepage data cards (marinedata). Every provider is keyless; only the on/off switch is an
+  # env var. MarineDataIngestJob ticks every 5 minutes and calls each source only once its
+  # interval has passed since that station's last attempt.
+  marine-data:
+    ingest-enabled: ${MARINE_DATA_INGEST_ENABLED:true}
+    connect-timeout: 5s
+    read-timeout: 15s
+    # Marine points sit slightly offshore: coastal grid cells come back null.
+    open-meteo-marine:
+      base-url: https://marine-api.open-meteo.com
+      interval: 1h
+      lookback-days: 7
+      stations:
+        - { key: strait_of_hormuz, latitude: 26.6, longitude: 56.3 }
+        - { key: bushehr, latitude: 28.9, longitude: 50.6 }
+        - { key: asaluyeh, latitude: 27.4, longitude: 52.5 }
+    # Air quality is measured where people are, so asaluyeh here is the onshore point.
+    open-meteo-air-quality:
+      base-url: https://air-quality-api.open-meteo.com
+      interval: 1h
+      lookback-days: 7
+      stations:
+        - { key: asaluyeh, latitude: 27.5, longitude: 52.6 }
+    # NOAA Coral Reef Watch publishes once a day with one or more days of lag, so every 6h is
+    # plenty; the look-back covers the lag plus a week of sparkline.
+    noaa-erddap:
+      base-url: https://coastwatch.noaa.gov/erddap
+      interval: 6h
+      lookback-days: 14
+      stations:
+        - { key: strait_of_hormuz, latitude: 26.6, longitude: 56.3 }
+        - { key: bushehr, latitude: 28.9, longitude: 50.6 }
+        - { key: asaluyeh, latitude: 27.4, longitude: 52.5 }
   admin:
     bootstrap-email: ${ADMIN_BOOTSTRAP_EMAIL:}
     bootstrap-username: ${ADMIN_BOOTSTRAP_USERNAME:}

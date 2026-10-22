@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,6 +42,20 @@ class OpenApiDocsIntegrationTests {
                 .andExpect(jsonPath("$.paths['/api/auth/register'].post").exists())
                 .andExpect(jsonPath("$.paths['/api/users/me'].get").exists())
                 .andExpect(jsonPath("$.paths['/api/admin/users'].get").exists());
+    }
+
+    // The listing reads its `attr.*` filters from the whole query string; that catch-all must not
+    // surface as a parameter of its own, since the operation description documents the filters.
+    @Test
+    void subjectReadSideIsDocumentedWithoutTheRawFilterMap() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.paths['/api/subjects/{subjectId}/infobox'].get.responses['200'].content['*/*']"
+                        + ".schema.$ref").value("#/components/schemas/SubjectInfoboxResponse"))
+                .andExpect(jsonPath("$.paths['/api/subjects'].get.responses['200'].content['*/*'].schema.$ref")
+                        .value("#/components/schemas/SubjectListResponse"))
+                .andExpect(jsonPath("$.paths['/api/subjects'].get.parameters[*].name")
+                        .value(containsInAnyOrder("kind", "page", "size")));
     }
 
     @Test
@@ -114,7 +129,10 @@ class OpenApiDocsIntegrationTests {
         List<String> tagNames = JsonPath.read(spec, "$.tags[*].name");
         assertThat(tagNames).containsExactly(
                 "Authentication", "OAuth2", "Email Verification", "Password Management",
-                "User Management", "Admin", "Expert Reviewer", "Subjects", "Sources", "Articles",
-                "Article Media", "Moderation");
+                "User Management", "Admin", "Expert Reviewer", "Subjects", "Subject Revisions",
+                "Expert Verifications", "Attributes",
+                "Labels",
+                "Sources", "Articles", "Article Media", "Topics", "Moderation",
+                "Marine Data");
     }
 }

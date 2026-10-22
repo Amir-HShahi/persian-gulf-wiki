@@ -22,6 +22,9 @@ public interface ModerationTaskRepository extends JpaRepository<ModerationTask, 
 
     Optional<ModerationTask> findByMediaMetadataVersionId(UUID mediaMetadataVersionId);
 
+    // Same totality for subject revisions (uq_moderation_tasks_subject_revision, V24).
+    Optional<ModerationTask> findBySubjectRevisionId(UUID subjectRevisionId);
+
     Page<ModerationTask> findByState(ModerationTaskState state, Pageable pageable);
 
     long deleteByDevMarkerAndCreatedAtBefore(String devMarker, Instant threshold);

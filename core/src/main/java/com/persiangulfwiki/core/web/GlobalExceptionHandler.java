@@ -4,11 +4,28 @@ import com.persiangulfwiki.core.admin.exception.InvalidPagingParametersException
 import com.persiangulfwiki.core.admin.exception.LastAdminException;
 import com.persiangulfwiki.core.admin.exception.RoleAlreadyGrantedException;
 import com.persiangulfwiki.core.admin.exception.RoleNotGrantedException;
+import com.persiangulfwiki.core.attribute.exception.AttributeDefinitionNotFoundException;
+import com.persiangulfwiki.core.attribute.exception.AttributeGroupNotFoundException;
+import com.persiangulfwiki.core.attribute.exception.AttributeHasFactsException;
+import com.persiangulfwiki.core.attribute.exception.AttributeHasOptionsException;
+import com.persiangulfwiki.core.attribute.exception.AttributeIsDerivedException;
+import com.persiangulfwiki.core.attribute.exception.AttributeOptionNotFoundException;
+import com.persiangulfwiki.core.attribute.exception.AttributeOptionsNotSupportedException;
+import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeGroupKeyException;
+import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeKeyException;
+import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeOptionCodeException;
+import com.persiangulfwiki.core.dev.exception.DevTestAttributeGroupInUseException;
+import com.persiangulfwiki.core.dev.exception.DevTestMainArticleTakenException;
+import com.persiangulfwiki.core.dev.exception.DevTestSubjectRevisionLiveException;
+import com.persiangulfwiki.core.dev.exception.DevTestTopicInUseException;
+import com.persiangulfwiki.core.label.exception.InvalidLabelReferentException;
+import com.persiangulfwiki.core.label.exception.LabelNotFoundException;
+import com.persiangulfwiki.core.label.exception.UnsupportedLabelLanguageException;
 import com.persiangulfwiki.core.article.exception.ArticleNotFoundException;
 import com.persiangulfwiki.core.article.exception.DuplicateSlugException;
 import com.persiangulfwiki.core.article.exception.DuplicateTranslationLanguageException;
-import com.persiangulfwiki.core.article.exception.EntityTypeNotDerivableException;
-import com.persiangulfwiki.core.article.exception.InvalidEntityTypeException;
+import com.persiangulfwiki.core.article.exception.InvalidArticleBodyException;
+import com.persiangulfwiki.core.article.exception.InvalidMainArticleException;
 import com.persiangulfwiki.core.article.exception.NotRevisionAuthorException;
 import com.persiangulfwiki.core.article.exception.RevisionNotEditableException;
 import com.persiangulfwiki.core.article.exception.RevisionNotFoundException;
@@ -17,7 +34,13 @@ import com.persiangulfwiki.core.moderation.exception.InvalidModerationTaskStateE
 import com.persiangulfwiki.core.moderation.exception.MissingDecisionReasonException;
 import com.persiangulfwiki.core.moderation.exception.ModerationTaskNotFoundException;
 import com.persiangulfwiki.core.common.exception.TooManyRequestsException;
+import com.persiangulfwiki.core.dev.exception.InvalidDevTestArticleRequestException;
+import com.persiangulfwiki.core.dev.exception.InvalidDevTestMarineRequestException;
 import com.persiangulfwiki.core.dev.exception.InvalidDevTestMediaRequestException;
+import com.persiangulfwiki.core.marinedata.exception.InvalidMarineSeriesRangeException;
+import com.persiangulfwiki.core.marinedata.exception.MarineMetricNotFoundException;
+import com.persiangulfwiki.core.marinedata.exception.MarineStationNotFoundException;
+import com.persiangulfwiki.core.marinedata.exception.UnsupportedMarineSeriesRangeException;
 import com.persiangulfwiki.core.media.exception.DuplicateMediaException;
 import com.persiangulfwiki.core.media.exception.IncompleteMediaMetadataException;
 import com.persiangulfwiki.core.media.exception.MediaAlreadyRejectedException;
@@ -57,10 +80,30 @@ import com.persiangulfwiki.core.expertreviewer.exception.InvalidApplicationStatu
 import com.persiangulfwiki.core.oauth2.exception.PasswordAlreadySetException;
 import com.persiangulfwiki.core.password.exception.InvalidPasswordResetTokenException;
 import com.persiangulfwiki.core.source.exception.SourceNotFoundException;
-import com.persiangulfwiki.core.subject.exception.InvalidGeometryException;
+import com.persiangulfwiki.core.subject.exception.ExpertVerificationNotFoundException;
+import com.persiangulfwiki.core.subject.exception.InvalidMergeTargetException;
+import com.persiangulfwiki.core.subject.exception.InvalidSubjectFilterException;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectKindException;
+import com.persiangulfwiki.core.subject.exception.InvalidSubjectPayloadException;
+import com.persiangulfwiki.core.subject.exception.NotSubjectKindExpertException;
+import com.persiangulfwiki.core.subject.exception.NotSubjectRevisionAuthorException;
+import com.persiangulfwiki.core.subject.exception.SelfVerificationNotAllowedException;
+import com.persiangulfwiki.core.subject.exception.StaleSubjectRevisionException;
+import com.persiangulfwiki.core.subject.exception.SubjectDeletedException;
+import com.persiangulfwiki.core.subject.exception.SubjectHasArticlesException;
 import com.persiangulfwiki.core.subject.exception.SubjectKindMismatchException;
+import com.persiangulfwiki.core.subject.exception.SubjectMergeInvalidException;
+import com.persiangulfwiki.core.subject.exception.SubjectMergedException;
+import com.persiangulfwiki.core.subject.exception.SubjectNotDeletedException;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
+import com.persiangulfwiki.core.subject.exception.SubjectReferencedException;
+import com.persiangulfwiki.core.subject.exception.SubjectRevisionAlreadyVerifiedException;
+import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotEditableException;
+import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotFoundException;
+import com.persiangulfwiki.core.subject.exception.SubjectRevisionNotLiveException;
+import com.persiangulfwiki.core.topic.exception.DuplicateTopicSlugException;
+import com.persiangulfwiki.core.topic.exception.InvalidTopicIdsException;
+import com.persiangulfwiki.core.topic.exception.TopicNotFoundException;
 import com.persiangulfwiki.core.user.exception.SessionAlreadyRevokedException;
 import com.persiangulfwiki.core.user.exception.SessionNotFoundException;
 import com.persiangulfwiki.core.user.exception.UserNotFoundException;
@@ -224,14 +267,205 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidSubjectKind"), "INVALID_SUBJECT_KIND", request);
     }
 
-    @ExceptionHandler(InvalidGeometryException.class)
-    public ProblemDetail handleInvalidGeometry(InvalidGeometryException ex, HttpServletRequest request) {
-        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidGeometry"), "INVALID_GEOMETRY", request);
+    @ExceptionHandler(SubjectRevisionNotFoundException.class)
+    public ProblemDetail handleSubjectRevisionNotFound(SubjectRevisionNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.subjectRevisionNotFound"), "SUBJECT_REVISION_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(SubjectRevisionNotEditableException.class)
+    public ProblemDetail handleSubjectRevisionNotEditable(SubjectRevisionNotEditableException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectRevisionNotEditable"), "SUBJECT_REVISION_NOT_EDITABLE", request);
+    }
+
+    @ExceptionHandler(NotSubjectRevisionAuthorException.class)
+    public ProblemDetail handleNotSubjectRevisionAuthor(NotSubjectRevisionAuthorException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.FORBIDDEN, resolve("error.notSubjectRevisionAuthor"), "NOT_SUBJECT_REVISION_AUTHOR", request);
+    }
+
+    // Names both revision numbers when it can ("based on r3, live is r4"), which is what tells the
+    // author their edit was overtaken rather than broken.
+    @ExceptionHandler(StaleSubjectRevisionException.class)
+    public ProblemDetail handleStaleSubjectRevision(StaleSubjectRevisionException ex, HttpServletRequest request) {
+        String detail = ex.getBaseRevisionNumber() != null && ex.getLiveRevisionNumber() != null
+                ? resolve("error.staleSubjectRevision", String.valueOf(ex.getBaseRevisionNumber()),
+                        String.valueOf(ex.getLiveRevisionNumber()))
+                : resolve("error.staleSubjectRevision.generic");
+        return ProblemDetails.of(HttpStatus.CONFLICT, detail, "STALE_SUBJECT_REVISION", request);
+    }
+
+    // VALIDATION_FAILED with an `errors` list, not a code of its own: to a client a payload rule
+    // the service checks against the field vocabulary is the same kind of failure as a constraint
+    // on the request body, and both render per field. Keeping the code also keeps the error
+    // contract unchanged -- `errors` still appears only on VALIDATION_FAILED.
+    @ExceptionHandler(InvalidSubjectPayloadException.class)
+    public ProblemDetail handleInvalidSubjectPayload(InvalidSubjectPayloadException ex, HttpServletRequest request) {
+        List<FieldViolation> errors = ex.getViolations().stream()
+                .map(violation -> new FieldViolation(violation.field(),
+                        resolve(violation.messageKey(), violation.args().toArray())))
+                .toList();
+        ProblemDetail problemDetail = ProblemDetails.of(
+                HttpStatus.BAD_REQUEST, resolve("error.validationFailed"), "VALIDATION_FAILED", request);
+        problemDetail.setProperty("errors", errors);
+        return problemDetail;
+    }
+
+    // VALIDATION_FAILED with an `errors` list, for the same reason as the payload handler above: a
+    // filter naming an unknown field or code is a per-parameter input error like any other.
+    @ExceptionHandler(InvalidSubjectFilterException.class)
+    public ProblemDetail handleInvalidSubjectFilter(InvalidSubjectFilterException ex, HttpServletRequest request) {
+        List<FieldViolation> errors = ex.getViolations().stream()
+                .map(violation -> new FieldViolation(violation.parameter(),
+                        resolve(violation.messageKey(), violation.args().toArray())))
+                .toList();
+        ProblemDetail problemDetail = ProblemDetails.of(
+                HttpStatus.BAD_REQUEST, resolve("error.validationFailed"), "VALIDATION_FAILED", request);
+        problemDetail.setProperty("errors", errors);
+        return problemDetail;
+    }
+
+    @ExceptionHandler(NotSubjectKindExpertException.class)
+    public ProblemDetail handleNotSubjectKindExpert(NotSubjectKindExpertException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.FORBIDDEN, resolve("error.notSubjectKindExpert"), "NOT_SUBJECT_KIND_EXPERT", request);
+    }
+
+    @ExceptionHandler(SelfVerificationNotAllowedException.class)
+    public ProblemDetail handleSelfVerificationNotAllowed(SelfVerificationNotAllowedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.FORBIDDEN, resolve("error.selfVerificationNotAllowed"), "SELF_VERIFICATION_NOT_ALLOWED", request);
+    }
+
+    @ExceptionHandler(SubjectRevisionNotLiveException.class)
+    public ProblemDetail handleSubjectRevisionNotLive(SubjectRevisionNotLiveException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectRevisionNotLive"), "SUBJECT_REVISION_NOT_LIVE", request);
+    }
+
+    @ExceptionHandler(SubjectRevisionAlreadyVerifiedException.class)
+    public ProblemDetail handleSubjectRevisionAlreadyVerified(SubjectRevisionAlreadyVerifiedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectRevisionAlreadyVerified"), "SUBJECT_REVISION_ALREADY_VERIFIED", request);
+    }
+
+    @ExceptionHandler(ExpertVerificationNotFoundException.class)
+    public ProblemDetail handleExpertVerificationNotFound(ExpertVerificationNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.expertVerificationNotFound"), "EXPERT_VERIFICATION_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(SubjectDeletedException.class)
+    public ProblemDetail handleSubjectDeleted(SubjectDeletedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectDeleted"), "SUBJECT_DELETED", request);
+    }
+
+    @ExceptionHandler(SubjectNotDeletedException.class)
+    public ProblemDetail handleSubjectNotDeleted(SubjectNotDeletedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectNotDeleted"), "SUBJECT_NOT_DELETED", request);
+    }
+
+    @ExceptionHandler(SubjectMergedException.class)
+    public ProblemDetail handleSubjectMerged(SubjectMergedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectMerged"), "SUBJECT_MERGED", request);
+    }
+
+    @ExceptionHandler(SubjectHasArticlesException.class)
+    public ProblemDetail handleSubjectHasArticles(SubjectHasArticlesException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectHasArticles"), "SUBJECT_HAS_ARTICLES", request);
+    }
+
+    @ExceptionHandler(SubjectReferencedException.class)
+    public ProblemDetail handleSubjectReferenced(SubjectReferencedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectReferenced"), "SUBJECT_REFERENCED", request);
     }
 
     @ExceptionHandler(SubjectKindMismatchException.class)
     public ProblemDetail handleSubjectKindMismatch(SubjectKindMismatchException ex, HttpServletRequest request) {
-        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.subjectKindMismatch"), "SUBJECT_KIND_MISMATCH", request);
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.subjectKindMismatch"), "SUBJECT_KIND_MISMATCH", request);
+    }
+
+    // VALIDATION_FAILED on `targetId`, like InvalidMainArticleException on `articleId`: the request
+    // names a subject that cannot take the merge.
+    @ExceptionHandler(InvalidMergeTargetException.class)
+    public ProblemDetail handleInvalidMergeTarget(InvalidMergeTargetException ex, HttpServletRequest request) {
+        ProblemDetail problemDetail = ProblemDetails.of(
+                HttpStatus.BAD_REQUEST, resolve("error.validationFailed"), "VALIDATION_FAILED", request);
+        problemDetail.setProperty("errors", List.of(new FieldViolation("targetId", resolve(ex.getMessageKey()))));
+        return problemDetail;
+    }
+
+    // The one 409 that carries `errors` (approved by the user): the request was fine, but the payload
+    // the merge would publish breaks the field vocabulary, and the moderator needs each broken field --
+    // a path into the merged payload -- to fix it with a normal edit before merging again.
+    @ExceptionHandler(SubjectMergeInvalidException.class)
+    public ProblemDetail handleSubjectMergeInvalid(SubjectMergeInvalidException ex, HttpServletRequest request) {
+        List<FieldViolation> errors = ex.getViolations().stream()
+                .map(violation -> new FieldViolation(violation.field(),
+                        resolve(violation.messageKey(), violation.args().toArray())))
+                .toList();
+        ProblemDetail problemDetail = ProblemDetails.of(
+                HttpStatus.CONFLICT, resolve("error.subjectMergeInvalid"), "SUBJECT_MERGE_INVALID", request);
+        problemDetail.setProperty("errors", errors);
+        return problemDetail;
+    }
+
+    @ExceptionHandler(AttributeGroupNotFoundException.class)
+    public ProblemDetail handleAttributeGroupNotFound(AttributeGroupNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.attributeGroupNotFound"), "ATTRIBUTE_GROUP_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(AttributeDefinitionNotFoundException.class)
+    public ProblemDetail handleAttributeDefinitionNotFound(AttributeDefinitionNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.attributeDefinitionNotFound"), "ATTRIBUTE_DEFINITION_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(AttributeOptionNotFoundException.class)
+    public ProblemDetail handleAttributeOptionNotFound(AttributeOptionNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.attributeOptionNotFound"), "ATTRIBUTE_OPTION_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(DuplicateAttributeGroupKeyException.class)
+    public ProblemDetail handleDuplicateAttributeGroupKey(DuplicateAttributeGroupKeyException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.duplicateAttributeGroupKey"), "DUPLICATE_ATTRIBUTE_GROUP_KEY", request);
+    }
+
+    @ExceptionHandler(DuplicateAttributeKeyException.class)
+    public ProblemDetail handleDuplicateAttributeKey(DuplicateAttributeKeyException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.duplicateAttributeKey"), "DUPLICATE_ATTRIBUTE_KEY", request);
+    }
+
+    @ExceptionHandler(DuplicateAttributeOptionCodeException.class)
+    public ProblemDetail handleDuplicateAttributeOptionCode(DuplicateAttributeOptionCodeException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.duplicateAttributeOptionCode"), "DUPLICATE_ATTRIBUTE_OPTION_CODE", request);
+    }
+
+    @ExceptionHandler(AttributeOptionsNotSupportedException.class)
+    public ProblemDetail handleAttributeOptionsNotSupported(AttributeOptionsNotSupportedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.attributeOptionsNotSupported"), "ATTRIBUTE_OPTIONS_NOT_SUPPORTED", request);
+    }
+
+    @ExceptionHandler(AttributeHasOptionsException.class)
+    public ProblemDetail handleAttributeHasOptions(AttributeHasOptionsException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.attributeHasOptions"), "ATTRIBUTE_HAS_OPTIONS", request);
+    }
+
+    @ExceptionHandler(AttributeHasFactsException.class)
+    public ProblemDetail handleAttributeHasFacts(AttributeHasFactsException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.attributeHasFacts"), "ATTRIBUTE_HAS_FACTS", request);
+    }
+
+    @ExceptionHandler(AttributeIsDerivedException.class)
+    public ProblemDetail handleAttributeIsDerived(AttributeIsDerivedException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.attributeIsDerived"), "ATTRIBUTE_IS_DERIVED", request);
+    }
+
+    @ExceptionHandler(LabelNotFoundException.class)
+    public ProblemDetail handleLabelNotFound(LabelNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.labelNotFound"), "LABEL_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(InvalidLabelReferentException.class)
+    public ProblemDetail handleInvalidLabelReferent(InvalidLabelReferentException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidLabelReferent"), "INVALID_LABEL_REFERENT", request);
+    }
+
+    @ExceptionHandler(UnsupportedLabelLanguageException.class)
+    public ProblemDetail handleUnsupportedLabelLanguage(UnsupportedLabelLanguageException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.unsupportedLabelLanguage"), "UNSUPPORTED_LABEL_LANGUAGE", request);
     }
 
     @ExceptionHandler(ArticleNotFoundException.class)
@@ -269,14 +503,47 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetails.of(HttpStatus.FORBIDDEN, resolve("error.notRevisionAuthor"), "NOT_REVISION_AUTHOR", request);
     }
 
-    @ExceptionHandler(EntityTypeNotDerivableException.class)
-    public ProblemDetail handleEntityTypeNotDerivable(EntityTypeNotDerivableException ex, HttpServletRequest request) {
-        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.entityTypeNotDerivable"), "ENTITY_TYPE_NOT_DERIVABLE", request);
+    // VALIDATION_FAILED with an `errors` list, like a subject payload: a subject link naming no
+    // subject is a per-field input error, reported at the link's path in the body.
+    @ExceptionHandler(InvalidArticleBodyException.class)
+    public ProblemDetail handleInvalidArticleBody(InvalidArticleBodyException ex, HttpServletRequest request) {
+        List<FieldViolation> errors = ex.getViolations().stream()
+                .map(violation -> new FieldViolation(violation.field(),
+                        resolve(violation.messageKey(), violation.args().toArray())))
+                .toList();
+        ProblemDetail problemDetail = ProblemDetails.of(
+                HttpStatus.BAD_REQUEST, resolve("error.validationFailed"), "VALIDATION_FAILED", request);
+        problemDetail.setProperty("errors", errors);
+        return problemDetail;
     }
 
-    @ExceptionHandler(InvalidEntityTypeException.class)
-    public ProblemDetail handleInvalidEntityType(InvalidEntityTypeException ex, HttpServletRequest request) {
-        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidEntityType"), "INVALID_ENTITY_TYPE", request);
+    // VALIDATION_FAILED on `articleId`, the same way an unusable mainImageMediaId in a subject payload
+    // is reported: the request names something that cannot fill the role.
+    @ExceptionHandler(TopicNotFoundException.class)
+    public ProblemDetail handleTopicNotFound(TopicNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.topicNotFound"), "TOPIC_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(DuplicateTopicSlugException.class)
+    public ProblemDetail handleDuplicateTopicSlug(DuplicateTopicSlugException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.duplicateTopicSlug"), "DUPLICATE_TOPIC_SLUG", request);
+    }
+
+    // VALIDATION_FAILED on `topicIds`, like InvalidMainArticleException on `articleId`.
+    @ExceptionHandler(InvalidTopicIdsException.class)
+    public ProblemDetail handleInvalidTopicIds(InvalidTopicIdsException ex, HttpServletRequest request) {
+        ProblemDetail problemDetail = ProblemDetails.of(
+                HttpStatus.BAD_REQUEST, resolve("error.validationFailed"), "VALIDATION_FAILED", request);
+        problemDetail.setProperty("errors", List.of(new FieldViolation("topicIds", resolve(ex.getMessageKey()))));
+        return problemDetail;
+    }
+
+    @ExceptionHandler(InvalidMainArticleException.class)
+    public ProblemDetail handleInvalidMainArticle(InvalidMainArticleException ex, HttpServletRequest request) {
+        ProblemDetail problemDetail = ProblemDetails.of(
+                HttpStatus.BAD_REQUEST, resolve("error.validationFailed"), "VALIDATION_FAILED", request);
+        problemDetail.setProperty("errors", List.of(new FieldViolation("articleId", resolve(ex.getMessageKey()))));
+        return problemDetail;
     }
 
     @ExceptionHandler(ModerationTaskNotFoundException.class)
@@ -425,6 +692,56 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(InvalidDevTestMediaRequestException.class)
     public ProblemDetail handleInvalidDevTestMediaRequest(InvalidDevTestMediaRequestException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidDevTestMediaRequest"), "INVALID_DEV_TEST_MEDIA_REQUEST", request);
+    }
+
+    @ExceptionHandler(InvalidDevTestArticleRequestException.class)
+    public ProblemDetail handleInvalidDevTestArticleRequest(InvalidDevTestArticleRequestException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidDevTestArticleRequest"), "INVALID_DEV_TEST_ARTICLE_REQUEST", request);
+    }
+
+    @ExceptionHandler(DevTestMainArticleTakenException.class)
+    public ProblemDetail handleDevTestMainArticleTaken(DevTestMainArticleTakenException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestMainArticleTaken"), "DEV_TEST_MAIN_ARTICLE_TAKEN", request);
+    }
+
+    @ExceptionHandler(DevTestTopicInUseException.class)
+    public ProblemDetail handleDevTestTopicInUse(DevTestTopicInUseException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestTopicInUse"), "DEV_TEST_TOPIC_IN_USE", request);
+    }
+
+    @ExceptionHandler(DevTestAttributeGroupInUseException.class)
+    public ProblemDetail handleDevTestAttributeGroupInUse(DevTestAttributeGroupInUseException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestAttributeGroupInUse"), "DEV_TEST_ATTRIBUTE_GROUP_IN_USE", request);
+    }
+
+    @ExceptionHandler(DevTestSubjectRevisionLiveException.class)
+    public ProblemDetail handleDevTestSubjectRevisionLive(DevTestSubjectRevisionLiveException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestSubjectRevisionLive"), "DEV_TEST_SUBJECT_REVISION_LIVE", request);
+    }
+
+    @ExceptionHandler(InvalidDevTestMarineRequestException.class)
+    public ProblemDetail handleInvalidDevTestMarineRequest(InvalidDevTestMarineRequestException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidDevTestMarineRequest"), "INVALID_DEV_TEST_MARINE_REQUEST", request);
+    }
+
+    @ExceptionHandler(MarineMetricNotFoundException.class)
+    public ProblemDetail handleMarineMetricNotFound(MarineMetricNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.marineMetricNotFound"), "MARINE_METRIC_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(MarineStationNotFoundException.class)
+    public ProblemDetail handleMarineStationNotFound(MarineStationNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.marineStationNotFound"), "MARINE_STATION_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(InvalidMarineSeriesRangeException.class)
+    public ProblemDetail handleInvalidMarineSeriesRange(InvalidMarineSeriesRangeException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidMarineSeriesRange"), "INVALID_MARINE_SERIES_RANGE", request);
+    }
+
+    @ExceptionHandler(UnsupportedMarineSeriesRangeException.class)
+    public ProblemDetail handleUnsupportedMarineSeriesRange(UnsupportedMarineSeriesRangeException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.unsupportedMarineSeriesRange"), "UNSUPPORTED_MARINE_SERIES_RANGE", request);
     }
 
     // The one handler that returns a ResponseEntity rather than a bare ProblemDetail: a 429

@@ -95,7 +95,7 @@ class AuthFlowIntegrationTests {
                 .build();
         User saved = userRepository.save(user);
 
-        new TransactionTemplate(transactionManager).executeWithoutResult(status ->
+        new TransactionTemplate(transactionManager).executeWithoutResult(_ ->
                 entityManager.createQuery("update User u set u.createdAt = :createdAt where u.id = :id")
                         .setParameter("createdAt", createdAt)
                         .setParameter("id", saved.getId())

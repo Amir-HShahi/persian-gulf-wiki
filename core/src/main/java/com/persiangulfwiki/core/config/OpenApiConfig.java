@@ -44,14 +44,26 @@ public class OpenApiConfig {
             "Expert Reviewer",
             "Subjects",
             "Dev Test Subjects",
+            "Subject Revisions",
+            "Dev Test Subject Revisions",
+            "Expert Verifications",
+            "Dev Test Expert Verifications",
+            "Attributes",
+            "Dev Test Attributes",
+            "Labels",
+            "Dev Test Labels",
             "Sources",
             "Dev Test Sources",
             "Articles",
             "Dev Test Articles",
             "Article Media",
             "Dev Test Media",
+            "Topics",
+            "Dev Test Topics",
             "Moderation",
-            "Dev Test Moderation Tasks");
+            "Dev Test Moderation Tasks",
+            "Marine Data",
+            "Dev Test Marine Data");
 
     // Flattens ApiResult<T> to T on every documented response — see the class javadoc and the
     // "Response envelope" section of the API description below.

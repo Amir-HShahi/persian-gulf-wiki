@@ -23,10 +23,17 @@ public final class PublicRoutes {
     public static final RequestMatcher CONTENT_READS = new OrRequestMatcher(List.of(
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/subjects"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/subjects/**"),
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/subject-revisions/**"),
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/subject-kinds/**"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/sources"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/sources/**"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/articles"),
-            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/articles/**")));
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/articles/**"),
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/topics"),
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/topics/**"),
+            // Homepage data cards: public provider data with nothing per-user in it.
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/marine-metrics"),
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/marine-metrics/**")));
 
     public static final RequestMatcher API_DOCS = new OrRequestMatcher(List.of(
             PathPatternRequestMatcher.withDefaults().matcher("/docs/**"),
