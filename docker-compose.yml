@@ -111,6 +111,34 @@ services:
       mc anonymous set download "local/$$STORAGE_MEDIA_BUCKET/public"
       '
 
+  # The submission-pipeline worker: image variants and the article search index. It takes its
+  # jobs from a Postgres `jobs` table and creates that table and the search index itself, but
+  # only after core has run its Flyway migrations, so it sits idle until core has started once
+  # against this database. The first build compiles libvips bindings and takes a few minutes.
+  pipeline:
+    build:
+      context: .
+      dockerfile: submission-pipeline/Dockerfile
+    container_name: pgw-pipeline
+    restart: unless-stopped
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: core
+      DB_USERNAME: core
+      DB_PASSWORD: core
+      MINIO_ENDPOINT: minio:9000
+      MINIO_USE_SSL: "false"
+      MINIO_ACCESS_KEY: ${STORAGE_ACCESS_KEY:-pgw-dev}
+      MINIO_SECRET_KEY: ${STORAGE_SECRET_KEY:-pgw-dev-secret}
+      MINIO_RAW_BUCKET: ${STORAGE_STAGING_BUCKET:-submissions-raw}
+      MINIO_DERIVED_BUCKET: ${STORAGE_MEDIA_BUCKET:-submissions-derived}
+    depends_on:
+      postgres:
+        condition: service_started
+      minio-init:
+        condition: service_completed_successfully
+
 volumes:
   postgres-data:
   pgadmin-data:

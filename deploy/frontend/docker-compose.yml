@@ -119,6 +119,32 @@ services:
       mc anonymous set download local/submissions-derived/public
       '
 
+  # The submission-pipeline worker. Opt-in (docker compose --profile pipeline up -d): its image
+  # is published separately from the API image, so a stack that pulled it by default would fail
+  # to start whenever it had not been published yet.
+  pipeline:
+    profiles:
+      - pipeline
+    image: ${PGW_PIPELINE_IMAGE:-ghcr.io/amir-hshahi/persian-gulf-wiki-pipeline:staging}
+    restart: unless-stopped
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: core
+      DB_USERNAME: core
+      DB_PASSWORD: core
+      MINIO_ENDPOINT: minio:9000
+      MINIO_USE_SSL: "false"
+      MINIO_ACCESS_KEY: pgw-dev
+      MINIO_SECRET_KEY: pgw-dev-secret
+      MINIO_RAW_BUCKET: submissions-raw
+      MINIO_DERIVED_BUCKET: submissions-derived
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+
 volumes:
   postgres-data:
   redis-data:
