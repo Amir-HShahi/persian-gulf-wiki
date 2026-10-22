@@ -30,6 +30,24 @@ type ImagePayload struct {
 // dot-dot — has to be refused rather than escaped.
 var validSubmissionID = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$`)
 
+// Where things go in the derived bucket. Variants go under core's
+// pending/{mediaId}/ prefix: core accepts no variant key outside it, moves the
+// prefix to public/ when a moderator approves the item, and deletes it when the
+// item is rejected or removed. The original goes under a prefix of its own, so
+// that clean-up never takes it with the variants.
+const (
+	variantPrefix  = "pending"
+	originalPrefix = "originals"
+)
+
+func variantKey(submissionID, file string) string {
+	return path.Join(variantPrefix, submissionID, file)
+}
+
+func originalKey(submissionID, ext string) string {
+	return path.Join(originalPrefix, submissionID, "original."+ext)
+}
+
 // derivedContentType is what every variant is stored as. imagepipe only ever
 // writes WebP, so this is a fact about that package rather than a choice made
 // here; if it learns another output format this has to follow the file.
@@ -112,10 +130,10 @@ func (h *Image) Handle(ctx context.Context, log *slog.Logger, _ pgx.Tx, job queu
 	if err != nil {
 		return queue.Result{}, fmt.Errorf("reading original: %w", err)
 	}
-	originalKey := path.Join(payload.SubmissionID, "original."+ext)
-	originalBytes, err := h.Store.Upload(ctx, h.DerivedBucket, originalKey, src, contentType)
+	origKey := originalKey(payload.SubmissionID, ext)
+	originalBytes, err := h.Store.Upload(ctx, h.DerivedBucket, origKey, src, contentType)
 	if err != nil {
-		return queue.Result{}, fmt.Errorf("saving original %s: %w", originalKey, err)
+		return queue.Result{}, fmt.Errorf("saving original %s: %w", origKey, err)
 	}
 
 	variants := make([]queue.Variant, 0, len(processed.Variants))
@@ -124,7 +142,7 @@ func (h *Image) Handle(ctx context.Context, log *slog.Logger, _ pgx.Tx, job queu
 		// taken from the local path, so where the temp dir happens to be never
 		// leaks into the bucket. Overwriting on a retry is deliberate: the same
 		// input yields the same keys, which makes the upload idempotent.
-		key := path.Join(payload.SubmissionID, filepath.Base(v.Path))
+		key := variantKey(payload.SubmissionID, filepath.Base(v.Path))
 
 		uploaded, err := h.Store.Upload(ctx, h.DerivedBucket, key, v.Path, derivedContentType)
 		if err != nil {
@@ -140,7 +158,7 @@ func (h *Image) Handle(ctx context.Context, log *slog.Logger, _ pgx.Tx, job queu
 		})
 	}
 
-	log.Info("image processed", "variants", len(variants), "original", originalKey,
+	log.Info("image processed", "variants", len(variants), "original", origKey,
 		"width", processed.Source.Width, "height", processed.Source.Height)
 
 	return queue.Result{
@@ -151,7 +169,7 @@ func (h *Image) Handle(ctx context.Context, log *slog.Logger, _ pgx.Tx, job queu
 			Format:   processed.Source.Format,
 			Variants: variants,
 			Original: &queue.Original{
-				Key:         originalKey,
+				Key:         origKey,
 				Bytes:       originalBytes,
 				ContentType: contentType,
 			},
