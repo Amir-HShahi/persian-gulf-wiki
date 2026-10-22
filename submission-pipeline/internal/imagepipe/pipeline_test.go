@@ -53,8 +53,8 @@ func TestCheckRejectsDecompressionBomb(t *testing.T) {
 	}
 	// The dimension limit catches this one before the pixel count does, and
 	// either verdict is terminal.
-	if r.Code != RejectDimension && r.Code != RejectTooLarge {
-		t.Errorf("Code = %q, want a size rejection", r.Code)
+	if r.Code != RejectTooLarge {
+		t.Errorf("Code = %q, want %q", r.Code, RejectTooLarge)
 	}
 }
 
@@ -66,8 +66,8 @@ func TestCheckRejectsOnPixelCountAlone(t *testing.T) {
 	if r == nil {
 		t.Fatal("expected rejection")
 	}
-	if r.Code != RejectTooLarge {
-		t.Errorf("Code = %q, want %q", r.Code, RejectTooLarge)
+	if r.Code != RejectTooLarge || r.Detail["limit"] != "pixels" {
+		t.Errorf("got %q (limit %q), want %q (limit pixels)", r.Code, r.Detail["limit"], RejectTooLarge)
 	}
 	if r.Detail["pixels"] != "400000000" {
 		t.Errorf("Detail[pixels] = %q, want 400000000", r.Detail["pixels"])
@@ -83,14 +83,14 @@ func TestCheckRejectsExtremeAspectRatio(t *testing.T) {
 	if r == nil {
 		t.Fatal("expected rejection")
 	}
-	if r.Code != RejectDimension {
-		t.Errorf("Code = %q, want %q", r.Code, RejectDimension)
+	if r.Code != RejectTooLarge || r.Detail["limit"] != "side" {
+		t.Errorf("got %q (limit %q), want %q (limit side)", r.Code, r.Detail["limit"], RejectTooLarge)
 	}
 }
 
 func TestCheckRejectsUnreadableHeader(t *testing.T) {
-	if r := check(Info{Width: 0, Height: 0}, DefaultOptions()); r == nil || r.Code != RejectUnreadable {
-		t.Errorf("got %+v, want %q", r, RejectUnreadable)
+	if r := check(Info{Width: 0, Height: 0}, DefaultOptions()); r == nil || r.Code != RejectCorrupt {
+		t.Errorf("got %+v, want %q", r, RejectCorrupt)
 	}
 }
 

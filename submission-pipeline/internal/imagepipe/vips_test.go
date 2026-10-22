@@ -235,15 +235,21 @@ func TestProcessRejectsWhatItCannotOrShouldNotDecode(t *testing.T) {
 	if err := os.WriteFile(garbage, []byte("this is not a picture"), 0o644); err != nil {
 		t.Fatal(err)
 	}
+	damaged := filepath.Join(dir, "damaged.jpg")
+	if err := os.WriteFile(damaged, append([]byte{0xFF, 0xD8, 0xFF, 0xE0}, make([]byte, 64)...), 0o644); err != nil {
+		t.Fatal(err)
+	}
 
 	cases := []struct {
 		name string
 		path string
 		want string
 	}{
-		{"not an image", garbage, RejectUnreadable},
+		{"not an image", garbage, RejectUnsupported},
+		// Starts like a JPEG, then nothing a decoder can read.
+		{"a damaged JPEG", damaged, RejectCorrupt},
 		// Past MaxDimension on both sides: refused from the header alone.
-		{"1.6 gigapixel header", writeBombPNG(t, dir, "huge.png", 40000, 40000), RejectDimension},
+		{"1.6 gigapixel header", writeBombPNG(t, dir, "huge.png", 40000, 40000), RejectTooLarge},
 		// Under MaxDimension but over MaxPixels, so only the pixel count catches it.
 		{"400 megapixel header", writeBombPNG(t, dir, "big.png", 20000, 20000), RejectTooLarge},
 	}

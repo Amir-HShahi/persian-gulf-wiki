@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -36,9 +37,11 @@ func Stop() { vips.Shutdown() }
 func Inspect(srcPath string, opt Options) (Info, *Rejection, error) {
 	img, err := vips.NewImageFromFile(srcPath)
 	if err != nil {
-		// Unreadable here means the bytes are not an image this build supports.
-		// That will be just as true on a retry, so it is a rejection.
-		return Info{}, &Rejection{Code: RejectUnreadable}, nil
+		// Unreadable now is unreadable on a retry too, so it is a rejection.
+		// The first bytes tell the two cases apart for the uploader: a file
+		// that does not start like any image format is the wrong kind of
+		// file, one that does is a damaged image.
+		return Info{}, &Rejection{Code: unreadableCode(srcPath)}, nil
 	}
 	defer img.Close()
 
@@ -59,6 +62,23 @@ func Inspect(srcPath string, opt Options) (Info, *Rejection, error) {
 		HasAlpha: img.HasAlpha(),
 	}
 	return info, check(info, opt), nil
+}
+
+// unreadableCode is RejectUnsupported when the file's leading bytes match no
+// image format libvips knows, and RejectCorrupt when they do.
+func unreadableCode(srcPath string) string {
+	f, err := os.Open(srcPath)
+	if err != nil {
+		return RejectCorrupt
+	}
+	defer f.Close()
+
+	head := make([]byte, 512)
+	n, _ := io.ReadFull(f, head)
+	if vips.DetermineImageType(head[:n]) == vips.ImageTypeUnknown {
+		return RejectUnsupported
+	}
+	return RejectCorrupt
 }
 
 // Process writes one WebP variant per planned width into outDir.

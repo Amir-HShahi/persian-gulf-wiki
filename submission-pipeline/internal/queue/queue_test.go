@@ -501,7 +501,7 @@ func TestARejectionIsDoneAndNeverRetried(t *testing.T) {
 	start(t, "w1", fast(), map[JobType]Handler{
 		JobTypeImage: handlerFunc(func(context.Context, *slog.Logger, pgx.Tx, Job) (Result, error) {
 			calls.Add(1)
-			return Result{Outcome: OutcomeRejected, Reason: &Reason{Code: "image_unreadable"}}, nil
+			return Result{Outcome: OutcomeRejected, Reason: &Reason{Code: "corrupt_file"}}, nil
 		}),
 	})
 
@@ -512,7 +512,7 @@ func TestARejectionIsDoneAndNeverRetried(t *testing.T) {
 	}
 	var res Result
 	_ = json.Unmarshal(row.Result, &res)
-	if res.Outcome != OutcomeRejected || res.Reason == nil || res.Reason.Code != "image_unreadable" {
+	if res.Outcome != OutcomeRejected || res.Reason == nil || res.Reason.Code != "corrupt_file" {
 		t.Errorf("result = %+v", res)
 	}
 }

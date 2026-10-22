@@ -23,13 +23,17 @@ import (
 // ErrUnavailable is returned when the binary was built without image support.
 var ErrUnavailable = errors.New("imagepipe: built without libvips support")
 
-// Rejection codes. Each is a stable identifier the frontend translates; none
-// is ever an English sentence.
+// Rejection codes. They are core's own (MediaFailureCode), so each one reaches
+// the uploader as a translated message in fa, en and ar; a code core does not
+// know would be shown as a generic "rejected". A new code has to be added on
+// core's side first.
+//
+// Both size limits share RejectTooLarge, as core has one message for them;
+// Detail["limit"] says which one it was, for the logs.
 const (
-	RejectUnreadable  = "image_unreadable"
-	RejectTooLarge    = "image_too_many_pixels"
-	RejectDimension   = "image_dimension_too_large"
-	RejectUnsupported = "image_format_unsupported"
+	RejectCorrupt     = "corrupt_file"
+	RejectUnsupported = "unsupported_format"
+	RejectTooLarge    = "dimensions_too_large"
 )
 
 // Options controls validation limits and output quality.
@@ -131,13 +135,14 @@ type Result struct {
 // image is acceptable.
 func check(info Info, opt Options) *Rejection {
 	if info.Width <= 0 || info.Height <= 0 {
-		return &Rejection{Code: RejectUnreadable}
+		return &Rejection{Code: RejectCorrupt}
 	}
 
 	if opt.MaxDimension > 0 && (info.Width > opt.MaxDimension || info.Height > opt.MaxDimension) {
 		return &Rejection{
-			Code: RejectDimension,
+			Code: RejectTooLarge,
 			Detail: map[string]string{
+				"limit":  "side",
 				"width":  itoa(info.Width),
 				"height": itoa(info.Height),
 				"max":    itoa(opt.MaxDimension),
@@ -151,6 +156,7 @@ func check(info Info, opt Options) *Rejection {
 			return &Rejection{
 				Code: RejectTooLarge,
 				Detail: map[string]string{
+					"limit":  "pixels",
 					"width":  itoa(info.Width),
 					"height": itoa(info.Height),
 					"pixels": itoa64(pixels),

@@ -109,9 +109,11 @@ func (h *Image) Handle(ctx context.Context, log *slog.Logger, _ pgx.Tx, job queu
 		var tooLarge *storage.TooLargeError
 		switch {
 		case errors.As(err, &tooLarge):
-			return reject("file_too_large", map[string]string{
+			// Core's code for any file over a limit, its byte size included.
+			return reject(imagepipe.RejectTooLarge, map[string]string{
+				"limit": "bytes",
 				"size":  strconv.FormatInt(tooLarge.Size, 10),
-				"limit": strconv.FormatInt(tooLarge.Limit, 10),
+				"max":   strconv.FormatInt(tooLarge.Limit, 10),
 			}), nil
 		case errors.Is(err, storage.ErrNotFound):
 			return reject("object_missing", nil), nil
