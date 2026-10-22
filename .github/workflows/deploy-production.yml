@@ -31,6 +31,25 @@ jobs:
           tags: |
             ghcr.io/amir-hshahi/persian-gulf-wiki-core:${{ steps.version.outputs.version }}
             ghcr.io/amir-hshahi/persian-gulf-wiki-core:latest
+      # The worker image. A problem building it must not stop the app deploying, so a failure here
+      # is not fatal (continue-on-error); the deploy step passes the worker image on only if this
+      # succeeded, and the warning below makes the failure visible instead of silent.
+      - name: Build and push the worker image
+        id: worker
+        continue-on-error: true
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: submission-pipeline/Dockerfile
+          build-args: |
+            APP_VERSION=${{ steps.version.outputs.version }}
+          push: true
+          tags: |
+            ghcr.io/amir-hshahi/persian-gulf-wiki-pipeline:${{ steps.version.outputs.version }}
+            ghcr.io/amir-hshahi/persian-gulf-wiki-pipeline:latest
+      - name: Warn if the worker image was not built
+        if: steps.worker.outcome == 'failure'
+        run: echo "::warning title=Worker image::The submission-pipeline image failed to build. The app is deploying without it."
       - name: Install cloudflared
         if: vars.DEPLOY_ENABLED == 'true'
         run: |
@@ -47,4 +66,4 @@ jobs:
               -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
               -o ProxyCommand="cloudflared access ssh --hostname ${{ secrets.PROD_SSH_HOSTNAME }}" \
               deploy@${{ secrets.PROD_SSH_HOSTNAME }} \
-              "cd /opt/pgw && ./deploy.sh ghcr.io/amir-hshahi/persian-gulf-wiki-core:${{ steps.version.outputs.version }}"
+              "cd /opt/pgw && ./deploy.sh ghcr.io/amir-hshahi/persian-gulf-wiki-core:${{ steps.version.outputs.version }} ${{ steps.worker.outcome == 'success' && format('ghcr.io/amir-hshahi/persian-gulf-wiki-pipeline:{0}', steps.version.outputs.version) || '' }}"
