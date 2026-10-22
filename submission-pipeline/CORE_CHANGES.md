@@ -90,6 +90,7 @@ is well inside the 60-minute stuck-processing sweep, which can stay as it is.
 | `submission_id` | in the row's `payload` |
 | `type` `media.image` | `type` `image` |
 | `media.sha256` | `image.sha256` (recomputed by the worker, standard padded base64) |
+| `media.placeholder` | `image.placeholder`: `data:image/webp;base64,...`, 24 px wide, under 16 KiB, so your `PLACEHOLDER` check passes as is. Left out (not empty) if one could not be made small enough. |
 | `media.width` / `media.height` | `image.width` / `image.height` (after EXIF rotation) |
 | `media.variants[].size` | `image.variants[].label` (`w320`, `w640`, ...) |
 | `media.variants[].key/bytes/width/height` | same names |
@@ -103,6 +104,7 @@ Example `result`:
   "image": {
     "width": 3000, "height": 4000, "format": "jpeg",
     "sha256": "n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=",
+    "placeholder": "data:image/webp;base64,UklGRjAAAABXRUJQVlA4...",
     "variants": [
       {"label": "w320", "key": "pending/9b1e7c3a/w320.webp", "width": 320, "height": 427, "bytes": 11874}
     ],

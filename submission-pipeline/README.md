@@ -126,6 +126,10 @@ notification is ever missed, the worker's polling picks the job up anyway.
   the image's shape. A width at or above the source's is skipped rather than
   upscaled, and an image narrower than all of them gets one variant at its own
   width.
+* Makes a **placeholder**: the whole image 24 px wide as a low-quality WebP, returned
+  inline in the result as a `data:image/webp;base64,…` URI (a few hundred bytes, never
+  over 16 KiB). The frontend shows it stretched while the real variant loads, so there
+  is a soft preview of the right shape instead of an empty box. It is not stored as a file.
 * Uploads to the **derived** bucket:
   * `pending/<submission_id>/w320.webp`, `w640.webp`, `w1280.webp`, `w1920.webp`
     (Content-Type `image/webp`). This is core's layout: it accepts no variant
@@ -156,6 +160,7 @@ notification is ever missed, the worker's polling picks the job up anyway.
   "image": {
     "width": 3000, "height": 4000, "format": "jpeg",
     "sha256": "n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=",
+    "placeholder": "data:image/webp;base64,UklGRjAAAABXRUJQVlA4...",
     "variants": [
       {"label": "w320", "key": "pending/9b1e7c3a/w320.webp", "width": 320, "height": 427, "bytes": 11874}
     ],
