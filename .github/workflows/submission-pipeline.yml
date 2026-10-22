@@ -1,0 +1,77 @@
+name: Submission pipeline
+
+# A workflow of its own rather than a job in ci.yml. Deploy Staging waits for the whole
+# "CI" workflow to succeed, so a Go failure in ci.yml would stop core from deploying.
+# Here it can only fail its own check. The path filter also keeps core-only changes from
+# paying for a libvips install.
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'submission-pipeline/**'
+      - '.github/workflows/submission-pipeline.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'submission-pipeline/**'
+      - '.github/workflows/submission-pipeline.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      # The image production runs, so the queue and search tests meet the same Postgres.
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: core
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: core
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U core"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      # The tests drop and recreate their tables, which is fine in a throwaway service.
+      QUEUE_TEST_DSN: postgres://core:test@localhost:5432/core?sslmode=disable
+      SEARCH_TEST_DSN: postgres://core:test@localhost:5432/core?sslmode=disable
+    defaults:
+      run:
+        working-directory: submission-pipeline
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: submission-pipeline/go.mod
+          cache-dependency-path: submission-pipeline/go.sum
+
+      # govips reaches libvips through cgo, so the headers are needed to compile the
+      # tagged build, not just to run it.
+      - name: Install libvips
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libvips-dev
+
+      # Both builds compile different files: internal/imagepipe has a real implementation
+      # behind the vips tag and a refusing stub without it.
+      - name: Vet
+        run: |
+          go vet ./...
+          go vet -tags vips ./...
+      - name: Build
+        run: |
+          go build ./...
+          go build -tags vips ./...
+      - name: Test
+        run: go test -race -count=1 -tags vips ./...
+
+      - name: Dependency vulnerability scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: submission-pipeline
+          severity: HIGH,CRITICAL
+          exit-code: 0   # report-only at first, like core's scan; flip to 1 once the baseline is clean
