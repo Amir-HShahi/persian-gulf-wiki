@@ -95,9 +95,9 @@ Example `result`:
   "image": {
     "width": 3000, "height": 4000, "format": "jpeg",
     "variants": [
-      {"label": "w320", "key": "9b1e7c3a/w320.webp", "width": 320, "height": 427, "bytes": 11874}
+      {"label": "w320", "key": "pending/9b1e7c3a/w320.webp", "width": 320, "height": 427, "bytes": 11874}
     ],
-    "original": {"key": "9b1e7c3a/original.jpg", "bytes": 2481152, "content_type": "image/jpeg"}
+    "original": {"key": "originals/9b1e7c3a/original.jpg", "bytes": 2481152, "content_type": "image/jpeg"}
   }
 }
 ```
@@ -107,7 +107,7 @@ Example `result`:
 | | Core's contract | Worker | Why the worker's way |
 |---|---|---|---|
 | Accepted formats | JPEG, PNG, WebP | also HEIC, AVIF, TIFF, GIF | iPhones upload HEIC by default; refusing it refuses most phone photos. Core's upload endpoint has to allow those content types for this to matter. |
-| The original | deleted by the worker | kept, and copied to the derived bucket as `original.<ext>` | It is the only source if a new size or format is ever needed. It must never be served: it still has the camera's metadata, including GPS. |
+| The original | deleted by the worker | kept, and copied to `originals/{mediaId}/original.<ext>` in the media bucket, outside `pending/` so your clean-up leaves it alone | It is the only source if a new size or format is ever needed. It must never be served: it still has the camera's metadata, including GPS. |
 | Pixel limit | about 60 MP suggested | 100 MP, and 30,000 px per side | The header is checked before any decode, so a larger limit costs no safety. Current phones shoot 48 to 200 MP. |
 | Widths | up to 2560 | 320, 640, 1280, 1920 | The original is kept, so a 2560 variant can be generated later if a layout needs one. |
 

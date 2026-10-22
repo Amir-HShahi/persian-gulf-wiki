@@ -120,8 +120,11 @@ notification is ever missed, the worker's polling picks the job up anyway.
   upscaled, and an image narrower than all of them gets one variant at its own
   width.
 * Uploads to the **derived** bucket:
-  * `<submission_id>/w320.webp`, `w640.webp`, `w1280.webp`, `w1920.webp` (Content-Type `image/webp`)
-  * `<submission_id>/original.<ext>`: a byte-for-byte copy of the upload, with the
+  * `pending/<submission_id>/w320.webp`, `w640.webp`, `w1280.webp`, `w1920.webp`
+    (Content-Type `image/webp`). This is core's layout: it accepts no variant
+    outside `pending/<id>/`, moves that folder to `public/` on approval, and
+    deletes it when the item is rejected or removed.
+  * `originals/<submission_id>/original.<ext>`: a byte-for-byte copy of the upload, with the
     extension taken from the file's content. **Do not serve this one publicly:** it
     still carries whatever the camera wrote, including location.
 * Never modifies or deletes anything in the raw bucket. The storage client has no
@@ -146,9 +149,9 @@ notification is ever missed, the worker's polling picks the job up anyway.
   "image": {
     "width": 3000, "height": 4000, "format": "jpeg",
     "variants": [
-      {"label": "w320", "key": "9b1e7c3a/w320.webp", "width": 320, "height": 427, "bytes": 11874}
+      {"label": "w320", "key": "pending/9b1e7c3a/w320.webp", "width": 320, "height": 427, "bytes": 11874}
     ],
-    "original": {"key": "9b1e7c3a/original.jpg", "bytes": 2481152, "content_type": "image/jpeg"}
+    "original": {"key": "originals/9b1e7c3a/original.jpg", "bytes": 2481152, "content_type": "image/jpeg"}
   }
 }
 ```
