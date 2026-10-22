@@ -53,7 +53,16 @@ type Options struct {
 	// smaller files at the same visual quality. This runs in a background
 	// worker where nobody is waiting, so the default is the maximum.
 	Effort int
+
+	// PlaceholderWidth is the width of the inline preview returned with the
+	// variants. Zero means no placeholder.
+	PlaceholderWidth int
 }
+
+// MaxPlaceholderBytes is the longest data URI core stores as a placeholder. A
+// placeholder that would be longer is left out rather than refused: it is an
+// optimisation, and the image is usable without one.
+const MaxPlaceholderBytes = 16 * 1024
 
 func DefaultOptions() Options {
 	return Options{
@@ -72,6 +81,10 @@ func DefaultOptions() Options {
 
 		Quality: 85,
 		Effort:  6,
+
+		// Small enough to be a few hundred bytes inline, large enough that the
+		// browser's smoothing turns it into a recognisable blur of the photo.
+		PlaceholderWidth: 24,
 	}
 }
 
@@ -104,9 +117,14 @@ type Variant struct {
 }
 
 // Result is what Process produced.
+//
+// Placeholder is a tiny WebP of the whole image as a data URI, for the
+// frontend to show stretched while the real variant loads. It is empty when
+// Options.PlaceholderWidth is zero or the URI would exceed MaxPlaceholderBytes.
 type Result struct {
-	Source   Info      `json:"source"`
-	Variants []Variant `json:"variants"`
+	Source      Info      `json:"source"`
+	Variants    []Variant `json:"variants"`
+	Placeholder string    `json:"placeholder,omitempty"`
 }
 
 // check applies the size limits to an already-read header. Returns nil when the

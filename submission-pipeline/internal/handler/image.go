@@ -186,11 +186,12 @@ func (h *Image) Handle(ctx context.Context, log *slog.Logger, _ pgx.Tx, job queu
 	return queue.Result{
 		Outcome: queue.OutcomeOK,
 		Image: &queue.ImageResult{
-			Width:    processed.Source.Width,
-			Height:   processed.Source.Height,
-			Format:   processed.Source.Format,
-			SHA256:   sum,
-			Variants: variants,
+			Width:       processed.Source.Width,
+			Height:      processed.Source.Height,
+			Format:      processed.Source.Format,
+			SHA256:      sum,
+			Placeholder: processed.Placeholder,
+			Variants:    variants,
 			Original: &queue.Original{
 				Key:         origKey,
 				Bytes:       originalBytes,

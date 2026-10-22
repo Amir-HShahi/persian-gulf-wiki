@@ -5,6 +5,7 @@ package imagepipe
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/binary"
 	"errors"
 	"hash/crc32"
@@ -14,6 +15,7 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/davidbyttow/govips/v2/vips"
@@ -277,5 +279,56 @@ func TestProcessGivesATinyImageOneVariantAtItsOwnSize(t *testing.T) {
 	}
 	if v := res.Variants[0]; v.Label != "w100" || v.Width != 100 || v.Height != 75 {
 		t.Errorf("variant = %s %dx%d, want w100 100x75", v.Label, v.Width, v.Height)
+	}
+}
+
+func TestProcessReturnsAPlaceholderCoreAccepts(t *testing.T) {
+	dir := t.TempDir()
+	// Portrait by EXIF, so the placeholder must follow the displayed shape too.
+	src := writeJPEG(t, dir, "portrait.jpg", 1600, 1200, 6)
+
+	res, err := Process(context.Background(), src, outDir(t, dir), quick(300))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Core's check (MediaProcessingService): a raster data URI, at most 16 KiB.
+	const prefix = "data:image/webp;base64,"
+	if !strings.HasPrefix(res.Placeholder, prefix) {
+		t.Fatalf("placeholder = %.40q, want a %s URI", res.Placeholder, prefix)
+	}
+	if len(res.Placeholder) > MaxPlaceholderBytes {
+		t.Errorf("placeholder is %d bytes, over core's %d", len(res.Placeholder), MaxPlaceholderBytes)
+	}
+
+	raw, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(res.Placeholder, prefix))
+	if err != nil {
+		t.Fatalf("placeholder is not base64: %v", err)
+	}
+	img, err := vips.NewImageFromBuffer(raw)
+	if err != nil {
+		t.Fatalf("placeholder does not decode: %v", err)
+	}
+	defer img.Close()
+	if img.Width() != 24 || img.Height() != 32 {
+		t.Errorf("placeholder is %dx%d, want 24x32 (the portrait shape)", img.Width(), img.Height())
+	}
+	if exif := img.GetExif(); len(exif) > 0 {
+		t.Errorf("placeholder carries metadata: %v", exif)
+	}
+}
+
+func TestProcessOmitsThePlaceholderWhenTurnedOff(t *testing.T) {
+	dir := t.TempDir()
+	src := writeJPEG(t, dir, "a.jpg", 400, 300, 0)
+
+	opt := quick(300)
+	opt.PlaceholderWidth = 0
+	res, err := Process(context.Background(), src, outDir(t, dir), opt)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Placeholder != "" {
+		t.Errorf("placeholder produced although turned off")
 	}
 }

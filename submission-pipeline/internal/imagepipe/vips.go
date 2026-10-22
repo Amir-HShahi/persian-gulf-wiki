@@ -4,6 +4,7 @@ package imagepipe
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -90,7 +91,45 @@ func Process(ctx context.Context, srcPath, outDir string, opt Options) (Result, 
 		result.Variants = append(result.Variants, v)
 	}
 
+	if opt.PlaceholderWidth > 0 {
+		p, err := placeholder(srcPath, info, opt.PlaceholderWidth)
+		if err != nil {
+			return Result{}, fmt.Errorf("building placeholder: %w", err)
+		}
+		if len(p) <= MaxPlaceholderBytes {
+			result.Placeholder = p
+		}
+	}
+
 	return result, nil
+}
+
+// placeholder renders the image width pixels wide as a low-quality WebP data
+// URI. No blur is applied here: stretched to full size by the browser, an image
+// this small is already a smooth blur, and blurring it first would only cost
+// bytes. Colour and orientation are handled exactly as for a variant, and
+// metadata is stripped, so the preview leaks no more than the variants do.
+func placeholder(srcPath string, info Info, width int) (string, error) {
+	img, err := vips.NewThumbnailWithSizeFromFile(
+		srcPath, width, scaledHeight(info.Width, info.Height, width), vips.InterestingNone, vips.SizeDown,
+	)
+	if err != nil {
+		return "", err
+	}
+	defer img.Close()
+
+	if err := img.OptimizeICCProfile(); err != nil {
+		return "", fmt.Errorf("converting colour profile: %w", err)
+	}
+
+	params := vips.NewWebpExportParams()
+	params.Quality = 40
+	params.StripMetadata = true
+	buf, _, err := img.ExportWebp(params)
+	if err != nil {
+		return "", err
+	}
+	return "data:image/webp;base64," + base64.StdEncoding.EncodeToString(buf), nil
 }
 
 func variant(srcPath, outDir string, width int, info Info, opt Options) (Variant, error) {

@@ -141,6 +141,10 @@ type ImageResult struct {
 	// Computed by the worker, so unlike the declared one it can be trusted.
 	SHA256 string `json:"sha256"`
 
+	// Placeholder is a tiny preview of the image as a data:image/webp URI, at
+	// most 16 KiB, to show while a variant loads. Empty when none was made.
+	Placeholder string `json:"placeholder,omitempty"`
+
 	// Original is the untouched upload, saved beside the variants so it outlives
 	// whatever the raw bucket's own lifecycle does to the staging copy.
 	//
