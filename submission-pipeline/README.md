@@ -26,6 +26,7 @@ app ──SELECT search_articles(...)──▶ ranked hits + snippets
 | `internal/imagepipe` | The image engine, built on libvips. |
 | `internal/storage` | MinIO/S3 client. |
 | `internal/search` | Article search index. `schema.sql` holds all of it. |
+| `internal/install` | Applies both `schema.sql` files once core's migrations have run. |
 | `internal/normalize` | Finds Persian/Arabic text problems (reports only, never rewrites). |
 | `internal/tabular` | Inspects CSV/XLSX files for structural faults. |
 | `internal/config` | Settings from environment variables. |
@@ -178,14 +179,16 @@ notification is ever missed, the worker's polling picks the job up anyway.
 ## Search
 
 `internal/search/schema.sql` creates a `search_documents` table and the functions
-around it. It indexes every **published** translation, meaning one whose
-`current_revision_id` is set.
+around it. It indexes every **published** translation, by the same rule as core's
+article list: the translation has a `current_revision_id`, and its article's
+subject, if it has one, is not deleted.
 
-It reads these article tables and nothing else: `articles(id, entity_type)`,
-`article_translations(id, article_id, language, slug, current_revision_id)` and
-`article_revisions(id, title, summary, body)`. If those names or columns change,
-update `schema.sql`. It has no triggers and no foreign keys into them, so a search
-problem can never fail an article write: the index simply falls behind.
+It reads these tables and nothing else: `subjects(id, kind, deleted_at)`,
+`articles(id, subject_id)`, `article_translations(id, article_id, language, slug,
+current_revision_id)` and `article_revisions(id, title, summary, body)`. If those
+names or columns change, update `schema.sql`. It has no triggers, no foreign keys
+and no views on them, so a search problem can never fail an article write or block
+one of core's migrations: the index simply falls behind.
 
 The article body is free-form JSON, so the text is taken from the values of the
 keys `title`, `text`, `caption` and `alt` at any depth.
@@ -198,11 +201,13 @@ leave the index at the same sync.
 
 ```sql
 SELECT * FROM search_articles('تنگه هرمز', 'fa', NULL, 20, 0);
---                            query,       language, entity_type, limit, offset
+--                            query,       language, subject_kind, limit, offset
 ```
 
-Returns `translation_id, article_id, language, entity_type, slug, title, snippet,
-score, total` (`total` is the full match count on every row, for paging). `snippet`
+Returns `translation_id, article_id, language, subject_kind, slug, title, snippet,
+score, total` (`total` is the full match count on every row, for paging).
+`subject_kind` is null for an article with no subject, and a kind filter leaves
+those out. `snippet`
 is HTML with matches in `<mark>`, already escaped, so it is safe to render as is.
 Every other column is plain text and must be escaped by whoever displays it.
 
@@ -217,20 +222,26 @@ and the worker rebuilds the index on its next sync.
 
 ## Database setup
 
-Add these two files as migrations, in this order (both can be re-run safely):
+Nothing to do by hand. On start the worker waits until core's Flyway has run
+(`flyway_schema_history` exists), then applies, each in its own transaction:
 
 1. `internal/queue/schema.sql`: the `jobs` table, its constraints and indexes, and
    the insert trigger that wakes workers.
-2. `internal/search/schema.sql`: needs the `pg_trgm` extension and the article
-   tables to exist.
+2. `internal/search/schema.sql`: the `pg_trgm` extension, the index table and its
+   functions. It needs core's article tables, and is retried until they exist.
 
-A worker that starts before these migrations have run does not fail: it logs one warning per
-component (the queue, the search sync) and idles, then picks up work as soon as the tables exist.
+Both are idempotent and are applied again on every start, which is how a changed
+schema reaches an existing database. It waits for Flyway because Flyway refuses to
+migrate a non-empty schema that has no history table: a `jobs` table created first
+would stop core from starting on a fresh database.
 
-The worker's database user needs `SELECT, UPDATE` on `jobs`; `SELECT` on the three
-article tables; full access to `search_documents`; and `EXECUTE` on the `search_*`
-functions. It also uses `LISTEN`. It never inserts into `jobs`, and finished rows
-are never deleted by the worker, so decide how long to keep them.
+Until then the worker idles: the queue and the search sync each log once that their
+table is missing, and resume as soon as it exists.
+
+The worker's database user needs `CREATE` on the schema and the right to create
+`pg_trgm` (core's user in the compose files has both); `SELECT, UPDATE` on `jobs`;
+`SELECT` on the four tables above; and `LISTEN`. It never inserts into `jobs`, and
+finished rows are never deleted by the worker, so decide how long to keep them.
 
 ## Configuration
 
@@ -284,12 +295,11 @@ inside a container that publishes nothing it will not clash with the app.
   `submission-pipeline/`.
   It is a workflow of its own, not a job in `ci.yml`, on purpose: Deploy Staging waits for the
   whole `CI` workflow to succeed, so a Go failure inside it would stop core from deploying.
-* **Compose.** `docker-compose.yml` and `deploy/frontend/docker-compose.yml` have a `pipeline`
-  service behind the `pipeline` profile, so it is opt-in:
-  `docker compose --profile pipeline up -d pipeline`. The root file builds it from the
-  `Dockerfile`; the frontend file pulls the published image. It is opt-in because the first would
-  force everyone to build a libvips image, and the second would stop the whole stack from
-  starting whenever the image had not been published yet.
+* **Compose.** `docker-compose.yml` builds the `pipeline` service from the `Dockerfile` and
+  starts it with everything else on `docker compose up`. The first build takes a few minutes.
+  `deploy/frontend/docker-compose.yml` pulls the published image instead, behind the `pipeline`
+  profile (`docker compose --profile pipeline up -d`), because a stack that pulled it by default
+  would not start at all until the image had been published.
 * **`docker-compose.deploy.yml`** has a `pipeline` service too. It is not in `app`'s
   `depends_on` and nothing depends on it. It has a default image so the file stays valid when
   `PIPELINE_IMAGE` is unset: Compose rejects the whole file for a service with a blank image,
@@ -315,13 +325,14 @@ The queue and search tests run against a real Postgres and **skip unless a datab
 is given** (CI gives them one, so they run there):
 
 ```bash
-QUEUE_TEST_DSN=postgres://user:pass@localhost:5432/scratch go test ./internal/queue/
+QUEUE_TEST_DSN=postgres://user:pass@localhost:5432/scratch go test ./internal/queue/ ./internal/install/
 SEARCH_TEST_DSN=postgres://user:pass@localhost:5432/scratch go test ./internal/search/
 ```
 
 **Use a scratch database.** The tests drop and recreate their tables: `jobs` and
-`queue_probe` for the queue; `search_documents`, `articles`, `article_translations`
-and `article_revisions` for search.
+`queue_probe` for the queue; `search_documents`, `subjects`, `articles`,
+`article_translations` and `article_revisions` for search. The install tests
+create and drop a database of their own, `install_test`, on the same server.
 
 ## Command-line tools
 
@@ -334,38 +345,13 @@ go run ./cmd/search -q "تنگه هرمز" -lang fa -dsn "$DSN"     # query the 
 
 ## For the app side
 
-1. Add the two `schema.sql` files as migrations and grant the worker's user the
-   privileges above.
-2. Insert `image` jobs as shown, and read `status` and `result` from the row.
-3. Call `search_articles(...)` for queries.
-4. Make sure both buckets exist, keep `original.*` private, and decide how long to
-   keep finished jobs and files.
-
-## Where this differs from `docs/MEDIA_PIPELINE.md`
-
-That document describes a Redis-stream contract between core and a worker. This worker takes its
-jobs from Postgres instead, so the two do not line up yet. For whoever brings them together:
-
-| | `docs/MEDIA_PIPELINE.md` | This worker |
-|---|---|---|
-| Transport | Redis streams `submissions` and `submission-results` | The Postgres `jobs` table |
-| Job id | UUID `job_id`, echoed in the result | `jobs.id` (a number) in the result's `job_id` |
-| Job fields | `version`, `job_id`, `type` (`media.*`), `submission_id`, `object_key`, `content_type`, `declared_bytes`, `declared_sha256` | `type` `image`, with `submission_id` and `object_key` |
-| Result | `status`, and a `media` block with `sha256`, `placeholder`, `variants[size, format, ...]` | `outcome`, and an `image` block with `variants[label, ...]` and `original` |
-| Variant keys | `pending/{mediaId}/{size}.{ext}` | `{submission_id}/w{width}.webp` |
-| Widths | 320, 640, 1280, 1920, 2560 | 320, 640, 1280, 1920 |
-| Accepted formats | JPEG, PNG, WebP | anything libvips can read |
-| The original | deleted by the worker after the result is published | never deleted, and copied beside the variants |
-| Checks | SHA-256 against the declared one, panorama 2:1, inline placeholder | none of these |
-| Reject codes | five fixed codes | the six above |
-
-Until core inserts into `jobs` (or the worker is pointed at whichever table core uses), nothing
-feeds this worker and it idles. Closing the gap is a decision for both sides, on the table
-and on each row of the table above; the worker side of it is a modest change.
+See [CORE_CHANGES.md](CORE_CHANGES.md): what core changes to send image jobs here
+instead of Redis, how to read results, the one search query to call, and which
+differences from `docs/MEDIA_PIPELINE.md` are deliberate.
 
 ## Not done yet
 
-* **The contract with core**, as above.
+* **The contract with core**: see [CORE_CHANGES.md](CORE_CHANGES.md).
 * **Other job types.** Spreadsheet, normalize and geo jobs are not wired in.
 * **Geo.** `internal/geo` (shapefile to GeoJSON) is unimplemented, so there is no
   `shp2geojson` command.
