@@ -102,6 +102,18 @@ Example `result`:
 }
 ```
 
+### Object keys: already core's layout
+
+Variants are written to `pending/{mediaId}/w320.webp`, `w640.webp`, `w1280.webp` and
+`w1920.webp` in the media bucket, so `MediaProcessingService`'s key check passes and your
+approve (move to `public/`) and clean-up (delete the prefix) work unchanged. The file names
+carry a `w` before the width; the check only looks at the prefix.
+
+The original goes to `originals/{mediaId}/original.<ext>`, outside `pending/`, so publishing
+or rejecting an item never deletes it. **One thing for core to decide:** your 7-day sweep of
+FAILED items does not reach `originals/`, so originals of rejected or deleted items stay. If
+they should go too, add `originals/{mediaId}/` to that sweep and to item deletion.
+
 ## 2. Kept on the worker side, on purpose
 
 | | Core's contract | Worker | Why the worker's way |
