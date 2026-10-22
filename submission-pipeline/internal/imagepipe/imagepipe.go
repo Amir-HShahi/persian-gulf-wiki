@@ -171,8 +171,10 @@ func check(info Info, opt Options) *Rejection {
 
 // plan returns the widths worth generating for a source of the given width.
 //
-// A target at or above the source is dropped: upscaling invents no detail, it
-// only produces a larger file that looks softer than the original.
+// A target above the source is dropped: upscaling invents no detail, it only
+// produces a larger file that looks softer than the original. A target equal
+// to the source is kept, because that is a re-encode, not an upscale, and the
+// original is private: without it a 4096 px panorama would have no 4k variant.
 //
 // A source narrower than every target would leave nothing, and the original is
 // private, so the submission would have no picture to show at all. It gets one
@@ -181,7 +183,7 @@ func check(info Info, opt Options) *Rejection {
 func plan(widths []int, srcWidth int) []int {
 	out := make([]int, 0, len(widths))
 	for _, w := range widths {
-		if w > 0 && w < srcWidth {
+		if w > 0 && w <= srcWidth {
 			out = append(out, w)
 		}
 	}
