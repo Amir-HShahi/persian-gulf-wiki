@@ -88,7 +88,8 @@ work as packages and CLIs but have no job type yet.
 
 ```sql
 INSERT INTO jobs (type, payload)
-VALUES ('image', '{"submission_id": "9b1e7c3a", "object_key": "uploads/9b1e7c3a"}')
+VALUES ('image', '{"submission_id": "9b1e7c3a", "object_key": "uploads/9b1e7c3a",
+                   "declared_sha256": "n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg="}')
 RETURNING id;
 ```
 
@@ -96,6 +97,9 @@ RETURNING id;
    * `submission_id` becomes a folder name in the derived bucket, so it may only
      contain letters, digits, `_` and `-` (up to 64 characters). Anything else is
      rejected as `malformed_payload`.
+   * `declared_sha256` (optional) is the hash the uploader declared, as standard
+     padded base64. When it is given, a file whose bytes hash to anything else is
+     refused.
    * Keep the returned `id`; it is the cheapest way to find the result later.
 3. Read the outcome from the same row:
 
@@ -109,6 +113,9 @@ notification is ever missed, the worker's polling picks the job up anyway.
 ### What the worker does
 
 * Downloads the original (capped by `WORKER_MAX_FILE_BYTES`).
+* Hashes it with SHA-256 before decoding it, and refuses it if the hash differs from
+  `declared_sha256`. The hash is reported as `sha256` either way: it proves the file is
+  the one that was uploaded, and it is what duplicate uploads are recognised by.
 * Reads the image header and refuses anything over 100 megapixels or with a side
   over 30,000 px, before decoding a single pixel. This is what stops a tiny file
   that claims to be 40,000 x 40,000.
@@ -148,6 +155,7 @@ notification is ever missed, the worker's polling picks the job up anyway.
   "attempt": 1, "duration_ms": 812, "finished_at": "2026-10-12T09:30:00Z",
   "image": {
     "width": 3000, "height": 4000, "format": "jpeg",
+    "sha256": "n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=",
     "variants": [
       {"label": "w320", "key": "pending/9b1e7c3a/w320.webp", "width": 320, "height": 427, "bytes": 11874}
     ],
@@ -166,7 +174,8 @@ notification is ever missed, the worker's polling picks the job up anyway.
 | `image_dimension_too_large` | A side over 30,000 px. |
 | `file_too_large` | Over `WORKER_MAX_FILE_BYTES`. |
 | `object_missing` | `object_key` is not in the raw bucket. |
-| `malformed_payload` | Bad JSON or an invalid `submission_id`. |
+| `checksum_mismatch` | The file's SHA-256 is not `declared_sha256`. |
+| `malformed_payload` | Bad JSON, an invalid `submission_id`, or a `declared_sha256` that is not base64 of 32 bytes. |
 
 ### Retries and crashes
 

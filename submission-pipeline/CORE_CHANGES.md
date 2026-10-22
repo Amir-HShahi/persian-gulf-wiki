@@ -36,13 +36,20 @@ RETURNING id;
 ```
 
 ```json
-{"submission_id": "<media id>", "object_key": "<staging key>"}
+{"submission_id": "<media id>", "object_key": "<staging key>", "declared_sha256": "<as declared>"}
 ```
 
 * Run it inside `MediaUploadService.complete`'s transaction.
 * `submission_id` may only contain letters, digits, `_` and `-`, up to 64 characters. A UUID fits.
-* Extra payload fields are ignored, so keeping `content_type`, `declared_bytes` and
-  `declared_sha256` in the payload costs nothing.
+* `declared_sha256` is the value core already has, in the same encoding (standard padded
+  base64, not hex). The worker hashes the bytes it downloaded, before decoding them, and
+  refuses the file with `checksum_mismatch` (your code, same name) if they differ. A value
+  that is not base64 of 32 bytes is `malformed_payload`. Leave the field out only to skip the
+  check.
+* The worker's own hash comes back as `result.image.sha256`, in the same encoding: store that
+  one and run the duplicate check on it, as you do today with `media.sha256`.
+* Other extra payload fields are ignored, so keeping `content_type` and `declared_bytes`
+  costs nothing.
 * The insert fires `NOTIFY jobs`, so the worker starts within milliseconds.
 
 `jobs.id` is a `bigint`, and `article_media.processing_job_id` (V19) is a `uuid`. Either store
@@ -82,6 +89,7 @@ is well inside the 60-minute stuck-processing sweep, which can stay as it is.
 | `job_id` (UUID) | not needed: core already knows which row it read |
 | `submission_id` | in the row's `payload` |
 | `type` `media.image` | `type` `image` |
+| `media.sha256` | `image.sha256` (recomputed by the worker, standard padded base64) |
 | `media.width` / `media.height` | `image.width` / `image.height` (after EXIF rotation) |
 | `media.variants[].size` | `image.variants[].label` (`w320`, `w640`, ...) |
 | `media.variants[].key/bytes/width/height` | same names |
@@ -94,6 +102,7 @@ Example `result`:
   "attempt": 1, "duration_ms": 812, "finished_at": "2026-10-12T09:30:00Z",
   "image": {
     "width": 3000, "height": 4000, "format": "jpeg",
+    "sha256": "n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=",
     "variants": [
       {"label": "w320", "key": "pending/9b1e7c3a/w320.webp", "width": 320, "height": 427, "bytes": 11874}
     ],
