@@ -14,9 +14,10 @@ import (
 type JobType string
 
 const (
-	JobTypeImage   JobType = "image"
-	JobTypeTabular JobType = "tabular"
-	JobTypeGeo     JobType = "geo"
+	JobTypeImage    JobType = "image"
+	JobTypePanorama JobType = "panorama"
+	JobTypeTabular  JobType = "tabular"
+	JobTypeGeo      JobType = "geo"
 )
 
 // Status is the lifecycle state of a job row, and is distinct from the

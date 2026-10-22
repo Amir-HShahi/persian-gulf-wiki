@@ -140,6 +140,13 @@ func run() error {
 		DerivedBucket: cfg.Storage.DerivedBucket,
 		Options:       imagepipe.DefaultOptions(),
 	})
+	// Same handler, other rules: 2:1 only, and 2k/4k/8k variants.
+	runner.Register(queue.JobTypePanorama, &handler.Image{
+		Store:         store,
+		RawBucket:     cfg.Storage.RawBucket,
+		DerivedBucket: cfg.Storage.DerivedBucket,
+		Options:       imagepipe.PanoramaOptions(),
+	})
 
 	log.Info("worker ready", "config", cfg, "identity", identity())
 
