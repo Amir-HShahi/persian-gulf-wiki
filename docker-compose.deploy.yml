@@ -109,6 +109,33 @@ services:
       mc anonymous set download "local/$$STORAGE_MEDIA_BUCKET/public"
       '
 
+  # The submission-pipeline worker. deploy.sh starts it on its own, after the app is healthy,
+  # and a failure here does not fail the deploy: it is not in app's depends_on and nothing
+  # depends on it. The default image keeps this file valid when PIPELINE_IMAGE is unset, as
+  # with an older deploy.sh; a service with a blank image makes Compose reject the whole
+  # file, and that would stop the app deploying too.
+  pipeline:
+    image: ${PIPELINE_IMAGE:-ghcr.io/amir-hshahi/persian-gulf-wiki-pipeline:latest}
+    restart: unless-stopped
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: core
+      DB_USERNAME: core
+      DB_PASSWORD: ${DB_PASSWORD}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_USE_SSL: "false"
+      MINIO_ACCESS_KEY: ${STORAGE_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${STORAGE_SECRET_KEY}
+      MINIO_RAW_BUCKET: ${STORAGE_STAGING_BUCKET}
+      MINIO_DERIVED_BUCKET: ${STORAGE_MEDIA_BUCKET}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+
   mailpit:
     image: axllent/mailpit:latest
     restart: unless-stopped
