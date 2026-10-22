@@ -35,6 +35,49 @@ app ──SELECT search_articles(...)──▶ ranked hits + snippets
 Only **image jobs** are wired into the worker today. `normalize` and `tabular`
 work as packages and CLIs but have no job type yet.
 
+## Why it is built this way
+
+* **Postgres is the only channel between the app and the worker.** The app can insert a job
+  row in the same transaction as its own change, so the two cannot disagree. With a stream,
+  the enqueue happens outside the database transaction, and the app has to publish first and
+  tolerate an orphaned job when the commit then fails (core's `MediaJobPublisher` does exactly
+  that). A row is also something you can look at: a stuck job is a `SELECT`, and the result is
+  on the same row. The cost is that the worker needs a database role, and the app inserts a
+  row instead of writing to a stream.
+* **One generic `jobs` table, not a table per feature.** Locking, retries and crash recovery are
+  written and tested once. A new kind of work is a new handler, not a new queue.
+* **The result goes back on the job row**, not into the app's tables, so the worker never has to
+  know the app's schema. Search is the one exception: it reads the article tables (read-only),
+  because the index is built from them.
+* **A job that kills its worker is parked, not retried forever.** If an image exhausts memory,
+  no worker survives to record a failure, so the only trace is a lapsed lock with every attempt
+  spent. Without a rule for that, each worker would pick the job up and die on it in turn.
+* **Shutdown lets a running job finish.** Otherwise every deploy would abort in-flight jobs and
+  leave them locked until the lock expired.
+* **The original is kept, and copied beside the variants.** Variants are what gets served; the
+  original is the only source if a new size or format is ever wanted, and the copy survives any
+  cleanup of the raw bucket. It is private because it still carries the camera's metadata,
+  including location.
+* **Variants are WebP at 320, 640, 1280 and 1920 px wide, sized by width.** That is how
+  responsive images choose a file. Nothing is upscaled, and since the original is not served,
+  1920 is the sharpest image a visitor sees. An image narrower than every width still gets one
+  variant, so no accepted upload ends up with nothing to show.
+* **Metadata is stripped and colours are converted to sRGB.** The first is privacy (GPS). The
+  second matters for iPhone photos, which are Display P3: left as is, their colours come out
+  wrong once the profile is removed. EXIF rotation is applied before sizing, because phones
+  store portraits sideways and sizing from the stored shape makes every variant too small.
+* **The header is checked before any pixel is decoded**, so a few bytes that claim to be
+  40,000 x 40,000 pixels are refused instead of allocated.
+* **libvips is behind a build tag, and the worker refuses to start without it.** The queue
+  dead-letters any job type it has no handler for, so a worker that cannot process images would
+  quietly discard real jobs.
+* **Search lives in SQL.** The folding rules exist once, so an article is indexed and a query is
+  folded the same way. It needs no extra service, and Postgres has no Persian dictionary to
+  lean on anyway.
+* **Search polls instead of reacting to events.** Nothing is added to the app's write path, so a
+  search problem can never fail an article save, and a missed signal cannot leave the index
+  wrong for good.
+
 ## Image jobs
 
 ### What the app does
@@ -181,6 +224,9 @@ Add these two files as migrations, in this order (both can be re-run safely):
 2. `internal/search/schema.sql`: needs the `pg_trgm` extension and the article
    tables to exist.
 
+A worker that starts before these migrations have run does not fail: it logs one warning per
+component (the queue, the search sync) and idles, then picks up work as soon as the tables exist.
+
 The worker's database user needs `SELECT, UPDATE` on `jobs`; `SELECT` on the three
 article tables; full access to `search_documents`; and `EXECUTE` on the `search_*`
 functions. It also uses `LISTEN`. It never inserts into `jobs`, and finished rows
@@ -229,6 +275,36 @@ HEIF decoders, fails the build if the HEIF loader is missing, runs as a non-root
 user, and health-checks `GET :8080/healthz`. That port is fixed in the code, so
 inside a container that publishes nothing it will not clash with the app.
 
+## CI and deployment
+
+* **`.github/workflows/submission-pipeline.yml`** runs `go vet`, builds (with and without the
+  `vips` tag), runs every test with `-race`, and scans the dependencies with Trivy (report-only,
+  like core's scan). The queue and search tests run, not skip: the job starts
+  `postgis/postgis:16-3.4`, the image production uses. It only runs for changes under
+  `submission-pipeline/`.
+  It is a workflow of its own, not a job in `ci.yml`, on purpose: Deploy Staging waits for the
+  whole `CI` workflow to succeed, so a Go failure inside it would stop core from deploying.
+* **Compose.** `docker-compose.yml` and `deploy/frontend/docker-compose.yml` have a `pipeline`
+  service behind the `pipeline` profile, so it is opt-in:
+  `docker compose --profile pipeline up -d pipeline`. The root file builds it from the
+  `Dockerfile`; the frontend file pulls the published image. It is opt-in because the first would
+  force everyone to build a libvips image, and the second would stop the whole stack from
+  starting whenever the image had not been published yet.
+* **`docker-compose.deploy.yml`** has a `pipeline` service too. It is not in `app`'s
+  `depends_on` and nothing depends on it. It has a default image so the file stays valid when
+  `PIPELINE_IMAGE` is unset: Compose rejects the whole file for a service with a blank image,
+  which would stop the app deploying.
+* **`deploy/deploy.sh`** takes an optional second argument, the worker image. Once the app is
+  healthy it pulls and starts the worker. If that fails it prints a warning and the deploy still
+  succeeds: a worker problem must not make a good app deploy look broken or send it into the
+  rollback path. Without the argument the script behaves as it did before.
+* **The deploy workflows** build and push `persian-gulf-wiki-pipeline` next to the core image
+  (`staging` and the sha tag; or the version and `latest`). That step has `continue-on-error`, so
+  a failed worker build cannot stop core deploying, and a warning says it was skipped. The worker
+  image is only passed on to `deploy.sh` if the build succeeded.
+* The first publish creates the `persian-gulf-wiki-pipeline` package on GHCR. Give it the same
+  visibility and access as the core image, or the server cannot pull it.
+
 ## Tests
 
 ```bash
@@ -236,7 +312,7 @@ go test -tags vips ./...
 ```
 
 The queue and search tests run against a real Postgres and **skip unless a database
-is given**:
+is given** (CI gives them one, so they run there):
 
 ```bash
 QUEUE_TEST_DSN=postgres://user:pass@localhost:5432/scratch go test ./internal/queue/
@@ -265,12 +341,34 @@ go run ./cmd/search -q "تنگه هرمز" -lang fa -dsn "$DSN"     # query the 
 4. Make sure both buckets exist, keep `original.*` private, and decide how long to
    keep finished jobs and files.
 
+## Where this differs from `docs/MEDIA_PIPELINE.md`
+
+That document describes a Redis-stream contract between core and a worker. This worker takes its
+jobs from Postgres instead, so the two do not line up yet. For whoever brings them together:
+
+| | `docs/MEDIA_PIPELINE.md` | This worker |
+|---|---|---|
+| Transport | Redis streams `submissions` and `submission-results` | The Postgres `jobs` table |
+| Job id | UUID `job_id`, echoed in the result | `jobs.id` (a number) in the result's `job_id` |
+| Job fields | `version`, `job_id`, `type` (`media.*`), `submission_id`, `object_key`, `content_type`, `declared_bytes`, `declared_sha256` | `type` `image`, with `submission_id` and `object_key` |
+| Result | `status`, and a `media` block with `sha256`, `placeholder`, `variants[size, format, ...]` | `outcome`, and an `image` block with `variants[label, ...]` and `original` |
+| Variant keys | `pending/{mediaId}/{size}.{ext}` | `{submission_id}/w{width}.webp` |
+| Widths | 320, 640, 1280, 1920, 2560 | 320, 640, 1280, 1920 |
+| Accepted formats | JPEG, PNG, WebP | anything libvips can read |
+| The original | deleted by the worker after the result is published | never deleted, and copied beside the variants |
+| Checks | SHA-256 against the declared one, panorama 2:1, inline placeholder | none of these |
+| Reject codes | five fixed codes | the six above |
+
+Until core inserts into `jobs` (or the worker is pointed at whichever table core uses), nothing
+feeds this worker and it idles. Closing the gap is a decision for both sides, on the table
+and on each row of the table above; the worker side of it is a modest change.
+
 ## Not done yet
 
+* **The contract with core**, as above.
 * **Other job types.** Spreadsheet, normalize and geo jobs are not wired in.
 * **Geo.** `internal/geo` (shapefile to GeoJSON) is unimplemented, so there is no
   `shp2geojson` command.
-* **Format allowlist.** Anything libvips can read is accepted today. Limiting it to
-  a list of formats would be a sensible tightening.
-* **CI and deployment.** No workflow runs these tests, and nothing deploys the worker.
+* **Format allowlist.** Anything libvips can read is accepted today. Limiting it to a list of
+  formats would be a sensible tightening.
 * **Untested:** a real camera HEIC straight from an iPhone, animated GIFs, and heavy load.
