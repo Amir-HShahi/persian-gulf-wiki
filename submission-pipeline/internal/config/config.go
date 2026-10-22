@@ -23,8 +23,9 @@ type Config struct {
 	LogLevel slog.Level
 }
 
-// Database points at the same Postgres instance core uses. Every schema object
-// is owned by core's Flyway migrations; the worker only issues DML against them.
+// Database points at the same Postgres instance core uses. Core's tables are
+// only read; the worker's own (the jobs table and the search index) are
+// applied by internal/install once core's migrations have run.
 type Database struct {
 	Host     string
 	Port     int

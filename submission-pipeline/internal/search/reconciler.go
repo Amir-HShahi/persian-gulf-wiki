@@ -40,7 +40,7 @@ func (r *Reconciler) Run(ctx context.Context) {
 			// Logged once, not every tick: until someone applies the schema the
 			// answer will not change, and repeating it would bury real errors.
 			if !notInstalled {
-				r.Log.Warn("search index is not installed; sync paused until schema.sql is applied")
+				r.Log.Warn("search index is not installed; sync paused until it is installed")
 				notInstalled = true
 			}
 		case err != nil && ctx.Err() == nil:

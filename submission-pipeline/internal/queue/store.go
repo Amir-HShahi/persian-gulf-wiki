@@ -30,9 +30,8 @@ func installedError(err error) error {
 // enqueue. It only wakes workers sooner; polling is what guarantees delivery.
 const NotifyChannel = "jobs"
 
-// Store is the worker's access to the jobs table. Schema changes belong to
-// core's Flyway migrations — nothing here creates or alters anything. The DDL
-// to put in that migration is schema.sql in this package.
+// Store is the worker's access to the jobs table. Nothing here creates or
+// alters it: schema.sql in this package does, applied by internal/install.
 type Store struct {
 	pool *pgxpool.Pool
 }

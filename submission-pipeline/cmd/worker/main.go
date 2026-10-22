@@ -16,6 +16,7 @@ import (
 	"wikipg/internal/config"
 	"wikipg/internal/handler"
 	"wikipg/internal/imagepipe"
+	"wikipg/internal/install"
 	"wikipg/internal/queue"
 	"wikipg/internal/search"
 	"wikipg/internal/storage"
@@ -64,6 +65,24 @@ func run() error {
 	if err != nil {
 		return err
 	}
+
+	// The worker's own tables and functions go in once core's migrations have
+	// run. Until then the job loop and search sync each find their table
+	// missing, say so once, and wait; nothing else has to happen in order.
+	installDone := make(chan struct{})
+	go func() {
+		defer close(installDone)
+		(&install.Installer{
+			DB:       pool,
+			Log:      log.With("component", "install"),
+			Interval: cfg.Worker.PollInterval,
+			Parts: []install.Part{
+				{Name: "jobs", SQL: queue.Schema},
+				{Name: "search", SQL: search.Schema},
+			},
+		}).Run(ctx)
+	}()
+	defer func() { <-installDone }()
 
 	// Search sync runs beside the job loop and shares its pool. Nothing it hits
 	// can stop the worker: a database without the search schema, or a failed

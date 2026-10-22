@@ -1,8 +1,8 @@
 // Package queue defines the Postgres-backed job contract shared with the
 // Spring side, and runs the worker loop that consumes it.
 //
-// The jobs table itself is owned by core's Flyway migrations. This package
-// only issues DML against it.
+// The worker applies the jobs table itself (schema.sql, through
+// internal/install); core only inserts rows and reads results.
 package queue
 
 import (

@@ -1,7 +1,8 @@
 -- The worker's job queue.
 --
--- Like every schema object this belongs in core's Flyway migrations: the worker
--- only issues DML against it. Core enqueues by inserting a row; the worker
+-- The worker applies this file at startup, once core's Flyway migrations have
+-- run, so every statement is safe to run again. Core enqueues by inserting a
+-- row, in the same transaction as the change that needs the job; the worker
 -- claims rows with FOR UPDATE SKIP LOCKED, runs them, and records the outcome
 -- on the same row.
 --

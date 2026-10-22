@@ -141,7 +141,7 @@ func (r *Runner) drain(ctx context.Context, sem chan struct{}, wg *sync.WaitGrou
 func (r *Runner) storeError(err error, what string) {
 	if errors.Is(err, ErrNotInstalled) {
 		if !r.notInstalled {
-			r.log.Warn("the jobs table is not installed; no jobs will run until queue/schema.sql is applied")
+			r.log.Warn("the jobs table is not installed; no jobs will run until it is installed")
 			r.notInstalled = true
 		}
 		return
