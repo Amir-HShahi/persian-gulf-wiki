@@ -111,6 +111,36 @@ services:
       mc anonymous set download "local/$$STORAGE_MEDIA_BUCKET/public"
       '
 
+  # The submission-pipeline worker. Opt-in, so a plain `docker compose up` does not build a
+  # libvips image nobody asked for:  docker compose --profile pipeline up -d pipeline
+  # It takes its jobs from the Postgres `jobs` table, so the tables in
+  # submission-pipeline/internal/queue/schema.sql and internal/search/schema.sql must exist.
+  pipeline:
+    profiles:
+      - pipeline
+    build:
+      context: .
+      dockerfile: submission-pipeline/Dockerfile
+    container_name: pgw-pipeline
+    restart: unless-stopped
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: core
+      DB_USERNAME: core
+      DB_PASSWORD: core
+      MINIO_ENDPOINT: minio:9000
+      MINIO_USE_SSL: "false"
+      MINIO_ACCESS_KEY: ${STORAGE_ACCESS_KEY:-pgw-dev}
+      MINIO_SECRET_KEY: ${STORAGE_SECRET_KEY:-pgw-dev-secret}
+      MINIO_RAW_BUCKET: ${STORAGE_STAGING_BUCKET:-submissions-raw}
+      MINIO_DERIVED_BUCKET: ${STORAGE_MEDIA_BUCKET:-submissions-derived}
+    depends_on:
+      postgres:
+        condition: service_started
+      minio-init:
+        condition: service_completed_successfully
+
 volumes:
   postgres-data:
   pgadmin-data:
