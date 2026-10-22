@@ -12,6 +12,7 @@ import com.persiangulfwiki.core.subject.dto.SubjectMergeRequest;
 import com.persiangulfwiki.core.subject.dto.SubjectMergeResponse;
 import com.persiangulfwiki.core.subject.dto.SubjectReferencesResponse;
 import com.persiangulfwiki.core.subject.dto.SubjectResponse;
+import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.subject.service.SubjectDeletionService;
 import com.persiangulfwiki.core.subject.service.SubjectInfoboxService;
 import com.persiangulfwiki.core.subject.service.SubjectListingService;
@@ -113,8 +114,8 @@ public class SubjectController {
             + "entry per parameter); or `kind` names a kind that does not exist (code INVALID_SUBJECT_KIND).",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "q", required = true, description = "The name to look for, 2 to 100 characters, e.g. `قشم`.")
-    @Parameter(name = "kind", description = "Optional: only subjects of this kind -- ISLAND, PORT, OIL_FIELD, SPECIES, "
-            + "STRAIT, FISHING_GROUND or PROVINCE (case-insensitive).")
+    @Parameter(name = "kind", description = "Optional: only subjects of this kind (case-insensitive).\n\n"
+            + SubjectKind.VALUES_DOC)
     @Parameter(name = "size", description = "How many subjects to return at most, 1 to 100.")
     @GetMapping("/lookup")
     @ResponseStatus(HttpStatus.OK)
@@ -204,8 +205,8 @@ public class SubjectController {
             + "exist or is of the wrong kind, or a yes/no value other than `true`; or field filters were sent "
             + "without a `kind`. All of these but the first answer VALIDATION_FAILED with an `errors` entry per "
             + "offending parameter.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    @Parameter(name = "kind", description = "ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, FISHING_GROUND or PROVINCE "
-            + "(case-insensitive); comma-separated or repeated. Omit for every kind.")
+    @Parameter(name = "kind", description = "Case-insensitive; comma-separated or repeated. Omit for every kind.\n\n"
+            + SubjectKind.VALUES_DOC)
     @Parameter(name = "page", description = "Zero-based page index.")
     @Parameter(name = "size", description = "Page size, 1 to 100.")
     @GetMapping
@@ -388,8 +389,8 @@ public class SubjectController {
     @ApiResponse(responseCode = "404", description = "No subject with that id, or it has been deleted or merged into another.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "attribute", required = true, description = "Key of a field referring to subjects of this subject's "
             + "kind, e.g. `province` or `located_in`; see `GET /api/subject-kinds/{kind}/attributes`.")
-    @Parameter(name = "kind", description = "Optional: only referring subjects of this kind -- ISLAND, PORT, OIL_FIELD, "
-            + "SPECIES, STRAIT, FISHING_GROUND or PROVINCE (case-insensitive).")
+    @Parameter(name = "kind", description = "Optional: only referring subjects of this kind (case-insensitive).\n\n"
+            + SubjectKind.VALUES_DOC)
     @Parameter(name = "page", description = "Zero-based page index.")
     @Parameter(name = "size", description = "Page size, 1 to 100.")
     @GetMapping("/{subjectId}/referenced-by")

@@ -240,6 +240,18 @@ public class OpenApiConfig {
         return index < 0 ? TAG_ORDER.size() : index;
     }
 
+    // Free-form JSON fields (an article body, a subject change's before/after) are read as JsonNode, which
+    // springdoc otherwise describes by its Java getters — including a nodeType enum the API never sends.
+    @Bean
+    OpenApiCustomizer jsonNodeSchemaCustomizer() {
+        return openApi -> {
+            if (openApi.getComponents() != null && openApi.getComponents().getSchemas() != null) {
+                openApi.getComponents().getSchemas().computeIfPresent("JsonNode",
+                        (_, _) -> new Schema<>().description("Any JSON value."));
+            }
+        };
+    }
+
     // These two routes are registered by Spring Security's own oauth2Login() support, not by
     // a controller method in this codebase, so springdoc's annotation scan never sees them.
     // They're added here by hand so the Google sign-in flow shows up in the docs at all.

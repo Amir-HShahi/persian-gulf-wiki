@@ -1,17 +1,20 @@
 package com.persiangulfwiki.core.marinedata.dto;
 
+import com.persiangulfwiki.core.marinedata.entity.MarineMetric;
+import com.persiangulfwiki.core.marinedata.entity.MarineSeriesRange;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
 public record MarineSeriesResponse(
-        @Schema(example = "sea_surface_temperature")
+        @Schema(description = MarineMetric.VALUES_DOC, example = "sea_surface_temperature")
         String metricKey,
 
         @Schema(example = "bushehr")
         String stationKey,
 
-        @Schema(description = "DAY, WEEK or MONTH.", example = "WEEK")
+        @Schema(description = MarineSeriesRange.VALUES_DOC, example = "WEEK")
         String range,
 
         @Schema(description = "Stable unit key; display text is the client's job.", example = "celsius")

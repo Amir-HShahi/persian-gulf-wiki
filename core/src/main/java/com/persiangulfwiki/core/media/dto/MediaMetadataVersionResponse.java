@@ -15,9 +15,9 @@ import java.util.UUID;
 public record MediaMetadataVersionResponse(
         MediaMetadataResponse metadata,
 
-        @Schema(description = "PENDING_REVIEW until a moderator decides; then APPROVED or REJECTED. A pending "
-                + "version is also REJECTED, without a moderator judging it, when a newer version of the same item "
-                + "is approved or when the item itself is rejected.")
+        @Schema(description = "A pending version is also REJECTED, without a moderator judging it, when a newer "
+                + "version of the same item is approved or when the item itself is rejected.\n\n"
+                + MetadataVersionStatus.VALUES_DOC)
         MetadataVersionStatus status,
 
         @Schema(description = "The account that proposed this version.")

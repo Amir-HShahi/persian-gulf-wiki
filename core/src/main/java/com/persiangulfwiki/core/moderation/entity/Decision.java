@@ -1,11 +1,14 @@
 package com.persiangulfwiki.core.moderation.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 // What a moderator concluded in one round of review. Mirrored by
 // ck_moderation_decisions_decision in V17 -- a new value here means a migration.
 //
 // The moderator is judging *policy* -- does this belong on the wiki, is it sourced, is it
 // within scope -- not whether the facts are right. Subject-matter correctness is Phase 5's
 // ExpertReview, which is advisory and cannot change any status here.
+@Schema(description = Decision.VALUES_DOC)
 public enum Decision {
 
     // Revision -> APPROVED, task -> DECIDED, and the revision becomes its translation's
@@ -21,5 +24,12 @@ public enum Decision {
     // needs a fix" -- the author edits the same revision in place and resubmits it, and the
     // same task is decided again. This is the only value that produces a second decision row
     // on one task.
-    REQUEST_CHANGES
+    REQUEST_CHANGES;
+
+    // One line per value; shown wherever this type appears in the API docs.
+    public static final String VALUES_DOC = """
+            - `APPROVE`: publishes the revision; the task becomes DECIDED.
+            - `REJECT`: refuses the revision for good; the author must write a new one. The task becomes DECIDED.
+            - `REQUEST_CHANGES`: sends the revision back as CHANGES_REQUESTED and the task back to OPEN; the author \
+            fixes the same revision and resubmits it, and the same task is decided again.""";
 }

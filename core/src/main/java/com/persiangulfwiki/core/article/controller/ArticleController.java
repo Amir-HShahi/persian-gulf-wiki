@@ -14,6 +14,7 @@ import com.persiangulfwiki.core.article.service.ArticleTranslationService;
 import com.persiangulfwiki.core.common.dto.ApiResult;
 import com.persiangulfwiki.core.common.dto.PageResponse;
 import com.persiangulfwiki.core.config.SupportedLocales;
+import com.persiangulfwiki.core.subject.entity.SubjectKind;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -181,9 +182,8 @@ public class ArticleController {
     @Parameter(name = "language", required = true, description = "BCP-47 language tag of the translation to list, e.g. \"fa\", \"en\", \"ar\". Matched exactly.")
     @Parameter(name = "subjectId", description = "Optional filter: only articles bound to this subject. A subject that "
             + "was merged into another filters on that other subject, which now holds its articles.")
-    @Parameter(name = "subjectKind", description = "Optional filter: only articles whose subject is of this kind -- ISLAND, PORT, "
-            + "OIL_FIELD, SPECIES, STRAIT, FISHING_GROUND or PROVINCE (case-insensitive). Articles with "
-            + "no subject never match it.")
+    @Parameter(name = "subjectKind", description = "Optional filter: only articles whose subject is of this kind "
+            + "(case-insensitive). Articles with no subject never match it.\n\n" + SubjectKind.VALUES_DOC)
     @Parameter(name = "topic", description = "Optional filter: only articles about this topic, by its `slug` from "
             + "GET /api/topics. An article's topics are those of its original-language translation's latest "
             + "approved version and apply to all its translations, so the `total` here equals that topic's "

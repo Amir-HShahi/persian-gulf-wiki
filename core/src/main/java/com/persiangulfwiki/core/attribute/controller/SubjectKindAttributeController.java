@@ -4,6 +4,7 @@ import com.persiangulfwiki.core.attribute.dto.SubjectKindAttributesResponse;
 import com.persiangulfwiki.core.attribute.service.AttributeVocabularyService;
 import com.persiangulfwiki.core.common.dto.ApiResult;
 import com.persiangulfwiki.core.config.SupportedLocales;
+import com.persiangulfwiki.core.subject.entity.SubjectKind;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -47,8 +48,7 @@ public class SubjectKindAttributeController {
     @ApiResponse(responseCode = "200", description = "The kind's label and its field vocabulary.")
     @ApiResponse(responseCode = "400", description = "`kind` is not one of ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, "
             + "FISHING_GROUND, PROVINCE (case-insensitive).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    @Parameter(name = "kind", description = "ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, FISHING_GROUND or PROVINCE "
-            + "(case-insensitive).")
+    @Parameter(name = "kind", description = "Case-insensitive.\n\n" + SubjectKind.VALUES_DOC)
     @GetMapping("/{kind}/attributes")
     @ResponseStatus(HttpStatus.OK)
     public ApiResult<SubjectKindAttributesResponse> listAttributes(@PathVariable String kind) {

@@ -4,6 +4,7 @@ import com.persiangulfwiki.core.common.dto.ApiResult;
 import com.persiangulfwiki.core.expertreviewer.dto.ApplicationRequest;
 import com.persiangulfwiki.core.expertreviewer.dto.ApplicationResponse;
 import com.persiangulfwiki.core.expertreviewer.dto.ReviewDecisionRequest;
+import com.persiangulfwiki.core.expertreviewer.entity.ApplicationStatus;
 import com.persiangulfwiki.core.expertreviewer.service.ExpertReviewerService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -84,7 +85,8 @@ public class ExpertReviewerController {
             + "is not yet verified — both surface as a plain 403 with no way to distinguish them from the "
             + "response's status code alone; read `detail` for which one occurred.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "400", description = "`status` is not one of PENDING, APPROVED, or REJECTED (case-insensitive).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    @Parameter(name = "status", description = "Optional filter: PENDING, APPROVED, or REJECTED (case-insensitive). Omit to return applications in every status.")
+    @Parameter(name = "status", description = "Optional filter (case-insensitive). Omit to return applications in "
+            + "every status.\n\n" + ApplicationStatus.VALUES_DOC)
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/applications")
     @ResponseStatus(HttpStatus.OK)

@@ -15,7 +15,8 @@ public record CurrentFeaturedArticleResponse(
         UUID articleId,
         @Schema(description = "The subject the article is about; absent when it has none.", nullable = true)
         @Nullable UUID subjectId,
-        @Schema(description = "That subject's kind; absent when the article has no subject.", nullable = true)
+        @Schema(description = "That subject's kind; absent when the article has no subject.\n\n" + SubjectKind.VALUES_DOC,
+                nullable = true)
         @Nullable SubjectKind subjectKind,
         String language,
         @Schema(description = "The translation's slug, for the \"read more\" link.") String slug,

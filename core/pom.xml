@@ -303,6 +303,18 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<!-- Local shells export SPRING_PROFILES_ACTIVE=dev from .env; inherited by the test JVM it turns
+				     the dev profile on in every test, so a test without @ActiveProfiles("dev") would no longer
+				     prove the dev-only routes and docs are absent. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<excludedEnvironmentVariables>
+						<excludedEnvironmentVariable>SPRING_PROFILES_ACTIVE</excludedEnvironmentVariable>
+					</excludedEnvironmentVariables>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

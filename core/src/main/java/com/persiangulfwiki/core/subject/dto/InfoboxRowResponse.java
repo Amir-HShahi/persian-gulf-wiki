@@ -12,7 +12,8 @@ import java.util.List;
 public record InfoboxRowResponse(
         String attribute,
         @Schema(nullable = true) @Nullable LocalizedLabelResponse label,
-        @Schema(description = "Says which field of each value is set.") AttributeValueType valueType,
+        @Schema(description = "Says which field of each value is set.\n\n" + AttributeValueType.VALUES_DOC)
+        AttributeValueType valueType,
         @Schema(description = "Unit code of a NUMBER field (e.g. `km2`, `per_km2`), to be localized by the client.",
                 nullable = true)
         @Nullable String unit,

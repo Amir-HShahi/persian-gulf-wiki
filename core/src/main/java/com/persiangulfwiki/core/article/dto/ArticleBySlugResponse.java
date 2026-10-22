@@ -18,8 +18,8 @@ public record ArticleBySlugResponse(
         @Schema(description = "The subject this article is about; null when it has none. The subject may have been "
                 + "deleted since -- the article is still served.", nullable = true)
         @Nullable UUID subjectId,
-        @Schema(description = "The kind of the subject this article is about; null when the article has no subject.",
-                nullable = true)
+        @Schema(description = "The kind of the subject this article is about; null when the article has no subject.\n\n"
+                + SubjectKind.VALUES_DOC, nullable = true)
         @Nullable SubjectKind subjectKind,
         @Schema(description = "Whether this is the subject's main article, whose slug is the subject's page.")
         boolean isMain,

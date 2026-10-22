@@ -1,5 +1,6 @@
 package com.persiangulfwiki.core.media.dto;
 
+import com.persiangulfwiki.core.media.entity.MediaFailureCode;
 import com.persiangulfwiki.core.media.entity.MediaKind;
 import com.persiangulfwiki.core.media.entity.ProcessingStatus;
 import com.persiangulfwiki.core.media.entity.PublicationStatus;
@@ -24,21 +25,14 @@ public record MediaResponse(
         UUID articleId,
         MediaKind type,
 
-        @Schema(description = "UPLOADING (waiting for the PUT and /complete), PROCESSING, READY, or FAILED.")
+        @Schema(description = ProcessingStatus.VALUES_DOC)
         ProcessingStatus processingStatus,
 
-        @Schema(description = "PENDING (not yet approved), PUBLISHED, REJECTED, or HIDDEN.")
+        @Schema(description = PublicationStatus.VALUES_DOC)
         PublicationStatus publicationStatus,
 
-        @Schema(description = "Set only when processingStatus is FAILED: a stable code to branch on. "
-                + "Checked at upload confirmation: upload_missing (nothing was uploaded), upload_mismatch "
-                + "(the stored file's size or checksum differs from the declaration). Set by processing: "
-                + "duplicate (the same file is already in this article's gallery), unsupported_format, "
-                + "corrupt_file, dimensions_too_large, checksum_mismatch, panorama_aspect_ratio (a 360° "
-                + "panorama must be twice as wide as it is tall), rejected (the file was refused for a "
-                + "reason with no more specific code), processing_error (processing broke down; the file "
-                + "itself may be fine), processing_timeout (processing did not finish in time). New codes "
-                + "may be added; treat an unknown one like rejected.", nullable = true)
+        @Schema(description = "Set only when processingStatus is FAILED: a stable code to branch on. New codes may be "
+                + "added; treat an unknown one like `rejected`.\n\n" + MediaFailureCode.VALUES_DOC, nullable = true)
         @Nullable String failureCode,
 
         @Schema(description = "Set exactly when failureCode is: a message explaining the failure to the uploader, in "
