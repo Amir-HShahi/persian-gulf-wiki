@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -770,5 +771,74 @@ func TestEnqueueingWakesTheRunnerWithoutWaitingForThePoll(t *testing.T) {
 		enqueue(t, "image", 0)
 		time.Sleep(30 * time.Millisecond)
 		return scalar[int](t, `SELECT count(*) FROM jobs WHERE status = 'done'`) > 0
+	})
+}
+
+// syncBuffer is a log destination the runner and the test can both touch.
+type syncBuffer struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+func (b *syncBuffer) Write(p []byte) (int, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.Write(p)
+}
+
+func (b *syncBuffer) count(substr string) int {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return strings.Count(b.buf.String(), substr)
+}
+
+// A worker deployed ahead of the migration finds no jobs table. That is a state to wait
+// out, not a fault: it must say so once rather than log an error on every poll, and it
+// must start work as soon as the table appears.
+func TestAMissingJobsTableIsReportedOnceAndThenRecovered(t *testing.T) {
+	pool(t)
+	exec(t, `ALTER TABLE jobs RENAME TO jobs_hidden`)
+	restored := false
+	restore := func() {
+		if !restored {
+			exec(t, `ALTER TABLE jobs_hidden RENAME TO jobs`)
+			restored = true
+		}
+	}
+	t.Cleanup(restore)
+
+	store := NewStore(testPool)
+	if _, _, err := store.Claim(context.Background(), time.Minute, "w1", 3); !errors.Is(err, ErrNotInstalled) {
+		t.Errorf("Claim = %v, want ErrNotInstalled", err)
+	}
+	if _, err := store.ParkExhausted(context.Background(), 3); !errors.Is(err, ErrNotInstalled) {
+		t.Errorf("ParkExhausted = %v, want ErrNotInstalled", err)
+	}
+
+	logs := &syncBuffer{}
+	r := NewRunner(store, slog.New(slog.NewTextHandler(logs, nil)), fast(), "w1", func() {})
+	r.Register(JobTypeImage, handlerFunc(func(context.Context, *slog.Logger, pgx.Tx, Job) (Result, error) {
+		return ok(), nil
+	}))
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan error, 1)
+	go func() { done <- r.Run(ctx) }()
+	defer func() { cancel(); <-done }()
+
+	// Many polls go by (every 20ms) with the table missing.
+	time.Sleep(400 * time.Millisecond)
+	if n := logs.count("not installed"); n != 1 {
+		t.Errorf("the missing table was reported %d times, want exactly once", n)
+	}
+	if n := logs.count("level=ERROR"); n != 0 {
+		t.Errorf("%d errors logged while waiting for the table, want none", n)
+	}
+
+	// The migration lands, and a job goes through without restarting the worker.
+	restore()
+	id := enqueue(t, "image", 0)
+	waitForStatus(t, id, "done")
+	eventually(t, 5*time.Second, "the worker to say it found the table", func() bool {
+		return logs.count("was found; resuming") == 1
 	})
 }

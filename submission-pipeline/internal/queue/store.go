@@ -8,8 +8,23 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+// ErrNotInstalled means the jobs table does not exist in this database. It is the
+// normal state of a worker deployed ahead of the migration that creates the table, so
+// callers treat it as "wait and try again", not as a fault.
+var ErrNotInstalled = errors.New("queue: the jobs table is not installed in this database")
+
+// installedError turns Postgres's "relation does not exist" into ErrNotInstalled.
+func installedError(err error) error {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code == "42P01" { // undefined_table
+		return ErrNotInstalled
+	}
+	return err
+}
 
 // NotifyChannel is the Postgres channel core signals after committing an
 // enqueue. It only wakes workers sooner; polling is what guarantees delivery.
@@ -75,6 +90,9 @@ func (s *Store) Claim(ctx context.Context, lock time.Duration, lockedBy string, 
 		return Job{}, false, nil
 	}
 	if err != nil {
+		if err = installedError(err); errors.Is(err, ErrNotInstalled) {
+			return Job{}, false, err
+		}
 		return Job{}, false, fmt.Errorf("claiming job: %w", err)
 	}
 
@@ -102,9 +120,18 @@ RETURNING id`
 // a lapsed lock with every attempt already spent. Without this, each worker in
 // turn would pick the job up and die on it, indefinitely.
 func (s *Store) ParkExhausted(ctx context.Context, defaultMaxAttempts int) ([]int64, error) {
+	// A missing table can show up at Query, or only while reading the rows when Postgres
+	// already has the statement cached, so every step goes through the same translation.
+	fail := func(err error) error {
+		if err = installedError(err); errors.Is(err, ErrNotInstalled) {
+			return err
+		}
+		return fmt.Errorf("parking exhausted jobs: %w", err)
+	}
+
 	rows, err := s.pool.Query(ctx, parkExhaustedSQL, defaultMaxAttempts)
 	if err != nil {
-		return nil, fmt.Errorf("parking exhausted jobs: %w", err)
+		return nil, fail(err)
 	}
 	defer rows.Close()
 
@@ -112,11 +139,14 @@ func (s *Store) ParkExhausted(ctx context.Context, defaultMaxAttempts int) ([]in
 	for rows.Next() {
 		var id int64
 		if err := rows.Scan(&id); err != nil {
-			return nil, fmt.Errorf("parking exhausted jobs: %w", err)
+			return nil, fail(err)
 		}
 		ids = append(ids, id)
 	}
-	return ids, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, fail(err)
+	}
+	return ids, nil
 }
 
 const heartbeatSQL = `

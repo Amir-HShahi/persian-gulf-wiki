@@ -2,6 +2,7 @@ package queue
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"math/rand/v2"
@@ -30,6 +31,11 @@ type Runner struct {
 	cfg      RunnerConfig
 	identity string
 	onPoll   func()
+
+	// notInstalled remembers that the jobs table was missing on the last check, so the
+	// warning is said once and not on every poll. Only drain touches it, and drain runs
+	// on Run's single goroutine.
+	notInstalled bool
 }
 
 // RunnerConfig carries the timing knobs, mirroring config.Worker.
@@ -94,9 +100,12 @@ func (r *Runner) Run(ctx context.Context) error {
 // is busy.
 func (r *Runner) drain(ctx context.Context, sem chan struct{}, wg *sync.WaitGroup) {
 	if ids, err := r.store.ParkExhausted(ctx, r.cfg.MaxAttempts); err != nil {
-		r.log.Error("parking exhausted jobs", "err", err)
-	} else if len(ids) > 0 {
-		r.log.Error("jobs parked: their worker died on the last allowed attempt", "job_ids", ids)
+		r.storeError(err, "parking exhausted jobs")
+	} else {
+		r.tableFound()
+		if len(ids) > 0 {
+			r.log.Error("jobs parked: their worker died on the last allowed attempt", "job_ids", ids)
+		}
 	}
 
 	for ctx.Err() == nil {
@@ -109,7 +118,7 @@ func (r *Runner) drain(ctx context.Context, sem chan struct{}, wg *sync.WaitGrou
 		job, ok, err := r.store.Claim(ctx, r.cfg.LockDuration, r.identity, r.cfg.MaxAttempts)
 		if err != nil {
 			<-sem
-			r.log.Error("claiming job", "err", err)
+			r.storeError(err, "claiming job")
 			return
 		}
 		if !ok {
@@ -123,6 +132,28 @@ func (r *Runner) drain(ctx context.Context, sem chan struct{}, wg *sync.WaitGrou
 			defer func() { <-sem }()
 			r.process(ctx, job)
 		}()
+	}
+}
+
+// storeError logs a failure to reach the jobs table. A table that does not exist yet is
+// what a worker deployed ahead of its migration sees, so that is one warning rather than
+// an error on every poll, and the worker waits for the table to appear.
+func (r *Runner) storeError(err error, what string) {
+	if errors.Is(err, ErrNotInstalled) {
+		if !r.notInstalled {
+			r.log.Warn("the jobs table is not installed; no jobs will run until queue/schema.sql is applied")
+			r.notInstalled = true
+		}
+		return
+	}
+	r.log.Error(what, "err", err)
+}
+
+// tableFound notes that the jobs table is reachable again after being missing.
+func (r *Runner) tableFound() {
+	if r.notInstalled {
+		r.log.Info("the jobs table was found; resuming")
+		r.notInstalled = false
 	}
 }
 
