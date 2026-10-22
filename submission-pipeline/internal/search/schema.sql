@@ -1,9 +1,9 @@
 -- Article search.
 --
--- Like every schema object this belongs in core's Flyway migrations: the worker
--- never runs DDL. The worker calls search_reconcile() to keep search_documents
--- in step with what the site publishes, and core calls search_articles() to
--- answer a query.
+-- The worker applies this file at startup, once core's Flyway migrations have
+-- created the article tables, so every statement is safe to run again. The
+-- worker calls search_reconcile() to keep search_documents in step with what
+-- the site publishes, and core calls search_articles() to answer a query.
 --
 -- Core's tables are only ever read. There are no triggers and no foreign keys
 -- into core's schema, so nothing in here can fail a write on the main site: if
@@ -117,15 +117,45 @@ AS $$
      GROUP BY span.lo, span.last
 $$;
 
--- One row per published translation: exactly what the site lists, which is a
--- translation whose current_revision_id is set. Core sets that only when a
+-- What the site publishes, one row per translation, by the same rule as core's
+-- article list (ArticleTranslationRepository.findPublishedByLanguage): the
+-- translation has an approved current revision, and its article's subject, if
+-- it has one, is not deleted. Core sets current_revision_id only when a
 -- revision is approved, and approved revisions are never edited in place.
+--
+-- subject_kind is the subject's kind, or NULL for an article with no subject;
+-- since core's V20 an article stores no kind of its own.
+--
+-- A function rather than a view on purpose. A view would make Postgres record a
+-- dependency on every column it reads, and a later core migration that drops or
+-- retypes one of them would then fail. A function body is checked when it is
+-- created but records no dependency, so a core change can only break search,
+-- never a migration.
+CREATE OR REPLACE FUNCTION search_published()
+    RETURNS TABLE (
+        translation_id uuid,
+        article_id     uuid,
+        language       varchar,
+        slug           varchar,
+        revision_id    uuid,
+        subject_kind   varchar)
+    LANGUAGE sql STABLE
+AS $$
+    SELECT t.id, t.article_id, t.language, t.slug, t.current_revision_id, s.kind
+      FROM article_translations t
+      JOIN articles a ON a.id = t.article_id
+      LEFT JOIN subjects s ON s.id = a.subject_id
+     WHERE t.current_revision_id IS NOT NULL
+       AND (s.id IS NULL OR s.deleted_at IS NULL)
+$$;
+
+-- One row per row of search_published().
 CREATE TABLE IF NOT EXISTS search_documents (
     translation_id uuid         PRIMARY KEY,
     article_id     uuid         NOT NULL,
     revision_id    uuid         NOT NULL,
     language       varchar(20)  NOT NULL,
-    entity_type    varchar(20)  NOT NULL,
+    subject_kind   varchar(30),
     slug           varchar(200) NOT NULL,
     title          text         NOT NULL,
     summary        text         NOT NULL DEFAULT '',
@@ -157,12 +187,18 @@ CREATE TABLE IF NOT EXISTS search_documents (
     ) STORED
 );
 
+-- An index built before core's V20 has entity_type instead of subject_kind.
+-- Dropping the column drops the old filter index with it, and the next
+-- reconcile fills subject_kind in, because NULL then differs from the kind.
+ALTER TABLE search_documents DROP COLUMN IF EXISTS entity_type;
+ALTER TABLE search_documents ADD COLUMN IF NOT EXISTS subject_kind varchar(30);
+
 CREATE INDEX IF NOT EXISTS idx_search_documents_document
     ON search_documents USING gin (document);
 CREATE INDEX IF NOT EXISTS idx_search_documents_title_trgm
     ON search_documents USING gin (title_key gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_search_documents_filters
-    ON search_documents (language, entity_type);
+    ON search_documents (language, subject_kind);
 
 -- search_refresh brings one translation's row in line with core and reports
 -- 'indexed', 'removed' or 'unchanged'. It reads the current state rather than
@@ -176,13 +212,12 @@ DECLARE
     v_words   text[];
     v_keys    text[];
 BEGIN
-    SELECT t.id, t.article_id, t.language, t.slug, a.entity_type,
+    SELECT p.translation_id AS id, p.article_id, p.language, p.slug, p.subject_kind,
            r.id AS revision_id, r.title, coalesce(r.summary, '') AS summary, r.body
       INTO src
-      FROM article_translations t
-      JOIN articles a ON a.id = t.article_id
-      JOIN article_revisions r ON r.id = t.current_revision_id
-     WHERE t.id = p_translation;
+      FROM search_published() p
+      JOIN article_revisions r ON r.id = p.revision_id
+     WHERE p.translation_id = p_translation;
 
     IF NOT FOUND THEN
         DELETE FROM search_documents WHERE translation_id = p_translation;
@@ -203,15 +238,15 @@ BEGIN
      WHERE w <> '';
 
     INSERT INTO search_documents AS d
-           (translation_id, article_id, revision_id, language, entity_type,
+           (translation_id, article_id, revision_id, language, subject_kind,
             slug, title, summary, body_text, excerpt_words, excerpt_keys, indexed_at)
-    VALUES (src.id, src.article_id, src.revision_id, src.language, src.entity_type,
+    VALUES (src.id, src.article_id, src.revision_id, src.language, src.subject_kind,
             src.slug, src.title, src.summary, v_body, v_words, v_keys, now())
     ON CONFLICT (translation_id) DO UPDATE
        SET article_id    = EXCLUDED.article_id,
            revision_id   = EXCLUDED.revision_id,
            language      = EXCLUDED.language,
-           entity_type   = EXCLUDED.entity_type,
+           subject_kind  = EXCLUDED.subject_kind,
            slug          = EXCLUDED.slug,
            title         = EXCLUDED.title,
            summary       = EXCLUDED.summary,
@@ -219,9 +254,9 @@ BEGIN
            excerpt_words = EXCLUDED.excerpt_words,
            excerpt_keys  = EXCLUDED.excerpt_keys,
            indexed_at    = now()
-     WHERE (d.revision_id, d.slug, d.entity_type, d.article_id, d.language)
+     WHERE (d.revision_id, d.slug, d.subject_kind, d.article_id, d.language)
            IS DISTINCT FROM
-           (EXCLUDED.revision_id, EXCLUDED.slug, EXCLUDED.entity_type, EXCLUDED.article_id, EXCLUDED.language);
+           (EXCLUDED.revision_id, EXCLUDED.slug, EXCLUDED.subject_kind, EXCLUDED.article_id, EXCLUDED.language);
 
     IF FOUND THEN
         RETURN 'indexed';
@@ -234,7 +269,9 @@ $$;
 -- stale or no longer published, refreshes them, and reports what it did.
 -- Because the current revision only changes on approval and approved revisions
 -- are immutable, comparing revision ids is an exact change test: nothing has to
--- re-read a body to find out whether it moved.
+-- re-read a body to find out whether it moved. A subject that is deleted or
+-- restored moves its articles out of or back into search_published(), which the
+-- two halves of the query below pick up the same way.
 CREATE OR REPLACE FUNCTION search_reconcile(p_limit integer DEFAULT 500)
     RETURNS TABLE (indexed integer, removed integer)
     LANGUAGE plpgsql
@@ -254,21 +291,18 @@ BEGIN
     END IF;
 
     FOR v_id IN
-        SELECT t.id
-          FROM article_translations t
-          JOIN articles a ON a.id = t.article_id
-          LEFT JOIN search_documents d ON d.translation_id = t.id
-         WHERE t.current_revision_id IS NOT NULL
-           AND (d.translation_id IS NULL
-                OR d.revision_id <> t.current_revision_id
-                OR d.slug <> t.slug
-                OR d.entity_type <> a.entity_type
-                OR d.article_id <> t.article_id)
+        SELECT p.translation_id
+          FROM search_published() p
+          LEFT JOIN search_documents d ON d.translation_id = p.translation_id
+         WHERE d.translation_id IS NULL
+            OR d.revision_id <> p.revision_id
+            OR d.slug <> p.slug
+            OR d.subject_kind IS DISTINCT FROM p.subject_kind
+            OR d.article_id <> p.article_id
         UNION ALL
         SELECT d.translation_id
           FROM search_documents d
-          LEFT JOIN article_translations t ON t.id = d.translation_id
-         WHERE t.id IS NULL OR t.current_revision_id IS NULL
+         WHERE NOT EXISTS (SELECT 1 FROM search_published() p WHERE p.translation_id = d.translation_id)
          LIMIT greatest(p_limit, 1)
     LOOP
         v_outcome := search_refresh(v_id);
@@ -283,23 +317,28 @@ BEGIN
 END
 $$;
 
--- search_articles answers one query. Language and entity type are optional
--- filters. Results are ranked, paged, and carry the total count on every row.
+-- search_articles answers one query. Language and subject kind are optional
+-- filters; a kind filter leaves out articles with no subject, as core's article
+-- list does. Results are ranked, paged, and carry the total count on every row.
 --
 -- The snippet is HTML: the excerpt is escaped first and only then wrapped in
 -- <mark>, so it is safe to render as-is. Every other column is plain text and
 -- must be escaped by whoever displays it.
-CREATE OR REPLACE FUNCTION search_articles(
-        p_query       text,
-        p_language    text    DEFAULT NULL,
-        p_entity_type text    DEFAULT NULL,
-        p_limit       integer DEFAULT 20,
-        p_offset      integer DEFAULT 0)
+--
+-- Dropped first because CREATE OR REPLACE cannot rename a parameter or a result
+-- column, which the move from entity_type to subject_kind did.
+DROP FUNCTION IF EXISTS search_articles(text, text, text, integer, integer);
+CREATE FUNCTION search_articles(
+        p_query        text,
+        p_language     text    DEFAULT NULL,
+        p_subject_kind text    DEFAULT NULL,
+        p_limit        integer DEFAULT 20,
+        p_offset       integer DEFAULT 0)
     RETURNS TABLE (
         translation_id uuid,
         article_id     uuid,
         language       varchar,
-        entity_type    varchar,
+        subject_kind   varchar,
         slug           varchar,
         title          text,
         snippet        text,
@@ -326,13 +365,13 @@ AS $$
           FROM q
     ),
     candidates AS (
-        SELECT d.translation_id, d.article_id, d.language, d.entity_type, d.slug, d.title,
+        SELECT d.translation_id, d.article_id, d.language, d.subject_kind, d.slug, d.title,
                d.title_key, d.excerpt_words, d.excerpt_keys, d.document, d.indexed_at,
                tq.key, tq.words, tq.stems, tq.terms
           FROM search_documents d
          CROSS JOIN tq
          WHERE (p_language IS NULL OR d.language = p_language)
-           AND (p_entity_type IS NULL OR d.entity_type = p_entity_type)
+           AND (p_subject_kind IS NULL OR d.subject_kind = p_subject_kind)
     ),
     exact AS (
         SELECT c.*
@@ -361,7 +400,7 @@ AS $$
                )::real AS score
           FROM (SELECT * FROM exact UNION ALL SELECT * FROM fuzzy) h
     )
-    SELECT s.translation_id, s.article_id, s.language, s.entity_type, s.slug, s.title,
+    SELECT s.translation_id, s.article_id, s.language, s.subject_kind, s.slug, s.title,
            coalesce(search_snippet(s.excerpt_words, s.excerpt_keys, s.terms), '') AS snippet,
            s.score,
            count(*) OVER () AS total

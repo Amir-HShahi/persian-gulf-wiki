@@ -4,7 +4,7 @@
 //
 //	search -q "تنگه هرمز" -lang fa      run a query
 //	search -sync                       bring the index up to date now
-//	search -schema                     print the SQL, for psql or a Flyway migration
+//	search -schema                     print the SQL the worker applies, for psql
 package main
 
 import (
@@ -33,7 +33,7 @@ func run() error {
 	dsn := flag.String("dsn", os.Getenv("SEARCH_DSN"), "Postgres connection string (default $SEARCH_DSN)")
 	query := flag.String("q", "", "text to search for")
 	language := flag.String("lang", "", "only this language, e.g. fa (default: all)")
-	entityType := flag.String("type", "", "only this entity type, e.g. ISLAND (default: all)")
+	subjectKind := flag.String("kind", "", "only articles about this kind of subject, e.g. ISLAND (default: all)")
 	limit := flag.Int("limit", search.DefaultLimit, "results per page, at most 100")
 	offset := flag.Int("offset", 0, "results to skip")
 	sync := flag.Bool("sync", false, "refresh the index before anything else")
@@ -91,11 +91,11 @@ func run() error {
 	}
 
 	page, err := search.Search(ctx, pool, search.Query{
-		Text:       *query,
-		Language:   *language,
-		EntityType: *entityType,
-		Limit:      *limit,
-		Offset:     *offset,
+		Text:        *query,
+		Language:    *language,
+		SubjectKind: *subjectKind,
+		Limit:       *limit,
+		Offset:      *offset,
 	})
 	if err != nil {
 		return err

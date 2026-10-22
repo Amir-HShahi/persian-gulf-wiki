@@ -19,9 +19,8 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-// Schema is the SQL that creates the index. It belongs in core's Flyway
-// migrations; it is embedded here so tests and the search CLI can apply it to a
-// scratch database.
+// Schema is the SQL that creates the index. The worker applies it at startup
+// through internal/install; tests and the search CLI use it too.
 //
 //go:embed schema.sql
 var Schema string
@@ -47,14 +46,14 @@ func Reconcile(ctx context.Context, db DB, batch int) (indexed, removed int, err
 	return indexed, removed, nil
 }
 
-// Query is one search. Language and EntityType are optional filters; empty
-// means all.
+// Query is one search. Language and SubjectKind are optional filters; empty
+// means all. A SubjectKind filter leaves out articles that have no subject.
 type Query struct {
-	Text       string
-	Language   string
-	EntityType string
-	Limit      int
-	Offset     int
+	Text        string
+	Language    string
+	SubjectKind string
+	Limit       int
+	Offset      int
 }
 
 // DefaultLimit is the page size when Query.Limit is not set. The database caps
@@ -63,11 +62,12 @@ const DefaultLimit = 20
 
 // Hit is one matching translation. Snippet is HTML, already escaped, with the
 // matching words wrapped in <mark>. Every other field is plain text.
+// SubjectKind is nil for an article with no subject.
 type Hit struct {
 	TranslationID string  `json:"translation_id"`
 	ArticleID     string  `json:"article_id"`
 	Language      string  `json:"language"`
-	EntityType    string  `json:"entity_type"`
+	SubjectKind   *string `json:"subject_kind"`
 	Slug          string  `json:"slug"`
 	Title         string  `json:"title"`
 	Snippet       string  `json:"snippet"`
@@ -87,10 +87,10 @@ func Search(ctx context.Context, db DB, q Query) (Page, error) {
 	}
 
 	rows, err := db.Query(ctx, `
-		SELECT translation_id::text, article_id::text, language, entity_type, slug,
+		SELECT translation_id::text, article_id::text, language, subject_kind, slug,
 		       title, snippet, score, total
 		  FROM search_articles($1, $2, $3, $4, $5)`,
-		q.Text, nullIfEmpty(q.Language), nullIfEmpty(q.EntityType), limit, max(q.Offset, 0))
+		q.Text, nullIfEmpty(q.Language), nullIfEmpty(q.SubjectKind), limit, max(q.Offset, 0))
 	if err != nil {
 		return Page{}, wrap("searching", err)
 	}
@@ -99,7 +99,7 @@ func Search(ctx context.Context, db DB, q Query) (Page, error) {
 	page := Page{Hits: []Hit{}}
 	for rows.Next() {
 		var h Hit
-		if err := rows.Scan(&h.TranslationID, &h.ArticleID, &h.Language, &h.EntityType,
+		if err := rows.Scan(&h.TranslationID, &h.ArticleID, &h.Language, &h.SubjectKind,
 			&h.Slug, &h.Title, &h.Snippet, &h.Score, &page.Total); err != nil {
 			return Page{}, wrap("reading results", err)
 		}

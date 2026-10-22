@@ -22,14 +22,19 @@ import (
 //	SEARCH_TEST_DSN=postgres://core:test@localhost:55432/core?sslmode=disable go test ./internal/search/
 var testDB *pgxpool.Pool
 
-// coreArticleTables mirrors the three tables core's V16 migration creates, with
-// the columns search reads. Foreign keys to users and subjects are left out
-// because search never reads them.
+// coreArticleTables mirrors the tables search reads, as core's migrations
+// leave them: subjects (V15, deleted_at from V29), and the article tables (V16,
+// with articles.entity_type dropped by V20). Only the columns search reads, or
+// that an insert needs, are here.
 const coreArticleTables = `
+CREATE TABLE subjects (
+    id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    kind       varchar(30) NOT NULL,
+    deleted_at timestamptz
+);
 CREATE TABLE articles (
     id                 uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    subject_id         uuid,
-    entity_type        varchar(20) NOT NULL,
+    subject_id         uuid REFERENCES subjects (id),
     canonical_language varchar(20) NOT NULL,
     created_at         timestamptz NOT NULL DEFAULT now(),
     updated_at         timestamptz NOT NULL DEFAULT now()
@@ -67,7 +72,7 @@ func TestMain(m *testing.M) {
 		// Start from nothing, so the schema in this branch is what gets tested
 		// rather than whatever an earlier run left behind.
 		for _, stmt := range []string{
-			`DROP TABLE IF EXISTS search_documents, article_revisions, article_translations, articles CASCADE`,
+			`DROP TABLE IF EXISTS search_documents, article_revisions, article_translations, articles, subjects CASCADE`,
 			coreArticleTables,
 			Schema,
 		} {
@@ -92,7 +97,7 @@ func db(t *testing.T) *pgxpool.Pool {
 	if testDB == nil {
 		t.Skip("SEARCH_TEST_DSN not set")
 	}
-	exec(t, `TRUNCATE articles, article_translations, article_revisions, search_documents CASCADE`)
+	exec(t, `TRUNCATE subjects, articles, article_translations, article_revisions, search_documents CASCADE`)
 	return testDB
 }
 
@@ -113,12 +118,17 @@ func scalar[T any](t *testing.T, sql string, args ...any) T {
 }
 
 // publish creates an article with one approved, current translation, the way
-// core does on approval, and returns the translation id.
-func publish(t *testing.T, language, slug, entityType, title, summary, body string) string {
+// core does on approval, and returns the translation id. A kind gives the
+// article a new subject of that kind; an empty kind leaves it without one.
+func publish(t *testing.T, language, slug, kind, title, summary, body string) string {
 	t.Helper()
+	var subjectID any
+	if kind != "" {
+		subjectID = scalar[string](t, `INSERT INTO subjects (kind) VALUES ($1) RETURNING id::text`, kind)
+	}
 	articleID := scalar[string](t,
-		`INSERT INTO articles (entity_type, canonical_language) VALUES ($1, $2) RETURNING id::text`,
-		entityType, language)
+		`INSERT INTO articles (subject_id, canonical_language) VALUES ($1, $2) RETURNING id::text`,
+		subjectID, language)
 	translationID := scalar[string](t,
 		`INSERT INTO article_translations (article_id, language, slug) VALUES ($1, $2, $3) RETURNING id::text`,
 		articleID, language, slug)
@@ -252,7 +262,7 @@ func TestSearchMatchesPrefixesWhileTyping(t *testing.T) {
 
 func TestTitleMatchOutranksBodyMatch(t *testing.T) {
 	db(t)
-	publish(t, "fa", "in-body", "GENERIC", "زیستگاه\u200cهای دریایی", "", text("در این زیستگاه مرجان فراوان است"))
+	publish(t, "fa", "in-body", "", "زیستگاه\u200cهای دریایی", "", text("در این زیستگاه مرجان فراوان است"))
 	publish(t, "fa", "in-title", "SPECIES", "مرجان", "", text("جانوری دریایی"))
 	syncAll(t)
 
@@ -292,7 +302,7 @@ func TestTyposStillFindTheTitle(t *testing.T) {
 
 func TestOnlyTheApprovedRevisionIsSearchable(t *testing.T) {
 	db(t)
-	tr := publish(t, "fa", "versions", "GENERIC", "نسخه اول", "", text("متن قدیمی"))
+	tr := publish(t, "fa", "versions", "", "نسخه اول", "", text("متن قدیمی"))
 	draft := addRevision(t, tr, "DRAFT", "نسخه دوم", "", text("متن تازه"))
 	syncAll(t)
 
@@ -318,8 +328,8 @@ func TestOnlyTheApprovedRevisionIsSearchable(t *testing.T) {
 
 func TestUnpublishedAndDeletedArticlesLeaveTheIndex(t *testing.T) {
 	db(t)
-	hidden := publish(t, "fa", "hidden", "GENERIC", "پنهان", "", text("متن"))
-	gone := publish(t, "fa", "gone", "GENERIC", "حذف", "", text("متن"))
+	hidden := publish(t, "fa", "hidden", "", "پنهان", "", text("متن"))
+	gone := publish(t, "fa", "gone", "", "حذف", "", text("متن"))
 	syncAll(t)
 
 	setCurrent(t, hidden, "")
@@ -333,19 +343,68 @@ func TestUnpublishedAndDeletedArticlesLeaveTheIndex(t *testing.T) {
 	}
 }
 
-func TestFiltersByLanguageAndEntityType(t *testing.T) {
+func TestFiltersByLanguageAndSubjectKind(t *testing.T) {
 	db(t)
 	publish(t, "fa", "kish-fa", "ISLAND", "کیش", "", text("Kish جزیره"))
 	publish(t, "en", "kish-en", "ISLAND", "Kish", "", text("Kish island"))
 	publish(t, "en", "kish-port", "PORT", "Kish Port", "", text("Kish harbour"))
+	publish(t, "en", "kish-essay", "", "Kish Essay", "", text("Kish in history"))
 	syncAll(t)
 
 	if got := slugsOf(find(t, Query{Text: "kish", Language: "fa"})); !slices.Equal(got, []string{"kish-fa"}) {
 		t.Errorf("language filter: %v", got)
 	}
-	got := slugsOf(find(t, Query{Text: "kish", Language: "en", EntityType: "PORT"}))
+	// A kind filter drops the article with no subject, as core's list does.
+	got := slugsOf(find(t, Query{Text: "kish", Language: "en", SubjectKind: "PORT"}))
 	if !slices.Equal(got, []string{"kish-port"}) {
-		t.Errorf("entity filter: %v", got)
+		t.Errorf("kind filter: %v", got)
+	}
+
+	hits := find(t, Query{Text: "kish essay"}).Hits
+	if len(hits) != 1 || hits[0].SubjectKind != nil {
+		t.Errorf("a subject-less article should be found with no kind: %+v", hits)
+	}
+}
+
+func TestArticlesOfADeletedSubjectLeaveTheIndexUntilItIsRestored(t *testing.T) {
+	db(t)
+	publish(t, "fa", "qeshm", "ISLAND", "قشم", "", text("جزیره"))
+	syncAll(t)
+	subject := scalar[string](t, `SELECT subject_id::text FROM articles`)
+
+	exec(t, `UPDATE subjects SET deleted_at = now() WHERE id = $1`, subject)
+	if _, removed := syncAll(t); removed != 1 {
+		t.Errorf("removed = %d after the subject was deleted, want 1", removed)
+	}
+	if got := find(t, Query{Text: "قشم"}); got.Total != 0 {
+		t.Errorf("an article of a deleted subject is searchable")
+	}
+
+	exec(t, `UPDATE subjects SET deleted_at = NULL WHERE id = $1`, subject)
+	if indexed, _ := syncAll(t); indexed != 1 {
+		t.Errorf("indexed = %d after the subject was restored, want 1", indexed)
+	}
+	if got := find(t, Query{Text: "قشم"}); got.Total != 1 {
+		t.Errorf("a restored subject's article is not searchable")
+	}
+}
+
+func TestAnIndexBuiltBeforeSubjectKindsIsUpgradedInPlace(t *testing.T) {
+	db(t)
+	publish(t, "fa", "old", "ISLAND", "قدیمی", "", text("متن"))
+	syncAll(t)
+
+	// The table as an earlier version of this schema created it.
+	exec(t, `ALTER TABLE search_documents DROP COLUMN subject_kind`)
+	exec(t, `ALTER TABLE search_documents ADD COLUMN entity_type varchar(20) NOT NULL DEFAULT 'ISLAND'`)
+	exec(t, Schema)
+
+	if indexed, _ := syncAll(t); indexed != 1 {
+		t.Errorf("indexed = %d after the upgrade, want 1", indexed)
+	}
+	hits := find(t, Query{Text: "قدیمی", SubjectKind: "ISLAND"}).Hits
+	if len(hits) != 1 || hits[0].SubjectKind == nil || *hits[0].SubjectKind != "ISLAND" {
+		t.Errorf("the upgraded row has no kind: %+v", hits)
 	}
 }
 
@@ -376,7 +435,7 @@ func TestSnippetShowsTheOriginalTextHighlightedAndEscaped(t *testing.T) {
 func TestPagingReportsTheTotal(t *testing.T) {
 	db(t)
 	for i := range 25 {
-		publish(t, "fa", fmt.Sprintf("sea-%02d", i), "GENERIC", fmt.Sprintf("دریا %d", i), "", text("دریا"))
+		publish(t, "fa", fmt.Sprintf("sea-%02d", i), "", fmt.Sprintf("دریا %d", i), "", text("دریا"))
 	}
 	syncAll(t)
 
@@ -388,7 +447,7 @@ func TestPagingReportsTheTotal(t *testing.T) {
 
 func TestAnEmptyQueryFindsNothing(t *testing.T) {
 	db(t)
-	publish(t, "fa", "any", "GENERIC", "هر چیزی", "", text("متن"))
+	publish(t, "fa", "any", "", "هر چیزی", "", text("متن"))
 	syncAll(t)
 
 	for _, q := range []string{"", "   ", "\u200c"} {
@@ -401,7 +460,7 @@ func TestAnEmptyQueryFindsNothing(t *testing.T) {
 func TestReconcileCatchesUpInBatchesAndThenDoesNothing(t *testing.T) {
 	db(t)
 	for i := range 7 {
-		publish(t, "fa", fmt.Sprintf("a-%d", i), "GENERIC", "عنوان", "", text("متن"))
+		publish(t, "fa", fmt.Sprintf("a-%d", i), "", "عنوان", "", text("متن"))
 	}
 
 	var got []int
@@ -436,8 +495,8 @@ func TestReconcileReportsAnUninstalledSchema(t *testing.T) {
 
 func TestReconcilerBackfillsThenStopsOnCancel(t *testing.T) {
 	db(t)
-	publish(t, "fa", "first", "GENERIC", "یکم", "", text("متن"))
-	publish(t, "fa", "second", "GENERIC", "دوم", "", text("متن"))
+	publish(t, "fa", "first", "", "یکم", "", text("متن"))
+	publish(t, "fa", "second", "", "دوم", "", text("متن"))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan struct{})
