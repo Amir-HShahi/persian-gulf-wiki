@@ -22,7 +22,7 @@ app ──SELECT search_articles(...)──▶ ranked hits + snippets
 | Path | What it does |
 |---|---|
 | `internal/queue` | The job queue on Postgres: claiming, heartbeats, retries, dead-lettering. `schema.sql` creates the table. |
-| `internal/handler` | The image job handler. |
+| `internal/handler` | The job handlers: image and panorama, spreadsheet, text check. |
 | `internal/imagepipe` | The image engine, built on libvips. |
 | `internal/storage` | MinIO/S3 client. |
 | `internal/search` | Article search index. `schema.sql` holds all of it. |
@@ -33,8 +33,8 @@ app ──SELECT search_articles(...)──▶ ranked hits + snippets
 | `cmd/worker` | The service. |
 | `cmd/imgpipe`, `cmd/normalize`, `cmd/tabular`, `cmd/search` | Small command-line tools over the packages above. |
 
-Only **image** and **panorama** jobs are wired into the worker today. `normalize` and `tabular`
-work as packages and CLIs but have no job type yet.
+The worker runs four job types: `image`, `panorama`, `tabular` (spreadsheets) and
+`normalize` (text checks on an article revision). `geo` is not built yet.
 
 ## Why it is built this way
 
@@ -214,6 +214,64 @@ VALUES ('panorama', '{"submission_id": "9b1e7c3a", "object_key": "uploads/9b1e7c
   worker in turn.
 * On shutdown the worker stops taking jobs and lets running ones finish.
 
+## Spreadsheet jobs
+
+```sql
+INSERT INTO jobs (type, payload)
+VALUES ('tabular', '{"submission_id": "9b1e7c3a", "object_key": "uploads/9b1e7c3a"}');
+```
+
+The worker downloads the file from the raw bucket and decides from its bytes whether it is
+CSV or XLSX (never from a name). It reports the file's shape: `format`, `rows` (data rows,
+header excluded), `columns`, and `problems`, grouped by kind with a count and up to ten
+sample row numbers each. The problem codes are `no_rows`, `no_header`, `duplicate_column`,
+`blank_column_name`, `empty_row`, `row_longer_than_header` and `unreadable_rows`.
+
+**A file with problems is not rejected.** The outcome is `ok` with the report, for a reviewer
+to decide on. The values themselves are never judged. Only these are refused:
+
+| Reason code | When |
+|---|---|
+| `unsupported_format` | Not CSV or XLSX (an empty file included). |
+| `corrupt_file` | Starts like one of them but cannot be read through. |
+| `file_too_large` | Over `WORKER_MAX_FILE_BYTES`. |
+| `object_missing`, `malformed_payload` | As for images. |
+
+```json
+"tabular": {"format": "csv", "rows": 3, "columns": 3,
+            "problems": [{"code": "empty_row", "count": 1, "sample_rows": [2]}]}
+```
+
+## Text check jobs (normalize)
+
+```sql
+INSERT INTO jobs (type, payload)
+VALUES ('normalize', '{"revision_id": "<article_revisions.id>"}');
+```
+
+The worker reads that revision from core's tables, and checks its title, summary and the
+prose of its body (the same text `search_body_text` gives search) against the rules for the
+translation's language: `fa`, `ar` or `en`, region ignored (`fa-IR` is `fa`).
+
+It **never changes the revision**. Each finding is a suggestion: an Arabic ي or ك in a Persian
+article, an invisible character, mixed digits. A reviewer accepts or rejects it, because a
+spelling can be a deliberate quotation. The same letters in an Arabic article are not findings.
+
+```json
+"normalize": {"revision_id": "…", "locale": "fa", "count": 2,
+              "findings": [{"rule": "…", "line": 2, "column": 4, "offset": 21,
+                            "found": "ي", "suggest": "ی", "context": "جزيره كيش"}]}
+```
+
+`count` is every finding; `findings` keeps the first 500, and `findings_truncated` says how
+many were left out. `line` and `column` count in that combined text: the title is line 1.
+
+| Reason code | When |
+|---|---|
+| `revision_missing` | No revision has that id. |
+| `unsupported_locale` | There are no rules for the translation's language. |
+| `malformed_payload` | Bad JSON, or `revision_id` is not a UUID. |
+
 ## Search
 
 `internal/search/schema.sql` creates a `search_documents` table and the functions
@@ -390,7 +448,7 @@ differences from `docs/MEDIA_PIPELINE.md` are deliberate.
 ## Not done yet
 
 * **The contract with core**: see [CORE_CHANGES.md](CORE_CHANGES.md).
-* **Other job types.** Spreadsheet, normalize and geo jobs are not wired in.
+* **Geo jobs.** Not wired in, because `internal/geo` is not built.
 * **Geo.** `internal/geo` (shapefile to GeoJSON) is unimplemented, so there is no
   `shp2geojson` command.
 * **Format allowlist.** Anything libvips can read is accepted today. Limiting it to a list of

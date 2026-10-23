@@ -172,7 +172,21 @@ your migrations is blocked by a dependency on these columns. If a migration rena
 one of them, search stops updating and logs why. The site is not affected. Please tell me when
 that happens.
 
-## 4. Database role
+## 4. Spreadsheets and text checks: ready when you want them
+
+Two more job types run already. Neither needs anything from core until you use it:
+
+* **`tabular`**: `{"submission_id", "object_key"}` for a CSV or XLSX in the staging bucket.
+  The result's `tabular` block is the file's shape and its structural problems, for a
+  reviewer. A file with problems is `ok`, not rejected.
+* **`normalize`**: `{"revision_id"}` for an article revision, any status. The worker reads it
+  from your tables and returns `normalize.findings`: suggested text fixes such as an Arabic
+  ي in a Persian article. It never writes to the revision. A natural place to enqueue it is
+  when a revision is submitted for review, so the moderator sees the findings with it.
+
+Both are described in the README with their result and reject codes.
+
+## 5. Database role
 
 The compose files run the worker as core's database user, which is enough. If it ever gets its
 own role, that role needs `CREATE` on `public` (it applies its schema),
