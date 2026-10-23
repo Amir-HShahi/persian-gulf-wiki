@@ -1,0 +1,132 @@
+{
+  "key": "hawksbill-turtle",
+  "subject": {
+    "kind": "SPECIES",
+    "names": { "fa": "لاک‌پشت پوزه‌عقابی", "en": "Hawksbill turtle", "ar": "السلحفاة صقرية المنقار" },
+    "aliases": { "fa": ["لاک‌پشت منقارعقابی"], "en": ["Hawksbill sea turtle", "Eretmochelys imbricata"], "ar": ["سلحفاة منقار الصقر", "الشرفة"] },
+    "geometry": "POLYGON((48 30, 50.5 29.5, 54 27, 56.5 27.2, 57 25.5, 56.3 24.5, 54 24, 51.5 24.5, 50 26, 48.5 28, 48 30))",
+    "facts": [
+      { "attribute": "scientific_name", "values": [ { "text": "Eretmochelys imbricata" } ] },
+      { "attribute": "category", "values": [ { "option": "REPTILE" } ] },
+      { "attribute": "iucn_status", "values": [ { "option": "CR" } ] },
+      { "attribute": "habitat", "values": [ { "option": "CORAL_REEF" } ] },
+      { "attribute": "species_features", "values": [ { "option": "MIGRATORY" } ] },
+      { "attribute": "max_length", "values": [ { "number": 114, "source": "iucn-redlist-2024" } ] }
+    ]
+  },
+  "topics": ["marine-life", "pollution-and-environment"],
+  "canonicalLanguage": "fa",
+  "gallery": ["hawksbill-turtle", "acropora-coral", "reef-fish-school"],
+  "history": { "revisions": 6, "contributors": 5 },
+  "verification": "VERIFIED",
+  "translations": {
+    "fa": {
+      "slug": "لاک‌پشت-پوزه‌عقابی",
+      "title": "لاک‌پشت پوزه‌عقابی",
+      "summary": "لاک‌پشتی دریایی با منقار خمیده و لاک نقش‌دار که در فهرست سرخ جهانی در وضعیت بحرانی قرار دارد و در جزایر خلیج فارس تخم می‌گذارد.",
+      "lead": [
+        "**لاک‌پشت پوزه‌عقابی** (نام علمی: *Eretmochelys imbricata*) یکی از هفت گونهٔ لاک‌پشت دریایی جهان است که به سبب منقار باریک و خمیده‌اش، که به منقار عقاب می‌ماند، این نام را گرفته است. این گونه در فهرست سرخ اتحادیهٔ جهانی حفاظت از طبیعت در ردهٔ «در معرض خطر انقراض بحرانی» جای دارد.{{iucn-redlist-2024}}",
+        "جزایر [[qeshm-island|قشم]]، [[hengam-island|هنگام]]، [[kish-island|کیش]]، [[lavan-island|لاوان]] و [[abu-musa-island|ابوموسی]] از مهم‌ترین زیستگاه‌های تخم‌گذاری این لاک‌پشت در خلیج فارس‌اند.{{doe-protected-areas}}"
+      ],
+      "sections": [
+        {
+          "heading": "ویژگی‌های ظاهری",
+          "blocks": [
+            { "p": "لاک این گونه از صفحه‌های شاخی هم‌پوشان تشکیل شده که لبه‌های پشتی آن دندانه‌دار است و نقش‌هایی از رنگ‌های کهربایی، قهوه‌ای و سیاه دارد. طول لاک بالغ‌ها به حدود یک متر و وزنشان به ۵۰ تا ۸۰ کیلوگرم می‌رسد. سر باریک و منقار تیز به آن امکان می‌دهد غذا را از شکاف‌های تنگ صخره‌های مرجانی بیرون بکشد.{{iucn-redlist-2024}}" }
+          ]
+        },
+        {
+          "heading": "زیستگاه و تغذیه",
+          "blocks": [
+            { "p": "لاک‌پشت پوزه‌عقابی بیشتر عمر خود را در صخره‌های مرجانی و بسترهای سنگی کم‌عمق می‌گذراند. خوراک اصلی آن اسفنج‌های دریایی است و از این راه با کنترل رشد اسفنج‌ها، به سلامت صخره‌های مرجانی کمک می‌کند. شقایق‌های دریایی، عروس‌های دریایی و جلبک‌ها نیز بخشی از رژیم غذایی آن‌اند.{{burt-gulf-corals}}" }
+          ]
+        },
+        {
+          "heading": "تخم‌گذاری در خلیج فارس",
+          "blocks": [
+            { "p": "فصل تخم‌گذاری در جزایر ایرانی از اسفند تا خرداد است. ماده‌ها شبانه به ساحل می‌آیند، گودالی در ماسه می‌کنند و در هر نوبت حدود ۱۰۰ تا ۱۴۰ تخم می‌گذارند. پس از حدود دو ماه، بچه‌لاک‌پشت‌ها شب‌هنگام سر از ماسه بیرون می‌آورند و به سوی دریا می‌روند. دمای ماسه جنسیت نوزادان را تعیین می‌کند و ماسهٔ گرم‌تر ماده‌های بیشتری پدید می‌آورد.{{doe-protected-areas}}" },
+            { "ul": ["تخم‌گذاری شبانه", "۱۰۰ تا ۱۴۰ تخم در هر لانه", "دورهٔ نهفتگی حدود ۶۰ روز", "تعیین جنسیت با دمای ماسه"] }
+          ]
+        },
+        {
+          "heading": "تهدیدها و حفاظت",
+          "blocks": [
+            { "p": "تجارت جهانی لاک این جانور برای ساخت زیورآلات، در سدهٔ بیستم جمعیت آن را به‌شدت کاهش داد. امروز گرفتار شدن در تورهای ماهیگیری، تخریب ساحل‌های تخم‌گذاری، نور مصنوعی که بچه‌لاک‌پشت‌ها را گمراه می‌کند، آلودگی نفتی و [[acropora-downingi|سفیدشدگی مرجان‌ها]] بزرگ‌ترین تهدیدها هستند.{{ropme-soe-2021}} محیط‌بانان و داوطلبان محلی در فصل تخم‌گذاری از لانه‌ها مراقبت می‌کنند و رهاسازی بچه‌لاک‌پشت‌ها به یکی از برنامه‌های آموزشی پرطرفدار در جزایر تبدیل شده است." }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "hawksbill-turtle",
+      "title": "Hawksbill turtle",
+      "summary": "A sea turtle with a hooked beak and patterned shell, critically endangered worldwide, that nests on Persian Gulf islands.",
+      "lead": [
+        "The **hawksbill turtle** (*Eretmochelys imbricata*) is one of the world's seven species of sea turtle, named for its narrow, hooked beak that resembles a hawk's. It is listed as Critically Endangered on the IUCN Red List.{{iucn-redlist-2024}}",
+        "The islands of [[qeshm-island|Qeshm]], [[hengam-island|Hengam]], [[kish-island|Kish]], [[lavan-island|Lavan]] and [[abu-musa-island|Abu Musa]] are among its most important nesting sites in the Persian Gulf.{{doe-protected-areas}}"
+      ],
+      "sections": [
+        {
+          "heading": "Appearance",
+          "blocks": [
+            { "p": "Its shell is made of overlapping horny plates with a serrated rear edge and patterns of amber, brown and black. Adults reach about a metre in shell length and 50 to 80 kilograms in weight. The narrow head and sharp beak let it pull food from tight crevices in coral reefs.{{iucn-redlist-2024}}" }
+          ]
+        },
+        {
+          "heading": "Habitat and diet",
+          "blocks": [
+            { "p": "The hawksbill spends most of its life on coral reefs and shallow rocky bottoms. Its main food is sea sponges, and by keeping sponge growth in check it helps keep reefs healthy. Sea anemones, jellyfish and algae are also part of its diet.{{burt-gulf-corals}}" }
+          ]
+        },
+        {
+          "heading": "Nesting in the Persian Gulf",
+          "blocks": [
+            { "p": "On the Iranian islands the nesting season runs from March to June. Females come ashore at night, dig a pit in the sand and lay about 100 to 140 eggs at a time. After about two months the hatchlings emerge at night and head for the sea. Sand temperature decides the sex of the young: warmer sand produces more females.{{doe-protected-areas}}" },
+            { "ul": ["Nocturnal nesting", "100 to 140 eggs per nest", "Incubation of about 60 days", "Sex set by sand temperature"] }
+          ]
+        },
+        {
+          "heading": "Threats and conservation",
+          "blocks": [
+            { "p": "The global trade in its shell for jewellery sharply reduced its numbers in the twentieth century. Today entanglement in fishing nets, loss of nesting beaches, artificial light that disorients hatchlings, oil pollution and [[acropora-downingi|coral bleaching]] are the main threats.{{ropme-soe-2021}} Rangers and local volunteers guard nests during the season, and hatchling releases have become a popular educational event on the islands." }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "السلحفاة-صقرية-المنقار",
+      "title": "السلحفاة صقرية المنقار",
+      "summary": "سلحفاة بحرية بمنقار معقوف ودرقة منقوشة، مهددة بشدة بالانقراض عالميًا، تعشّش على جزر الخليج الفارسي.",
+      "lead": [
+        "**السلحفاة صقرية المنقار** (الاسم العلمي: *Eretmochelys imbricata*) واحدة من سبعة أنواع من السلاحف البحرية في العالم، سُمّيت بذلك لمنقارها الضيق المعقوف الشبيه بمنقار الصقر. وهي مصنفة في القائمة الحمراء للاتحاد الدولي لحفظ الطبيعة بوصفها «مهددة بشدة بالانقراض».{{iucn-redlist-2024}}",
+        "وتُعدّ جزر [[qeshm-island|قشم]] و[[hengam-island|هنگام]] و[[kish-island|كيش]] و[[lavan-island|لاوان]] و[[abu-musa-island|أبو موسى]] من أهم مواقع تعشيشها في الخليج الفارسي.{{doe-protected-areas}}"
+      ],
+      "sections": [
+        {
+          "heading": "الشكل",
+          "blocks": [
+            { "p": "تتكون درقتها من صفائح قرنية متراكبة ذات حافة خلفية مسننة، وتزينها نقوش بألوان الكهرمان والبني والأسود. ويبلغ طول درقة البالغ نحو متر ووزنه بين ٥٠ و٨٠ كيلوغرامًا، ويتيح لها رأسها الضيق ومنقارها الحاد انتزاع الغذاء من الشقوق الضيقة في الشعاب المرجانية.{{iucn-redlist-2024}}" }
+          ]
+        },
+        {
+          "heading": "الموطن والغذاء",
+          "blocks": [
+            { "p": "تقضي معظم حياتها في الشعاب المرجانية والقيعان الصخرية الضحلة، وغذاؤها الرئيسي الإسفنج البحري، وبالحد من نموه تسهم في سلامة الشعاب. كما تتغذى على شقائق النعمان البحرية وقناديل البحر والطحالب.{{burt-gulf-corals}}" }
+          ]
+        },
+        {
+          "heading": "التعشيش في الخليج الفارسي",
+          "blocks": [
+            { "p": "يمتد موسم التعشيش في الجزر الإيرانية من مارس إلى يونيو، إذ تخرج الإناث ليلًا إلى الشاطئ وتحفر حفرة في الرمل وتضع نحو ١٠٠ إلى ١٤٠ بيضة في كل مرة. وبعد نحو شهرين تخرج الصغار ليلًا وتتجه إلى البحر، وتحدد حرارة الرمل جنس الصغار، فالرمل الأدفأ ينتج إناثًا أكثر.{{doe-protected-areas}}" },
+            { "ul": ["تعشيش ليلي", "١٠٠ إلى ١٤٠ بيضة في العش", "حضانة نحو ٦٠ يومًا", "تحديد الجنس بحرارة الرمل"] }
+          ]
+        },
+        {
+          "heading": "التهديدات والحماية",
+          "blocks": [
+            { "p": "خفّضت التجارة العالمية بدرقتها لصنع الحلي أعدادها بشدة في القرن العشرين. وأخطر التهديدات اليوم الوقوع في شباك الصيد، وفقدان شواطئ التعشيش، والإضاءة الصناعية التي تضلل الصغار، والتلوث النفطي، و[[acropora-downingi|ابيضاض المرجان]].{{ropme-soe-2021}} ويحرس حراس البيئة والمتطوعون المحليون الأعشاش في الموسم، وأصبح إطلاق الصغار نشاطًا تعليميًا شائعًا في الجزر." }
+          ]
+        }
+      ]
+    }
+  }
+}

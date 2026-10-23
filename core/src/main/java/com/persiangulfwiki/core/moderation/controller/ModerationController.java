@@ -4,6 +4,7 @@ import com.persiangulfwiki.core.common.dto.ApiResult;
 import com.persiangulfwiki.core.moderation.dto.DecideRequest;
 import com.persiangulfwiki.core.moderation.dto.ModerationTaskDetailResponse;
 import com.persiangulfwiki.core.moderation.dto.ModerationTaskResponse;
+import com.persiangulfwiki.core.moderation.entity.ModerationTaskState;
 import com.persiangulfwiki.core.moderation.service.ModerationService;
 import com.persiangulfwiki.core.web.SignedUrlResponses;
 
@@ -84,8 +85,8 @@ public class ModerationController {
             + "outside its allowed range.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "The account does not hold the moderator role, or its email address is not yet verified.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    @Parameter(name = "state", description = "Optional filter: OPEN (waiting for a moderator to pick it up), CLAIMED (someone is "
-            + "working on it), or DECIDED (finished). Case-insensitive. Omit for every state.")
+    @Parameter(name = "state", description = "Optional filter (case-insensitive). Omit for every state.\n\n"
+            + ModerationTaskState.VALUES_DOC)
     @Parameter(name = "page", description = "Zero-based page index.")
     @Parameter(name = "size", description = "Page size, 1 to 100.")
     @SecurityRequirement(name = "cookieAuth")

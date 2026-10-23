@@ -15,6 +15,7 @@ globs: ["**/*.java"]
 - `200` — successful `GET`, `PUT`, or `PATCH` returning a payload.
 - `201` — successful `POST` creating a resource; return the created resource.
 - `204` — successful action with no response body, such as `DELETE`.
+- `202` — the request started work that finishes after the response (e.g. `POST /api/dev/demo-content`). The body is the work's status, and the endpoint pairs it with a `GET` that reports progress and the final outcome.
 - `400` — request validation failure due to bad or missing fields.
 - `401` — missing or invalid authentication.
 - `403` — authenticated but not authorized for the resource or action.

@@ -3,6 +3,8 @@ package com.persiangulfwiki.core.marinedata.controller;
 import com.persiangulfwiki.core.common.dto.ApiResult;
 import com.persiangulfwiki.core.marinedata.dto.MarineMetricResponse;
 import com.persiangulfwiki.core.marinedata.dto.MarineSeriesResponse;
+import com.persiangulfwiki.core.marinedata.entity.MarineMetric;
+import com.persiangulfwiki.core.marinedata.entity.MarineSeriesRange;
 import com.persiangulfwiki.core.marinedata.service.MarineMetricService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,9 +63,10 @@ public class MarineMetricController {
             + "daily-only metric.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "404", description = "The metric key is unknown, or the station has no readings for "
             + "that metric.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    @Parameter(name = "metricKey", description = "A metric key as returned by the list endpoint.", example = "sea_surface_temperature")
+    @Parameter(name = "metricKey", description = "A metric key as returned by the list endpoint.\n\n"
+            + MarineMetric.VALUES_DOC, example = "sea_surface_temperature")
     @Parameter(name = "stationKey", description = "A station key as returned by the list endpoint.", example = "bushehr")
-    @Parameter(name = "range", description = "DAY, WEEK or MONTH (case-insensitive). Defaults to WEEK.")
+    @Parameter(name = "range", description = "Case-insensitive. Defaults to WEEK.\n\n" + MarineSeriesRange.VALUES_DOC)
     @GetMapping("/{metricKey}/stations/{stationKey}/series")
     @ResponseStatus(HttpStatus.OK)
     public ApiResult<MarineSeriesResponse> series(

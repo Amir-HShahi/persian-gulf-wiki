@@ -1,5 +1,6 @@
 package com.persiangulfwiki.core.article.controller;
 
+import com.persiangulfwiki.core.article.dto.ArticleBySlugResponse;
 import com.persiangulfwiki.core.article.dto.ArticleListItemResponse;
 import com.persiangulfwiki.core.article.dto.ArticleResponse;
 import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
@@ -13,6 +14,7 @@ import com.persiangulfwiki.core.article.service.ArticleTranslationService;
 import com.persiangulfwiki.core.common.dto.ApiResult;
 import com.persiangulfwiki.core.common.dto.PageResponse;
 import com.persiangulfwiki.core.config.SupportedLocales;
+import com.persiangulfwiki.core.subject.entity.SubjectKind;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -143,6 +145,26 @@ public class ArticleController {
         return ApiResult.of(data, message);
     }
 
+    @Operation(summary = "Get an article by slug", description = "Everything the article page shows, by the slug of one of "
+            + "its translations: the article, that translation, and the translation's most recently approved revision "
+            + "with its full `body`. Open to everyone; no account is required, and the result is the same whoever "
+            + "asks -- unreviewed drafts are never returned here, not even to their authors. An article whose "
+            + "subject has been deleted is still returned. Subject names in `subjectLinks` follow `Accept-Language`.")
+    @ApiResponse(responseCode = "200", description = "The article as readers see it in the slug's language.")
+    @ApiResponse(responseCode = "400", description = "The slug is longer than 200 characters.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "404", description = "No translation has this slug, or it has no approved revision "
+            + "yet.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @Parameter(name = "slug", description = "The translation's slug, matched exactly. Slugs are unique across all "
+            + "articles and languages, so the slug also picks the language.")
+    @GetMapping("/by-slug/{slug}")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResult<ArticleBySlugResponse> getBySlug(
+            @PathVariable @Size(max = 200, message = "{validation.slug.tooLong}") String slug) {
+        ArticleBySlugResponse data = articleService.getBySlug(slug, readerLanguage());
+        String message = messageSource.getMessage("success.articleFetched", null, LocaleContextHolder.getLocale());
+        return ApiResult.of(data, message);
+    }
+
     @Operation(summary = "List articles in a language", description = "Open to everyone; no account is required, and the result is the "
             + "same whoever asks -- an author's own unapproved drafts are not listed here. Lists only articles "
             + "that have an approved translation in `language`; articles with no translation in that "
@@ -160,9 +182,8 @@ public class ArticleController {
     @Parameter(name = "language", required = true, description = "BCP-47 language tag of the translation to list, e.g. \"fa\", \"en\", \"ar\". Matched exactly.")
     @Parameter(name = "subjectId", description = "Optional filter: only articles bound to this subject. A subject that "
             + "was merged into another filters on that other subject, which now holds its articles.")
-    @Parameter(name = "subjectKind", description = "Optional filter: only articles whose subject is of this kind -- ISLAND, PORT, "
-            + "OIL_FIELD, SPECIES, STRAIT, FISHING_GROUND or PROVINCE (case-insensitive). Articles with "
-            + "no subject never match it.")
+    @Parameter(name = "subjectKind", description = "Optional filter: only articles whose subject is of this kind "
+            + "(case-insensitive). Articles with no subject never match it.\n\n" + SubjectKind.VALUES_DOC)
     @Parameter(name = "topic", description = "Optional filter: only articles about this topic, by its `slug` from "
             + "GET /api/topics. An article's topics are those of its original-language translation's latest "
             + "approved version and apply to all its translations, so the `total` here equals that topic's "

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -112,6 +113,45 @@ public interface SubjectRepository extends JpaRepository<Subject, UUID>, Subject
             @Param("size") int size);
 
     long deleteByDevMarkerAndCreatedAtBefore(String devMarker, Instant threshold);
+
+    // The marked subjects the dev demo-content wipe must keep: those an unmarked article or fact still
+    // points at, and everything they reference in turn (the recursive part), because deleting any of
+    // them would fail on articles.subject_id or subject_facts.value_ref_subject_id (both NO ACTION).
+    String KEPT_MARKED_SUBJECTS = """
+            with recursive kept(id) as (
+                select s.id from subjects s
+                where s.dev_marker = :devMarker
+                  and (exists (select 1 from articles a
+                               where a.subject_id = s.id and a.dev_marker is distinct from :devMarker)
+                       or exists (select 1 from subject_facts f join subjects o on o.id = f.subject_id
+                                  where f.value_ref_subject_id = s.id
+                                    and o.dev_marker is distinct from :devMarker))
+                union
+                select f.value_ref_subject_id from subject_facts f join kept k on k.id = f.subject_id
+                where f.value_ref_subject_id is not null
+            )
+            """;
+
+    // Used only by the dev demo-content wipe, and run before deleteByDevMarkerExceptKept. Marked
+    // subjects reference each other through their facts, and Postgres checks a NO ACTION reference
+    // before the facts that go with a subject through ON DELETE CASCADE are gone -- even inside one
+    // DELETE -- so the facts of every subject about to be deleted are removed in a statement of their own.
+    @Modifying
+    @Query(value = KEPT_MARKED_SUBJECTS + """
+            delete from subject_facts f
+            using subjects s
+            where s.id = f.subject_id and s.dev_marker = :devMarker and s.id not in (select id from kept)
+            """, nativeQuery = true)
+    int deleteFactsOfMarkedSubjectsExceptKept(@Param("devMarker") String devMarker);
+
+    @Modifying
+    @Query(value = KEPT_MARKED_SUBJECTS + """
+            delete from subjects s
+            where s.dev_marker = :devMarker and s.id not in (select id from kept)
+            """, nativeQuery = true)
+    int deleteByDevMarkerExceptKept(@Param("devMarker") String devMarker);
+
+    long countByDevMarker(String devMarker);
 
     interface LookupMatch {
 

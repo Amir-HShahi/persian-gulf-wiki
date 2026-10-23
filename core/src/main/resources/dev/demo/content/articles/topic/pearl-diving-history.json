@@ -1,0 +1,117 @@
+{
+  "key": "pearl-diving-history",
+  "topics": ["culture-and-ethnography", "history-and-archaeology", "economy-and-trade"],
+  "canonicalLanguage": "fa",
+  "gallery": ["fishing-dhow", "acropora-coral"],
+  "history": { "revisions": 4, "contributors": 3 },
+  "translations": {
+    "fa": {
+      "slug": "غواصی-مروارید-در-خلیج-فارس",
+      "title": "غواصی مروارید در خلیج فارس",
+      "summary": "پیشه‌ای هزاران‌ساله که تا آغاز سدهٔ بیستم زندگی و اقتصاد کرانه‌های خلیج فارس را می‌ساخت.",
+      "lead": [
+        "**غواصی مروارید** کهن‌ترین و پررونق‌ترین پیشهٔ مردم کرانه‌های خلیج فارس بود که دست‌کم هفت هزار سال پیشینه دارد. تا آغاز سدهٔ بیستم میلادی، هر تابستان هزاران غواص و دریانورد از [[bandar-lengeh|بندر لنگه]]، [[kish-island|کیش]]، بحرین، قطر و دیگر بندرها رهسپار صیدگاه‌های مروارید می‌شدند تا [[pearl-oyster|صدف مروارید]] را از بستر دریا گرد آورند.{{potter-gulf-history}}",
+        "مروارید خلیج فارس به سبب درخشش و رنگ زیبایش در بازارهای هند، اروپا و آمریکا خواهان بسیار داشت."
+      ],
+      "sections": [
+        {
+          "heading": "فصل غواصی",
+          "blocks": [
+            { "p": "فصل اصلی غواصی، که «غوص الکبیر» یا «فصل بزرگ» نامیده می‌شد، از اوایل خرداد تا اواخر شهریور ادامه داشت؛ زمانی که آب گرم و دریا آرام بود. لنج‌های غواصی چهار ماه در دریا می‌ماندند و تنها برای آب شیرین و آذوقه به بندرها یا جزایر نزدیک بازمی‌گشتند. پایان فصل با جشن و آیین‌هایی در بندرها همراه بود که هنوز در یاد سالمندان مانده است." }
+          ]
+        },
+        {
+          "heading": "شیوهٔ غواصی",
+          "blocks": [
+            { "p": "غواص با گیره‌ای از استخوان یا شاخ بر بینی، سنگی سنگین بسته به پا و سبدی بر گردن، تا ژرفای ده تا بیست متری فرو می‌رفت و پس از یک تا دو دقیقه، با کشیدن طنابی، به «سیب»، یعنی کمک‌کار بالای عرشه، نشانه می‌داد تا او را بالا بکشد. هر غواص روزانه ده‌ها بار فرو می‌رفت. صدف‌ها شبانه روی عرشه باز می‌شدند و ناخدا مرواریدهای یافته را نگه می‌داشت.{{potter-gulf-history}}" },
+            { "ul": ["غواص: فرو رفتن به بستر دریا", "سیب: بالا کشیدن غواص با طناب", "ناخدا: فرمانده و نگهدار مروارید", "تاجر مروارید (طواش): خرید از ناخدا"] }
+          ]
+        },
+        {
+          "heading": "اقتصاد مروارید",
+          "blocks": [
+            { "p": "تجارت مروارید بر نظامی از وام و بدهی استوار بود: بازرگانان پیش از فصل به ناخداها و غواصان وام می‌دادند و پس از فصل، مرواریدها را به بهای دلخواه خود می‌خریدند. بسیاری از غواصان سال‌ها و گاه تا پایان عمر بدهکار می‌ماندند. با این همه، این تجارت ثروت هنگفتی برای بازرگانان بندرهای خلیج فارس پدید آورد و پایهٔ شکل‌گیری بسیاری از شهرهای ساحلی شد.{{floor-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "فروپاشی و یاد آن",
+          "blocks": [
+            { "p": "در دههٔ ۱۹۳۰ میلادی، عرضهٔ گستردهٔ مروارید پرورشی ژاپنی و رکود بزرگ اقتصادی، بازار مروارید طبیعی خلیج فارس را فروپاشاند. چند سال بعد، کشف و استخراج نفت، زندگی اقتصادی منطقه را یکسره دگرگون کرد و غواصی مروارید به خاطره‌ای فرهنگی تبدیل شد. امروز موزه‌ها، جشنواره‌ها و ثبت «مسیر مروارید» بحرین در فهرست میراث جهانی یونسکو، یاد این پیشه را زنده نگه می‌دارند.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "pearl-diving-in-the-persian-gulf",
+      "title": "Pearl diving in the Persian Gulf",
+      "summary": "A trade thousands of years old that shaped life and the economy of the Persian Gulf coasts until the early twentieth century.",
+      "lead": [
+        "**Pearl diving** was the oldest and most prosperous occupation of the people of the Persian Gulf coasts, going back at least seven thousand years. Until the early twentieth century, every summer thousands of divers and seamen from [[bandar-lengeh|Bandar Lengeh]], [[kish-island|Kish]], Bahrain, Qatar and other ports set out for the pearl banks to gather the [[pearl-oyster|pearl oyster]] from the seabed.{{potter-gulf-history}}",
+        "For their lustre and colour, Persian Gulf pearls were in great demand in the markets of India, Europe and America."
+      ],
+      "sections": [
+        {
+          "heading": "The diving season",
+          "blocks": [
+            { "p": "The main diving season, known as the ghaus al-kabir or \"great season\", ran from late May to mid-September, when the water was warm and the sea calm. Diving dhows stayed at sea for four months, returning to port or nearby islands only for fresh water and provisions. The end of the season was marked by festivities in the ports that elders still remember." }
+          ]
+        },
+        {
+          "heading": "How divers worked",
+          "blocks": [
+            { "p": "With a bone or horn clip on his nose, a heavy stone tied to his foot and a basket around his neck, the diver descended to ten or twenty metres and, after one or two minutes, tugged a rope to signal the saib, his helper on deck, to haul him up. Each diver went down dozens of times a day. The oysters were opened on deck the next morning, and the nakhoda kept the pearls found.{{potter-gulf-history}}" },
+            { "ul": ["Diver: goes down to the seabed", "Saib: hauls the diver up by rope", "Nakhoda: captain and keeper of the pearls", "Pearl merchant (tawwash): buys from the captain"] }
+          ]
+        },
+        {
+          "heading": "The pearl economy",
+          "blocks": [
+            { "p": "The pearl trade rested on a system of loans and debt: merchants advanced money to captains and divers before the season and bought the pearls afterwards at prices they set themselves. Many divers stayed in debt for years, sometimes for life. Even so, the trade created great fortunes for the merchants of the Gulf ports and laid the foundations of many coastal towns.{{floor-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "Collapse and memory",
+          "blocks": [
+            { "p": "In the 1930s the mass arrival of Japanese cultured pearls and the Great Depression destroyed the market for the Gulf's natural pearls. A few years later the discovery of oil transformed the region's economy, and pearl diving became a cultural memory. Today museums, festivals and the inscription of Bahrain's Pearling Path on the UNESCO World Heritage List keep the memory of the trade alive.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "الغوص-على-اللؤلؤ-في-الخليج",
+      "title": "الغوص على اللؤلؤ في الخليج الفارسي",
+      "summary": "مهنة عمرها آلاف السنين صاغت الحياة والاقتصاد على سواحل الخليج الفارسي حتى أوائل القرن العشرين.",
+      "lead": [
+        "كان **الغوص على اللؤلؤ** أقدم مهن أهل سواحل الخليج الفارسي وأكثرها ازدهارًا، ويعود إلى سبعة آلاف عام على الأقل. وحتى أوائل القرن العشرين كان آلاف الغواصين والبحارة من [[bandar-lengeh|بندر لنجة]] و[[kish-island|كيش]] والبحرين وقطر وموانئ أخرى يبحرون كل صيف إلى المغاصات لجمع [[pearl-oyster|محار اللؤلؤ]] من قاع البحر.{{potter-gulf-history}}",
+        "وكان لؤلؤ الخليج، لبريقه ولونه، مطلوبًا بشدة في أسواق الهند وأوروبا وأمريكا."
+      ],
+      "sections": [
+        {
+          "heading": "موسم الغوص",
+          "blocks": [
+            { "p": "كان موسم الغوص الرئيسي، المعروف بـ«الغوص الكبير»، يمتد من أواخر مايو حتى منتصف سبتمبر، حين يكون الماء دافئًا والبحر هادئًا. وكانت سفن الغوص تبقى في البحر أربعة أشهر، لا تعود إلى الموانئ أو الجزر القريبة إلا للماء العذب والمؤن، وكانت نهاية الموسم، المعروفة بـ«القفال»، تُستقبل باحتفالات في الموانئ لا يزال كبار السن يتذكرونها." }
+          ]
+        },
+        {
+          "heading": "طريقة الغوص",
+          "blocks": [
+            { "p": "كان الغواص يضع على أنفه مشبكًا من العظم أو القرن، ويربط بقدمه حجرًا ثقيلًا، ويعلّق سلة في عنقه، فينزل إلى عمق عشرة أو عشرين مترًا، وبعد دقيقة أو دقيقتين يشد الحبل ليشير إلى «السيب» على السطح كي يسحبه. وكان كل غواص ينزل عشرات المرات يوميًا، وتُفلق المحارات صباح اليوم التالي، ويحتفظ النوخذة باللؤلؤ.{{potter-gulf-history}}" },
+            { "ul": ["الغيص: ينزل إلى القاع", "السيب: يسحب الغيص بالحبل", "النوخذة: قائد السفينة وحافظ اللؤلؤ", "الطواش: تاجر اللؤلؤ الذي يشتري من النوخذة"] }
+          ]
+        },
+        {
+          "heading": "اقتصاد اللؤلؤ",
+          "blocks": [
+            { "p": "قامت تجارة اللؤلؤ على نظام من السلف والديون؛ فكان التجار يقرضون النواخذة والغواصين قبل الموسم، ثم يشترون اللؤلؤ بعده بأسعار يحددونها، وظل كثير من الغواصين مدينين سنوات وأحيانًا طوال حياتهم. ومع ذلك صنعت هذه التجارة ثروات طائلة لتجار موانئ الخليج، وأرست أسس كثير من المدن الساحلية.{{floor-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "الانهيار والذاكرة",
+          "blocks": [
+            { "p": "في ثلاثينيات القرن العشرين قضى تدفق اللؤلؤ الياباني المستزرع والكساد الكبير على سوق اللؤلؤ الطبيعي في الخليج، وبعد سنوات قليلة غيّر اكتشاف النفط اقتصاد المنطقة كليًا، فصار الغوص على اللؤلؤ ذكرى ثقافية. وتحافظ اليوم المتاحف والمهرجانات وإدراج «طريق اللؤلؤ» البحريني في قائمة التراث العالمي على ذكرى هذه المهنة.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

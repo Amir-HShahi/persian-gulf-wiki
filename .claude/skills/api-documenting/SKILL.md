@@ -184,6 +184,53 @@ must be modeled as an API-key-in-cookie, not HTTP Bearer.
   cases from the DFS) won't explain, since the CSRF filter rejects the request before it ever
   reaches the controller method.
 
+## Enums: list and explain every value
+
+Anywhere a closed set of values reaches the API (a request field, a response field, a path
+variable, a query parameter, a header), every value must be listed **and** explained. springdoc
+emits the bare `enum` array, and that doesn't tell a client what `STALE` or `BAN` means or how
+they differ from the other values. "IMAGE, VIDEO or PANORAMA_360" has the same problem: it lists
+the values without explaining them. Neither is acceptable.
+
+- **One source per enum.** Each API-exposed enum carries a `VALUES_DOC` constant: a text block
+  with one Markdown bullet per value, in the form `` - `VALUE`: what it means. `` (Scalar renders
+  it as a list). Wrap lines over 120 chars with a trailing `\` so each bullet stays one line once
+  rendered. Annotate the enum itself with `@Schema(description = X.VALUES_DOC)`:
+  ```java
+  @Schema(description = FactRank.VALUES_DOC)
+  public enum FactRank {
+      PREFERRED, NORMAL;
+
+      // One line per value; shown wherever this type appears in the API docs.
+      public static final String VALUES_DOC = """
+              - `PREFERRED`: the value readers see: shown in the infobox and counted in filters.
+              - `NORMAL`: kept on record as an alternative; not shown or counted.""";
+  }
+  ```
+- **A field-level description replaces the class-level one, it does not merge** (verified on
+  this project's springdoc). A field with no `@Schema(description)` inherits the list for free.
+  A field that has its own description must append the list:
+  `@Schema(description = "Field-specific context.\n\n" + FactRank.VALUES_DOC)`. Don't repeat the
+  values inline in the field text ("PREFERRED (the default) or NORMAL") as well.
+- **String-typed closed sets carry no `enum` in the spec, so nothing reminds you to document
+  them.** This covers query/path params bound as `String` and parsed by hand (e.g.
+  `?state=`, `{kind}`), and response fields that hold an enum's name or code as a `String`
+  (e.g. `ApplicationResponse.status`, `MediaResponse.failureCode`). Append the matching enum's
+  `VALUES_DOC` to their `@Parameter`/`@Schema` description too. If the set isn't a Java enum
+  (e.g. `MarineMetric` keys, `MediaFailureCode` codes), give the class that owns the set a
+  `VALUES_DOC` anyway, without the class-level `@Schema`.
+- **Explain from the consumer's side:** what the value means, what it leads to (e.g. "the task
+  returns to OPEN"), and how it differs from its neighbours (e.g. `BAN` vs `SUSPEND`). Read the
+  code to get this right. Don't guess from the name.
+- **Check the generated spec, not just the annotations.** `OpenApiDevDocsIntegrationTests
+  .everyEnumExplainsEachOfItsValues` fails if any `enum` in the spec lacks a ``- `VALUE`: ``
+  bullet for each of its values. It can't see string-typed closed sets, so check those by hand
+  against the list above.
+- **Watch for framework types leaking an enum.** springdoc describes `JsonNode` by its Java
+  getters, which brings in a `nodeType` enum the API never sends. `OpenApiConfig
+  .jsonNodeSchemaCustomizer` replaces it with "Any JSON value". Any other library type that
+  shows up with an unexpected `enum` needs the same treatment.
+
 ## Audience: no Spring/Java leakage
 
 The docs are consumed by frontend developers (Next.js) and possibly mobile developers

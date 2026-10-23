@@ -13,7 +13,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -132,7 +135,29 @@ class OpenApiDocsIntegrationTests {
                 "User Management", "Admin", "Expert Reviewer", "Subjects", "Subject Revisions",
                 "Expert Verifications", "Attributes",
                 "Labels",
-                "Sources", "Articles", "Article Media", "Topics", "Moderation",
+                "Sources", "Articles", "Featured Articles", "Article Media", "Topics", "Moderation",
                 "Marine Data");
+    }
+
+    // Query/path filters that take a closed set are bound as plain strings, so they carry no enum in the
+    // spec for a sweep to find; their descriptions must still explain every value.
+    @Test
+    void stringFilterOverAClosedSetExplainsEachValue() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.paths['/api/moderation/tasks'].get.parameters[?(@.name == 'state')].description")
+                        .value(contains(stringContainsInOrder("- `OPEN`: ", "- `CLAIMED`: ", "- `DECIDED`: "))))
+                .andExpect(jsonPath("$.paths['/api/subject-kinds/{kind}/attributes'].get.parameters[?(@.name == 'kind')]"
+                        + ".description").value(contains(containsString("- `FISHING_GROUND`: "))));
+    }
+
+    // A free-form JSON field must not be described by the server's internal JSON-tree type, whose
+    // node-type enum the API never sends.
+    @Test
+    void freeFormJsonFieldsAreDocumentedAsAnyValue() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.components.schemas.JsonNode.description").value("Any JSON value."))
+                .andExpect(jsonPath("$.components.schemas.JsonNode.properties").doesNotExist());
     }
 }

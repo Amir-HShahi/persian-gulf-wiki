@@ -1,0 +1,132 @@
+{
+  "key": "orange-spotted-grouper",
+  "subject": {
+    "kind": "SPECIES",
+    "names": { "fa": "هامور معمولی", "en": "Orange-spotted grouper", "ar": "الهامور" },
+    "aliases": { "fa": ["هامور", "هامور خال‌نارنجی"], "en": ["Estuary cod", "Epinephelus coioides"], "ar": ["هامور أبو نقط", "الهامور البرتقالي المنقط"] },
+    "geometry": "POLYGON((48 30, 50.5 29.5, 54 27, 56.5 27.2, 57 25.5, 56.3 24.5, 54 24, 51.5 24.5, 50 26, 48.5 28, 48 30))",
+    "facts": [
+      { "attribute": "scientific_name", "values": [ { "text": "Epinephelus coioides" } ] },
+      { "attribute": "category", "values": [ { "option": "FISH" } ] },
+      { "attribute": "iucn_status", "values": [ { "option": "LC" } ] },
+      { "attribute": "habitat", "values": [ { "option": "CORAL_REEF" }, { "option": "MANGROVE" } ] },
+      { "attribute": "species_features", "values": [ { "option": "FISHERY" } ] },
+      { "attribute": "max_length", "values": [ { "number": 120, "source": "carpenter-living-resources" } ] }
+    ]
+  },
+  "topics": ["marine-life", "economy-and-trade"],
+  "canonicalLanguage": "fa",
+  "gallery": ["gag-grouper", "reef-fish-school", "fishing-dhow"],
+  "history": { "revisions": 4, "contributors": 4 },
+  "verification": "VERIFIED",
+  "translations": {
+    "fa": {
+      "slug": "هامور-معمولی",
+      "title": "هامور معمولی",
+      "summary": "ماهی کفزی بزرگ و پرطرفدار سفره‌های جنوب ایران که در صخره‌های مرجانی و خورهای حرا زندگی می‌کند.",
+      "lead": [
+        "**هامور معمولی** (نام علمی: *Epinephelus coioides*) یکی از ماهی‌های خانوادهٔ سرانیده است که در آب‌های گرم ساحلی اقیانوس هند و غرب اقیانوس آرام زندگی می‌کند. هامور در خلیج فارس یکی از باارزش‌ترین ماهی‌های خوراکی است و در بازارهای [[bandar-abbas|بندرعباس]]، [[bushehr-port|بوشهر]] و کشورهای حاشیهٔ جنوبی خلیج، قیمت بالایی دارد.{{carpenter-living-resources}}",
+        "این ماهی در [[bushehr-shrimp-grounds|صیدگاه‌های بوشهر]] و [[hormuz-fishing-grounds|تنگهٔ هرمز]] صید می‌شود و پرورش آن در قفس‌های دریایی نیز رو به گسترش است."
+      ],
+      "sections": [
+        {
+          "heading": "ویژگی‌ها",
+          "blocks": [
+            { "p": "بدن هامور کشیده و قوی است و رنگ قهوه‌ای مایل به خاکستری دارد که با خال‌های ریز نارنجی یا قهوه‌ای پوشیده شده است. پنج نوار تیرهٔ نامنظم گاه بر پهلوهای آن دیده می‌شود. طول این ماهی به بیش از یک متر و وزنش به حدود ۱۵ کیلوگرم می‌رسد. دهان بزرگ و آروارهٔ پایین بیرون‌زده، آن را به شکارچی کمین‌گری کارآمد تبدیل کرده است.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "زیستگاه و رفتار",
+          "blocks": [
+            { "p": "هامور در صخره‌های مرجانی، بسترهای سنگی، خورها و دهانهٔ رودها زندگی می‌کند. نوجوانان بیشتر در خورهای حرا و آب‌های لب‌شور دیده می‌شوند و بالغ‌ها به آب‌های ژرف‌تر و صخره‌ای کوچ می‌کنند. این ماهی تنها زندگی می‌کند و در کمین می‌نشیند تا ماهی‌ها، خرچنگ‌ها و میگوهایی را که از کنارش می‌گذرند، شکار کند.{{burt-gulf-corals}}" }
+          ]
+        },
+        {
+          "heading": "دگرجنسی",
+          "blocks": [
+            { "p": "هامور مانند بسیاری از گونه‌های خانواده‌اش، «ماده‌پیش» است: همهٔ جانوران نخست به‌صورت ماده به بلوغ می‌رسند و برخی پس از چند سال، معمولاً با رسیدن به اندازهٔ بزرگ، به نر تبدیل می‌شوند. به همین سبب، صید ماهی‌های درشت نسبت نرها را در جمعیت کاهش می‌دهد و بر توان تولیدمثل اثر می‌گذارد.{{fao-fishery-gulf}}" }
+          ]
+        },
+        {
+          "heading": "صید و پرورش",
+          "blocks": [
+            { "p": "هامور با قلاب، تور و «گرگور» صید می‌شود. افزایش تقاضا در دهه‌های اخیر، ذخایر آن را در بخش‌هایی از خلیج فارس زیر فشار گذاشته و برخی کشورهای منطقه برای آن حداقل اندازهٔ صید و فصل ممنوعیت تعیین کرده‌اند. پرورش هامور در قفس‌های دریایی در نزدیکی [[qeshm-island|قشم]] و سواحل هرمزگان آغاز شده است تا بخشی از فشار بر جمعیت‌های وحشی کاهش یابد.{{fao-fishery-gulf}}{{ropme-soe-2021}}" },
+            { "ul": ["صید با قلاب و گرگور", "حداقل اندازهٔ صید", "پرورش در قفس‌های دریایی", "تقاضای بالا در بازارهای منطقه"] }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "orange-spotted-grouper",
+      "title": "Orange-spotted grouper",
+      "summary": "A large, highly prized bottom fish of southern Iran's tables, living on coral reefs and in mangrove creeks.",
+      "lead": [
+        "The **orange-spotted grouper** (*Epinephelus coioides*) is a fish of the family Serranidae found in the warm coastal waters of the Indian Ocean and western Pacific. In the Persian Gulf, hamour is one of the most valuable food fish, commanding high prices in the markets of [[bandar-abbas|Bandar Abbas]], [[bushehr-port|Bushehr]] and the southern Gulf states.{{carpenter-living-resources}}",
+        "It is caught on the [[bushehr-shrimp-grounds|Bushehr grounds]] and in the [[hormuz-fishing-grounds|Strait of Hormuz]], and cage farming of the species is growing."
+      ],
+      "sections": [
+        {
+          "heading": "Description",
+          "blocks": [
+            { "p": "The body is long and powerful, brownish grey and covered with small orange or brown spots. Five irregular dark bars sometimes show on the flanks. It grows to more than a metre and about 15 kilograms. A large mouth with a protruding lower jaw makes it an efficient ambush predator.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "Habitat and behaviour",
+          "blocks": [
+            { "p": "The grouper lives on coral reefs, rocky bottoms, in creeks and estuaries. Juveniles are found mostly in mangrove creeks and brackish water, while adults move to deeper, rocky areas. It is solitary and lies in wait to ambush the fish, crabs and shrimp that pass by.{{burt-gulf-corals}}" }
+          ]
+        },
+        {
+          "heading": "Sex change",
+          "blocks": [
+            { "p": "Like many of its relatives, the orange-spotted grouper is a protogynous hermaphrodite: all individuals mature first as females, and some become males after several years, usually on reaching a large size. Catching big fish therefore lowers the share of males in the population and affects its ability to reproduce.{{fao-fishery-gulf}}" }
+          ]
+        },
+        {
+          "heading": "Fishing and farming",
+          "blocks": [
+            { "p": "Hamour is caught with hooks, nets and gargur traps. Rising demand in recent decades has put stocks under pressure in parts of the Persian Gulf, and some countries in the region have set a minimum landing size and closed seasons. Cage farming near [[qeshm-island|Qeshm]] and along the Hormozgan coast has begun, to take some of the pressure off wild populations.{{fao-fishery-gulf}}{{ropme-soe-2021}}" },
+            { "ul": ["Hook and gargur fishing", "Minimum landing size", "Sea-cage farming", "High demand in regional markets"] }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "الهامور",
+      "title": "الهامور",
+      "summary": "سمكة قاعية كبيرة مرغوبة جدًا على موائد جنوب إيران والخليج، تعيش في الشعاب المرجانية وأخوار القرم.",
+      "lead": [
+        "**الهامور** (الاسم العلمي: *Epinephelus coioides*) سمكة من فصيلة الوقاريات تعيش في المياه الساحلية الدافئة للمحيط الهندي وغرب المحيط الهادئ. ويُعدّ في الخليج الفارسي من أثمن أسماك المائدة، ويحظى بأسعار مرتفعة في أسواق [[bandar-abbas|بندر عباس]] و[[bushehr-port|بوشهر]] ودول جنوب الخليج.{{carpenter-living-resources}}",
+        "ويُصاد في [[bushehr-shrimp-grounds|مصائد بوشهر]] و[[hormuz-fishing-grounds|مضيق هرمز]]، وتتوسع تربيته في الأقفاص البحرية."
+      ],
+      "sections": [
+        {
+          "heading": "الوصف",
+          "blocks": [
+            { "p": "جسم الهامور طويل قوي بلون بني رمادي تغطيه نقاط صغيرة برتقالية أو بنية، وقد تظهر على جانبيه خمسة أشرطة داكنة غير منتظمة. ويتجاوز طوله مترًا ووزنه نحو ١٥ كيلوغرامًا، ويجعله فمه الكبير وفكه السفلي البارز مفترسًا كامنًا بارعًا.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "الموطن والسلوك",
+          "blocks": [
+            { "p": "يعيش الهامور في الشعاب المرجانية والقيعان الصخرية والأخوار ومصبات الأنهار. وتوجد صغاره غالبًا في أخوار القرم والمياه قليلة الملوحة، بينما ينتقل البالغ إلى المناطق الصخرية الأعمق. وهو انفرادي يكمن لاصطياد الأسماك والسرطانات والروبيان المارة بجانبه.{{burt-gulf-corals}}" }
+          ]
+        },
+        {
+          "heading": "تغيّر الجنس",
+          "blocks": [
+            { "p": "الهامور، مثل كثير من أقاربه، خنثى متعاقب يبدأ أنثى: إذ تبلغ جميع الأفراد أولًا إناثًا، ثم يتحول بعضها إلى ذكور بعد سنوات، عادةً عند بلوغ حجم كبير. ولذلك يؤدي صيد الأسماك الكبيرة إلى خفض نسبة الذكور في المجموعة والتأثير في قدرتها على التكاثر.{{fao-fishery-gulf}}" }
+          ]
+        },
+        {
+          "heading": "الصيد والاستزراع",
+          "blocks": [
+            { "p": "يُصاد الهامور بالخيوط والشباك والقراقير. وقد وضع ارتفاع الطلب في العقود الأخيرة مخزونه تحت الضغط في أجزاء من الخليج، فحددت بعض دول المنطقة حدًا أدنى لحجم الصيد ومواسم حظر. وبدأ استزراعه في أقفاص بحرية قرب [[qeshm-island|قشم]] وعلى ساحل هرمزغان لتخفيف الضغط عن المجموعات البرية.{{fao-fishery-gulf}}{{ropme-soe-2021}}" },
+            { "ul": ["الصيد بالخيط والقراقير", "حد أدنى لحجم الصيد", "الاستزراع في الأقفاص البحرية", "طلب مرتفع في أسواق المنطقة"] }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "users": [
+    { "key": "sara-ahmadi", "role": "CONTRIBUTOR" },
+    { "key": "reza-karimi", "role": "CONTRIBUTOR" },
+    { "key": "maryam-hosseini", "role": "CONTRIBUTOR" },
+    { "key": "ali-rezaei", "role": "CONTRIBUTOR" },
+    { "key": "nasrin-jafari", "role": "CONTRIBUTOR" },
+    { "key": "omid-moradi", "role": "CONTRIBUTOR" },
+    { "key": "layla-khalifa", "role": "CONTRIBUTOR" },
+    { "key": "yousef-hashimi", "role": "CONTRIBUTOR" },
+    { "key": "fatemeh-ghasemi", "role": "CONTRIBUTOR" },
+    { "key": "hamid-tavakoli", "role": "CONTRIBUTOR" },
+    { "key": "parisa-nouri", "role": "CONTRIBUTOR" },
+    { "key": "kaveh-bahrami", "role": "CONTRIBUTOR" },
+    { "key": "noura-sabah", "role": "CONTRIBUTOR" },
+    { "key": "mehdi-rostami", "role": "CONTRIBUTOR" },
+    { "key": "zahra-kazemi", "role": "CONTRIBUTOR" },
+    { "key": "mina-moderator", "role": "MODERATOR" },
+    { "key": "shirin-marine", "role": "EXPERT_REVIEWER", "expertise": "SPECIES" },
+    { "key": "hassan-islands", "role": "EXPERT_REVIEWER", "expertise": "ISLAND" },
+    { "key": "farhad-ports", "role": "EXPERT_REVIEWER", "expertise": "PORT" }
+  ]
+}

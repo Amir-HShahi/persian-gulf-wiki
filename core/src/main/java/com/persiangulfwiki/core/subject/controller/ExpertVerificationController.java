@@ -4,6 +4,7 @@ import com.persiangulfwiki.core.common.dto.ApiResult;
 import com.persiangulfwiki.core.common.dto.PageResponse;
 import com.persiangulfwiki.core.subject.dto.ExpertVerificationResponse;
 import com.persiangulfwiki.core.subject.dto.VerificationQueueItemResponse;
+import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.subject.service.ExpertVerificationService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -110,7 +111,7 @@ public class ExpertVerificationController {
             + "(code NOT_SUBJECT_KIND_EXPERT); or the email address is not yet verified.",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "kind", description = "Optional: only this kind, which must be one of the caller's areas of "
-            + "expertise (case-insensitive). Omit for all of them.")
+            + "expertise (case-insensitive). Omit for all of them.\n\n" + SubjectKind.VALUES_DOC)
     @Parameter(name = "page", description = "Zero-based page index.")
     @Parameter(name = "size", description = "Page size, 1 to 100.")
     @SecurityRequirement(name = "cookieAuth")

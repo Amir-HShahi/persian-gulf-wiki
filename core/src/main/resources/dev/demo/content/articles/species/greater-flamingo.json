@@ -1,0 +1,132 @@
+{
+  "key": "greater-flamingo",
+  "subject": {
+    "kind": "SPECIES",
+    "names": { "fa": "فلامینگوی بزرگ", "en": "Greater flamingo", "ar": "النحام الكبير" },
+    "aliases": { "fa": ["فلامینگو", "مرغ آتشی"], "en": ["Flamingo", "Phoenicopterus roseus"], "ar": ["الفلامنجو", "البشروش"] },
+    "geometry": "POLYGON((48 30, 50.5 29.5, 54 27, 56.5 27.2, 57 25.5, 56.3 24.5, 54 24, 51.5 24.5, 50 26, 48.5 28, 48 30))",
+    "facts": [
+      { "attribute": "scientific_name", "values": [ { "text": "Phoenicopterus roseus" } ] },
+      { "attribute": "category", "values": [ { "option": "BIRD" } ] },
+      { "attribute": "iucn_status", "values": [ { "option": "LC" } ] },
+      { "attribute": "habitat", "values": [ { "option": "MUDFLAT" } ] },
+      { "attribute": "species_features", "values": [ { "option": "MIGRATORY" } ] },
+      { "attribute": "max_length", "values": [ { "number": 150, "source": "iucn-redlist-2024" } ] }
+    ]
+  },
+  "topics": ["marine-life", "pollution-and-environment"],
+  "canonicalLanguage": "fa",
+  "gallery": ["greater-flamingos", "mudflat-sandpipers"],
+  "history": { "revisions": 3, "contributors": 3 },
+  "verification": "NONE",
+  "translations": {
+    "fa": {
+      "slug": "فلامینگوی-بزرگ",
+      "title": "فلامینگوی بزرگ",
+      "summary": "پرنده‌ای بلندقامت و صورتی که زمستان‌ها در گروه‌های بزرگ به پهنه‌های گلی و تالاب‌های کرانهٔ خلیج فارس می‌آید.",
+      "lead": [
+        "**فلامینگوی بزرگ** (نام علمی: *Phoenicopterus roseus*) بزرگ‌ترین و پرشمارترین گونهٔ فلامینگو در جهان است که در آفریقا، جنوب اروپا و جنوب غربی آسیا زندگی می‌کند. این پرنده با پاهای بلند، گردن کشیده و پرهای صورتی، یکی از شناخته‌شده‌ترین پرندگان آبزی ایران است.{{iucn-redlist-2024}}",
+        "فلامینگوها هر پاییز از دریاچه‌های شور شمال غرب ایران و آسیای مرکزی به تالاب‌ها و پهنه‌های جزرومدی جنوب کوچ می‌کنند و [[khuran-strait|تنگهٔ خوران]] و تالاب‌های [[bushehr-province|بوشهر]] و [[khuzestan-province|خوزستان]] از زمستان‌گذرانی‌های مهم آن‌اند.{{unesco-ramsar-hara}}"
+      ],
+      "sections": [
+        {
+          "heading": "ویژگی‌ها",
+          "blocks": [
+            { "p": "قد فلامینگوی بزرگ به ۱۲۰ تا ۱۵۰ سانتی‌متر می‌رسد. پرهای بدن سفید مایل به صورتی و پرهای پوشپری بال سرخ تند است و پرهای پروازی سیاه‌اند. رنگ صورتی از رنگدانه‌های کاروتنوئید موجود در خوراک آن، یعنی سخت‌پوستان ریز و جلبک‌ها، می‌آید. نوک خمیده و ستبر آن صورتی با سری سیاه است.{{iucn-redlist-2024}}" }
+          ]
+        },
+        {
+          "heading": "تغذیه",
+          "blocks": [
+            { "p": "فلامینگو با سر وارونه در آب کم‌عمق راه می‌رود و نوکش را در آب گل‌آلود به این سو و آن سو می‌کشد. زبان این پرنده مانند تلمبه عمل می‌کند و آب را از میان تیغه‌های ریز لبهٔ نوک بیرون می‌راند و سخت‌پوستان ریز، لارو حشرات، جلبک‌ها و دانه‌ها را در دهان نگه می‌دارد. این شیوهٔ تغذیه، فلامینگو را به آب‌های کم‌عمق و پربار پهنه‌های گلی وابسته می‌کند.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "کوچ و زادآوری",
+          "blocks": [
+            { "p": "مهم‌ترین زادگاه فلامینگوی بزرگ در ایران، جزیره‌های دریاچهٔ ارومیه بوده است؛ جایی که در سال‌های پرآب، ده‌ها هزار جفت لانه می‌ساختند. فلامینگوها لانه‌هایی مخروطی از گل می‌سازند و هر جفت معمولاً تنها یک تخم می‌گذارد. با خشک شدن بخش بزرگی از دریاچهٔ ارومیه، زادآوری در آنجا به‌شدت کاهش یافته است.{{doe-protected-areas}}" },
+            { "ul": ["زادآوری در دریاچه‌های شور", "زمستان‌گذرانی در تالاب‌های جنوب", "لانهٔ مخروطی از گل", "زندگی در گروه‌های هزاران‌تایی"] }
+          ]
+        },
+        {
+          "heading": "تهدیدها",
+          "blocks": [
+            { "p": "خشک شدن تالاب‌ها، آلودگی نفتی در پهنه‌های جزرومدی، شکار غیرقانونی و برخورد با خطوط برق از تهدیدهای این پرنده‌اند. هرچند جمعیت جهانی فلامینگوی بزرگ پایدار است و در فهرست سرخ «کمترین نگرانی» شمرده می‌شود، جمعیت‌های منطقه‌ای آن به سلامت تالاب‌های ایران وابسته‌اند.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "greater-flamingo",
+      "title": "Greater flamingo",
+      "summary": "A tall pink bird that comes in large flocks every winter to the mudflats and wetlands of the Persian Gulf coast.",
+      "lead": [
+        "The **greater flamingo** (*Phoenicopterus roseus*) is the largest and most numerous flamingo in the world, found in Africa, southern Europe and south-west Asia. With its long legs, slender neck and pink plumage, it is one of Iran's best-known waterbirds.{{iucn-redlist-2024}}",
+        "Every autumn flamingos migrate from the salt lakes of north-west Iran and Central Asia to the wetlands and tidal flats of the south; the [[khuran-strait|Khuran Strait]] and the wetlands of [[bushehr-province|Bushehr]] and [[khuzestan-province|Khuzestan]] are important wintering sites.{{unesco-ramsar-hara}}"
+      ],
+      "sections": [
+        {
+          "heading": "Description",
+          "blocks": [
+            { "p": "The greater flamingo stands 120 to 150 centimetres tall. Its body feathers are pinkish white, the wing coverts bright red and the flight feathers black. The pink colour comes from carotenoid pigments in its food of tiny crustaceans and algae. The thick, bent bill is pink with a black tip.{{iucn-redlist-2024}}" }
+          ]
+        },
+        {
+          "heading": "Feeding",
+          "blocks": [
+            { "p": "The flamingo walks through shallow water with its head upside down, sweeping its bill through the muddy water. Its tongue works like a pump, forcing water out through fine plates along the bill's edge and keeping tiny crustaceans, insect larvae, algae and seeds in its mouth. This way of feeding ties it to the shallow, productive waters of tidal flats.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "Migration and breeding",
+          "blocks": [
+            { "p": "The most important breeding site for greater flamingos in Iran has been the islands of Lake Urmia, where tens of thousands of pairs nested in wet years. Flamingos build cone-shaped mud nests, and each pair usually lays a single egg. With much of Lake Urmia drying up, breeding there has fallen sharply.{{doe-protected-areas}}" },
+            { "ul": ["Breeds on salt lakes", "Winters on southern wetlands", "Cone-shaped mud nests", "Lives in flocks of thousands"] }
+          ]
+        },
+        {
+          "heading": "Threats",
+          "blocks": [
+            { "p": "Drying wetlands, oil pollution on tidal flats, illegal hunting and collisions with power lines threaten the species. Although its global population is stable and it is listed as Least Concern, its regional populations depend on the health of Iran's wetlands.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "النحام-الكبير",
+      "title": "النحام الكبير",
+      "summary": "طائر طويل وردي يأتي كل شتاء في أسراب كبيرة إلى السهول الطينية والأراضي الرطبة على ساحل الخليج الفارسي.",
+      "lead": [
+        "**النحام الكبير** (الاسم العلمي: *Phoenicopterus roseus*) أكبر أنواع الفلامنجو وأكثرها عددًا في العالم، ويعيش في أفريقيا وجنوب أوروبا وجنوب غرب آسيا. وبساقيه الطويلتين وعنقه النحيل وريشه الوردي يُعدّ من أشهر الطيور المائية في إيران.{{iucn-redlist-2024}}",
+        "وكل خريف تهاجر طيور النحام من البحيرات المالحة في شمال غرب إيران وآسيا الوسطى إلى الأراضي الرطبة والمسطحات المدّية في الجنوب، ويُعدّ [[khuran-strait|مضيق خوران]] والأراضي الرطبة في [[bushehr-province|بوشهر]] و[[khuzestan-province|خوزستان]] من أهم مشاتيها.{{unesco-ramsar-hara}}"
+      ],
+      "sections": [
+        {
+          "heading": "الوصف",
+          "blocks": [
+            { "p": "يبلغ طول النحام الكبير ١٢٠ إلى ١٥٠ سنتيمترًا، وريش جسمه أبيض وردي، وريش أغطية الجناح أحمر زاهٍ، وريش الطيران أسود. ويأتي اللون الوردي من أصباغ الكاروتينات في غذائه من القشريات الدقيقة والطحالب، ومنقاره السميك المنحني وردي بطرف أسود.{{iucn-redlist-2024}}" }
+          ]
+        },
+        {
+          "heading": "التغذية",
+          "blocks": [
+            { "p": "يمشي النحام في المياه الضحلة ورأسه مقلوب، ويحرّك منقاره في الماء العكر يمينًا ويسارًا، ويعمل لسانه كمضخة تدفع الماء عبر صفائح دقيقة على حافة المنقار، فيحتفظ في فمه بالقشريات الدقيقة ويرقات الحشرات والطحالب والبذور. وتربط طريقة التغذية هذه النحامَ بالمياه الضحلة المنتجة في المسطحات المدّية.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "الهجرة والتكاثر",
+          "blocks": [
+            { "p": "كانت جزر بحيرة أرومية أهم مواقع تكاثر النحام الكبير في إيران، حيث كانت عشرات الآلاف من الأزواج تعشّش في السنوات الماطرة. ويبني النحام أعشاشًا مخروطية من الطين، ويضع كل زوج عادة بيضة واحدة. ومع جفاف جزء كبير من بحيرة أرومية تراجع التكاثر فيها بشدة.{{doe-protected-areas}}" },
+            { "ul": ["التكاثر في البحيرات المالحة", "التشتية في الأراضي الرطبة الجنوبية", "أعشاش مخروطية من الطين", "العيش في أسراب بالآلاف"] }
+          ]
+        },
+        {
+          "heading": "التهديدات",
+          "blocks": [
+            { "p": "يهدد هذا النوعَ جفافُ الأراضي الرطبة، والتلوث النفطي في المسطحات المدّية، والصيد غير المشروع، والاصطدام بخطوط الكهرباء. ورغم أن أعداده العالمية مستقرة ومصنف «غير مهدد»، فإن مجموعاته الإقليمية تعتمد على سلامة الأراضي الرطبة في إيران.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

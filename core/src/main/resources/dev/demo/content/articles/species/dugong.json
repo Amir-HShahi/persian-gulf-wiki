@@ -1,0 +1,131 @@
+{
+  "key": "dugong",
+  "subject": {
+    "kind": "SPECIES",
+    "names": { "fa": "گاو دریایی", "en": "Dugong", "ar": "الأطوم" },
+    "aliases": { "fa": ["دوگونگ", "گاو دریایی خلیج فارس"], "en": ["Sea cow", "Dugong dugon"], "ar": ["بقرة البحر", "عروس البحر"] },
+    "geometry": "POLYGON((48 30, 50.5 29.5, 54 27, 56.5 27.2, 57 25.5, 56.3 24.5, 54 24, 51.5 24.5, 50 26, 48.5 28, 48 30))",
+    "facts": [
+      { "attribute": "scientific_name", "values": [ { "text": "Dugong dugon" } ] },
+      { "attribute": "category", "values": [ { "option": "MAMMAL" } ] },
+      { "attribute": "iucn_status", "values": [ { "option": "VU" } ] },
+      { "attribute": "habitat", "values": [ { "option": "SEAGRASS" } ] },
+      { "attribute": "max_length", "values": [ { "number": 400, "source": "marsh-dugong-2002" } ] }
+    ]
+  },
+  "topics": ["marine-life", "plants-and-algae", "pollution-and-environment"],
+  "canonicalLanguage": "fa",
+  "gallery": ["dugong", "scorpionfish-seagrass"],
+  "history": { "revisions": 4, "contributors": 3 },
+  "verification": "STALE",
+  "translations": {
+    "fa": {
+      "slug": "گاو-دریایی",
+      "title": "گاو دریایی",
+      "summary": "پستانداری دریایی و گیاه‌خوار که در علفزارهای خلیج فارس زندگی می‌کند؛ این دریا دومین جمعیت بزرگ آن را در جهان دارد.",
+      "lead": [
+        "**گاو دریایی** یا دوگونگ (نام علمی: *Dugong dugon*) پستانداری دریایی و گیاه‌خوار از راستهٔ گاوهای دریایی است که در آب‌های کم‌عمق و گرم اقیانوس هند و غرب اقیانوس آرام زندگی می‌کند. خلیج فارس پس از استرالیا، بزرگ‌ترین جمعیت این جانور را در جهان دارد و چند هزار گاو دریایی در علفزارهای آن، به‌ویژه میان قطر، بحرین و امارات، زندگی می‌کنند.{{marsh-dugong-2002}}",
+        "این گونه در فهرست سرخ جهانی در ردهٔ «آسیب‌پذیر» جای دارد.{{iucn-redlist-2024}}"
+      ],
+      "sections": [
+        {
+          "heading": "ویژگی‌ها",
+          "blocks": [
+            { "p": "بدن دوکی و خاکستری گاو دریایی به طول سه تا چهار متر می‌رسد و وزنش ممکن است از ۴۰۰ کیلوگرم بگذرد. دم آن مانند دم دلفین دوشاخه است و پوزهٔ پهن و رو به پایینش برای چرا در بستر دریا سازگار شده است. نرها و برخی ماده‌های مسن، دندان‌های پیشین کوتاهی شبیه عاج دارند.{{marsh-dugong-2002}}" }
+          ]
+        },
+        {
+          "heading": "تغذیه",
+          "blocks": [
+            { "p": "گاو دریایی تنها پستاندار دریایی است که یکسره گیاه‌خوار است. این جانور [[halodule-uninervis|علف‌های دریایی]]، به‌ویژه گونه‌های کوچک و نرم، را از ریشه می‌کند و روزانه ده‌ها کیلوگرم علف می‌خورد. ردهای چرای آن، که به شکل شیارهای بلند در علفزار دیده می‌شوند، نشانهٔ حضورش در یک منطقه‌اند.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "زندگی و تولیدمثل",
+          "blocks": [
+            { "p": "گاوهای دریایی آهسته رشد می‌کنند و ممکن است بیش از ۷۰ سال عمر کنند. ماده‌ها پس از ده سالگی به بلوغ می‌رسند و هر سه تا هفت سال یک نوزاد می‌زایند که تا یک سال و نیم از مادر جدا نمی‌شود. همین زادآوری کند، این گونه را در برابر مرگ‌ومیر ناشی از فعالیت‌های انسانی بسیار آسیب‌پذیر می‌کند.{{marsh-dugong-2002}}" },
+            { "ul": ["عمر بیش از ۷۰ سال", "یک نوزاد در هر سه تا هفت سال", "شیردهی تا ۱۸ ماه", "زیستن در گروه‌های کوچک یا بزرگ"] }
+          ]
+        },
+        {
+          "heading": "تهدیدها و حفاظت",
+          "blocks": [
+            { "p": "گرفتار شدن در تورهای ماهیگیری، به‌ویژه تورهای گوشگیر، بزرگ‌ترین علت مرگ گاوهای دریایی در خلیج فارس است. لایروبی، ساخت جزایر مصنوعی و گرم شدن آب، علفزارهای دریایی را از میان می‌برد و برخورد با قایق‌های تندرو نیز خطرآفرین است.{{ropme-soe-2021}} کشورهای منطقه در چارچوب یادداشت تفاهم حفاظت از دوگونگ، پایش جمعیت و ممنوعیت تورهای خطرناک را در مناطق مهم دنبال می‌کنند." }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "dugong",
+      "title": "Dugong",
+      "summary": "A plant-eating marine mammal of the Persian Gulf's seagrass meadows; the Gulf holds the second-largest dugong population in the world.",
+      "lead": [
+        "The **dugong** (*Dugong dugon*) is a herbivorous marine mammal of the order Sirenia that lives in the warm, shallow waters of the Indian Ocean and western Pacific. After Australia, the Persian Gulf holds the largest population in the world: several thousand dugongs live in its seagrass meadows, especially between Qatar, Bahrain and the UAE.{{marsh-dugong-2002}}",
+        "The species is listed as Vulnerable on the IUCN Red List.{{iucn-redlist-2024}}"
+      ],
+      "sections": [
+        {
+          "heading": "Description",
+          "blocks": [
+            { "p": "The grey, spindle-shaped body is three to four metres long and can weigh more than 400 kilograms. The tail is fluked like a dolphin's, and the broad, downturned snout is adapted to grazing on the seabed. Males and some older females have short, tusk-like incisors.{{marsh-dugong-2002}}" }
+          ]
+        },
+        {
+          "heading": "Diet",
+          "blocks": [
+            { "p": "The dugong is the only strictly herbivorous marine mammal. It uproots [[halodule-uninervis|seagrass]], especially small, soft species, and eats dozens of kilograms a day. Its feeding trails, long furrows through the meadow, are a sign of its presence in an area.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "Life and reproduction",
+          "blocks": [
+            { "p": "Dugongs grow slowly and can live more than 70 years. Females mature after the age of ten and give birth to a single calf every three to seven years, which stays with its mother for up to a year and a half. This slow breeding makes the species very vulnerable to deaths caused by human activity.{{marsh-dugong-2002}}" },
+            { "ul": ["Lifespan of more than 70 years", "One calf every three to seven years", "Nursing for up to 18 months", "Lives in small or large herds"] }
+          ]
+        },
+        {
+          "heading": "Threats and conservation",
+          "blocks": [
+            { "p": "Entanglement in fishing nets, especially gillnets, is the leading cause of dugong deaths in the Persian Gulf. Dredging, the building of artificial islands and warming water destroy seagrass meadows, and collisions with speedboats are also a danger.{{ropme-soe-2021}} Under the dugong memorandum of understanding, the countries of the region monitor populations and ban dangerous nets in key areas." }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "الأطوم",
+      "title": "الأطوم",
+      "summary": "حيوان ثديي بحري عاشب يعيش في مروج الأعشاب البحرية بالخليج الفارسي، الذي يضم ثاني أكبر تجمع للأطوم في العالم.",
+      "lead": [
+        "**الأطوم** (الاسم العلمي: *Dugong dugon*) حيوان ثديي بحري عاشب من رتبة الخيلانيات، يعيش في المياه الضحلة الدافئة للمحيط الهندي وغرب المحيط الهادئ. ويضم الخليج الفارسي، بعد أستراليا، أكبر تجمع له في العالم، إذ يعيش عدة آلاف منه في مروج الأعشاب البحرية، ولا سيما بين قطر والبحرين والإمارات.{{marsh-dugong-2002}}",
+        "والنوع مصنف «معرّضًا للخطر» في القائمة الحمراء.{{iucn-redlist-2024}}"
+      ],
+      "sections": [
+        {
+          "heading": "الوصف",
+          "blocks": [
+            { "p": "جسمه رمادي مغزلي يبلغ طوله ثلاثة إلى أربعة أمتار، وقد يتجاوز وزنه ٤٠٠ كيلوغرام. وذيله مشقوق كذيل الدلفين، وخطمه العريض المتجه إلى الأسفل متكيّف مع الرعي في قاع البحر. وللذكور وبعض الإناث المسنة قواطع قصيرة تشبه الأنياب.{{marsh-dugong-2002}}" }
+          ]
+        },
+        {
+          "heading": "الغذاء",
+          "blocks": [
+            { "p": "الأطوم هو الثديي البحري الوحيد العاشب كليًا، إذ يقتلع [[halodule-uninervis|الأعشاب البحرية]]، ولا سيما الأنواع الصغيرة الطرية، ويأكل عشرات الكيلوغرامات يوميًا. وتدل آثار رعيه، وهي أخاديد طويلة في المروج، على وجوده في المنطقة.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "الحياة والتكاثر",
+          "blocks": [
+            { "p": "ينمو الأطوم ببطء وقد يعيش أكثر من ٧٠ عامًا، وتبلغ الإناث بعد العاشرة وتلد صغيرًا واحدًا كل ثلاث إلى سبع سنوات، يبقى مع أمه حتى سنة ونصف. ويجعل هذا التكاثر البطيء النوع شديد الهشاشة أمام النفوق الناجم عن النشاط البشري.{{marsh-dugong-2002}}" },
+            { "ul": ["عمر يتجاوز ٧٠ عامًا", "صغير واحد كل ثلاث إلى سبع سنوات", "رضاعة حتى ١٨ شهرًا", "يعيش في قطعان صغيرة أو كبيرة"] }
+          ]
+        },
+        {
+          "heading": "التهديدات والحماية",
+          "blocks": [
+            { "p": "يُعدّ الوقوع في شباك الصيد، ولا سيما الشباك الخيشومية، السبب الأول لنفوق الأطوم في الخليج. كما يدمّر التجريف وبناء الجزر الاصطناعية وارتفاع حرارة المياه مروجَ الأعشاب البحرية، ويشكّل الاصطدام بالقوارب السريعة خطرًا آخر.{{ropme-soe-2021}} وفي إطار مذكرة التفاهم الخاصة بالأطوم ترصد دول المنطقة أعداده وتحظر الشباك الخطرة في المناطق المهمة." }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "key": "dhow-building-tradition",
+  "topics": ["culture-and-ethnography", "shipping-and-transit", "history-and-archaeology"],
+  "canonicalLanguage": "fa",
+  "gallery": ["fishing-dhow", "barge-and-tug"],
+  "history": { "revisions": 3, "contributors": 4 },
+  "translations": {
+    "fa": {
+      "slug": "لنج‌سازی-سنتی",
+      "title": "لنج‌سازی سنتی",
+      "summary": "دانش و هنر ساخت لنج‌های چوبی در کرانهٔ خلیج فارس که در فهرست میراث فرهنگی ناملموس یونسکو ثبت شده است.",
+      "lead": [
+        "**لنج‌سازی سنتی** هنر ساخت قایق‌ها و کشتی‌های چوبی بادبانی و موتوری در کرانه‌های خلیج فارس است که دانش آن سینه‌به‌سینه از استادان به شاگردان رسیده است. «دانش سنتی ساخت و دریانوردی لنج در خلیج فارس» در سال ۲۰۱۱ در فهرست میراث فرهنگی ناملموس نیازمند پاسداری فوری یونسکو ثبت شد.{{potter-gulf-history}}",
+        "روستای گوران و بندر لافت در [[qeshm-island|قشم]]، [[bandar-lengeh|بندر لنگه]] و کنگ، از کارگاه‌های نامدار لنج‌سازی در ایران‌اند."
+      ],
+      "sections": [
+        {
+          "heading": "گونه‌های لنج",
+          "blocks": [
+            { "p": "واژهٔ «لنج» در کرانهٔ ایرانی خلیج فارس برای انواع گوناگونی از کشتی‌های چوبی به کار می‌رود که در اندازه، شکل بدنه و کاربرد با هم تفاوت دارند. بوم، سنبوک، جالبوت و بغله از گونه‌های شناخته‌شدهٔ این کشتی‌ها هستند. لنج‌های بزرگ باری روزگاری میان خلیج فارس، هند و شرق آفریقا با بادهای موسمی سفر می‌کردند و لنج‌های کوچک‌تر برای صیادی و جابه‌جایی میان جزایر به کار می‌رفتند." },
+            { "ul": ["بوم: لنج بزرگ باری با پاشنهٔ نوک‌تیز", "سنبوک: لنج با پاشنهٔ پهن و قوسی", "جالبوت: لنج کوچک صیادی", "بغله: لنج بزرگ کهن با پاشنهٔ تزیینی"] }
+          ]
+        },
+        {
+          "heading": "روش ساخت",
+          "blocks": [
+            { "p": "لنج‌سازان بدون نقشهٔ کاغذی و تنها با تکیه بر تجربه و چشم کار می‌کنند. ساخت با گذاشتن «بیس»، یعنی تیر کف، آغاز می‌شود؛ سپس «مالبند»‌ها یا دنده‌ها و تخته‌های بدنه یکی پس از دیگری نصب می‌شوند. چوب ساج هندی برای بدنه و چوب درختان بومی مانند کُنار برای دنده‌ها به کار می‌رود. درزهای میان تخته‌ها را با پنبه و روغن کوسه یا روغن نارگیل آب‌بند می‌کنند. ساخت یک لنج بزرگ ممکن است بیش از یک سال طول بکشد.{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "زندگی دریانوردان",
+          "blocks": [
+            { "p": "سفرهای تجاری لنج‌ها در گذشته ماه‌ها به درازا می‌کشید. «ناخدا» فرمانده لنج بود و «سکونی» سکان را در دست داشت. دریانوردان با ستارگان، رنگ آب و رفتار پرندگان راه می‌یافتند و آوازهای کار، که با ضرب دهل همراه بود، بخشی از زندگی روی عرشه بود. این آوازها هنوز در جشن‌ها و آیین‌های بندری شنیده می‌شوند." }
+          ]
+        },
+        {
+          "heading": "وضعیت امروز",
+          "blocks": [
+            { "p": "با رواج کشتی‌های فلزی و فایبرگلاس، شمار کارگاه‌های لنج‌سازی کاهش یافته و بسیاری از استادکاران سالمند جانشینی ندارند. با این حال، لنج‌های چوبی هنوز برای صیادی و تجارت کوچک میان [[hormozgan-province|هرمزگان]] و بندرهای حاشیهٔ جنوبی خلیج فارس ساخته می‌شوند و برنامه‌های آموزشی برای انتقال این دانش به نسل جوان در گوران و لافت در حال اجراست.{{fao-fishery-gulf}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "dhow-building-tradition",
+      "title": "Dhow-building tradition",
+      "summary": "The knowledge and craft of building wooden dhows on the Persian Gulf coast, listed by UNESCO as intangible cultural heritage.",
+      "lead": [
+        "**Traditional dhow building** is the craft of making wooden sailing and motor vessels on the shores of the Persian Gulf, passed on by word of mouth from master to apprentice. The \"traditional skills of building and sailing Iranian lenj boats in the Persian Gulf\" were inscribed in 2011 on UNESCO's List of Intangible Cultural Heritage in Need of Urgent Safeguarding.{{potter-gulf-history}}",
+        "The village of Guran and the port of Laft on [[qeshm-island|Qeshm]], [[bandar-lengeh|Bandar Lengeh]] and Kong are among Iran's best-known dhow yards."
+      ],
+      "sections": [
+        {
+          "heading": "Kinds of dhow",
+          "blocks": [
+            { "p": "On the Iranian shore the word lenj covers many kinds of wooden vessel that differ in size, hull shape and use. The boom, sambuk, jalibut and baghlah are among the best known. Large cargo dhows once sailed with the monsoon between the Persian Gulf, India and East Africa, while smaller ones were used for fishing and for travel between the islands." },
+            { "ul": ["Boom: large cargo dhow with a pointed stern", "Sambuk: dhow with a broad, curved stern", "Jalibut: small fishing dhow", "Baghlah: large old dhow with a decorated stern"] }
+          ]
+        },
+        {
+          "heading": "How a dhow is built",
+          "blocks": [
+            { "p": "Dhow builders work without paper plans, relying on experience and the eye. Building begins with the keel; the ribs and hull planks are then fitted one after another. Indian teak is used for the hull and local woods such as kunar (Christ's thorn) for the ribs. The seams between planks are caulked with cotton and shark or coconut oil. A large dhow can take more than a year to build.{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "Life at sea",
+          "blocks": [
+            { "p": "Trading voyages once lasted months. The nakhoda commanded the dhow and the sukkuni held the helm. Sailors found their way by the stars, the colour of the water and the behaviour of birds, and work songs kept time with the beat of the drum on deck. These songs are still heard at festivals and celebrations in the ports." }
+          ]
+        },
+        {
+          "heading": "Today",
+          "blocks": [
+            { "p": "With the spread of steel and fibreglass boats, the number of dhow yards has fallen and many elderly masters have no successor. Wooden dhows are nevertheless still built for fishing and small-scale trade between [[hormozgan-province|Hormozgan]] and the ports of the southern Gulf, and training programmes at Guran and Laft aim to pass the craft on to the young.{{fao-fishery-gulf}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "صناعة-المراكب-التقليدية",
+      "title": "صناعة المراكب التقليدية",
+      "summary": "معارف بناء المراكب الخشبية وحرفتها على ساحل الخليج الفارسي، المدرجة في قائمة اليونسكو للتراث الثقافي غير المادي.",
+      "lead": [
+        "**صناعة المراكب التقليدية** حرفة بناء السفن الخشبية الشراعية والآلية على سواحل الخليج الفارسي، تنتقل مشافهة من المعلّم إلى المتعلم. وقد أُدرجت «المهارات التقليدية لبناء مراكب اللنج الإيرانية والإبحار بها في الخليج الفارسي» عام ٢٠١١ في قائمة اليونسكو للتراث الثقافي غير المادي الذي يحتاج إلى صون عاجل.{{potter-gulf-history}}",
+        "وتُعدّ قرية كوران وميناء لافت في [[qeshm-island|قشم]] و[[bandar-lengeh|بندر لنجة]] وكنگ من أشهر ورش بناء المراكب في إيران."
+      ],
+      "sections": [
+        {
+          "heading": "أنواع المراكب",
+          "blocks": [
+            { "p": "تشمل كلمة «لنج» على الساحل الإيراني أنواعًا كثيرة من السفن الخشبية تختلف في الحجم وشكل البدن والاستعمال، ومن أشهرها البوم والسنبوك والجالبوت والبغلة. وكانت مراكب الشحن الكبيرة تبحر قديمًا مع الرياح الموسمية بين الخليج والهند وشرق أفريقيا، بينما استُخدمت الصغيرة للصيد والتنقل بين الجزر." },
+            { "ul": ["البوم: مركب شحن كبير بمؤخرة مدببة", "السنبوك: مركب بمؤخرة عريضة مقوسة", "الجالبوت: مركب صيد صغير", "البغلة: مركب قديم كبير بمؤخرة مزخرفة"] }
+          ]
+        },
+        {
+          "heading": "طريقة البناء",
+          "blocks": [
+            { "p": "يعمل بناة المراكب دون مخططات ورقية، معتمدين على الخبرة والعين. ويبدأ البناء بوضع القاعدة، ثم تُركَّب الأضلاع وألواح البدن واحدًا بعد آخر، ويُستعمل خشب الساج الهندي للبدن وأخشاب محلية كالسدر للأضلاع، وتُسدّ الفواصل بين الألواح بالقطن وزيت القرش أو زيت جوز الهند. وقد يستغرق بناء مركب كبير أكثر من عام.{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "الحياة في البحر",
+          "blocks": [
+            { "p": "كانت الرحلات التجارية تمتد شهورًا، فالنوخذة قائد المركب والسكوني ممسك الدفة، ويهتدي البحارة بالنجوم ولون الماء وسلوك الطيور، وتضبط أغاني العمل إيقاعها على قرع الطبل فوق السطح. ولا تزال هذه الأغاني تُسمع في الأعراس والاحتفالات في الموانئ." }
+          ]
+        },
+        {
+          "heading": "اليوم",
+          "blocks": [
+            { "p": "مع انتشار القوارب الفولاذية والمصنوعة من الألياف الزجاجية تراجع عدد ورش بناء المراكب، ولا خلف لكثير من المعلّمين المسنّين. ومع ذلك لا تزال المراكب الخشبية تُبنى للصيد والتجارة الصغيرة بين [[hormozgan-province|هرمزغان]] وموانئ جنوب الخليج، وتسعى برامج تدريبية في كوران ولافت إلى نقل الحرفة إلى الشباب.{{fao-fishery-gulf}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

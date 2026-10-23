@@ -91,6 +91,12 @@ class DevTestContentEndpointDisabledIntegrationTests {
         assertThat(applicationContext.getBeanNamesForType(DevTestTopicSweeper.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestMarineController.class)).isEmpty();
         assertThat(applicationContext.getBeanNamesForType(DevTestMarineSweeper.class)).isEmpty();
+        // The demo seeder and wipe write and delete hundreds of rows and storage objects on a
+        // single unauthenticated call; they must not exist at all outside dev.
+        assertThat(applicationContext.getBeanNamesForType(DevDemoContentController.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevDemoContentSeeder.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevDemoContentWiper.class)).isEmpty();
+        assertThat(applicationContext.getBeanNamesForType(DevDemoMediaLibrary.class)).isEmpty();
     }
 
     @Test
@@ -119,6 +125,12 @@ class DevTestContentEndpointDisabledIntegrationTests {
         mockMvc.perform(get("/api/dev/test-topics/{topicId}", UUID.randomUUID()))
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(delete("/api/dev/marine-readings/{stationKey}", "dev-test-abc"))
+                .andExpect(status().isForbidden());
+        // POST and DELETE carry no CSRF header here, so the main chain refuses them with 403
+        // before authorization -- see mintingIsRejectedAndCreatesNothing.
+        mockMvc.perform(post("/api/dev/demo-content"))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(delete("/api/dev/demo-content"))
                 .andExpect(status().isForbidden());
     }
 

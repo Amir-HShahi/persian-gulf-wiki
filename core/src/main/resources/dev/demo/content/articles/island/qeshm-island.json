@@ -1,0 +1,177 @@
+{
+  "key": "qeshm-island",
+  "subject": {
+    "kind": "ISLAND",
+    "names": { "fa": "جزیرهٔ قشم", "en": "Qeshm Island", "ar": "جزيرة قشم" },
+    "aliases": { "fa": ["قشم", "جزیره دراز", "ابرکاوان"], "en": ["Qeshm", "Long Island"], "ar": ["قشم", "الجزيرة الطويلة"] },
+    "geometry": "POINT(55.92 26.81)",
+    "facts": [
+      { "attribute": "located_in", "values": [ { "subject": "strait-of-hormuz" }, { "subject": "khuran-strait" } ] },
+      { "attribute": "area", "values": [ { "number": 1491, "source": "ncc-gazetteer" } ] },
+      { "attribute": "place_features", "values": [ { "option": "FREE_ZONE" }, { "option": "UNESCO_GEOPARK" }, { "option": "PROTECTED_AREA" } ] },
+      { "attribute": "country", "values": [ { "option": "IR" } ] },
+      { "attribute": "province", "values": [ { "subject": "hormozgan-province" } ] },
+      { "attribute": "county", "values": [ { "localized": { "fa": "قشم", "en": "Qeshm", "ar": "قشم" } } ] },
+      { "attribute": "district", "values": [
+        { "localized": { "fa": "بخش مرکزی", "en": "Central District", "ar": "القسم المركزي" } },
+        { "localized": { "fa": "بخش شهاب", "en": "Shahab District", "ar": "قسم شهاب" } }
+      ] },
+      { "attribute": "population", "values": [ { "number": 148993, "asOf": "2016-01-01", "source": "sci-census-2016" } ] },
+      { "attribute": "ethnic_groups", "values": [ { "localized": { "fa": "فارس‌ها", "en": "Persians", "ar": "الفرس" } } ] },
+      { "attribute": "languages", "values": [ { "option": "FA" }, { "option": "AR" } ] }
+    ]
+  },
+  "topics": ["islands", "geography-and-climate", "economy-and-trade"],
+  "canonicalLanguage": "fa",
+  "gallery": ["iran-coast-iss", "mangrove-forest", "iss-47-gulf", "mangrove-channel"],
+  "panorama": "pano-rocky-beach",
+  "history": { "revisions": 6, "contributors": 11, "outdated": ["ar"] },
+  "verification": "VERIFIED",
+  
+  "translations": {
+    "fa": {
+      "slug": "جزیره-قشم",
+      "title": "جزیرهٔ قشم",
+      "summary": "بزرگ‌ترین جزیرهٔ خلیج فارس در استان هرمزگان، با جنگل‌های حرا، ژئوپارک جهانی و منطقهٔ آزاد تجاری.",
+      "lead": [
+        "**جزیرهٔ قشم** یکی از جزایر خلیج فارس است که به‌عنوان بزرگ‌ترین جزیرهٔ ایران و خاورمیانه در [[hormozgan-province|استان هرمزگان]] قرار دارد.{{ncc-gazetteer}} این جزیره در مجاورت [[strait-of-hormuz|تنگهٔ هرمز]] و در برابر بندرعباس واقع شده و [[khuran-strait|تنگهٔ خوران]] آن را از خشکی سرزمین اصلی جدا می‌کند. قشم به‌دلیل وسعت، جایگاه راهبردی، بندرگاه‌های طبیعی و منطقهٔ آزاد تجاری، توان تبدیل‌شدن به یکی از قطب‌های بازرگانی و گردشگری جنوب ایران را دارد.{{qeshm-free-zone}}",
+        "از نقاط دیدنی این جزیره می‌توان به جنگل‌های حرا، غارهای خربس، تنگهٔ چاهکوه، درهٔ ستارگان، دلفین‌های خلیج فارس، جزیرهٔ ناز و غار نمکدان اشاره کرد."
+      ],
+      "sections": [
+        {
+          "heading": "تاریخ قشم",
+          "blocks": [
+            { "h3": "جزیرهٔ قشم در عصر ساسانی" },
+            { "p": "جزیرهٔ قشم در دوران ساسانیان «ابرکاوان» خوانده می‌شد. در واقع واژهٔ کاوان در زبان پارسی میانه به معنای «از تبار کاوه» است و از این نام کهن هنوز می‌توان ردپاهایی در منابع جغرافیایی سده‌های نخستین اسلامی یافت.{{iranica-qeshm}} ابرکاوان جزئی از کورهٔ اردشیرخره بود و بندرهای کوچک آن در مسیر کشتی‌هایی قرار داشتند که میان سیراف و هند رفت‌وآمد می‌کردند." },
+            { "h3": "از عصر اسلامی تا دورهٔ پرتغالی‌ها" },
+            { "p": "در اوایل عصر اسلامی، ابرکاوان سرزمینی آباد و پر از کشتزار، درختان خرما و دیگر درختان میوه توصیف شده است. با برآمدن پادشاهی [[hormuz-island|هرمز]] در سدهٔ هشتم هجری، قشم به پشتیبان آب شیرین و آذوقهٔ این بندر بزرگ تبدیل شد. پرتغالی‌ها در سدهٔ شانزدهم میلادی بر قشم نیز چیره شدند و قلعه‌ای در شرق جزیره ساختند که ویرانه‌های آن هنوز برجاست.{{floor-persian-gulf}}" },
+            { "p": "در سال ۱۶۲۲ میلادی، نیروهای ایرانی به همراهی ناوگان کمپانی هند شرقی انگلیس قشم و سپس هرمز را از پرتغالی‌ها پس گرفتند و از آن پس جزیره بخشی پیوسته از قلمرو ایران بوده است.{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "جغرافیا و زمین‌شناسی",
+          "blocks": [
+            { "p": "قشم با مساحتی نزدیک به ۱۴۹۱ کیلومتر مربع، دو برابر وسعت کشور بحرین است و طولی حدود ۱۲۰ کیلومتر دارد.{{ncc-gazetteer}} ناهمواری‌های جزیره بیشتر از گنبدهای نمکی، تپه‌های ماسه‌سنگی و دره‌های فرسایشی تشکیل شده است. بلندترین نقطهٔ آن کوه نمکدان است که غار نمکی آن از درازترین غارهای نمکی جهان به شمار می‌رود." },
+            { "p": "به پاس همین پدیده‌های زمین‌شناختی، بخش‌هایی از جزیره در سال ۲۰۱۷ با نام **ژئوپارک جهانی قشم** در فهرست ژئوپارک‌های یونسکو قرار گرفت.{{unesco-qeshm-geopark}} درهٔ ستارگان، تنگهٔ چاهکوه و دره‌های رنگین مسیر گردشگری این ژئوپارک را می‌سازند." }
+          ]
+        },
+        {
+          "heading": "زیست‌بوم و جنگل‌های حرا",
+          "blocks": [
+            { "p": "در شمال غربی جزیره، گسترده‌ترین رویشگاه [[grey-mangrove|درخت حرا]] در ایران قرار دارد. این جنگل‌های جزرومدی که در تالاب بین‌المللی خوران ثبت شده‌اند، پناهگاه پرندگان مهاجر، خرچنگ‌ها و نوزادان بسیاری از گونه‌های آبزی‌اند.{{unesco-ramsar-hara}}{{doe-mangroves}}" },
+            { "p": "سواحل جنوبی قشم نیز محل تخم‌گذاری [[hawksbill-turtle|لاک‌پشت پوزه‌عقابی]] است و در آب‌های اطراف آن گاه گروه‌هایی از دلفین‌های گوژپشت دیده می‌شوند." }
+          ]
+        },
+        {
+          "heading": "اقتصاد و منطقهٔ آزاد",
+          "blocks": [
+            { "p": "منطقهٔ آزاد تجاری‌صنعتی قشم در سال ۱۳۶۹ خورشیدی پایه‌گذاری شد و امروز اسکله‌های بازرگانی، بندر لافت، صنایع کشتی‌سازی و بخش گردشگری ستون‌های اقتصاد جزیره‌اند.{{qeshm-free-zone}} صیادی، لنج‌سازی سنتی در بندر لافت و تجارت با کشورهای حاشیهٔ خلیج فارس پیشه‌های دیرینهٔ مردم جزیره است." },
+            { "ul": ["بندر قشم و اسکلهٔ بهمن", "بندر لافت و کارگاه‌های لنج‌سازی", "منطقهٔ گردشگری درگهان", "اسکلهٔ شهید ذاکری"] }
+          ]
+        },
+        {
+          "heading": "جمعیت و فرهنگ",
+          "blocks": [
+            { "p": "بر پایهٔ سرشماری سال ۱۳۹۵، جمعیت شهرستان قشم ۱۴۸٬۹۹۳ نفر بوده است.{{sci-census-2016}} بیشتر مردم به گویش قشمی سخن می‌گویند که از گویش‌های جنوبی زبان فارسی است و موسیقی، جشن نوروز صیاد و صنایع دستی گلابتون‌دوزی از جلوه‌های فرهنگ بومی جزیره به شمار می‌آیند." }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "qeshm-island",
+      "title": "Qeshm Island",
+      "summary": "The largest island in the Persian Gulf, in Hormozgan Province, known for its mangrove forests, UNESCO geopark and free trade zone.",
+      "lead": [
+        "**Qeshm Island** is the largest island in the Persian Gulf and in Iran, lying in [[hormozgan-province|Hormozgan Province]].{{ncc-gazetteer}} It sits beside the [[strait-of-hormuz|Strait of Hormuz]], opposite the port city of Bandar Abbas, and is separated from the mainland by the narrow [[khuran-strait|Khuran Strait]]. Its size, strategic position, natural harbours and free trade zone have made it one of the most promising commercial and tourist centres of southern Iran.{{qeshm-free-zone}}",
+        "Among its best-known sights are the mangrove forests, the Kharbas caves, Chahkooh canyon, the Valley of the Stars, the Persian Gulf dolphins, Naz Islands and the Namakdan salt cave."
+      ],
+      "sections": [
+        {
+          "heading": "History",
+          "blocks": [
+            { "h3": "Qeshm under the Sasanians" },
+            { "p": "In the Sasanian period the island was called Abarkavan. The element kavan meant \"of the line of Kaveh\" in Middle Persian, and traces of the old name survive in the geographical works of the early Islamic centuries.{{iranica-qeshm}} Abarkavan belonged to the district of Ardashir-Khwarrah, and its small harbours lay on the route of ships sailing between Siraf and India." },
+            { "h3": "From the Islamic era to the Portuguese" },
+            { "p": "Early Islamic writers describe Abarkavan as a prosperous land of fields, date palms and fruit trees. When the kingdom of [[hormuz-island|Hormuz]] rose in the fourteenth century, Qeshm became the source of fresh water and provisions for that great port. The Portuguese took Qeshm in the sixteenth century and built a fort on its eastern tip, whose ruins still stand.{{floor-persian-gulf}}" },
+            { "p": "In 1622 Persian forces, supported by ships of the English East India Company, recovered Qeshm and then Hormuz from the Portuguese, and the island has been part of Iran ever since.{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "Geography and geology",
+          "blocks": [
+            { "p": "With an area of about 1,491 square kilometres, Qeshm is twice the size of Bahrain and roughly 120 kilometres long.{{ncc-gazetteer}} Its landscape is made up mostly of salt domes, sandstone hills and deeply eroded valleys. The highest point is Namakdan mountain, whose salt cave is counted among the longest salt caves in the world." },
+            { "p": "Because of these formations, part of the island was listed in 2017 as the **Qeshm Island UNESCO Global Geopark**.{{unesco-qeshm-geopark}} The Valley of the Stars, Chahkooh canyon and the island's coloured valleys form the geopark's main visitor route." }
+          ]
+        },
+        {
+          "heading": "Ecology and the mangrove forests",
+          "blocks": [
+            { "p": "The north-west of the island holds the largest stand of [[grey-mangrove|grey mangrove]] in Iran. These tidal forests, part of the Khuran Straits Ramsar wetland, shelter migratory birds, crabs and the young of many marine species.{{unesco-ramsar-hara}}{{doe-mangroves}}" },
+            { "p": "The southern beaches are a nesting site of the [[hawksbill-turtle|hawksbill turtle]], and groups of Indo-Pacific humpback dolphins are regularly seen in the surrounding waters." }
+          ]
+        },
+        {
+          "heading": "Economy and the free zone",
+          "blocks": [
+            { "p": "The Qeshm Free Area was established in 1990. Today its commercial piers, the port of Laft, shipbuilding and tourism are the pillars of the island's economy.{{qeshm-free-zone}} Fishing, traditional dhow building at Laft and trade with the other Gulf states remain long-standing livelihoods." },
+            { "ul": ["Qeshm port and Bahman pier", "Laft port and its dhow yards", "Dargahan tourist area", "Shahid Zakeri pier"] }
+          ]
+        },
+        {
+          "heading": "Population and culture",
+          "blocks": [
+            { "p": "According to the 2016 census, Qeshm County had 148,993 inhabitants.{{sci-census-2016}} Most islanders speak the Qeshmi dialect, one of the southern varieties of Persian, and local music, the fishermen's Nowruz festival and golabatoon embroidery are among the hallmarks of island culture." }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "جزيرة-قشم",
+      "title": "جزيرة قشم",
+      "summary": "أكبر جزر الخليج الفارسي في محافظة هرمزغان، تشتهر بغابات القرم والمتنزه الجيولوجي العالمي والمنطقة الحرة.",
+      "lead": [
+        "**جزيرة قشم** هي أكبر جزر الخليج الفارسي وأكبر جزيرة في إيران، وتقع في [[hormozgan-province|محافظة هرمزغان]].{{ncc-gazetteer}} تجاور الجزيرة [[strait-of-hormuz|مضيق هرمز]] قبالة مدينة بندر عباس، ويفصلها عن البر الرئيسي [[khuran-strait|مضيق خوران]] الضيق. وقد أهّلتها مساحتها وموقعها الاستراتيجي وموانئها الطبيعية ومنطقتها الحرة لتكون من أبرز المراكز التجارية والسياحية في جنوب إيران.{{qeshm-free-zone}}",
+        "ومن أشهر معالمها غابات القرم، وكهوف خربس، ووادي جاهكوه، ووادي النجوم، ودلافين الخليج، وجزر ناز، وكهف نمكدان الملحي."
+      ],
+      "sections": [
+        {
+          "heading": "التاريخ",
+          "blocks": [
+            { "h3": "قشم في العهد الساساني" },
+            { "p": "عُرفت الجزيرة في العهد الساساني باسم «أبركاوان»، وتعني كلمة كاوان في الفارسية الوسطى «من نسل كاوه»، ولا تزال آثار هذا الاسم القديم حاضرة في كتب الجغرافيين في القرون الإسلامية الأولى.{{iranica-qeshm}} وكانت أبركاوان جزءًا من كورة أردشير خرّه، وتقع موانئها الصغيرة على طريق السفن المبحرة بين سيراف والهند." },
+            { "h3": "من العصر الإسلامي إلى البرتغاليين" },
+            { "p": "يصف الكتّاب المسلمون الأوائل أبركاوان بأنها أرض عامرة بالمزارع والنخيل وأشجار الفاكهة. ومع صعود مملكة [[hormuz-island|هرمز]] في القرن الرابع عشر الميلادي أصبحت قشم مصدر الماء العذب والمؤن لذلك الميناء الكبير. واستولى البرتغاليون على قشم في القرن السادس عشر وبنوا قلعة في طرفها الشرقي ما تزال أطلالها قائمة.{{floor-persian-gulf}}" },
+            { "p": "وفي عام ١٦٢٢ استعادت القوات الإيرانية، بمساندة سفن شركة الهند الشرقية الإنجليزية، قشم ثم هرمز من البرتغاليين، ومنذ ذلك الحين بقيت الجزيرة جزءًا من إيران.{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "الجغرافيا والجيولوجيا",
+          "blocks": [
+            { "p": "تبلغ مساحة قشم نحو ١٤٩١ كيلومترًا مربعًا، أي ضعف مساحة البحرين، ويقارب طولها ١٢٠ كيلومترًا.{{ncc-gazetteer}} وتتكوّن تضاريسها في الغالب من قباب ملحية وتلال من الحجر الرملي وأودية شديدة التعرية، وأعلى نقاطها جبل نمكدان الذي يُعدّ كهفه الملحي من أطول الكهوف الملحية في العالم." },
+            { "p": "وبفضل هذه التكوينات أُدرج جزء من الجزيرة عام ٢٠١٧ في قائمة اليونسكو باسم **متنزه قشم الجيولوجي العالمي**.{{unesco-qeshm-geopark}} ويشكّل وادي النجوم ووادي جاهكوه والأودية الملوّنة المسار الرئيسي لزوار المتنزه." }
+          ]
+        },
+        {
+          "heading": "البيئة وغابات القرم",
+          "blocks": [
+            { "p": "يضم شمال غرب الجزيرة أكبر تجمع لأشجار [[grey-mangrove|القرم الرمادي]] في إيران، وتؤوي هذه الغابات المدّية المسجلة ضمن أرض خوران الرطبة وفق اتفاقية رامسار الطيورَ المهاجرة والسرطانات وصغار كثير من الأنواع البحرية.{{unesco-ramsar-hara}}{{doe-mangroves}}" },
+            { "p": "كما تُعدّ شواطئها الجنوبية موقعًا لتعشيش [[hawksbill-turtle|السلحفاة صقرية المنقار]]، وكثيرًا ما تُشاهد مجموعات من الدلافين الحدباء في المياه المحيطة بها." }
+          ]
+        },
+        {
+          "heading": "الاقتصاد والمنطقة الحرة",
+          "blocks": [
+            { "p": "أُنشئت منطقة قشم الحرة عام ١٩٩٠، وتمثل أرصفتها التجارية وميناء لافت وصناعة السفن والسياحة اليوم ركائز اقتصاد الجزيرة.{{qeshm-free-zone}} ولا يزال صيد الأسماك وبناء المراكب التقليدية في لافت والتجارة مع دول الخليج من أقدم مهن أهلها." },
+            { "ul": ["ميناء قشم ورصيف بهمن", "ميناء لافت وورش بناء المراكب", "منطقة درگهان السياحية", "رصيف الشهيد ذاكري"] }
+          ]
+        },
+        {
+          "heading": "السكان والثقافة",
+          "blocks": [
+            { "p": "بلغ عدد سكان مقاطعة قشم ١٤٨٩٩٣ نسمة وفق تعداد عام ٢٠١٦.{{sci-census-2016}} ويتحدث معظم الأهالي اللهجة القشمية، وهي من اللهجات الجنوبية للغة الفارسية، وتُعدّ الموسيقى المحلية واحتفال نوروز الصيادين وتطريز الكلابتون من أبرز ملامح ثقافة الجزيرة." }
+          ]
+        }
+      ]
+    }
+  }
+}

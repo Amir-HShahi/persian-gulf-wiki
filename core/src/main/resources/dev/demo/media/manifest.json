@@ -1,0 +1,2433 @@
+{
+ "assets": [
+  {
+   "key": "strait-hormuz-modis",
+   "kind": "IMAGE",
+   "width": 2320,
+   "height": 1860,
+   "sha256": "RZs8eJKCCFjvz8aUQ+1c6PiBOUKPjHcK3fOVjrjoVaE=",
+   "placeholder": "data:image/webp;base64,UklGRqgAAABXRUJQVlA4IJwAAADwBACdASoYABMAPu1oqVAppiOiqA1RMB2JQBTigWc9qkFiy2OPRAYgKcD7h4qR1oAA9wm8TRj1cjziUr1dK+fuS4jN3D+N/38xCSDEWVRJFEQ7b98iyavfO9nG+hI5DE6gHtjvYnrUyNXJrolOm058IgSjo2PFUDEXpEUAvrRQeSY7CTY9pLQ4K0ekb6Ax6BEBF8gxx+/ntu7jgAA=",
+   "tags": [
+    "STRAIT",
+    "shipping",
+    "geography"
+   ],
+   "caption": {
+    "fa": "تصویر ماهواره‌ای تنگهٔ هرمز و شبه‌جزیرهٔ مسندم",
+    "en": "Satellite view of the Strait of Hormuz and the Musandam Peninsula",
+    "ar": "صورة فضائية لمضيق هرمز وشبه جزيرة مسندم"
+   },
+   "credit": {
+    "author": "MODIS Land Rapid Response Team, NASA GSFC",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Strait_of_Hormuz_and_Musandam_Peninsula_(MODIS_2018-12-10).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 13138,
+     "width": 320,
+     "height": 257
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 44184,
+     "width": 640,
+     "height": 513
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 147244,
+     "width": 1280,
+     "height": 1026
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 261498,
+     "width": 1920,
+     "height": 1539
+    }
+   ]
+  },
+  {
+   "key": "persian-gulf-modis",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2831,
+   "sha256": "OKqpPTQzkki5E1xk06WLQNdKdPJ4rEEf86Ry9WHTNtc=",
+   "placeholder": "data:image/webp;base64,UklGRqIAAABXRUJQVlA4IJYAAADwBACdASoYABIAPu1ur1IppiQiqAgBMB2JYgCsO/+91AWMfazGM2A3V3FAPFy7jOAA/ArkGbItG/OAKI7MEytHu7JQ/MjhIe9FJsig+9f4GV2rwLdDPQDGkTs2reNvn59Ry5bBL5PKIbtCnMSa6nr+xh1E6dIZr0YJtCHzzILGfzcyM61h1nKgo3J34Dddsp24ERqJwAA=",
+   "tags": [
+    "STRAIT",
+    "PROVINCE",
+    "geography"
+   ],
+   "caption": {
+    "fa": "نمای ماهواره‌ای خلیج فارس در روزی صاف",
+    "en": "The Persian Gulf from orbit on a clear day",
+    "ar": "الخليج الفارسي من المدار في يوم صافٍ"
+   },
+   "credit": {
+    "author": "MODIS Land Rapid Response Team, NASA GSFC",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Persian_Gulf_(MODIS_2021-03-10).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 11846,
+     "width": 320,
+     "height": 236
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 38666,
+     "width": 640,
+     "height": 472
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 134918,
+     "width": 1280,
+     "height": 944
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 267200,
+     "width": 1920,
+     "height": 1416
+    }
+   ]
+  },
+  {
+   "key": "persian-gulf-modis-autumn",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2727,
+   "sha256": "J/D+tba5JdQK/oiJFubWz3JB0OdbyT717Nul0FWUUCo=",
+   "placeholder": "data:image/webp;base64,UklGRqgAAABXRUJQVlA4IJwAAAAwBQCdASoYABEAPu1srFEppaQiqAqpMB2JQBOmY2dABO5roffhvpF3cJXHAGXP5OFbQADiHz3wT9Dd7kgA2WLY2uEh6x/FjmoMY+zIc7ReJGH+26OiDECCanzHZ8ks13eDVuBVtz7stV22hntTFslHvDlB7VyBx/85F0Cy7L7g7e5PbDqT26OKGyRopfoREPoPuYQuX47YYG/0gAA=",
+   "tags": [
+    "PROVINCE",
+    "geography",
+    "climate"
+   ],
+   "caption": {
+    "fa": "خلیج فارس در تصویر ماهواره‌ای پاییزی",
+    "en": "An autumn satellite view of the Persian Gulf",
+    "ar": "صورة فضائية خريفية للخليج الفارسي"
+   },
+   "credit": {
+    "author": "MODIS Land Rapid Response Team, NASA GSFC",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Persian_Gulf_(MODIS_2021-10-19).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 10772,
+     "width": 320,
+     "height": 227
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 33786,
+     "width": 640,
+     "height": 454
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 109856,
+     "width": 1280,
+     "height": 909
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 221480,
+     "width": 1920,
+     "height": 1364
+    }
+   ]
+  },
+  {
+   "key": "gulf-dust-plume",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 3069,
+   "sha256": "qc2tRKVsrFmfyrGNdxn2+qj/ZJKKSuxFDaB8mgdFnc0=",
+   "placeholder": "data:image/webp;base64,UklGRp4AAABXRUJQVlA4IJIAAADQBACdASoYABMAPu1cqU6ppKOiMBgMATAdiUAWnQHGt1SGiMHnIQbbHLMZbFuyAAD+iXvJLzQZLkrm44gbVLtnORevZJUKqStZOtodxCqeW0Z6iDPZhbsIbb8/12NgAHoqpWVlc9KKEOEz+t8IsZpeUjppenwNfu0nyJoHZfVVINsicEh54IBRQgZD2wV7Re4AAA==",
+   "tags": [
+    "climate",
+    "pollution"
+   ],
+   "caption": {
+    "fa": "تودهٔ گردوغبار بر فراز خلیج فارس",
+    "en": "A plume of dust over the Persian Gulf",
+    "ar": "عمود من الغبار فوق الخليج الفارسي"
+   },
+   "credit": {
+    "author": "MODIS Land Rapid Response Team, NASA GSFC",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dust_over_the_Persian_Gulf_(MODIS_2022-05-01).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 17194,
+     "width": 320,
+     "height": 256
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 63420,
+     "width": 640,
+     "height": 511
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 226884,
+     "width": 1280,
+     "height": 1023
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 460110,
+     "width": 1920,
+     "height": 1535
+    }
+   ]
+  },
+  {
+   "key": "gulf-dust-storm-2003",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 3072,
+   "sha256": "DmII/h0+Ccmu464l+LpkaQjX/YxBX/OZQptOwqlzWII=",
+   "placeholder": "data:image/webp;base64,UklGRpQAAABXRUJQVlA4IIgAAADQBACdASoYABMAPu1sq1EppiOiqAqpMB2JQBOmW+A2rZ4/BJhijK8nakpFGIe4AADfbb0yG09jvAPgJDOwCeGZ8uwa0M2/fpDRFBrOCGmCJGIgwWrwT7UDllSuCV8XJaXsKc5PewnW9HLcXG3KxEcTKaPklUprLH4MzDB6WG64G95Ev3FcAAAA",
+   "tags": [
+    "climate",
+    "pollution",
+    "geography"
+   ],
+   "caption": {
+    "fa": "طوفان گردوغبار در سراسر خلیج فارس",
+    "en": "A dust storm sweeping across the Persian Gulf",
+    "ar": "عاصفة غبارية تجتاح الخليج الفارسي"
+   },
+   "credit": {
+    "author": "Jacques Descloitres, MODIS Rapid Response Team, NASA/GSFC",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dust_Storm_across_the_Persian_Gulf,_March_28_2003_-_A2003087.0735.250m.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 14684,
+     "width": 320,
+     "height": 256
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 50428,
+     "width": 640,
+     "height": 512
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 182930,
+     "width": 1280,
+     "height": 1024
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 406338,
+     "width": 1920,
+     "height": 1536
+    }
+   ]
+  },
+  {
+   "key": "iran-coast-iss",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2560,
+   "sha256": "qpYY/VZs9zOdeXRRj2+lPRWnzutPXGm+AESs2Q4VENM=",
+   "placeholder": "data:image/webp;base64,UklGRmYCAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggeAAAANADAJ0BKhgAEAA+7WKqTamlpCIwCAEwHYliALToDsb17DOiCDy4AAD3BB19C6wZn8Ssde9/ScjhgqPHy+Iz1wBMIGn2t39RWfhi/5IY20TC8bUBA1KywuesSVcCuM1LLg7KJp49pzdj0j6FXUvVjgf/Bvuo2AAAAA==",
+   "tags": [
+    "PROVINCE",
+    "ISLAND",
+    "geography"
+   ],
+   "caption": {
+    "fa": "کرانهٔ جنوبی ایران از ایستگاه فضایی بین‌المللی",
+    "en": "Iran's southern coast seen from the International Space Station",
+    "ar": "الساحل الجنوبي لإيران من محطة الفضاء الدولية"
+   },
+   "credit": {
+    "author": "NASA/Raja Chari",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:ISS-66_Persian_Gulf,_Iran.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 12050,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 44274,
+     "width": 640,
+     "height": 427
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 182796,
+     "width": 1280,
+     "height": 853
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 428926,
+     "width": 1920,
+     "height": 1280
+    }
+   ]
+  },
+  {
+   "key": "arvand-delta-iss",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2560,
+   "sha256": "Zt7JlmO2NhSpR381uMtfvklKFqkx451d0TnxEK0PVO0=",
+   "placeholder": "data:image/webp;base64,UklGRlwCAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggbgAAABAEAJ0BKhgAEAA+7WaqTamlpCIwCAEwHYlAE6ZQAEIUIOnhIgShuXYAAMw6IS70Bq3taW1YVMJe386PiEHGG2EODjzYUa6R5CliMC5EuRMLOX6doZpEcJmDSiQnsiIhsPJp+CM/Qc33v2ShHcAA",
+   "tags": [
+    "PROVINCE",
+    "PORT",
+    "geography"
+   ],
+   "caption": {
+    "fa": "دلتای اروندرود و بهمنشیر در کرانهٔ خلیج فارس",
+    "en": "The Arvand and Bahmanshir delta on the Persian Gulf coast",
+    "ar": "دلتا أروند وبهمنشير على ساحل الخليج الفارسي"
+   },
+   "credit": {
+    "author": "NASA",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:ISS-67_The_Arvand_Roud_and_the_Bahmanshir_River_on_the_Persian_Gulf_coast.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 11006,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 35206,
+     "width": 640,
+     "height": 427
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 127284,
+     "width": 1280,
+     "height": 853
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 325422,
+     "width": 1920,
+     "height": 1280
+    }
+   ]
+  },
+  {
+   "key": "gulf-night-iss",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2560,
+   "sha256": "sRqN35f2v47acpRbnCxevSOhvXOgQWzVsbCedhGQxlI=",
+   "placeholder": "data:image/webp;base64,UklGRlICAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggZAAAALADAJ0BKhgAEAA+7XKtT6mnpCIwCAEwHYlnAABb6p5vR8EAQOAAAP70ID+2mzVS2NzFddrRDBXS3qhExJ3AfQSrXVhBkY9M5L7ZYm6+QBjp6HebLclV94HTzYqOrSxxv3yrAAA=",
+   "tags": [
+    "PORT",
+    "economy",
+    "PROVINCE"
+   ],
+   "caption": {
+    "fa": "چراغ‌های شهرها و بندرهای خلیج فارس در شب",
+    "en": "City and port lights around the Persian Gulf at night",
+    "ar": "أضواء المدن والموانئ حول الخليج الفارسي ليلًا"
+   },
+   "credit": {
+    "author": "NASA",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:ISS-63_Persian_Gulf_at_night.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 9046,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 31970,
+     "width": 640,
+     "height": 427
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 196068,
+     "width": 1280,
+     "height": 853
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 586386,
+     "width": 1920,
+     "height": 1280
+    }
+   ]
+  },
+  {
+   "key": "gulf-oman-night-iss",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2560,
+   "sha256": "unaWKjlvxR4qqTrXOxkXUzhM6YSDjZBjwn2mgWKN4+k=",
+   "placeholder": "data:image/webp;base64,UklGRjICAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggRAAAANADAJ0BKhgAEAA+7UK3VqmipqQYATAdiWkAAR3rSrBzcCz3AOvwAAD+/EWtdgQZI+1s/qJTW4gyIAQgW7ue5uE39gAA",
+   "tags": [
+    "STRAIT",
+    "economy"
+   ],
+   "caption": {
+    "fa": "خلیج فارس و دریای عمان در شب از فضا",
+    "en": "The Persian Gulf and the Gulf of Oman at night from space",
+    "ar": "الخليج الفارسي وبحر عُمان ليلًا من الفضاء"
+   },
+   "credit": {
+    "author": "NASA",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:ISS-64_Persian_Gulf_and_Gulf_of_Oman_at_night.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 6056,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 33220,
+     "width": 640,
+     "height": 427
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 264242,
+     "width": 1280,
+     "height": 853
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 803606,
+     "width": 1920,
+     "height": 1280
+    }
+   ]
+  },
+  {
+   "key": "iran-iss-51",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2556,
+   "sha256": "65LB2Oxf6seWaWeRIAw3jMqEzZGYLUcZEnXrkefj65I=",
+   "placeholder": "data:image/webp;base64,UklGRlgCAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggagAAABAEAJ0BKhgAEAA+7WSqTimlpCIwCAEwHYlkALsAIea7Fgu5iMpuu5T8AP5Sue37BxnHOI06fOl41QGo6E6Y964eIT4DbcWOtSimcpQI+FxdEk45MbX5m7NdZFNoLRcZQWRse10ooRW4wAA=",
+   "tags": [
+    "ISLAND",
+    "PROVINCE"
+   ],
+   "caption": {
+    "fa": "جزایر و کرانه‌های هرمزگان از مدار زمین",
+    "en": "Hormozgan's islands and coast from orbit",
+    "ar": "جزر هرمزغان وسواحلها من المدار"
+   },
+   "credit": {
+    "author": "Earth Science and Remote Sensing Unit, Lyndon B. Johnson Space Center",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:ISS051-E-42101_-_View_of_Iran.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 5336,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 13778,
+     "width": 640,
+     "height": 426
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 38012,
+     "width": 1280,
+     "height": 852
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 68422,
+     "width": 1920,
+     "height": 1278
+    }
+   ]
+  },
+  {
+   "key": "iss-47-gulf",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2556,
+   "sha256": "f5qp3eQ92sl3g47Jldiwbx6qqyVFwtP6WNb0olnQlRQ=",
+   "placeholder": "data:image/webp;base64,UklGRj4CAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggUAAAAPADAJ0BKhgAEAA+7WitTammpKIwCAEwHYljAJ0ygAIY6qcRZI+N6AAA3Y/Fsuca2BHLSCPhuUO1+VmMa7C05flXFdA5d2FbbsKQ9RBcQAAA",
+   "tags": [
+    "ISLAND",
+    "geography"
+   ],
+   "caption": {
+    "fa": "جزیره‌ای در خلیج فارس از ایستگاه فضایی",
+    "en": "A Persian Gulf island from the space station",
+    "ar": "جزيرة في الخليج الفارسي من محطة الفضاء"
+   },
+   "credit": {
+    "author": "Earth Science and Remote Sensing Unit, Lyndon B. Johnson Space Center",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:ISS047-E-45899_-_View_of_Earth.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 5626,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 15120,
+     "width": 640,
+     "height": 426
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 41898,
+     "width": 1280,
+     "height": 852
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 81456,
+     "width": 1920,
+     "height": 1278
+    }
+   ]
+  },
+  {
+   "key": "uae-coast-iss",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2560,
+   "sha256": "ZKRaaUMuSzII6cPT7iKeaiTHjaHDAeYv+jbwd+A3hdo=",
+   "placeholder": "data:image/webp;base64,UklGRlQCAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggZgAAAHAEAJ0BKhgAEAA+7WKpTamlo6IwCAEwHYlkAJ0ygxgAMB8LiI7P76Ml7WyAAP51Ijamm/y5bJiGzhMPaRIHKnVSyxwXa+uorHt853z7iQQu9XzC5b/1JxS34blrB0XD9QKcOgAAAA==",
+   "tags": [
+    "ISLAND",
+    "PORT"
+   ],
+   "caption": {
+    "fa": "کرانهٔ جنوبی خلیج فارس از فضا",
+    "en": "The southern shore of the Persian Gulf from space",
+    "ar": "الساحل الجنوبي للخليج الفارسي من الفضاء"
+   },
+   "credit": {
+    "author": "Earth Science and Remote Sensing Unit, NASA Johnson Space Center",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:ISS059-E-85794_-_View_of_United_Arab_Emirates.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 6622,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 20008,
+     "width": 640,
+     "height": 427
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 65918,
+     "width": 1280,
+     "height": 853
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 143298,
+     "width": 1920,
+     "height": 1280
+    }
+   ]
+  },
+  {
+   "key": "kuwait-coast-iss",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2157,
+   "sha256": "KdkTy/0ol4EYgQ18a7kOFA2n65v915eYsliIBd6sRG8=",
+   "placeholder": "data:image/webp;base64,UklGRlwCAABXRUJQVlA4WAoAAAAgAAAAFwAADAAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggbgAAANADAJ0BKhgADQA+7WitTqmmJKIwCAEwHYlqAJ0ygACBsV7lyIEQgAD2+qQ8r1bvTGQLYLHnF7QW2Q42f+//pag2IjgD0VOeWFgVgH7i9DiUermRccB4W8UrnaKRcEz5i/sn99LxbvBjez3LlIAA",
+   "tags": [
+    "PROVINCE",
+    "PORT"
+   ],
+   "caption": {
+    "fa": "کرانهٔ شمالی خلیج فارس و خلیج کویت",
+    "en": "The northern Gulf coast and Kuwait Bay",
+    "ar": "الساحل الشمالي للخليج وخليج الكويت"
+   },
+   "credit": {
+    "author": "NASA",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:ISS-64_Kuwait,_Persian_Gulf_northern_coast.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 10948,
+     "width": 320,
+     "height": 180
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 36654,
+     "width": 640,
+     "height": 359
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 139364,
+     "width": 1280,
+     "height": 719
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 431120,
+     "width": 1920,
+     "height": 1079
+    }
+   ]
+  },
+  {
+   "key": "dubai-islands-iss",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2560,
+   "sha256": "zW5I4eeWQjycuxUfeSmYN8DcDJzdAgZnpCrE3D8Keso=",
+   "placeholder": "data:image/webp;base64,UklGRmQCAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggdgAAAHAEAJ0BKhgAEAA+7WaqTimlo6IwCAEwHYloAJ0AI9BjST2IuB3i0kTMthkAAP7SVkHXxR6Xf1o+i8kyse/cWkjqjIVdtrfT/VTa2RuLkrCaR04SD0J/iT+ZV/nT5N3+Wxd1/5OGl7DsR2gPpSI76pJbE/L78AA=",
+   "tags": [
+    "ISLAND",
+    "economy"
+   ],
+   "caption": {
+    "fa": "جزایر مصنوعی در کرانهٔ خلیج فارس",
+    "en": "Artificial islands on the Persian Gulf coast",
+    "ar": "جزر اصطناعية على ساحل الخليج الفارسي"
+   },
+   "credit": {
+    "author": "NASA",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:ISS-59_World_Islands,_Palm_Jumeirah_and_Palm_Jebel_Ali,_Dubai.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 12062,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 37200,
+     "width": 640,
+     "height": 427
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 105568,
+     "width": 1280,
+     "height": 853
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 337552,
+     "width": 1920,
+     "height": 1280
+    }
+   ]
+  },
+  {
+   "key": "kuwait-sts",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2623,
+   "sha256": "ZMRQL4M3XR1XGJ7h32xpFWXxWt78lesD8ATkYmpWfIw=",
+   "placeholder": "data:image/webp;base64,UklGRioCAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggPAAAALADAJ0BKhgAEAA+7WKpTamlo6IwCAEwHYlnAABb6ryP4jw2EDZIAP7r0BhNZO0dYG2UmwpwwHl3XnRAAA==",
+   "tags": [
+    "PROVINCE",
+    "PORT"
+   ],
+   "caption": {
+    "fa": "شمال خلیج فارس از شاتل فضایی",
+    "en": "The northern Persian Gulf from the Space Shuttle",
+    "ar": "شمال الخليج الفارسي من مكوك الفضاء"
+   },
+   "credit": {
+    "author": "NASA",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:STS128-E-10484_-_View_of_Kuwait.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 5048,
+     "width": 320,
+     "height": 218
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 20440,
+     "width": 640,
+     "height": 437
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 69510,
+     "width": 1280,
+     "height": 874
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 132634,
+     "width": 1920,
+     "height": 1312
+    }
+   ]
+  },
+  {
+   "key": "musandam-iss",
+   "kind": "IMAGE",
+   "width": 2546,
+   "height": 1695,
+   "sha256": "3O65qbsNoFxV5lkQnl1+DXudIEn9fXvCIlpn6IGtU5s=",
+   "placeholder": "data:image/webp;base64,UklGRmYCAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggeAAAABAEAJ0BKhgAEAA+7WKpTamlo6IwCAEwHYloAJ0ygANNf8brw20XorYYAP6dKorYVa8r4ChFBMH/n4Tyh8+E2qtOme7LGGiXdkJxKt3g0Fjwzs3uMpotQ6+HDTP9KuXZULCZLgbdxH4DmikEZj/JzJaE1SxtZnAAAA==",
+   "tags": [
+    "STRAIT",
+    "geography"
+   ],
+   "caption": {
+    "fa": "خورهای صخره‌ای شبه‌جزیرهٔ مسندم",
+    "en": "The rocky inlets of the Musandam Peninsula",
+    "ar": "الخلجان الصخرية في شبه جزيرة مسندم"
+   },
+   "credit": {
+    "author": "Earth Science and Remote Sensing Unit, Lyndon B. Johnson Space Center",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:ISS023-E-33601_-_View_of_Oman_-_Musandam_Peninsula_-_Persian_Gulf_-_Khawr_ash_Shamm_-_Khasab_-_Jabal_Maqlab_-_Kubbat_Ghazira_-_Gulf_of_Oman_(cropped).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 11234,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 29678,
+     "width": 640,
+     "height": 426
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 71542,
+     "width": 1280,
+     "height": 852
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 120436,
+     "width": 1920,
+     "height": 1278
+    }
+   ]
+  },
+  {
+   "key": "middle-east-modis",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 3168,
+   "sha256": "fTyMu3/Jc0R9f832a5k6mOHGiY1lmap2YZDAxi0UuE0=",
+   "placeholder": "data:image/webp;base64,UklGRpwAAABXRUJQVlA4IJAAAACwBACdASoYABQAPu1krE4ppaSiKA1RMB2JQBWAAkWLBS40hG6mcOu0pyeufF2oAP7CQox6oKl46vOj+nuJkhCrxacaDvS3rcNZ6NBrdCvoaC8gzrPDdq1ZLjYghY3BXJCbvZNC7/+5Tb+8l53pTa8LE0lH5r8adCCxGTbugFk5QSZ2SXJQspYxo8CmeWpxAAA=",
+   "tags": [
+    "geography",
+    "history"
+   ],
+   "caption": {
+    "fa": "خاورمیانه و خلیج فارس در یک نما",
+    "en": "The Middle East and the Persian Gulf in one view",
+    "ar": "الشرق الأوسط والخليج الفارسي في مشهد واحد"
+   },
+   "credit": {
+    "author": "MODIS Land Rapid Response Team, NASA GSFC",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Middle_East_(MODIS_2018-12-24).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 20198,
+     "width": 320,
+     "height": 264
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 73318,
+     "width": 640,
+     "height": 528
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 286926,
+     "width": 1280,
+     "height": 1056
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 663932,
+     "width": 1920,
+     "height": 1584
+    }
+   ]
+  },
+  {
+   "key": "basrah-oil-terminal",
+   "kind": "IMAGE",
+   "width": 3008,
+   "height": 2000,
+   "sha256": "ytDMTJ9IsXcT9M5cuuLrxaPqEs0omxwNcvsoR9csDcc=",
+   "placeholder": "data:image/webp;base64,UklGRogCAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggmgAAABAEAJ0BKhgAEAA+7WKpTamlpCIwCAEwHYliAJ0giMK4WBdXL2VFF8EAAP4hrtlFA8dIcGnjej5pLSEOOj63/21kdPUK3cVUoxKVsYFXRxLioAqUDzb5rPVtBlyplpTksvM1IA8tUJRE9kZVUfzQju+psBRVjgGxzf/wyr6DK7P174d7Cp1E7L41BF2h3vJLwH/7PvF3MGccIAA=",
+   "tags": [
+    "OIL_FIELD",
+    "PORT",
+    "economy"
+   ],
+   "caption": {
+    "fa": "نفتکش در حال بارگیری در پایانهٔ نفتی دریایی",
+    "en": "A tanker loading at an offshore oil terminal",
+    "ar": "ناقلة تُحمَّل في محطة نفطية بحرية"
+   },
+   "credit": {
+    "author": "U.S. Navy photo by Photographer's Mate Airman Eben Boothby",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:US_Navy_051111-N-8163B-032_An_oil_tanker_docked_to_the_Al_Basrah_Oil_Terminal_(ABOT)_takes_on_crude_oil_in_the_Persian_Gulf.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 14810,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 49016,
+     "width": 640,
+     "height": 426
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 167232,
+     "width": 1280,
+     "height": 851
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 332304,
+     "width": 1920,
+     "height": 1277
+    }
+   ]
+  },
+  {
+   "key": "basrah-tankers",
+   "kind": "IMAGE",
+   "width": 3008,
+   "height": 1960,
+   "sha256": "lZ6RJ8kUcysya2xjC2inkAqSQ/MwOggo9p3j4Q6gk+M=",
+   "placeholder": "data:image/webp;base64,UklGRnACAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggggAAAHAEAJ0BKhgAEAA+7WKqTimlpCIwCAEwHYliAJ0ygyWyf8B5BMaCGpHYcFkoAP6yPXL9oIkbiQHMthNbXQvxNeL4lV14a/9HAw2xJuZcQ5urQmHxSxMpXQnRMpYewJXnXFSkt8JoeSLdYwHKFG5U1hjPdq26Bum1isxop/X6b7M+AAA=",
+   "tags": [
+    "OIL_FIELD",
+    "PORT",
+    "shipping"
+   ],
+   "caption": {
+    "fa": "نفتکش‌ها در کنار اسکلهٔ نفتی",
+    "en": "Tankers alongside an oil jetty",
+    "ar": "ناقلات بجوار رصيف نفطي"
+   },
+   "credit": {
+    "author": "U.S. Navy photo by Photographer's Mate 1st Class Richard J. Brunson",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:US_Navy_041212-N-6932B-013_Hundreds_of_oil_tankers_each_year_receive_their_payload_from_Iraq%27s_Al_Basrah_Oil_Terminal_(ABOT).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 14918,
+     "width": 320,
+     "height": 209
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 60080,
+     "width": 640,
+     "height": 417
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 241400,
+     "width": 1280,
+     "height": 834
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 500048,
+     "width": 1920,
+     "height": 1251
+    }
+   ]
+  },
+  {
+   "key": "tanker-omala",
+   "kind": "IMAGE",
+   "width": 2464,
+   "height": 1632,
+   "sha256": "+mJe7BxSkcv5b3DNtPLrm2mxMTD/RPeoaz6tl/KtqqM=",
+   "placeholder": "data:image/webp;base64,UklGRnoCAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggjAAAANADAJ0BKhgAEAA+7WSpTamlpCIwCAEwHYlnAABKKxGvbjh2wQrBeAD9+GoHQyMro1RERBcEWWKo1LMCvtULK7777F77MKBcXpejfZLJRY4liK95xQbCN5HXVnIXeIpx0svz3NKdlDG13bffMWha1Y9xQdradrffTpvd5QRAr90P+oWg5JY55dMCAAAA",
+   "tags": [
+    "OIL_FIELD",
+    "shipping",
+    "economy"
+   ],
+   "caption": {
+    "fa": "نفتکش در آب‌های خلیج فارس",
+    "en": "An oil tanker in Persian Gulf waters",
+    "ar": "ناقلة نفط في مياه الخليج الفارسي"
+   },
+   "credit": {
+    "author": "U.S. Navy photo by Photographer's Mate 1st Class Richard J. Brunson",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:US_Navy_041207-N-6932B-014_The_oil_tanker_Omala_is_one_of_hundreds_of_oil_tankers_from_around_the_world_that_receives_its_payload_from_Iraq%27s_Al_Basrah_Oil_Terminal_(ABOT).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 16566,
+     "width": 320,
+     "height": 212
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 52730,
+     "width": 640,
+     "height": 424
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 166880,
+     "width": 1280,
+     "height": 848
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 300488,
+     "width": 1920,
+     "height": 1272
+    }
+   ]
+  },
+  {
+   "key": "barge-and-tug",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2550,
+   "sha256": "+F5Hz9RjafaEauddw0T/MN390d7+N4+m1ueh52IBigY=",
+   "placeholder": "data:image/webp;base64,UklGRnICAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDgghAAAABAEAJ0BKhgAEAA+7WKpTamlo6IwCAEwHYllAMKAFO+E0l4uIf3pdV4AAP7e7D8v8GJdFSd4I1c6jgs+JPC8e6xRFcAsZ50+10P1lijKXDaHWAUUdgM4fJm8IFfNEj1yLqsp+JMiCsgPr1z4RsvRpqfeop3Gya7yeV/AIkjFnDOPscAAAA==",
+   "tags": [
+    "shipping",
+    "PORT"
+   ],
+   "caption": {
+    "fa": "یدک‌کش و بارج در خلیج فارس",
+    "en": "A tug towing a barge in the Persian Gulf",
+    "ar": "قاطرة تسحب صندلًا في الخليج الفارسي"
+   },
+   "credit": {
+    "author": "U.S. Navy photo by Mass Communication Specialist 2nd Class Kitt Amaritnant",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:US_Navy_061017-N-8148A-071_The_chartered_barge_Ocean_6_being_towed_by_tug_boat_Dona_II_in_the_Persian_Gulf.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 15034,
+     "width": 320,
+     "height": 212
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 47154,
+     "width": 640,
+     "height": 425
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 139184,
+     "width": 1280,
+     "height": 850
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 256246,
+     "width": 1920,
+     "height": 1275
+    }
+   ]
+  },
+  {
+   "key": "fishing-dhow",
+   "kind": "IMAGE",
+   "width": 3504,
+   "height": 2336,
+   "sha256": "9NKzDckNKtcQkAK5zbz13rR3pEmY/i8hlVD9HdoWeQ4=",
+   "placeholder": "data:image/webp;base64,UklGRmICAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggdAAAAPADAJ0BKhgAEAA+7WKqTamlpCIwCAEwHYlAE6ADLsEe9Pf+DAP/LYAA9wQjKpiLhEKGBrSu72blpWunVUqW9wnUHglncXmDtqbgVwIfMaj2XeVgzV36qXyEywfWJIFpbhLbwFMvnwDc1nUhPqVrFIiJQ7AA",
+   "tags": [
+    "FISHING_GROUND",
+    "culture",
+    "shipping"
+   ],
+   "caption": {
+    "fa": "لنج صیادی چوبی در دریا",
+    "en": "A wooden fishing dhow at sea",
+    "ar": "مركب صيد خشبي في البحر"
+   },
+   "credit": {
+    "author": "U.S. Navy photo/Released",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:120131-N-ZZ999-002_-_disabled_Iranian_fishing_dhow_Sohaila_17_January_2012.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 16910,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 44942,
+     "width": 640,
+     "height": 427
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 110512,
+     "width": 1280,
+     "height": 853
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 187496,
+     "width": 1920,
+     "height": 1280
+    }
+   ]
+  },
+  {
+   "key": "mangrove-channel",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2560,
+   "sha256": "qZCTfwb5e+Ao4WGIZZHLqJT7YmViv4YdtZaQHQ3dCf4=",
+   "placeholder": "data:image/webp;base64,UklGRogCAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggmgAAALADAJ0BKhgAEAA+7WKpTamlo6IwCAEwHYlqAKwACPeV76zrNtqAAP68ZIiSq/CikjKo8WEOXaNFeVxI3jSSv+w73+FTB8w8J5Mq/gQKif4ipVn2jAj1h8+MWmylqTRQQOhcj79RwyTCubmUJMxUOmNVIJkYFkLpzoAVSTV6/3SGx/chOaBE4ayGbPtHqLQrY/Hd1PDZnrwAAAA=",
+   "tags": [
+    "ISLAND",
+    "SEA_PLANT",
+    "environment"
+   ],
+   "caption": {
+    "fa": "آبراهی میان جنگل‌های حرا",
+    "en": "A channel through mangrove forest",
+    "ar": "قناة بين غابات القرم"
+   },
+   "credit": {
+    "author": "evergladesnps",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mangroves_(53575741485).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 23226,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 73890,
+     "width": 640,
+     "height": 427
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 241760,
+     "width": 1280,
+     "height": 853
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 484746,
+     "width": 1920,
+     "height": 1280
+    }
+   ]
+  },
+  {
+   "key": "mangrove-forest",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2150,
+   "sha256": "N4m0732RsAMau+qgpSW9C6E1JuHF/2tms2YGCfomYJo=",
+   "placeholder": "data:image/webp;base64,UklGRmQCAABXRUJQVlA4WAoAAAAgAAAAFwAADAAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggdgAAAHAEAJ0BKhgADQA+7WarTimlpCIwCAEwHYlkAJ0ygxgmf8Bs9x4XWvf3zRKAAP37UFJ98lrm+dNRESM33uXED40qaEVDGPig3LbT0KN6A8zFuxft5Y4lz4q/tEFJZFhlBewQ8XYcF8LfSDYJ8r4JHeaMmoEAAAA=",
+   "tags": [
+    "ISLAND",
+    "SEA_PLANT",
+    "environment"
+   ],
+   "caption": {
+    "fa": "جنگل انبوه حرا در کرانهٔ جزرومدی",
+    "en": "Dense mangrove forest on a tidal shore",
+    "ar": "غابة قرم كثيفة على ساحل مدّي"
+   },
+   "credit": {
+    "author": "evergladesnps",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Mangroves_(53575624549).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 16534,
+     "width": 320,
+     "height": 179
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 60126,
+     "width": 640,
+     "height": 358
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 213604,
+     "width": 1280,
+     "height": 717
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 444732,
+     "width": 1920,
+     "height": 1075
+    }
+   ]
+  },
+  {
+   "key": "grey-mangrove",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2560,
+   "sha256": "3kvj3tYxAo+bw8m7byMh5byffExuJPslC+QIuQXe5FY=",
+   "placeholder": "data:image/webp;base64,UklGRpQAAABXRUJQVlA4IIgAAABwBACdASoYABAAPu1iqU2ppaOiMAgBMB2JZQC/WMgDByVFNt4o8OOC0d/nwAD+83SY26OgaqqSelfe8w95MkJJq7Iqw/vpAJjitH5IallR1gAKr7dxzTaKfz0+f8/c9u0478bZt1gjyl0GXKudCWYTmpXTXxBjUIqpOEv8AdGW8tTcTPQiAAAA",
+   "tags": [
+    "SEA_PLANT",
+    "ISLAND"
+   ],
+   "caption": {
+    "fa": "درخت حرا با ریشه‌های هوایی",
+    "en": "A grey mangrove with its aerial roots",
+    "ar": "شجرة قرم رمادي بجذورها الهوائية"
+   },
+   "credit": {
+    "author": "Alison Klein",
+    "license": "CC0",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Avicennia_marina._Grey_Mangrove,_Sydney_Olympic_Park.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 22654,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 90600,
+     "width": 640,
+     "height": 427
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 308662,
+     "width": 1280,
+     "height": 853
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 563044,
+     "width": 1920,
+     "height": 1280
+    }
+   ]
+  },
+  {
+   "key": "acropora-coral",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2499,
+   "sha256": "W0W7JUQuPRrGG4j3P0ja0oK6vVUHReoMxVd0Dnprcms=",
+   "placeholder": "data:image/webp;base64,UklGRqICAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggtAAAALAEAJ0BKhgAEAA+7WKpTamlo6IwCAEwHYlsAJ0vUnpIBHitLOaAHd6jYFJXWEAA/vFs2fwruMR1w8IZu5LH/ddTr0YxgcN4yBlktx7zypbSosGhKGJNdUjN2ReLvVQVz1Qv3XSin5HKdptHXwuMqsSZ0PoUVj3VOExo4apABCjlLMZgrJXFqS6pRdpKDpVUs939loKm2fIKRxFyfI5/gnl25nDokSgxvi9Fz7rW2shqCmIYAA==",
+   "tags": [
+    "CORAL",
+    "CNIDARIAN",
+    "environment"
+   ],
+   "caption": {
+    "fa": "کلونی مرجان آکروپورا",
+    "en": "A colony of Acropora coral",
+    "ar": "مستعمرة من مرجان الأكروبورا"
+   },
+   "credit": {
+    "author": "National Marine Sanctuaries",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:PMNM_-_Acropora_cytherea_-_French_Frigate_Shoals_(31289715760).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 15708,
+     "width": 320,
+     "height": 208
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 49972,
+     "width": 640,
+     "height": 416
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 166488,
+     "width": 1280,
+     "height": 833
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 342432,
+     "width": 1920,
+     "height": 1250
+    }
+   ]
+  },
+  {
+   "key": "butterflyfish-coral",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2880,
+   "sha256": "8DquSJRnOgNXslZzUpTYAZSuE8gEpsznpYCOFH2XpJI=",
+   "placeholder": "data:image/webp;base64,UklGRqYCAABXRUJQVlA4WAoAAAAgAAAAFwAAEQAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDgguAAAADAFAJ0BKhgAEgA+7WyqUSmlo6KoCqkwHYlAFtk7uA6MuK4yIHrVR0Zhvz1BcnasDik0AP3VQ6HmweMpmrTowISnNV3MEUVrHhYWy0ucwWBYTxfvnabXzykyz9PzVNL69VU1T6B6sSyQDKD7n85Mn1eaub90O/eq/Q4U1sGcxy47LOhZj/O9pp5FRQyC9ZOHhGJerCTIWYg5a0KvzofVmj0ZqKfrU1exLaUw2TRdU48oyTUnIAZAAAA=",
+   "tags": [
+    "CORAL",
+    "FISH"
+   ],
+   "caption": {
+    "fa": "ماهی پروانه در میان مرجان‌ها",
+    "en": "A butterflyfish among corals",
+    "ar": "سمكة فراشة بين المرجان"
+   },
+   "credit": {
+    "author": "National Marine Sanctuaries",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Melon_Butterflyfish_In_Acropora_Coral_(38797562144).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 21108,
+     "width": 320,
+     "height": 240
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 50644,
+     "width": 640,
+     "height": 480
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 112482,
+     "width": 1280,
+     "height": 960
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 191506,
+     "width": 1920,
+     "height": 1440
+    }
+   ]
+  },
+  {
+   "key": "reef-fish-school",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2880,
+   "sha256": "ZJN8+R4bP+U2V6RBXYa9E9j+olO2SUHyAOXibeHLlbM=",
+   "placeholder": "data:image/webp;base64,UklGRpoCAABXRUJQVlA4WAoAAAAgAAAAFwAAEQAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggrAAAALAEAJ0BKhgAEgA+7WqvUKmlpCKoCqkwHYljAKwACmA14yKdkBcFa3jLdcpItgAA/Fpdy7yFa8JOiCd4wlKwEVm+QD29QNXubu3bREworVn2bdMZm/rAatR42KeWnYKBlAauBnnmJ3INFx5/hz4R6j/A+Pf/CJwwAsmnl8sHb/pwEXkf7XphPbpT/KD7G0QJ8mHAavbLdwV71nq4lyi64889OK/ElkrvhzkAAAA=",
+   "tags": [
+    "FISH",
+    "FISHING_GROUND"
+   ],
+   "caption": {
+    "fa": "گلهٔ ماهی‌های صخره‌ای",
+    "en": "A school of reef fish",
+    "ar": "سرب من أسماك الشعاب"
+   },
+   "credit": {
+    "author": "National Marine Sanctuaries",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:NMSAS_-_Fish_At_Rose_Atoll_(28208114956).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 25670,
+     "width": 320,
+     "height": 240
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 85388,
+     "width": 640,
+     "height": 480
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 247644,
+     "width": 1280,
+     "height": 960
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 435794,
+     "width": 1920,
+     "height": 1440
+    }
+   ]
+  },
+  {
+   "key": "scorpionfish-seagrass",
+   "kind": "IMAGE",
+   "width": 2560,
+   "height": 1920,
+   "sha256": "qU7rUzrt7yqx4ABqNHNprrzUGUdfB2H7fisUZL7IfLE=",
+   "placeholder": "data:image/webp;base64,UklGRqYCAABXRUJQVlA4WAoAAAAgAAAAFwAAEQAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDgguAAAAPAEAJ0BKhgAEgA+7W6vUimmJCKoCAEwHYliALUa2o44BaOxFBcLXQlPSFUm/Sm5AAD+zH7e6+AL3lHanZlcB50t9b/2Pp0bLrAS2cN74lu7H6HPxcq3SUEFJ4SiWFVYmjt+uEMP0bXUVEoIQdFyYMzoCBDBjDqOveriPk5mqUix4w5IG0NEvkvecS5HJmlSanUrAC4siQXY4p9qfMXPUgIkiNFrWpiQGzOV3yYz9ylVXdCRsRSAAAA=",
+   "tags": [
+    "SEA_PLANT",
+    "FISH"
+   ],
+   "caption": {
+    "fa": "عقرب‌ماهی در بستر علف‌های دریایی",
+    "en": "A scorpionfish on a seagrass bed",
+    "ar": "سمكة عقرب على مرج من الأعشاب البحرية"
+   },
+   "credit": {
+    "author": "National Marine Sanctuaries",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Scorpionfish_In_Seagrass_(29904628858).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 35818,
+     "width": 320,
+     "height": 240
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 121010,
+     "width": 640,
+     "height": 480
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 384256,
+     "width": 1280,
+     "height": 960
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 762410,
+     "width": 1920,
+     "height": 1440
+    }
+   ]
+  },
+  {
+   "key": "dugong",
+   "kind": "IMAGE",
+   "width": 1920,
+   "height": 1278,
+   "sha256": "xJCQPAWFdnKxLbD3V0AmpPvNEjUfpabEfAXNuyEsPno=",
+   "placeholder": "data:image/webp;base64,UklGRlgAAABXRUJQVlA4IEwAAADwAwCdASoYABAAPu1oqk6ppiQiMAgBMB2JaQDLLCHS0TxkbTN3M/ZAAP5RXFXSuHiLODt998x0ihW9QnAfCU/bglMcM4gn1DuiAAAA",
+   "tags": [
+    "MAMMAL"
+   ],
+   "caption": {
+    "fa": "گاو دریایی در حال شنا",
+    "en": "A dugong swimming",
+    "ar": "أطوم يسبح"
+   },
+   "credit": {
+    "author": "Fernando Brambila",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dugong_dugon_-_Fernando_Brambila_-_Expedici%C3%B3n_Malaspina.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 2946,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 12284,
+     "width": 640,
+     "height": 426
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 57562,
+     "width": 1280,
+     "height": 852
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 136748,
+     "width": 1920,
+     "height": 1278
+    }
+   ]
+  },
+  {
+   "key": "bottlenose-dolphin",
+   "kind": "IMAGE",
+   "width": 3008,
+   "height": 1960,
+   "sha256": "Yiv7gucsejtNRVdCnomMfn/63nQ3gZ/vm9zsjWRxLCU=",
+   "placeholder": "data:image/webp;base64,UklGRoAAAABXRUJQVlA4IHQAAADwAwCdASoYABAAPu1iqk2ppaQiMAgBMB2JQBOmUABchFnwHHe5DIDAAP50bSb5ckvdlUAML8d9M8F8Pipmj8E5tvsHmAMnEkm+3uBsk1LJyFGhqwYFiGTyBDvSlQCxibyMmKXZRMhtX1iY34u3SEu1bWU0AA==",
+   "tags": [
+    "MAMMAL"
+   ],
+   "caption": {
+    "fa": "دلفین در سطح آب",
+    "en": "A dolphin at the surface",
+    "ar": "دلفين على سطح الماء"
+   },
+   "credit": {
+    "author": "Wayne Hoggard NOAA/NMFS/SEFSC",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tursiops.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 9842,
+     "width": 320,
+     "height": 209
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 33806,
+     "width": 640,
+     "height": 417
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 122860,
+     "width": 1280,
+     "height": 834
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 286388,
+     "width": 1920,
+     "height": 1251
+    }
+   ]
+  },
+  {
+   "key": "humpback-whale",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2560,
+   "sha256": "69FwXe3J7XbTnILHCJCcf2jO+GZvzzBZ7n8qtPCVmnA=",
+   "placeholder": "data:image/webp;base64,UklGRkwCAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggXgAAAFAEAJ0BKhgAEAA+7WKpTamlo6IwCAEwHYloAJ0yhHgYKfhiVVI3JRsEEAAA/ngfA3RuWctIl2vJLyrt6MR4/xOv/lbv90mDf3ceazONB/pyYw05+slcKupoA5ZAAAA=",
+   "tags": [
+    "MAMMAL"
+   ],
+   "caption": {
+    "fa": "نهنگ و نوزادش در اقیانوس",
+    "en": "A whale and its calf in open water",
+    "ar": "حوت وصغيره في المياه المفتوحة"
+   },
+   "credit": {
+    "author": "National Marine Sanctuaries",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Humpback_Whale_And_Calf_(42854767822).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 7836,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 22560,
+     "width": 640,
+     "height": 427
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 65086,
+     "width": 1280,
+     "height": 853
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 122330,
+     "width": 1920,
+     "height": 1280
+    }
+   ]
+  },
+  {
+   "key": "green-turtle",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2575,
+   "sha256": "KW57GU2Ou5MPuYP5U0KNkpfHfz86KEctvnvKo3AZrlw=",
+   "placeholder": "data:image/webp;base64,UklGRn4AAABXRUJQVlA4IHIAAADQAwCdASoYABAAPu1krU6ppaSiMAgBMB2JbACdMoRwADfK+5w/nAAA/utNWe4xeL8upRSWctDvY/nfiYtEZeJQi80WgUJ8NzwGZR07L6LID2Ngar1GdbvhMQJsHgjfG7AwHGThVX7FvDMyHuL8WZsMAAA=",
+   "tags": [
+    "REPTILE"
+   ],
+   "caption": {
+    "fa": "لاک‌پشت سبز در زیر آب",
+    "en": "A green turtle underwater",
+    "ar": "سلحفاة خضراء تحت الماء"
+   },
+   "credit": {
+    "author": "National Marine Sanctuaries",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Green_Sea_Turtle_(43781715354).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 11830,
+     "width": 320,
+     "height": 214
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 40230,
+     "width": 640,
+     "height": 429
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 127556,
+     "width": 1280,
+     "height": 858
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 233322,
+     "width": 1920,
+     "height": 1288
+    }
+   ]
+  },
+  {
+   "key": "hawksbill-turtle",
+   "kind": "IMAGE",
+   "width": 2560,
+   "height": 1843,
+   "sha256": "RcMlrs+mL/sKfF5qv2TQdzxxstFM6vtXxrmpAsSapGQ=",
+   "placeholder": "data:image/webp;base64,UklGRqYAAABXRUJQVlA4IJoAAAAQBQCdASoYABEAPu1or1CppaQiqAqpMB2JZACxHzQ/b1HALNKl8j7NJS+hF1mFs/5AAP7yngFhsEpte+nx9E6TUSQDR8Uz/IAivuND/xJ6tH/RRrCLqG9Y76GPaC/7IYSbauPvdZJcOWgCe7k2qg0RinTqJofI490HChtu4yM5hTDimFD74XHlDYEi/p5fTy+L1RjZScsoAAAA",
+   "tags": [
+    "REPTILE"
+   ],
+   "caption": {
+    "fa": "لاک‌پشت پوزه‌عقابی",
+    "en": "A hawksbill turtle",
+    "ar": "سلحفاة صقرية المنقار"
+   },
+   "credit": {
+    "author": "U.S. Fish and Wildlife Service Headquarters",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hawksbill_sea_turtle_(53662928451).png"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 24686,
+     "width": 320,
+     "height": 230
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 78360,
+     "width": 640,
+     "height": 461
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 211054,
+     "width": 1280,
+     "height": 922
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 344530,
+     "width": 1920,
+     "height": 1382
+    }
+   ]
+  },
+  {
+   "key": "whale-shark",
+   "kind": "IMAGE",
+   "width": 3648,
+   "height": 2736,
+   "sha256": "CR3vNQUfODKqbnPNdna/CitwjepQPe2e2YS64KqgO9E=",
+   "placeholder": "data:image/webp;base64,UklGRmICAABXRUJQVlA4WAoAAAAgAAAAFwAAEQAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggdAAAAJAEAJ0BKhgAEgA+7WarTymlo6IoDVEwHYliAL53f4DRpn6VoCpWBCwNZXnTAADhE9HK2MLbovBWdHSDpM18HBSIQQiDc3Th8BOxsaiXYj1Q4qhbJKa9jTiN8oCtA0bN57Mcb34wncjEQYxaqPuJke9OAAAA",
+   "tags": [
+    "FISH"
+   ],
+   "caption": {
+    "fa": "کوسهٔ نهنگ، بزرگ‌ترین ماهی جهان",
+    "en": "A whale shark, the world's largest fish",
+    "ar": "قرش حوتي، أكبر سمكة في العالم"
+   },
+   "credit": {
+    "author": "National Marine Sanctuaries",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Whale_Shark_(42853285042).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 5942,
+     "width": 320,
+     "height": 240
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 16884,
+     "width": 640,
+     "height": 480
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 56154,
+     "width": 1280,
+     "height": 960
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 171524,
+     "width": 1920,
+     "height": 1440
+    }
+   ]
+  },
+  {
+   "key": "gag-grouper",
+   "kind": "IMAGE",
+   "width": 2304,
+   "height": 1536,
+   "sha256": "/AUXkPOtzcerXQp1dvq6yI6B5mb97zub7ImHU+1Rr7c=",
+   "placeholder": "data:image/webp;base64,UklGRoQAAABXRUJQVlA4IHgAAADQAwCdASoYABAAPu1kqU2ppaQiMAgBMB2JQBYdgvbMyEaBTuAwDKAA2cki7o0aygnZfAUCoT+hH6jyYg+LgwdAG1mJgINXqs6mK0EEdoCsNZKTTHrNsxMyiInpvpfO06W6AB2YHGi3hMjhaN2xFnLHs2kmToVAAAA=",
+   "tags": [
+    "FISH",
+    "FISHING_GROUND"
+   ],
+   "caption": {
+    "fa": "ماهی هامور در میان صخره‌ها",
+    "en": "A grouper among the rocks",
+    "ar": "سمكة هامور بين الصخور"
+   },
+   "credit": {
+    "author": "SEFSC Pascagoula Laboratory; Collection of Brandi Noble, NOAA/NMFS/SEFSC.",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fish4335_-_Flickr_-_NOAA_Photo_Library.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 8118,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 22398,
+     "width": 640,
+     "height": 427
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 67424,
+     "width": 1280,
+     "height": 853
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 127154,
+     "width": 1920,
+     "height": 1280
+    }
+   ]
+  },
+  {
+   "key": "penaeid-shrimp",
+   "kind": "IMAGE",
+   "width": 2896,
+   "height": 1944,
+   "sha256": "8LTRc6uj2jbKouuJlLBqedPhz8G95a4N4brCTNr/q/k=",
+   "placeholder": "data:image/webp;base64,UklGRkYCAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggWAAAADAEAJ0BKhgAEAA+7WKqTamlpCIwCAEwHYlsAJ0yhHAAKce1vUowY0bIAAD+2MwZaHIF29slos10y37UsdyYY5vtMeg1ur4Gm5VE/vZ3hLfJXRXCyO3ggAA=",
+   "tags": [
+    "CRUSTACEAN",
+    "FISHING_GROUND"
+   ],
+   "caption": {
+    "fa": "میگوی خانوادهٔ پنائیده",
+    "en": "A penaeid shrimp",
+    "ar": "روبيان من فصيلة البنايدية"
+   },
+   "credit": {
+    "author": "SEFSC Pascagoula Laboratory; Collection of Brandi Noble, NOAA/NMFS/SEFSC.",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fish4551_-_Flickr_-_NOAA_Photo_Library.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 4106,
+     "width": 320,
+     "height": 215
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 10216,
+     "width": 640,
+     "height": 430
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 27104,
+     "width": 1280,
+     "height": 859
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 51960,
+     "width": 1920,
+     "height": 1289
+    }
+   ]
+  },
+  {
+   "key": "land-crab",
+   "kind": "IMAGE",
+   "width": 3570,
+   "height": 2380,
+   "sha256": "5g44mRegby0jaxS6xiEJK9KHluLTfhaE94e7VTrwH1k=",
+   "placeholder": "data:image/webp;base64,UklGRpgCAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggqgAAAHAEAJ0BKhgAEAA+7WKpTamlo6IwCAEwHYllAAPk+g4GBN3DovDfcS/nz0bEAP7fE0PRwupsCNN7HrOu7cgao0LLwZOaChu+iT8FqQIHl1GucAFWkyaMwyZWmOo5GmbwOdd+eZWButs8JwHNFJ3a40LpOfUVWm+RUcAIztkuRz4Pe3OK0/gl3sDIye8u7dLmwiWDdBbtXfy/yJrxAGxiZYVUBs4jhQo7gAAA",
+   "tags": [
+    "CRUSTACEAN"
+   ],
+   "caption": {
+    "fa": "خرچنگ ساحلی",
+    "en": "A shore crab",
+    "ar": "سرطان ساحلي"
+   },
+   "credit": {
+    "author": "U.S. Fish and Wildlife Service Southeast Region",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Blue_Land_Crab_(Cardisoma_guanhumi)_(6852439208).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 22288,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 65022,
+     "width": 640,
+     "height": 427
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 179164,
+     "width": 1280,
+     "height": 853
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 310230,
+     "width": 1920,
+     "height": 1280
+    }
+   ]
+  },
+  {
+   "key": "octopus",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2656,
+   "sha256": "an63teHvVTBJsqOWeCmp0hIK61BAzt0tgEfie5u/nJY=",
+   "placeholder": "data:image/webp;base64,UklGRrICAABXRUJQVlA4WAoAAAAgAAAAFwAAEAAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggxAAAAJAFAJ0BKhgAEQA+7WqtUKmlpCKoCqkwHYlmAJ0vxcqABsNhn2K5brGxptEWTktrCgHYdBEAAPqY+kz7AVwMaLmMmnijjqb0aSy2I+8ffPtQ7GK68nIZn2sn9jR37wMzQtIzPPi2dVmCe0WuZEWTAKMGi1Vrt7CM6bI5tirTiD7903tj66WJhtCVMeJ4ZH/Hs4MhonC0NjC7TFVIbvg5wpevuK02ontJ/EEmb4Ae8WLnCLvwnDfgKOgHwJMw9kZ/apRIAAA=",
+   "tags": [
+    "MOLLUSC"
+   ],
+   "caption": {
+    "fa": "هشت‌پا در میان صخره‌های مرجانی",
+    "en": "An octopus among coral rocks",
+    "ar": "أخطبوط بين الصخور المرجانية"
+   },
+   "credit": {
+    "author": "National Marine Sanctuaries",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:PMNM_-_He%27e_Octopus_(27551309582).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 28048,
+     "width": 320,
+     "height": 221
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 87382,
+     "width": 640,
+     "height": 443
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 296804,
+     "width": 1280,
+     "height": 885
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 601598,
+     "width": 1920,
+     "height": 1328
+    }
+   ]
+  },
+  {
+   "key": "moon-jellyfish",
+   "kind": "IMAGE",
+   "width": 2592,
+   "height": 1944,
+   "sha256": "VNjEL+9hKZNJ+3oCFv3ufMvyljN1aGxRNOXeD4IP7Uw=",
+   "placeholder": "data:image/webp;base64,UklGRsQAAABXRUJQVlA4ILgAAACwBQCdASoYABIAPu1orlCppaQiqAqpMB2JbACdMtU5akmQhPd10H2h2h04KPDE1D187X3FfQAA/unXdsfmLkwmhBlRK3rIeSLW9jycmDGG43XJBzHIc5q2yCQeSiv9wDXaJA5BCZEIw/XewYq4S0Qg2GET+A+1JgtbyFqypA1zUx7O1/TxPczMS8xH6ZSIewiHisjqUXxgQIX+P8bqulFf9N1WwiDb3BBuDZNr8oxsLUbhxQ+K4AAA",
+   "tags": [
+    "CNIDARIAN"
+   ],
+   "caption": {
+    "fa": "عروس دریایی",
+    "en": "Jellyfish",
+    "ar": "قناديل البحر"
+   },
+   "credit": {
+    "author": "Anna Fiolek, NOAA Central Library.",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Aurelia_jellyfishes_Expl1602_-_Flickr_-_NOAA_Photo_Library.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 9368,
+     "width": 320,
+     "height": 240
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 27082,
+     "width": 640,
+     "height": 480
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 90066,
+     "width": 1280,
+     "height": 960
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 179254,
+     "width": 1920,
+     "height": 1440
+    }
+   ]
+  },
+  {
+   "key": "greater-flamingos",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2880,
+   "sha256": "f0VHYXNps3ZjFzWwfnistcShUS3QhsPRd0bV9Us91eQ=",
+   "placeholder": "data:image/webp;base64,UklGRnwAAABXRUJQVlA4IHAAAACwBACdASoYABIAPu1oq0+ppiOiMBgIATAdiWcAw6wQ64sZhvggGK5AcOxd3R2IAP7qyIrmLKOfP1QgYYk/eksU+0VSfIC1GYIgYL+3OoBfRVuF3N0otjGKGPprAnA+3DDeEREG2ht4tGMkuYzIEWgA",
+   "tags": [
+    "BIRD",
+    "environment"
+   ],
+   "caption": {
+    "fa": "گروهی از فلامینگوهای بزرگ",
+    "en": "A flock of greater flamingos",
+    "ar": "سرب من النحام الكبير"
+   },
+   "credit": {
+    "author": "U. S. Fish and Wildlife Service - Northeast Region",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Greater_flamingos_in_salt_ponds._(6771455847).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 17182,
+     "width": 320,
+     "height": 240
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 48186,
+     "width": 640,
+     "height": 480
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 114342,
+     "width": 1280,
+     "height": 960
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 193082,
+     "width": 1920,
+     "height": 1440
+    }
+   ]
+  },
+  {
+   "key": "mudflat-sandpipers",
+   "kind": "IMAGE",
+   "width": 3840,
+   "height": 2561,
+   "sha256": "OsWez+/gDPgpmlNOhldVmtpOLh5nWl09fQZEfk7bQrw=",
+   "placeholder": "data:image/webp;base64,UklGRjYCAABXRUJQVlA4WAoAAAAgAAAAFwAADwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDggSAAAALADAJ0BKhgAEAA+7WKpTamlo6IwCAEwHYlpAMTYId/EPNaISyQAAP7vsvEHVLwEykZeynCHHxLlQruSQBgNDnBfVrN74WAAAA==",
+   "tags": [
+    "BIRD",
+    "environment"
+   ],
+   "caption": {
+    "fa": "پرندگان کنارآبزی در پهنهٔ گلی",
+    "en": "Shorebirds feeding on a mudflat",
+    "ar": "طيور شاطئية تتغذى في سهل طيني"
+   },
+   "credit": {
+    "author": "USFWSAlaska",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rock_sandpipers_in_the_mudflats_(51939947787).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 7766,
+     "width": 320,
+     "height": 213
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 20154,
+     "width": 640,
+     "height": 427
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 55814,
+     "width": 1280,
+     "height": 854
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 103116,
+     "width": 1920,
+     "height": 1281
+    }
+   ]
+  },
+  {
+   "key": "oil-spill-shore",
+   "kind": "IMAGE",
+   "width": 2035,
+   "height": 1351,
+   "sha256": "wgHLGziVtZiN7lbNxMWfTa9g1SRU/LDafftx9Gp55mM=",
+   "placeholder": "data:image/webp;base64,UklGRowAAABXRUJQVlA4IIAAAABQBACdASoYABAAPu1iqU2ppaOiMAgBMB2JYwCdMoADUlbyC8oSgf6pe5AAAP7UY6Ew9EqxMQOPDnO73cyEZE4sHaEDgjCAb9GxCVMLo+w15+9XEP4Ve2eBmWt7AdVQl5ZzaBD6eBpPdLl+IDimvOrvgvMqrEAtHZXhVI7YriAAAA==",
+   "tags": [
+    "pollution",
+    "OIL_FIELD"
+   ],
+   "caption": {
+    "fa": "آلودگی نفتی بر ساحل",
+    "en": "Oil pollution on a shoreline",
+    "ar": "تلوث نفطي على الشاطئ"
+   },
+   "credit": {
+    "author": "NOAA's National Ocean Service",
+    "license": "Public domain",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Exxon_Valdez_Oil_Spill_(13266806523).jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 10462,
+     "width": 320,
+     "height": 212
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 34718,
+     "width": 640,
+     "height": 425
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 149676,
+     "width": 1280,
+     "height": 850
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 351346,
+     "width": 1920,
+     "height": 1275
+    }
+   ]
+  },
+  {
+   "key": "bahrain-fort",
+   "kind": "IMAGE",
+   "width": 3264,
+   "height": 2448,
+   "sha256": "plRybQb6bQqYniYdElSiteb6JRYYWWqgECZmFnMLGx4=",
+   "placeholder": "data:image/webp;base64,UklGRlYAAABXRUJQVlA4IEoAAACQAwCdASoYABIAPu1mqk2ppaQiMAgBMB2JZQC2yAuVHL1nAhEAAOhQhxEVHp1uya2n3XcxYo0UwO9MlcRv13i3PHAEXcLAgo4AAA==",
+   "tags": [
+    "history",
+    "culture",
+    "ISLAND"
+   ],
+   "caption": {
+    "fa": "قلعه‌ای تاریخی در کرانهٔ خلیج فارس",
+    "en": "A historic fort on the Persian Gulf coast",
+    "ar": "قلعة تاريخية على ساحل الخليج الفارسي"
+   },
+   "credit": {
+    "author": "Beireke1",
+    "license": "CC0",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Qal%27at_al-Bahrain_2.jpg"
+   },
+   "variants": [
+    {
+     "size": "w320",
+     "file": "w320.webp",
+     "bytes": 4282,
+     "width": 320,
+     "height": 240
+    },
+    {
+     "size": "w640",
+     "file": "w640.webp",
+     "bytes": 16842,
+     "width": 640,
+     "height": 480
+    },
+    {
+     "size": "w1280",
+     "file": "w1280.webp",
+     "bytes": 66728,
+     "width": 1280,
+     "height": 960
+    },
+    {
+     "size": "w1920",
+     "file": "w1920.webp",
+     "bytes": 136414,
+     "width": 1920,
+     "height": 1440
+    }
+   ]
+  },
+  {
+   "key": "pano-rocky-beach",
+   "kind": "PANORAMA_360",
+   "width": 16384,
+   "height": 8192,
+   "sha256": "fKXi9eidFzodO+Ke/Am5XBsVUOGkPyl3lgMoelomtJs=",
+   "placeholder": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAADQAwCdASoYAAwAPu1mqk2ppaQiMAgBMB2JZwDImCHXMJg1dpvvd7QA/u+6R79DR/gxssoD7Iy+DET9GRfNAlWXv6EBxxPIXjvkYbzZ9RYAAA==",
+   "tags": [
+    "ISLAND",
+    "STRAIT"
+   ],
+   "caption": {
+    "fa": "نمای ۳۶۰ درجهٔ ساحل صخره‌ای",
+    "en": "A 360° view of a rocky beach",
+    "ar": "منظر بزاوية ٣٦٠ درجة لشاطئ صخري"
+   },
+   "credit": {
+    "author": "Ckoerner",
+    "license": "CC BY-SA 4.0",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Battery_Point_Beach,_Crescent_City,_California_May_2023.jpg"
+   },
+   "variants": [
+    {
+     "size": "2k",
+     "file": "2k.webp",
+     "bytes": 223558,
+     "width": 2048,
+     "height": 1024
+    },
+    {
+     "size": "4k",
+     "file": "4k.webp",
+     "bytes": 875730,
+     "width": 4096,
+     "height": 2048
+    },
+    {
+     "size": "8k",
+     "file": "8k.webp",
+     "bytes": 3270146,
+     "width": 8192,
+     "height": 4096
+    }
+   ]
+  },
+  {
+   "key": "pano-sandy-beach",
+   "kind": "PANORAMA_360",
+   "width": 10000,
+   "height": 5000,
+   "sha256": "H+undbqjaxvGEg0Vux0I9oXnhvIL6hnKnA5DqfYN+qg=",
+   "placeholder": "data:image/webp;base64,UklGRnICAABXRUJQVlA4WAoAAAAgAAAAFwAACwAASUNDUMgBAAAAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAAF9jcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5//9WUDgghAAAALADAJ0BKhgADAA+7WKpTamlpCIwCAEwHYlsAJ0AIWjcXpnz1raMAP7pWFXJrKwZOGzMNwltANPyogvuF2Fav73MpBOjNaYZYBcBUs3bVvoJUgpLLHjcW9gZJSH2xVbq+8u0RUKjDaM/cgnBpjg0lFzCRBaDzpTeGfASxmif1Chb0gAAAA==",
+   "tags": [
+    "ISLAND",
+    "PORT"
+   ],
+   "caption": {
+    "fa": "نمای ۳۶۰ درجهٔ ساحل شنی",
+    "en": "A 360° view of a sandy beach",
+    "ar": "منظر بزاوية ٣٦٠ درجة لشاطئ رملي"
+   },
+   "credit": {
+    "author": "Troy Sankey",
+    "license": "CC BY-SA 4.0",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:San_Diego_Panorama_DSC_2026-DSC_2032.jpg"
+   },
+   "variants": [
+    {
+     "size": "2k",
+     "file": "2k.webp",
+     "bytes": 188050,
+     "width": 2048,
+     "height": 1024
+    },
+    {
+     "size": "4k",
+     "file": "4k.webp",
+     "bytes": 770070,
+     "width": 4096,
+     "height": 2048
+    },
+    {
+     "size": "8k",
+     "file": "8k.webp",
+     "bytes": 3084098,
+     "width": 8192,
+     "height": 4096
+    }
+   ]
+  },
+  {
+   "key": "pano-cliff-trail",
+   "kind": "PANORAMA_360",
+   "width": 10000,
+   "height": 5000,
+   "sha256": "03PFxTCHMTlTlNRu9LtIVQgvWuvMbRVZ94dHfDB10hw=",
+   "placeholder": "data:image/webp;base64,UklGRrAAAABXRUJQVlA4IKQAAACQBACdASoYAAwAPu1kqU2ppaOiMAgBMB2JaACdMoMrin/AeRRqZifvDemueqAA/tvqdEwCIcMjmqI/jinov1N3Mri1OHhvR4NnNtqwyVCtaLibrzNDoaMlS78zEtzd4uud2kJ8PaYpjWlf/3mB6BRlGsuiTMN6Jpt7jxZ0L7gpmDIvAsecl0l11RkWntgRSv/whEDOoBueEAL8vt//VHb+zuwAAA==",
+   "tags": [
+    "ISLAND",
+    "PROVINCE"
+   ],
+   "caption": {
+    "fa": "نمای ۳۶۰ درجهٔ مسیر صخره‌ای کنار دریا",
+    "en": "A 360° view of a cliff trail above the sea",
+    "ar": "منظر بزاوية ٣٦٠ درجة لممر صخري فوق البحر"
+   },
+   "credit": {
+    "author": "Troy Sankey",
+    "license": "CC BY-SA 4.0",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:San_Diego_Panorama_DSC_2062-DSC_2068.jpg"
+   },
+   "variants": [
+    {
+     "size": "2k",
+     "file": "2k.webp",
+     "bytes": 284156,
+     "width": 2048,
+     "height": 1024
+    },
+    {
+     "size": "4k",
+     "file": "4k.webp",
+     "bytes": 1156978,
+     "width": 4096,
+     "height": 2048
+    },
+    {
+     "size": "8k",
+     "file": "8k.webp",
+     "bytes": 4536368,
+     "width": 8192,
+     "height": 4096
+    }
+   ]
+  }
+ ]
+}

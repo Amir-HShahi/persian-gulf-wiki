@@ -18,7 +18,7 @@ import jakarta.validation.constraints.Size;
 // upload URL, so storage itself refuses any other file.
 public record ReserveMediaRequest(
         @NotNull(message = "{validation.mediaType.required}")
-        @Schema(description = "IMAGE, VIDEO or PANORAMA_360. A panorama is an equirectangular 360° image (2:1).")
+        @Schema(description = MediaKind.VALUES_DOC)
         MediaKind type,
 
         @NotBlank(message = "{validation.contentType.required}")

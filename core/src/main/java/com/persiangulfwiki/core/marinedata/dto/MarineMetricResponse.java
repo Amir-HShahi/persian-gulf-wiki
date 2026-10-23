@@ -1,5 +1,6 @@
 package com.persiangulfwiki.core.marinedata.dto;
 
+import com.persiangulfwiki.core.marinedata.entity.MarineMetric;
 import com.persiangulfwiki.core.marinedata.entity.MarineStatus;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,7 +14,8 @@ import java.util.List;
 // One homepage card: the latest value of one metric at one station, with everything the card
 // draws so it needs no second call.
 public record MarineMetricResponse(
-        @Schema(description = "Stable metric key; labels are the client's job.", example = "sea_surface_temperature")
+        @Schema(description = "Stable metric key; labels are the client's job.\n\n" + MarineMetric.VALUES_DOC,
+                example = "sea_surface_temperature")
         String metricKey,
 
         @Schema(description = "Stable station key; display names are the client's job.", example = "bushehr")
@@ -35,7 +37,7 @@ public record MarineMetricResponse(
         @Nullable BigDecimal baselineDelta,
 
         @Schema(description = "Status band for metrics that have one (`coral_bleaching_alert`, `air_quality_index`, "
-                + "`sea_surface_temperature_anomaly`); absent for the rest.", nullable = true)
+                + "`sea_surface_temperature_anomaly`); absent for the rest.\n\n" + MarineStatus.VALUES_DOC, nullable = true)
         @Nullable MarineStatus status,
 
         @Schema(description = "Up to 7 daily points ending on the day of `observedAt`, oldest first.")

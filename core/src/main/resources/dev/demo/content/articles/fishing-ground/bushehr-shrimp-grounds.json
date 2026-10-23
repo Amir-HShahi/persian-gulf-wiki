@@ -1,0 +1,230 @@
+{
+  "key": "bushehr-shrimp-grounds",
+  "subject": {
+    "kind": "FISHING_GROUND",
+    "names": {
+      "fa": "صیدگاه میگوی بوشهر",
+      "en": "Bushehr shrimp grounds",
+      "ar": "مصائد الروبيان في بوشهر"
+    },
+    "aliases": {
+      "fa": [
+        "صیدگاه‌های میگوی شمال خلیج فارس"
+      ],
+      "en": [
+        "Northern Gulf shrimp grounds"
+      ],
+      "ar": [
+        "مصائد روبيان شمال الخليج"
+      ]
+    },
+    "geometry": "POLYGON((50.3 29.2, 50.9 29.0, 51.1 28.4, 50.6 28.5, 50.3 29.2))",
+    "facts": [
+      {
+        "attribute": "area",
+        "values": [
+          {
+            "number": 2600,
+            "source": "ifro-shrimp-stock"
+          }
+        ]
+      },
+      {
+        "attribute": "country",
+        "values": [
+          {
+            "option": "IR"
+          }
+        ]
+      },
+      {
+        "attribute": "province",
+        "values": [
+          {
+            "subject": "bushehr-province"
+          }
+        ]
+      }
+    ]
+  },
+  "topics": [
+    "economy-and-trade",
+    "marine-life",
+    "pollution-and-environment"
+  ],
+  "canonicalLanguage": "fa",
+  "gallery": [
+    "penaeid-shrimp",
+    "fishing-dhow",
+    "scorpionfish-seagrass"
+  ],
+  "history": {
+    "revisions": 3,
+    "contributors": 3
+  },
+  "verification": "STALE",
+  "translations": {
+    "fa": {
+      "slug": "صیدگاه-میگوی-بوشهر",
+      "title": "صیدگاه میگوی بوشهر",
+      "summary": "پهنه‌های کم‌عمق گلی و علفزارهای دریایی کرانهٔ بوشهر که مهم‌ترین صیدگاه میگوی ایران در خلیج فارس‌اند.",
+      "lead": [
+        "**صیدگاه میگوی بوشهر** به مجموعه‌ای از پهنه‌های کم‌عمق دریایی در کرانهٔ [[bushehr-province|استان بوشهر]] گفته می‌شود که از دهانهٔ خور شیف تا دماغهٔ بردخون کشیده شده‌اند. این صیدگاه‌ها با بستر گلی و ماسه‌ای و علفزارهای دریایی، زیستگاه اصلی [[penaeus-semisulcatus|میگوی ببری سبز]] و چند گونهٔ دیگر میگو در شمال خلیج فارس به شمار می‌روند.{{ifro-shrimp-stock}}",
+        "صید میگو در این ناحیه یکی از سودآورترین فعالیت‌های صیادی ایران است و هر سال هزاران صیاد در فصل صید به این آب‌ها می‌آیند.{{fao-fishery-gulf}}"
+      ],
+      "sections": [
+        {
+          "heading": "زیست‌شناسی صیدگاه",
+          "blocks": [
+            {
+              "p": "میگوها در خورها و پهنه‌های جزرومدی نزدیک ساحل، به‌ویژه در میان [[halodule-uninervis|علف‌های دریایی]] و ریشه‌های حرا، پرورش می‌یابند و با رشد به آب‌های ژرف‌تر کوچ می‌کنند. ورود آب شیرین رودهای مند و حله، مواد غذایی لازم برای این زنجیرهٔ غذایی را فراهم می‌کند.{{carpenter-living-resources}}"
+            },
+            {
+              "p": "افزون بر میگو، ماهی‌های کفزی مانند [[orange-spotted-grouper|هامور]]، شوریده و سنگسر، و نیز خرچنگ آبی در این پهنه‌ها صید می‌شوند."
+            }
+          ]
+        },
+        {
+          "heading": "مدیریت صید",
+          "blocks": [
+            {
+              "p": "برای حفظ ذخایر، صید میگو در بوشهر فصلی است و معمولاً از اواخر تیر تا اواسط شهریور آزاد است. زمان آغاز فصل هر سال بر پایهٔ نمونه‌برداری‌های مؤسسهٔ تحقیقات علوم شیلاتی و اندازهٔ میگوها تعیین می‌شود.{{ifro-shrimp-stock}} شمار شناورهای ترال‌کش محدود است و صید در خورها و مناطق پرورش نوزادان ممنوع است."
+            },
+            {
+              "ul": [
+                "فصل صید کوتاه و نظارت‌شده",
+                "ممنوعیت صید در خورها",
+                "سهمیهٔ شناورهای ترال",
+                "پایش سالانهٔ ذخایر"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "چالش‌ها",
+          "blocks": [
+            {
+              "p": "صید بیش از حد، صید ضمنی ماهی‌های نابالغ در تورهای ترال، تخریب بستر دریا و آلودگی ناشی از صنایع نفت و گاز، ذخایر میگوی بوشهر را تهدید می‌کنند. گزارش‌های منطقه‌ای کاهش محسوس صید در واحد تلاش را در دو دههٔ گذشته نشان می‌دهند.{{ropme-soe-2021}}{{fao-fishery-gulf}}"
+            }
+          ]
+        },
+        {
+          "heading": "ارزش اقتصادی",
+          "blocks": [
+            {
+              "p": "میگوی صیدشده در بوشهر بیشتر به‌صورت منجمد به بازارهای داخلی و کشورهای همسایه فرستاده می‌شود. ده‌ها کارگاه فراوری در بندرهای بوشهر، دیلم و گناوه، میگو را درجه‌بندی، پوست‌کنی و بسته‌بندی می‌کنند و برای صدها خانوار، به‌ویژه زنان شاغل در این کارگاه‌ها، درآمد فصلی فراهم می‌آورند. پرورش میگو در استخرهای ساحلی دلوار و حله نیز در سال‌های اخیر گسترش یافته و بخشی از تقاضا را پاسخ می‌دهد.{{fao-fishery-gulf}}"
+            }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "bushehr-shrimp-grounds",
+      "title": "Bushehr shrimp grounds",
+      "summary": "The shallow mudflats and seagrass beds off Bushehr that form Iran's most important shrimp fishery in the Persian Gulf.",
+      "lead": [
+        "The **Bushehr shrimp grounds** are a set of shallow sea areas off the coast of [[bushehr-province|Bushehr Province]], stretching from the mouth of the Shif creek to Cape Bardkhun. With their muddy and sandy beds and seagrass meadows, they are the main habitat of the [[penaeus-semisulcatus|green tiger prawn]] and several other shrimp species in the northern Persian Gulf.{{ifro-shrimp-stock}}",
+        "Shrimp fishing here is one of the most profitable fisheries in Iran, and thousands of fishermen come to these waters every season.{{fao-fishery-gulf}}"
+      ],
+      "sections": [
+        {
+          "heading": "Biology of the grounds",
+          "blocks": [
+            {
+              "p": "Shrimp grow up in creeks and tidal flats near the shore, especially among [[halodule-uninervis|seagrass]] and mangrove roots, and move into deeper water as they mature. Fresh water from the Mond and Helleh rivers brings the nutrients that feed this food chain.{{carpenter-living-resources}}"
+            },
+            {
+              "p": "Besides shrimp, bottom fish such as the [[orange-spotted-grouper|orange-spotted grouper]], tigertooth croaker and grunts, as well as the blue swimming crab, are caught on these grounds."
+            }
+          ]
+        },
+        {
+          "heading": "Managing the fishery",
+          "blocks": [
+            {
+              "p": "To protect the stock, shrimp fishing at Bushehr is seasonal, usually open from late July to early September. The opening date is set each year from sampling by the Iranian Fisheries Science Research Institute and the size of the shrimp.{{ifro-shrimp-stock}} The number of trawlers is limited, and fishing in creeks and nursery areas is banned."
+            },
+            {
+              "ul": [
+                "A short, monitored season",
+                "No fishing in creeks",
+                "A quota on trawlers",
+                "Annual stock surveys"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Challenges",
+          "blocks": [
+            {
+              "p": "Overfishing, bycatch of juvenile fish in trawl nets, damage to the seabed and pollution from the oil and gas industry threaten the Bushehr shrimp stock. Regional reports show a marked drop in catch per unit effort over the past two decades.{{ropme-soe-2021}}{{fao-fishery-gulf}}"
+            }
+          ]
+        },
+        {
+          "heading": "Economic value",
+          "blocks": [
+            {
+              "p": "Most of the shrimp landed at Bushehr is frozen and sent to domestic markets and neighbouring countries. Dozens of processing plants in the ports of Bushehr, Deylam and Genaveh grade, peel and pack the catch, providing seasonal income for hundreds of households, especially the women who work in them. Shrimp farming in coastal ponds at Delvar and Helleh has also grown in recent years and meets part of the demand.{{fao-fishery-gulf}}"
+            }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "مصائد-الروبيان-في-بوشهر",
+      "title": "مصائد الروبيان في بوشهر",
+      "summary": "المسطحات الطينية الضحلة ومروج الأعشاب البحرية قبالة بوشهر، أهم مصائد الروبيان الإيرانية في الخليج الفارسي.",
+      "lead": [
+        "**مصائد الروبيان في بوشهر** مجموعة من المناطق البحرية الضحلة قبالة ساحل [[bushehr-province|محافظة بوشهر]]، تمتد من مصب خور شيف إلى رأس بردخون. وتُعدّ هذه المصائد، بقيعانها الطينية والرملية ومروج الأعشاب البحرية فيها، الموطن الرئيسي لـ[[penaeus-semisulcatus|الروبيان النمري الأخضر]] وأنواع أخرى من الروبيان في شمال الخليج.{{ifro-shrimp-stock}}",
+        "ويُعدّ صيد الروبيان هنا من أربح مصائد إيران، ويأتي آلاف الصيادين إلى هذه المياه كل موسم.{{fao-fishery-gulf}}"
+      ],
+      "sections": [
+        {
+          "heading": "بيولوجيا المصائد",
+          "blocks": [
+            {
+              "p": "ينمو الروبيان في الأخوار والمسطحات المدّية القريبة من الشاطئ، ولا سيما بين [[halodule-uninervis|الأعشاب البحرية]] وجذور القرم، ثم ينتقل إلى المياه الأعمق مع نضجه. وتحمل المياه العذبة لنهري مند وحلة المغذيات التي تقوم عليها هذه السلسلة الغذائية.{{carpenter-living-resources}}"
+            },
+            {
+              "p": "وإلى جانب الروبيان تُصاد في هذه المسطحات أسماك قاعية مثل [[orange-spotted-grouper|الهامور]] والنويبي والفسكر، إضافة إلى السرطان الأزرق السابح."
+            }
+          ]
+        },
+        {
+          "heading": "إدارة الصيد",
+          "blocks": [
+            {
+              "p": "لحماية المخزون يكون صيد الروبيان في بوشهر موسميًا، ويُفتح عادة من أواخر يوليو حتى أوائل سبتمبر، ويُحدَّد موعد افتتاح الموسم سنويًا بناءً على عينات معهد بحوث علوم الثروة السمكية وحجم الروبيان.{{ifro-shrimp-stock}} ويُحدَّد عدد سفن الجرف، ويُحظر الصيد في الأخوار ومناطق الحضانة."
+            },
+            {
+              "ul": [
+                "موسم قصير خاضع للرقابة",
+                "حظر الصيد في الأخوار",
+                "حصة لسفن الجرف",
+                "مسوح سنوية للمخزون"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "التحديات",
+          "blocks": [
+            {
+              "p": "يهدد الصيد الجائر، والصيد العرضي لصغار الأسماك في شباك الجرف، وتدمير قاع البحر، والتلوث الناتج عن صناعة النفط والغاز مخزونَ الروبيان في بوشهر، وتُظهر التقارير الإقليمية تراجعًا ملحوظًا في المصيد لكل وحدة جهد خلال العقدين الماضيين.{{ropme-soe-2021}}{{fao-fishery-gulf}}"
+            }
+          ]
+        },
+        {
+          "heading": "القيمة الاقتصادية",
+          "blocks": [
+            {
+              "p": "يُجمَّد معظم الروبيان المصيد في بوشهر ويُرسل إلى الأسواق المحلية والدول المجاورة. وتتولى عشرات مصانع المعالجة في موانئ بوشهر وديلم وكناوه فرز المصيد وتقشيره وتعبئته، فتوفر دخلًا موسميًا لمئات الأسر، ولا سيما النساء العاملات فيها. كما توسعت تربية الروبيان في الأحواض الساحلية في دلوار وحلة في السنوات الأخيرة لتلبية جزء من الطلب.{{fao-fishery-gulf}}"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

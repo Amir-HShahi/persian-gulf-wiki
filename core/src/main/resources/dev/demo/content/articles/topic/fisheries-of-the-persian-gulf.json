@@ -1,0 +1,117 @@
+{
+  "key": "fisheries-of-the-persian-gulf",
+  "topics": ["economy-and-trade", "marine-life", "culture-and-ethnography"],
+  "canonicalLanguage": "fa",
+  "gallery": ["fishing-dhow", "reef-fish-school", "penaeid-shrimp"],
+  "history": { "revisions": 3, "contributors": 4 },
+  "translations": {
+    "fa": {
+      "slug": "شیلات-خلیج-فارس",
+      "title": "شیلات خلیج فارس",
+      "summary": "صیادی در خلیج فارس، از روش‌های سنتی تا ناوگان صنعتی، و چالش‌های کاهش ذخایر ماهی و میگو.",
+      "lead": [
+        "**شیلات خلیج فارس** یکی از کهن‌ترین فعالیت‌های اقتصادی مردم کرانه‌های این دریاست و هنوز معیشت ده‌ها هزار خانوادهٔ صیادی در ایران و کشورهای همسایه به آن وابسته است. صید سالانهٔ ایران در آب‌های جنوب، از جمله خلیج فارس و دریای عمان، بیش از پانصد هزار تن برآورد می‌شود.{{fao-fishery-gulf}}",
+        "[[penaeus-semisulcatus|میگو]]، [[narrow-barred-spanish-mackerel|شیر ماهی]]، [[orange-spotted-grouper|هامور]]، [[silver-pomfret|حلوا سفید]] و انواع ساردین و تون‌ماهیان از مهم‌ترین گونه‌های صیدشده‌اند."
+      ],
+      "sections": [
+        {
+          "heading": "صیدگاه‌ها",
+          "blocks": [
+            { "p": "آب‌های کم‌عمق شمال خلیج فارس، به‌ویژه [[bushehr-shrimp-grounds|صیدگاه‌های میگوی بوشهر]] و خورهای خوزستان، مهم‌ترین مناطق صید میگو و ماهی‌های کفزی‌اند. در شرق، [[hormuz-fishing-grounds|صیدگاه‌های تنگهٔ هرمز]] برای صید ماهی‌های سطح‌زی مهاجر اهمیت دارند. هر صیدگاه گونه‌ها، فصل‌ها و روش‌های صید ویژهٔ خود را دارد.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "روش‌های صید",
+          "blocks": [
+            { "p": "صیادی سنتی با «گرگور» (تلهٔ قفسی سیمی)، «مشتا» (تلهٔ ثابت ساحلی از نی و چوب که در جزرومد ماهی را به دام می‌اندازد)، قلاب و تور گوشگیر انجام می‌شود. ناوگان صنعتی‌تر از کشتی‌های ترال‌کش برای صید میگو و تورهای محاصره‌ای برای ساردین و تون‌ماهیان بهره می‌گیرد.{{fao-fishery-gulf}}" },
+            { "ul": ["گرگور: تلهٔ قفسی برای ماهی‌های صخره‌ای", "مشتا: تلهٔ ساحلی جزرومدی", "ترال کف: صید میگو", "تور محاصره‌ای: ساردین و تون"] }
+          ]
+        },
+        {
+          "heading": "فشار بر ذخایر",
+          "blocks": [
+            { "p": "افزایش شمار شناورها، صید ماهی‌های نابالغ، از میان رفتن زیستگاه‌هایی مانند جنگل‌های [[grey-mangrove|حرا]] و علفزارهای دریایی، آلودگی و گرم شدن آب، ذخایر بسیاری از گونه‌های تجاری را کاهش داده است. صید حلوا سفید و برخی گونه‌های هامور در دو دههٔ گذشته به‌شدت کم شده است.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "مدیریت و همکاری",
+          "blocks": [
+            { "p": "ایران و کشورهای شورای همکاری خلیج فارس برای گونه‌های مهم، فصل‌های ممنوعیت صید، حداقل اندازهٔ صید و محدودیت در شمار شناورها تعیین کرده‌اند. از آنجا که بسیاری از ذخایر، مانند شیر ماهی، میان کشورهای منطقه مشترک‌اند، همکاری منطقه‌ای در پایش و مدیریت آن‌ها اهمیت فراوان دارد. پرورش ماهی در قفس‌های دریایی و پرورش میگو در استخرهای ساحلی نیز به‌عنوان راهی برای کاهش فشار بر ذخایر وحشی گسترش یافته است.{{fao-fishery-gulf}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "fisheries-of-the-persian-gulf",
+      "title": "Fisheries of the Persian Gulf",
+      "summary": "Fishing in the Persian Gulf, from traditional methods to industrial fleets, and the challenge of declining fish and shrimp stocks.",
+      "lead": [
+        "The **fisheries of the Persian Gulf** are among the oldest economic activities on its shores, and tens of thousands of fishing families in Iran and neighbouring countries still depend on them. Iran's annual catch in its southern waters, the Persian Gulf and Gulf of Oman, is estimated at more than half a million tonnes.{{fao-fishery-gulf}}",
+        "[[penaeus-semisulcatus|Shrimp]], [[narrow-barred-spanish-mackerel|kingfish]], [[orange-spotted-grouper|grouper]], [[silver-pomfret|silver pomfret]] and various sardines and tunas are among the most important species caught."
+      ],
+      "sections": [
+        {
+          "heading": "Fishing grounds",
+          "blocks": [
+            { "p": "The shallow waters of the northern Gulf, especially the [[bushehr-shrimp-grounds|Bushehr shrimp grounds]] and the creeks of Khuzestan, are the main areas for shrimp and bottom fish. In the east, the [[hormuz-fishing-grounds|Strait of Hormuz grounds]] matter for migratory pelagic fish. Each ground has its own species, seasons and methods.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "Fishing methods",
+          "blocks": [
+            { "p": "Traditional fishing uses the gargur (a wire cage trap), the moshta (a fixed tidal trap of reeds and wood that catches fish as the tide ebbs), hand lines and gillnets. More industrial fleets use bottom trawlers for shrimp and purse seines for sardines and tuna.{{fao-fishery-gulf}}" },
+            { "ul": ["Gargur: cage trap for reef fish", "Moshta: tidal shore trap", "Bottom trawl: shrimp", "Purse seine: sardines and tuna"] }
+          ]
+        },
+        {
+          "heading": "Pressure on stocks",
+          "blocks": [
+            { "p": "More vessels, catches of juvenile fish, the loss of habitats such as [[grey-mangrove|mangroves]] and seagrass beds, pollution and warming water have reduced the stocks of many commercial species. Catches of silver pomfret and some groupers have fallen sharply over the past two decades.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "Management and cooperation",
+          "blocks": [
+            { "p": "Iran and the GCC states have set closed seasons, minimum landing sizes and limits on fleet size for key species. Because many stocks, such as kingfish, are shared among the countries of the region, regional cooperation in monitoring and managing them is essential. Sea-cage fish farming and coastal shrimp farming have also grown as a way to ease the pressure on wild stocks.{{fao-fishery-gulf}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "مصائد-أسماك-الخليج-الفارسي",
+      "title": "مصائد أسماك الخليج الفارسي",
+      "summary": "الصيد في الخليج الفارسي من الطرق التقليدية إلى الأساطيل الصناعية، وتحدي تراجع مخزون الأسماك والروبيان.",
+      "lead": [
+        "تُعدّ **مصائد أسماك الخليج الفارسي** من أقدم الأنشطة الاقتصادية على سواحله، ولا يزال عشرات الآلاف من أسر الصيادين في إيران والدول المجاورة يعتمدون عليها. ويُقدَّر مصيد إيران السنوي في مياهها الجنوبية، الخليج الفارسي وبحر عُمان، بأكثر من نصف مليون طن.{{fao-fishery-gulf}}",
+        "ومن أهم الأنواع المصيدة [[penaeus-semisulcatus|الروبيان]] و[[narrow-barred-spanish-mackerel|الكنعد]] و[[orange-spotted-grouper|الهامور]] و[[silver-pomfret|الزبيدي]] وأنواع السردين والتونة."
+      ],
+      "sections": [
+        {
+          "heading": "المصائد",
+          "blocks": [
+            { "p": "تُعدّ المياه الضحلة في شمال الخليج، ولا سيما [[bushehr-shrimp-grounds|مصائد الروبيان في بوشهر]] وأخوار خوزستان، أهم مناطق صيد الروبيان والأسماك القاعية، وفي الشرق تكتسب [[hormuz-fishing-grounds|مصائد مضيق هرمز]] أهميتها من الأسماك السطحية المهاجرة. ولكل مصيد أنواعه ومواسمه وطرقه.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "طرق الصيد",
+          "blocks": [
+            { "p": "يستخدم الصيد التقليدي «القرقور» (مصيدة قفصية سلكية) و«المشتا» (مصيدة ساحلية ثابتة من القصب والخشب تحبس الأسماك عند الجزر) والخيوط والشباك الخيشومية، بينما تستخدم الأساطيل الأكثر صناعية سفن الجرف القاعي للروبيان وشباك التطويق للسردين والتونة.{{fao-fishery-gulf}}" },
+            { "ul": ["القرقور: مصيدة قفصية لأسماك الشعاب", "المشتا: مصيدة ساحلية مدّية", "الجرف القاعي: الروبيان", "شباك التطويق: السردين والتونة"] }
+          ]
+        },
+        {
+          "heading": "الضغط على المخزون",
+          "blocks": [
+            { "p": "خفّض ازدياد عدد السفن، وصيد صغار الأسماك، وفقدان موائل مثل غابات [[grey-mangrove|القرم]] ومروج الأعشاب البحرية، والتلوث، وارتفاع حرارة المياه مخزونَ كثير من الأنواع التجارية، وتراجع مصيد الزبيدي وبعض أنواع الهامور بشدة خلال العقدين الماضيين.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "الإدارة والتعاون",
+          "blocks": [
+            { "p": "حددت إيران ودول مجلس التعاون مواسم حظر وأحجامًا دنيا للصيد وقيودًا على عدد السفن للأنواع المهمة. ولأن كثيرًا من المخزونات، كالكنعد، مشترك بين دول المنطقة، فإن التعاون الإقليمي في رصدها وإدارتها ضروري. كما توسعت تربية الأسماك في الأقفاص البحرية والروبيان في الأحواض الساحلية وسيلةً لتخفيف الضغط على المخزون البري.{{fao-fishery-gulf}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

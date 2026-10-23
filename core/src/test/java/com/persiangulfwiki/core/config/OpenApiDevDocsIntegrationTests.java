@@ -12,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -44,9 +45,28 @@ class OpenApiDevDocsIntegrationTests {
                 "Labels", "Dev Test Labels",
                 "Sources", "Dev Test Sources",
                 "Articles", "Dev Test Articles",
+                "Featured Articles", "Dev Test Featured Articles",
                 "Article Media", "Dev Test Media",
                 "Topics", "Dev Test Topics",
                 "Moderation", "Dev Test Moderation Tasks",
-                "Marine Data", "Dev Test Marine Data");
+                "Marine Data", "Dev Test Marine Data",
+                "Dev Demo Content");
+    }
+
+    // The dev spec is a superset of the public one, so this sweep covers every enum in both. A value
+    // list alone tells a client nothing about what each value means, hence one bullet per value.
+    @Test
+    void everyEnumExplainsEachOfItsValues() throws Exception {
+        String spec = mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<Map<String, Object>> enumSchemas = JsonPath.read(spec, "$..[?(@.enum)]");
+        assertThat(enumSchemas).isNotEmpty().allSatisfy(schema -> {
+            List<?> values = (List<?>) schema.get("enum");
+            assertThat((String) schema.get("description")).as("description of enum %s", values)
+                    .isNotNull()
+                    .contains(values.stream().map(value -> "- `" + value + "`: ").toList());
+        });
     }
 }

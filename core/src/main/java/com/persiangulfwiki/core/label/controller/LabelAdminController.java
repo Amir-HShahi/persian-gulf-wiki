@@ -1,9 +1,11 @@
 package com.persiangulfwiki.core.label.controller;
 
 import com.persiangulfwiki.core.common.dto.ApiResult;
+import com.persiangulfwiki.core.label.dto.LabelReferentKind;
 import com.persiangulfwiki.core.label.dto.LabelResponse;
 import com.persiangulfwiki.core.label.dto.UpsertLabelRequest;
 import com.persiangulfwiki.core.label.service.LabelService;
+import com.persiangulfwiki.core.subject.entity.SubjectKind;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -62,10 +64,10 @@ public class LabelAdminController {
             + "verified, or the CSRF header is missing or does not match the cookie; read `detail` for which one "
             + "occurred.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "404", description = "No group, definition, choice value or topic with this id.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
-    @Parameter(name = "referentKind", description = "What is being named: GROUP, ATTRIBUTE, OPTION, KIND or TOPIC "
-            + "(case-insensitive).")
+    @Parameter(name = "referentKind", description = "What is being named (case-insensitive). SUBJECT is refused "
+            + "here.\n\n" + LabelReferentKind.VALUES_DOC)
     @Parameter(name = "referentId", description = "The group's, definition's, choice value's or topic's id; for KIND, the kind "
-            + "itself, e.g. ISLAND (case-insensitive).")
+            + "itself, e.g. ISLAND (case-insensitive).\n\n" + SubjectKind.VALUES_DOC)
     @Parameter(name = "language", description = "fa, en or ar (case-insensitive).")
     @Parameter(name = "X-XSRF-TOKEN", in = ParameterIn.HEADER, required = true, description = "CSRF token. Call GET /api/auth/csrf first to receive the XSRF-TOKEN cookie, "
             + "then encode its value and send the encoded result in this header — see the API "

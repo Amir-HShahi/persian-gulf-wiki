@@ -1,0 +1,138 @@
+{
+  "key": "bandar-abbas",
+  "subject": {
+    "kind": "PORT",
+    "names": { "fa": "بندرعباس", "en": "Bandar Abbas", "ar": "بندر عباس" },
+    "aliases": { "fa": ["بندر عباس", "گمبرون"], "en": ["Bandar-e Abbas", "Gombroon"], "ar": ["بندر عباس", "جمبرون"] },
+    "geometry": "POINT(56.27 27.18)",
+    "facts": [
+      { "attribute": "located_in", "values": [ { "subject": "strait-of-hormuz" } ] },
+      { "attribute": "country", "values": [ { "option": "IR" } ] },
+      { "attribute": "province", "values": [ { "subject": "hormozgan-province" } ] },
+      { "attribute": "county", "values": [ { "localized": { "fa": "بندرعباس", "en": "Bandar Abbas", "ar": "بندر عباس" } } ] },
+      { "attribute": "district", "values": [ { "localized": { "fa": "بخش مرکزی", "en": "Central District", "ar": "القسم المركزي" } } ] },
+      { "attribute": "population", "values": [ { "number": 526648, "asOf": "2016-01-01", "source": "sci-census-2016" } ] },
+      { "attribute": "ethnic_groups", "values": [ { "localized": { "fa": "فارس‌ها، بلوچ‌ها و عرب‌ها", "en": "Persians, Baloch and Arabs", "ar": "الفرس والبلوش والعرب" } } ] },
+      { "attribute": "languages", "values": [ { "option": "FA" }, { "option": "BAL" }, { "option": "AR" } ] }
+    ]
+  },
+  "topics": ["ports-and-oil-terminals", "shipping-and-transit", "economy-and-trade"],
+  "canonicalLanguage": "fa",
+  "gallery": ["gulf-night-iss", "barge-and-tug", "strait-hormuz-modis"],
+  "panorama": "pano-sandy-beach",
+  "history": { "revisions": 8, "contributors": 10 },
+  "verification": "VERIFIED",
+  "translations": {
+    "fa": {
+      "slug": "بندرعباس",
+      "title": "بندرعباس",
+      "summary": "مرکز استان هرمزگان و بزرگ‌ترین بندر بازرگانی ایران در کرانهٔ تنگهٔ هرمز.",
+      "lead": [
+        "**بندرعباس** مرکز [[hormozgan-province|استان هرمزگان]] و بزرگ‌ترین بندر بازرگانی ایران است که در کرانهٔ شمالی [[strait-of-hormuz|تنگهٔ هرمز]] و روبه‌روی جزایر [[qeshm-island|قشم]] و [[hormuz-island|هرمز]] قرار دارد. بر پایهٔ سرشماری ۱۳۹۵، جمعیت این شهر بیش از پانصد و بیست هزار نفر بوده است.{{sci-census-2016}}",
+        "بندر شهید رجایی، در غرب شهر، بزرگ‌ترین بندر کانتینری ایران است و بخش بزرگی از کالاهای وارداتی و صادراتی کشور از آن می‌گذرد.{{pmo-shahid-rajaee}}"
+      ],
+      "sections": [
+        {
+          "heading": "تاریخ",
+          "blocks": [
+            { "p": "این بندر در گذشته «گمبرون» نامیده می‌شد و روستایی کوچک در کرانهٔ خشکی بود. پس از آنکه شاه عباس یکم در سال ۱۶۲۲ میلادی [[hormuz-island|هرمز]] را از پرتغالی‌ها پس گرفت، بازرگانی خلیج فارس را به این بندر منتقل کرد و نام آن به «بندرعباس» دگرگون شد.{{floor-persian-gulf}}" },
+            { "p": "در سدهٔ هفدهم، کمپانی‌های هند شرقی انگلیس و هلند در بندرعباس تجارت‌خانه داشتند و ابریشم، ادویه، پارچه و قند از اسکله‌های آن بارگیری می‌شد. با آشفتگی‌های پایان دوران صفوی و برآمدن بوشهر، اهمیت بندرعباس کاهش یافت، اما در سدهٔ بیستم با ساخت بندرهای نوین دوباره به دروازهٔ دریایی اصلی ایران تبدیل شد.{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "بندرها و کشتیرانی",
+          "blocks": [
+            { "p": "مجتمع بندری شهید رجایی با ده‌ها اسکلهٔ کانتینری، فله و نفتی، بیش از نیمی از تخلیه و بارگیری کالای بازرگانی ایران را بر عهده دارد.{{pmo-shahid-rajaee}}{{pmo-ports-2023}} بندر شهید باهنر در کنار شهر و اسکله‌های مسافربری، بندرعباس را به جزایر قشم، هرمز، لارک و کیش و به بندرهای کشورهای همسایه پیوند می‌دهند." },
+            { "ul": ["بندر شهید رجایی (کانتینری و فله)", "بندر شهید باهنر", "اسکلهٔ مسافربری حقانی", "اسکله‌های صیادی سورو"] }
+          ]
+        },
+        {
+          "heading": "اقتصاد و صنعت",
+          "blocks": [
+            { "p": "افزون بر بندرها، پالایشگاه نفت بندرعباس، پالایشگاه میعانات گازی ستارهٔ خلیج فارس، مجتمع‌های فولاد و آلومینیوم و نیروگاه‌های بزرگ در پیرامون شهر جای دارند.{{sci-yearbook-2022}} این صنایع، بندرعباس را به یکی از قطب‌های صنعتی جنوب ایران تبدیل کرده‌اند، اما فشارهای زیست‌محیطی بر ساحل و جنگل‌های حرای نزدیک را نیز افزایش داده‌اند.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "فرهنگ و زندگی شهری",
+          "blocks": [
+            { "p": "بازار ماهی‌فروشان، بازار محلی زنان با زیورآلات و پارچه‌های رنگی، معبد هندوها از دورهٔ قاجار و ساحل سورو از جاذبه‌های شهرند. غذاهای دریایی تند مانند قلیه‌ماهی و میگو، و موسیقی و رقص بندری بخشی از هویت فرهنگی بندرعباس‌اند که از پیوند دیرینهٔ آن با هند، عربستان و شرق آفریقا اثر پذیرفته است." }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "bandar-abbas",
+      "title": "Bandar Abbas",
+      "summary": "The capital of Hormozgan Province and Iran's largest commercial port, on the shore of the Strait of Hormuz.",
+      "lead": [
+        "**Bandar Abbas** is the capital of [[hormozgan-province|Hormozgan Province]] and Iran's largest commercial port, lying on the northern shore of the [[strait-of-hormuz|Strait of Hormuz]] opposite the islands of [[qeshm-island|Qeshm]] and [[hormuz-island|Hormuz]]. According to the 2016 census the city had more than 520,000 inhabitants.{{sci-census-2016}}",
+        "Shahid Rajaee port, west of the city, is Iran's largest container port, and a large share of the country's imports and exports pass through it.{{pmo-shahid-rajaee}}"
+      ],
+      "sections": [
+        {
+          "heading": "History",
+          "blocks": [
+            { "p": "The port was once called Gombroon and was a small village on the mainland shore. After Shah Abbas I recaptured [[hormuz-island|Hormuz]] from the Portuguese in 1622, he moved the trade of the Gulf to this port, which was renamed Bandar Abbas, \"the port of Abbas\".{{floor-persian-gulf}}" },
+            { "p": "In the seventeenth century the English and Dutch East India Companies kept factories in Bandar Abbas, and silk, spices, cloth and sugar were loaded at its quays. With the turmoil at the end of the Safavid era and the rise of Bushehr, Bandar Abbas declined, but in the twentieth century the construction of modern ports made it once again Iran's main gateway to the sea.{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "Ports and shipping",
+          "blocks": [
+            { "p": "The Shahid Rajaee port complex, with dozens of container, bulk and oil berths, handles more than half of Iran's commercial cargo.{{pmo-shahid-rajaee}}{{pmo-ports-2023}} Shahid Bahonar port next to the city and the passenger piers link Bandar Abbas to the islands of Qeshm, Hormuz, Larak and Kish and to ports in neighbouring countries." },
+            { "ul": ["Shahid Rajaee port (container and bulk)", "Shahid Bahonar port", "Haghani passenger pier", "Suru fishing jetties"] }
+          ]
+        },
+        {
+          "heading": "Economy and industry",
+          "blocks": [
+            { "p": "Besides the ports, the Bandar Abbas oil refinery, the Persian Gulf Star gas-condensate refinery, steel and aluminium complexes and large power stations surround the city.{{sci-yearbook-2022}} These industries make Bandar Abbas one of the industrial hubs of southern Iran, but they also increase the environmental pressure on the coast and the nearby mangroves.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "Culture and city life",
+          "blocks": [
+            { "p": "The fish market, the women's local market with its jewellery and coloured fabrics, the Qajar-era Hindu temple and Suru beach are among the city's sights. Spicy seafood dishes such as qalieh mahi and shrimp, and Bandari music and dance, are part of the city's identity, shaped by its old ties with India, Arabia and East Africa." }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "بندر-عباس",
+      "title": "بندر عباس",
+      "summary": "عاصمة محافظة هرمزغان وأكبر ميناء تجاري في إيران على ساحل مضيق هرمز.",
+      "lead": [
+        "**بندر عباس** عاصمة [[hormozgan-province|محافظة هرمزغان]] وأكبر ميناء تجاري في إيران، تقع على الساحل الشمالي لـ[[strait-of-hormuz|مضيق هرمز]] قبالة جزيرتي [[qeshm-island|قشم]] و[[hormuz-island|هرمز]]. وبلغ عدد سكانها وفق تعداد عام ٢٠١٦ أكثر من ٥٢٠ ألف نسمة.{{sci-census-2016}}",
+        "ويُعدّ ميناء الشهيد رجائي غرب المدينة أكبر ميناء للحاويات في إيران، وتمر عبره حصة كبيرة من واردات البلاد وصادراتها.{{pmo-shahid-rajaee}}"
+      ],
+      "sections": [
+        {
+          "heading": "التاريخ",
+          "blocks": [
+            { "p": "كان الميناء يُسمّى قديمًا «جمبرون»، وكان قرية صغيرة على ساحل البر. وبعد أن استعاد الشاه عباس الأول [[hormuz-island|هرمز]] من البرتغاليين عام ١٦٢٢، نقل تجارة الخليج إلى هذا الميناء الذي أصبح اسمه «بندر عباس»، أي ميناء عباس.{{floor-persian-gulf}}" },
+            { "p": "وفي القرن السابع عشر كانت لشركتي الهند الشرقية الإنجليزية والهولندية وكالات تجارية في بندر عباس، وكان الحرير والتوابل والأقمشة والسكر تُحمَّل من أرصفتها. ومع اضطرابات أواخر العهد الصفوي وصعود بوشهر تراجعت أهميتها، لكنها عادت في القرن العشرين، مع بناء الموانئ الحديثة، بوابةَ إيران البحرية الرئيسية.{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "الموانئ والملاحة",
+          "blocks": [
+            { "p": "يتولى مجمع ميناء الشهيد رجائي، بعشرات الأرصفة للحاويات والبضائع السائبة والنفط، أكثر من نصف البضائع التجارية في إيران.{{pmo-shahid-rajaee}}{{pmo-ports-2023}} ويربط ميناء الشهيد باهنر بجوار المدينة وأرصفة الركاب بندر عباس بجزر قشم وهرمز ولارك وكيش وبموانئ الدول المجاورة." },
+            { "ul": ["ميناء الشهيد رجائي (حاويات وبضائع سائبة)", "ميناء الشهيد باهنر", "رصيف حقاني للركاب", "أرصفة سورو للصيد"] }
+          ]
+        },
+        {
+          "heading": "الاقتصاد والصناعة",
+          "blocks": [
+            { "p": "إلى جانب الموانئ، تحيط بالمدينة مصفاة بندر عباس للنفط، ومصفاة نجمة الخليج الفارسي للمكثفات الغازية، ومجمعات الصلب والألمنيوم، ومحطات كهرباء كبرى.{{sci-yearbook-2022}} وتجعل هذه الصناعات بندر عباس من المراكز الصناعية في جنوب إيران، لكنها تزيد أيضًا الضغط البيئي على الساحل وغابات القرم القريبة.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "الثقافة والحياة الحضرية",
+          "blocks": [
+            { "p": "من معالم المدينة سوق السمك، وسوق النساء المحلية بحليّها وأقمشتها الملوّنة، والمعبد الهندوسي من العهد القاجاري، وشاطئ سورو. وتشكّل الأطباق البحرية الحارة مثل قلية السمك والروبيان، والموسيقى والرقص البندري، جزءًا من هوية المدينة التي صاغتها روابطها القديمة بالهند وجزيرة العرب وشرق أفريقيا." }
+          ]
+        }
+      ]
+    }
+  }
+}

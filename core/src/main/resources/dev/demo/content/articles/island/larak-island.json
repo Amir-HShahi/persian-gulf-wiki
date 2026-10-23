@@ -1,0 +1,278 @@
+{
+  "key": "larak-island",
+  "subject": {
+    "kind": "ISLAND",
+    "names": {
+      "fa": "جزیرهٔ لارک",
+      "en": "Larak Island",
+      "ar": "جزيرة لارك"
+    },
+    "aliases": {
+      "fa": [
+        "لارک"
+      ],
+      "en": [
+        "Larak"
+      ],
+      "ar": [
+        "لارك"
+      ]
+    },
+    "geometry": "POINT(56.36 26.86)",
+    "facts": [
+      {
+        "attribute": "located_in",
+        "values": [
+          {
+            "subject": "strait-of-hormuz"
+          }
+        ]
+      },
+      {
+        "attribute": "area",
+        "values": [
+          {
+            "number": 49,
+            "source": "ncc-gazetteer"
+          }
+        ]
+      },
+      {
+        "attribute": "place_features",
+        "values": [
+          {
+            "option": "PROTECTED_AREA"
+          }
+        ]
+      },
+      {
+        "attribute": "country",
+        "values": [
+          {
+            "option": "IR"
+          }
+        ]
+      },
+      {
+        "attribute": "province",
+        "values": [
+          {
+            "subject": "hormozgan-province"
+          }
+        ]
+      },
+      {
+        "attribute": "county",
+        "values": [
+          {
+            "localized": {
+              "fa": "قشم",
+              "en": "Qeshm",
+              "ar": "قشم"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "district",
+        "values": [
+          {
+            "localized": {
+              "fa": "بخش شهاب",
+              "en": "Shahab District",
+              "ar": "قسم شهاب"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "population",
+        "values": [
+          {
+            "number": 638,
+            "asOf": "2016-01-01",
+            "source": "sci-census-2016"
+          }
+        ]
+      },
+      {
+        "attribute": "ethnic_groups",
+        "values": [
+          {
+            "localized": {
+              "fa": "کمزاری‌ها",
+              "en": "Kumzari people",
+              "ar": "الكمازرة"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "languages",
+        "values": [
+          {
+            "option": "ZUM"
+          },
+          {
+            "option": "FA"
+          }
+        ]
+      }
+    ]
+  },
+  "topics": [
+    "islands",
+    "culture-and-ethnography",
+    "shipping-and-transit"
+  ],
+  "canonicalLanguage": "fa",
+  "gallery": [
+    "musandam-iss",
+    "fishing-dhow"
+  ],
+  "history": {
+    "revisions": 2,
+    "contributors": 2
+  },
+  "verification": "NONE",
+  "translations": {
+    "fa": {
+      "slug": "جزیره-لارک",
+      "title": "جزیرهٔ لارک",
+      "summary": "جزیره‌ای کوهستانی در میانهٔ تنگهٔ هرمز که مردمش به زبان کمزاری سخن می‌گویند.",
+      "lead": [
+        "**جزیرهٔ لارک** جزیره‌ای کوهستانی با مساحتی حدود ۴۹ کیلومتر مربع است که در میانهٔ [[strait-of-hormuz|تنگهٔ هرمز]]، در جنوب شرقی [[qeshm-island|قشم]] و جنوب [[hormuz-island|هرمز]] قرار دارد.{{ncc-gazetteer}} لارک از نزدیک‌ترین جزایر ایرانی به خط اصلی کشتیرانی تنگه است و نفتکش‌های غول‌پیکر در چند کیلومتری ساحل آن رفت‌وآمد می‌کنند.",
+        "مردم روستای لارک‌شهری به زبان کمزاری سخن می‌گویند؛ زبانی ایرانی که جز در لارک، تنها در روستای کمزار در شبه‌جزیرهٔ مسندم عمان رواج دارد."
+      ],
+      "sections": [
+        {
+          "heading": "جغرافیا",
+          "blocks": [
+            {
+              "p": "لارک نیز مانند هرمز و هنگام یک گنبد نمکی است و کوه‌های تیره و سرخ‌رنگ آن از سنگ‌های آتشفشانی و رسوبات نمکی ساخته شده‌اند. بلندترین نقطهٔ جزیره حدود ۱۵۰ متر از سطح دریا ارتفاع دارد. منابع آب شیرین بسیار اندک است و مردم بیشتر به آب‌انبارها و آب‌شیرین‌کن‌ها وابسته‌اند.{{ncc-coastal-atlas}}"
+            },
+            {
+              "p": "آب‌های پیرامون لارک زیستگاه مرجان‌ها، [[hawksbill-turtle|لاک‌پشت پوزه‌عقابی]] و گاه نهنگ‌ها و [[whale-shark|کوسهٔ نهنگ]] است و صیادان محلی از دیرباز در این آب‌ها ماهی و میگو صید می‌کنند.{{doe-protected-areas}}"
+            }
+          ]
+        },
+        {
+          "heading": "زبان کمزاری",
+          "blocks": [
+            {
+              "p": "کمزاری از زبان‌های ایرانی جنوب غربی است که واژه‌های فراوانی از عربی، پرتغالی، هندی و سواحلی وام گرفته است. این زبان یادگار پیوندهای کهن دریانوردان دو سوی تنگهٔ هرمز است و امروز تنها چند هزار گویشور دارد. زبان‌شناسان آن را از زبان‌های در معرض خطر به شمار می‌آورند.{{iranica-hormuz}}"
+            }
+          ]
+        },
+        {
+          "heading": "تاریخ",
+          "blocks": [
+            {
+              "p": "پرتغالی‌ها در سدهٔ شانزدهم قلعه‌ای در لارک ساختند تا بر گذرگاه کشتی‌ها نظارت کنند و ویرانه‌های آن هنوز بر تپه‌ای در شمال جزیره پیداست. در سده‌های بعد، لارک بیشتر به‌عنوان ایستگاه صیادان و پناهگاه کشتی‌ها در طوفان شناخته می‌شد.{{floor-persian-gulf}} در دهه‌های اخیر، به دلیل جایگاه راهبردی‌اش در تنگه، تأسیسات دریایی و نظامی در جزیره ساخته شده است."
+            }
+          ]
+        },
+        {
+          "heading": "صیادی و معیشت",
+          "blocks": [
+            {
+              "p": "بیشتر مردان لارک صیادند و با قایق‌های موتوری کوچک یا لنج، ماهی‌های سطح‌زی مانند [[narrow-barred-spanish-mackerel|شیر ماهی]] و ماهی‌های کفزی را صید می‌کنند. ماهی خشک‌شده و ترشی ماهی از فراورده‌های سنتی جزیره است که به بازارهای قشم و بندرعباس فرستاده می‌شود. نبود آب شیرین و دوری از خدمات شهری باعث شده بسیاری از جوانان برای کار به خشکی بروند."
+            }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "larak-island",
+      "title": "Larak Island",
+      "summary": "A mountainous island in the middle of the Strait of Hormuz whose people speak the Kumzari language.",
+      "lead": [
+        "**Larak Island** is a mountainous island of about 49 square kilometres in the middle of the [[strait-of-hormuz|Strait of Hormuz]], south-east of [[qeshm-island|Qeshm]] and south of [[hormuz-island|Hormuz]].{{ncc-gazetteer}} It is one of the Iranian islands closest to the strait's main shipping lane, and supertankers pass within a few kilometres of its shore.",
+        "The people of Larak Shahri village speak Kumzari, an Iranian language spoken otherwise only in the village of Kumzar on Oman's Musandam Peninsula."
+      ],
+      "sections": [
+        {
+          "heading": "Geography",
+          "blocks": [
+            {
+              "p": "Like Hormuz and Hengam, Larak is a salt dome, and its dark and red hills are made of volcanic rock and salt deposits. The highest point is about 150 metres above sea level. Fresh water is very scarce, and islanders depend mostly on cisterns and desalination plants.{{ncc-coastal-atlas}}"
+            },
+            {
+              "p": "The waters around Larak are home to corals, the [[hawksbill-turtle|hawksbill turtle]] and occasionally whales and the [[whale-shark|whale shark]], and local fishermen have long caught fish and shrimp there.{{doe-protected-areas}}"
+            }
+          ]
+        },
+        {
+          "heading": "The Kumzari language",
+          "blocks": [
+            {
+              "p": "Kumzari is a south-western Iranian language that has borrowed heavily from Arabic, Portuguese, Hindi and Swahili. It is a legacy of the old ties between seafarers on both sides of the Strait of Hormuz and today has only a few thousand speakers. Linguists consider it endangered.{{iranica-hormuz}}"
+            }
+          ]
+        },
+        {
+          "heading": "History",
+          "blocks": [
+            {
+              "p": "In the sixteenth century the Portuguese built a fort on Larak to watch the shipping lane, and its ruins are still visible on a hill in the north of the island. In later centuries Larak was known mainly as a fishing station and a refuge for ships in storms.{{floor-persian-gulf}} In recent decades its strategic position in the strait has brought maritime and military installations to the island."
+            }
+          ]
+        },
+        {
+          "heading": "Fishing and livelihoods",
+          "blocks": [
+            {
+              "p": "Most men on Larak are fishermen who use small motorboats or dhows to catch pelagic fish such as the [[narrow-barred-spanish-mackerel|kingfish]] as well as bottom fish. Dried fish and fish pickle are traditional island products sent to markets in Qeshm and Bandar Abbas. The lack of fresh water and distance from public services have led many young people to move to the mainland for work."
+            }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "جزيرة-لارك",
+      "title": "جزيرة لارك",
+      "summary": "جزيرة جبلية في وسط مضيق هرمز يتحدث أهلها اللغة الكمزارية.",
+      "lead": [
+        "**جزيرة لارك** جزيرة جبلية مساحتها نحو ٤٩ كيلومترًا مربعًا، تقع في وسط [[strait-of-hormuz|مضيق هرمز]] جنوب شرق [[qeshm-island|قشم]] وجنوب [[hormuz-island|هرمز]].{{ncc-gazetteer}} وهي من أقرب الجزر الإيرانية إلى خط الملاحة الرئيسي في المضيق، إذ تمر الناقلات العملاقة على بعد كيلومترات قليلة من شاطئها.",
+        "ويتحدث أهل قرية لارك شهري اللغة الكمزارية، وهي لغة إيرانية لا يتحدث بها خارج لارك إلا أهل قرية كمزار في شبه جزيرة مسندم العُمانية."
+      ],
+      "sections": [
+        {
+          "heading": "الجغرافيا",
+          "blocks": [
+            {
+              "p": "لارك، مثل هرمز وهنگام، قبة ملحية، وتلالها الداكنة والحمراء مكوّنة من صخور بركانية ورواسب ملحية. ويبلغ ارتفاع أعلى نقطة فيها نحو ١٥٠ مترًا فوق سطح البحر. والمياه العذبة شحيحة جدًا، ويعتمد الأهالي في الغالب على الصهاريج ومحطات التحلية.{{ncc-coastal-atlas}}"
+            },
+            {
+              "p": "وتؤوي المياه المحيطة بلارك المرجان و[[hawksbill-turtle|السلحفاة صقرية المنقار]]، وأحيانًا الحيتان و[[whale-shark|القرش الحوتي]]، وقد اعتاد الصيادون المحليون منذ القدم صيد الأسماك والروبيان فيها.{{doe-protected-areas}}"
+            }
+          ]
+        },
+        {
+          "heading": "اللغة الكمزارية",
+          "blocks": [
+            {
+              "p": "الكمزارية لغة إيرانية جنوبية غربية اقترضت كثيرًا من العربية والبرتغالية والهندية والسواحلية، وهي إرث الروابط القديمة بين البحارة على ضفتي مضيق هرمز، ولا يتحدث بها اليوم سوى بضعة آلاف. ويعدّها اللغويون من اللغات المهددة بالاندثار.{{iranica-hormuz}}"
+            }
+          ]
+        },
+        {
+          "heading": "التاريخ",
+          "blocks": [
+            {
+              "p": "بنى البرتغاليون في القرن السادس عشر قلعة في لارك لمراقبة ممر السفن، وما تزال أطلالها ظاهرة على تلة في شمال الجزيرة. وفي القرون اللاحقة عُرفت لارك أساسًا محطةً للصيادين وملاذًا للسفن في العواصف.{{floor-persian-gulf}} وفي العقود الأخيرة جلب موقعها الاستراتيجي في المضيق منشآت بحرية وعسكرية إلى الجزيرة."
+            }
+          ]
+        },
+        {
+          "heading": "الصيد ومصادر الرزق",
+          "blocks": [
+            {
+              "p": "معظم رجال لارك صيادون يستخدمون القوارب الصغيرة أو المراكب لصيد الأسماك السطحية مثل [[narrow-barred-spanish-mackerel|الكنعد]] والأسماك القاعية. ويُعدّ السمك المجفف ومخلل السمك من المنتجات التقليدية للجزيرة التي تُرسل إلى أسواق قشم وبندر عباس. وقد دفع شح المياه العذبة والبعد عن الخدمات العامة كثيرًا من الشباب إلى الانتقال إلى البر للعمل."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

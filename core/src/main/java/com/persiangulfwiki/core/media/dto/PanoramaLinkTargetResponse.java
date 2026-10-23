@@ -16,7 +16,7 @@ public record PanoramaLinkTargetResponse(
         @Schema(description = "The article the target belongs to, which may differ from the source's.")
         UUID articleId,
 
-        @Schema(description = "The target's type. Normally PANORAMA_360.")
+        @Schema(description = "The target's type. Normally PANORAMA_360.\n\n" + MediaKind.VALUES_DOC)
         MediaKind type,
 
         @Schema(description = "The target's tiny inline preview image (a data: URI), if it has one.", nullable = true)

@@ -1,0 +1,125 @@
+{
+  "key": "khuzestan-province",
+  "subject": {
+    "kind": "PROVINCE",
+    "names": { "fa": "استان خوزستان", "en": "Khuzestan Province", "ar": "محافظة خوزستان" },
+    "aliases": { "fa": ["خوزستان"], "en": ["Khuzestan"], "ar": ["خوزستان", "الأهواز"] },
+    "geometry": "POLYGON((47.7 31.0, 48.0 32.8, 49.5 33.0, 50.5 31.8, 50.1 30.2, 49.0 30.0, 48.0 29.9, 47.7 31.0))",
+    "facts": []
+  },
+  "topics": ["geography-and-climate", "culture-and-ethnography", "history-and-archaeology"],
+  "canonicalLanguage": "fa",
+  "gallery": ["arvand-delta-iss", "kuwait-coast-iss"],
+  "history": { "revisions": 5, "contributors": 5 },
+  "verification": "NONE",
+  "translations": {
+    "fa": {
+      "slug": "استان-خوزستان",
+      "title": "استان خوزستان",
+      "summary": "استانی در جنوب غربی ایران در سرشاخهٔ خلیج فارس، با رودهای بزرگ کارون و اروند، میدان‌های نفتی کهن و بندرهای خرمشهر و امام خمینی.",
+      "lead": [
+        "**استان خوزستان** در جنوب غربی ایران و در شمالی‌ترین کرانهٔ خلیج فارس قرار دارد و مرکز آن شهر اهواز است. این استان سرزمین رودهای پرآب کارون، کرخه و دز است و اروندرود، که از پیوستن دجله و فرات و کارون پدید می‌آید، مرز آن با عراق را می‌سازد.{{ncc-coastal-atlas}}",
+        "بندرهای [[khorramshahr-port|خرمشهر]] و [[bandar-imam-khomeini|امام خمینی]] دروازه‌های دریایی خوزستان‌اند و نخستین چاه نفت خاورمیانه در سال ۱۲۸۷ خورشیدی در مسجدسلیمان همین استان به نفت رسید.{{eia-iran-2024}}"
+      ],
+      "sections": [
+        {
+          "heading": "جغرافیا",
+          "blocks": [
+            { "p": "بخش بزرگی از خوزستان جلگه‌ای آبرفتی و هموار است که رودهای زاگرس در طول هزاران سال پدید آورده‌اند. در جنوب استان، تالاب‌های شادگان و هورالعظیم و خورهای پرپیچ‌وخم موسی و دورق، یکی از بزرگ‌ترین مجموعه‌های تالابی ایران را می‌سازند.{{doe-protected-areas}} اهواز در تابستان از گرم‌ترین شهرهای جهان است و ریزگردها در بهار و تابستان از چالش‌های بزرگ زیست‌محیطی استان به شمار می‌روند.{{irimo-climate}}" }
+          ]
+        },
+        {
+          "heading": "تاریخ",
+          "blocks": [
+            { "p": "خوزستان کانون تمدن ایلام بود و شهرهای شوش و چغازنبیل از کهن‌ترین شهرهای ایران‌اند. در دوران هخامنشی، شوش یکی از پایتخت‌های شاهنشاهی شد و در دوران ساسانی، شهرهای جندی‌شاپور و شوشتر با دانشگاه و سازه‌های آبی خود شهرت یافتند. سازه‌های آبی شوشتر و چغازنبیل امروز در فهرست میراث جهانی یونسکو جای دارند.{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "اقتصاد",
+          "blocks": [
+            { "p": "خوزستان قطب صنعت نفت ایران است و میدان‌های اهواز، مارون و آغاجاری بخش بزرگی از نفت کشور را تولید می‌کنند.{{eia-iran-2024}} مجتمع‌های پتروشیمی بندر امام خمینی، فولاد خوزستان، کشت نیشکر و نخلستان‌های آبادان و خرمشهر دیگر پایه‌های اقتصاد استان‌اند.{{sci-yearbook-2022}}" },
+            { "ul": ["میدان‌های نفتی اهواز، مارون و آغاجاری", "منطقهٔ ویژهٔ اقتصادی پتروشیمی", "منطقهٔ آزاد اروند", "کشت و صنعت نیشکر"] }
+          ]
+        },
+        {
+          "heading": "مردم",
+          "blocks": [
+            { "p": "خوزستان از گوناگون‌ترین استان‌های ایران از نظر قومی است. عرب‌ها، بختیاری‌ها، لرها، دزفولی‌ها و شوشتری‌ها در کنار هم زندگی می‌کنند و هر گروه گویش، موسیقی و آیین‌های ویژهٔ خود را دارد. بر پایهٔ سرشماری ۱۳۹۵، جمعیت استان بیش از چهار میلیون و هفتصد هزار نفر بوده است.{{sci-census-2016-khuzestan}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "khuzestan-province",
+      "title": "Khuzestan Province",
+      "summary": "A province in south-western Iran at the head of the Persian Gulf, with the great Karun and Arvand rivers, the oldest oil fields of the region and the ports of Khorramshahr and Imam Khomeini.",
+      "lead": [
+        "**Khuzestan Province** lies in south-western Iran on the northernmost shore of the Persian Gulf; its capital is Ahvaz. It is the land of the great Karun, Karkheh and Dez rivers, and the Arvand Rud — formed where the Tigris, Euphrates and Karun meet — marks its border with Iraq.{{ncc-coastal-atlas}}",
+        "The ports of [[khorramshahr-port|Khorramshahr]] and [[bandar-imam-khomeini|Bandar Imam Khomeini]] are Khuzestan's gateways to the sea, and the first oil well in the Middle East struck oil at Masjed Soleyman in this province in 1908.{{eia-iran-2024}}"
+      ],
+      "sections": [
+        {
+          "heading": "Geography",
+          "blocks": [
+            { "p": "Much of Khuzestan is a flat alluvial plain built up over thousands of years by rivers coming down from the Zagros. In the south, the Shadegan and Hawizeh marshes and the winding Musa and Dorag creeks form one of Iran's largest wetland systems.{{doe-protected-areas}} Ahvaz is among the hottest cities in the world in summer, and dust storms in spring and summer are one of the province's most serious environmental problems.{{irimo-climate}}" }
+          ]
+        },
+        {
+          "heading": "History",
+          "blocks": [
+            { "p": "Khuzestan was the heartland of the Elamite civilisation, and Susa and Chogha Zanbil are among the oldest cities of Iran. Under the Achaemenids, Susa became one of the capitals of the empire, and in the Sasanian era Gundishapur and Shushtar became famous for their academy and their waterworks. The Shushtar hydraulic system and Chogha Zanbil are now UNESCO World Heritage sites.{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "Economy",
+          "blocks": [
+            { "p": "Khuzestan is the centre of Iran's oil industry, and the Ahvaz, Marun and Aghajari fields produce a large share of the country's crude.{{eia-iran-2024}} The petrochemical complexes of Bandar Imam Khomeini, Khuzestan Steel, sugar cane plantations and the date groves of Abadan and Khorramshahr are the other pillars of the provincial economy.{{sci-yearbook-2022}}" },
+            { "ul": ["Ahvaz, Marun and Aghajari oil fields", "Petrochemical Special Economic Zone", "Arvand Free Zone", "Sugar cane agro-industry"] }
+          ]
+        },
+        {
+          "heading": "People",
+          "blocks": [
+            { "p": "Khuzestan is one of Iran's most ethnically diverse provinces. Arabs, Bakhtiaris, Lors, and the people of Dezful and Shushtar live side by side, each with their own dialect, music and customs. According to the 2016 census the province had more than 4.7 million inhabitants.{{sci-census-2016-khuzestan}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "محافظة-خوزستان",
+      "title": "محافظة خوزستان",
+      "summary": "محافظة في جنوب غرب إيران عند رأس الخليج الفارسي، تضم نهري كارون وأروند الكبيرين وأقدم حقول النفط في المنطقة وميناءي خرمشهر والإمام الخميني.",
+      "lead": [
+        "**محافظة خوزستان** تقع في جنوب غرب إيران على أقصى الساحل الشمالي للخليج الفارسي، وعاصمتها مدينة الأهواز. وهي أرض أنهار كارون والكرخة ودز الغزيرة، ويشكّل شط العرب (أروند رود)، الذي يتكون من التقاء دجلة والفرات بكارون، حدودها مع العراق.{{ncc-coastal-atlas}}",
+        "ويُعدّ ميناءا [[khorramshahr-port|خرمشهر]] و[[bandar-imam-khomeini|الإمام الخميني]] بوابتي خوزستان إلى البحر، وفي مسجد سليمان بهذه المحافظة تدفق النفط من أول بئر في الشرق الأوسط عام ١٩٠٨.{{eia-iran-2024}}"
+      ],
+      "sections": [
+        {
+          "heading": "الجغرافيا",
+          "blocks": [
+            { "p": "معظم خوزستان سهل رسوبي منبسط كوّنته عبر آلاف السنين أنهار تنحدر من زاغروس. وفي جنوبها تشكّل أهوار شادكان والحويزة وخورا موسى ودورق المتعرجان واحدة من أكبر منظومات الأراضي الرطبة في إيران.{{doe-protected-areas}} والأهواز من أشد مدن العالم حرارة في الصيف، كما تمثل العواصف الغبارية في الربيع والصيف من أخطر مشكلات المحافظة البيئية.{{irimo-climate}}" }
+          ]
+        },
+        {
+          "heading": "التاريخ",
+          "blocks": [
+            { "p": "كانت خوزستان موطن الحضارة العيلامية، وتُعدّ سوسة وجغازنبيل من أقدم مدن إيران. وفي العهد الأخميني أصبحت سوسة إحدى عواصم الإمبراطورية، وفي العهد الساساني اشتهرت جنديسابور وشوشتر بأكاديميتها ومنشآتها المائية. وتُدرج اليوم منظومة شوشتر المائية وجغازنبيل في قائمة التراث العالمي لليونسكو.{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "الاقتصاد",
+          "blocks": [
+            { "p": "خوزستان مركز صناعة النفط في إيران، وتنتج حقول الأهواز ومارون وآغاجاري حصة كبيرة من نفط البلاد.{{eia-iran-2024}} أما مجمعات البتروكيماويات في ميناء الإمام الخميني، وفولاد خوزستان، ومزارع قصب السكر، وبساتين النخيل في عبادان وخرمشهر، فهي الركائز الأخرى لاقتصاد المحافظة.{{sci-yearbook-2022}}" },
+            { "ul": ["حقول نفط الأهواز ومارون وآغاجاري", "المنطقة الاقتصادية الخاصة للبتروكيماويات", "منطقة أروند الحرة", "صناعة قصب السكر الزراعية"] }
+          ]
+        },
+        {
+          "heading": "السكان",
+          "blocks": [
+            { "p": "خوزستان من أكثر محافظات إيران تنوعًا عرقيًا؛ إذ يعيش فيها العرب والبختياريون واللر وأهالي دزفول وشوشتر جنبًا إلى جنب، ولكل جماعة لهجتها وموسيقاها وعاداتها. وبلغ عدد سكانها وفق تعداد عام ٢٠١٦ أكثر من ٤٫٧ ملايين نسمة.{{sci-census-2016-khuzestan}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

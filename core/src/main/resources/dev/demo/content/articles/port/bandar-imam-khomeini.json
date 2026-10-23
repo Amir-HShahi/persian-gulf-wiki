@@ -1,0 +1,272 @@
+{
+  "key": "bandar-imam-khomeini",
+  "subject": {
+    "kind": "PORT",
+    "names": {
+      "fa": "بندر امام خمینی",
+      "en": "Bandar Imam Khomeini",
+      "ar": "ميناء الإمام الخميني"
+    },
+    "aliases": {
+      "fa": [
+        "بندر شاهپور"
+      ],
+      "en": [
+        "Bandar Shahpur",
+        "Imam Khomeini Port"
+      ],
+      "ar": [
+        "بندر شاهبور"
+      ]
+    },
+    "geometry": "POINT(49.08 30.43)",
+    "facts": [
+      {
+        "attribute": "country",
+        "values": [
+          {
+            "option": "IR"
+          }
+        ]
+      },
+      {
+        "attribute": "province",
+        "values": [
+          {
+            "subject": "khuzestan-province"
+          }
+        ]
+      },
+      {
+        "attribute": "county",
+        "values": [
+          {
+            "localized": {
+              "fa": "ماهشهر",
+              "en": "Mahshahr",
+              "ar": "ماهشهر"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "district",
+        "values": [
+          {
+            "localized": {
+              "fa": "بخش بندر امام خمینی",
+              "en": "Bandar Imam Khomeini District",
+              "ar": "قسم ميناء الإمام الخميني"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "population",
+        "values": [
+          {
+            "number": 83512,
+            "asOf": "2016-01-01",
+            "source": "sci-census-2016-khuzestan"
+          }
+        ]
+      },
+      {
+        "attribute": "ethnic_groups",
+        "values": [
+          {
+            "localized": {
+              "fa": "عرب‌ها، لرها و فارس‌ها",
+              "en": "Arabs, Lors and Persians",
+              "ar": "العرب واللر والفرس"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "languages",
+        "values": [
+          {
+            "option": "AR"
+          },
+          {
+            "option": "FA"
+          },
+          {
+            "option": "LRL"
+          }
+        ]
+      }
+    ]
+  },
+  "topics": [
+    "ports-and-oil-terminals",
+    "economy-and-trade",
+    "shipping-and-transit"
+  ],
+  "canonicalLanguage": "fa",
+  "gallery": [
+    "kuwait-coast-iss",
+    "basrah-tankers"
+  ],
+  "history": {
+    "revisions": 3,
+    "contributors": 3
+  },
+  "verification": "NONE",
+  "translations": {
+    "fa": {
+      "slug": "بندر-امام-خمینی",
+      "title": "بندر امام خمینی",
+      "summary": "بزرگ‌ترین بندر فله و پتروشیمی ایران در خور موسی در شمال خلیج فارس.",
+      "lead": [
+        "**بندر امام خمینی** بندری بزرگ در [[khuzestan-province|استان خوزستان]] است که در انتهای خور موسی، یکی از ژرف‌ترین خورهای شمال خلیج فارس، قرار دارد. این بندر که پیش از انقلاب «بندر شاهپور» نامیده می‌شد، بزرگ‌ترین بندر ایران در جابه‌جایی کالاهای فله، غلات و فراورده‌های پتروشیمی است.{{pmo-ports-2023}}",
+        "خور موسی با ژرفای مناسب، کشتی‌های بزرگ را تا نزدیکی خشکی هدایت می‌کند و از همین رو بندر امام خمینی جایگزین [[khorramshahr-port|خرمشهر]] در بازرگانی دریایی خوزستان شده است."
+      ],
+      "sections": [
+        {
+          "heading": "تاریخ",
+          "blocks": [
+            {
+              "p": "بندر شاهپور در دههٔ ۱۳۱۰ خورشیدی به‌عنوان پایانهٔ جنوبی راه‌آهن سراسری ایران ساخته شد. در جنگ جهانی دوم، متفقین از این بندر و راه‌آهن برای رساندن جنگ‌افزار و آذوقه به اتحاد جماهیر شوروی بهره گرفتند و ظرفیت آن به‌سرعت گسترش یافت.{{potter-gulf-history}} پس از انقلاب ۱۳۵۷، نام بندر به بندر امام خمینی تغییر کرد."
+            }
+          ]
+        },
+        {
+          "heading": "بندر و صنایع",
+          "blocks": [
+            {
+              "p": "بندر امام خمینی ده‌ها اسکله برای کالاهای فله، کانتینر، غلات، فراورده‌های نفتی و مواد شیمیایی دارد و با راه‌آهن به سراسر کشور پیوند خورده است.{{pmo-ports-2023}} منطقهٔ ویژهٔ اقتصادی پتروشیمی، با ده‌ها مجتمع تولید پلیمر، کود و مواد شیمیایی پایه، در کنار بندر و شهر ماهشهر جای دارد و بخش بزرگی از صادرات پتروشیمی ایران از اسکله‌های همین بندر بارگیری می‌شود.{{sci-yearbook-2022}}"
+            },
+            {
+              "ul": [
+                "اسکله‌های غلات و کالای فله",
+                "پایانهٔ فراورده‌های پتروشیمی",
+                "پایانهٔ کانتینری",
+                "اتصال به راه‌آهن سراسری"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "محیط زیست خور موسی",
+          "blocks": [
+            {
+              "p": "خور موسی و خورهای پیرامون آن زیستگاه نوزادان میگو و ماهی‌های تجاری، و نیز زیستگاه [[indo-pacific-humpback-dolphin|دلفین گوژپشت]] است. فعالیت‌های صنعتی و رفت‌وآمد کشتی‌ها، این خورها را در معرض آلودگی نفتی، فلزات سنگین و پساب‌های صنعتی قرار داده‌اند و پژوهشگران بارها نسبت به کاهش کیفیت آب در آن هشدار داده‌اند.{{ropme-soe-2021}}{{doe-protected-areas}}"
+            }
+          ]
+        },
+        {
+          "heading": "شهر بندر امام",
+          "blocks": [
+            {
+              "p": "شهر بندر امام خمینی در کنار بندر، شهرکی نوساز با محله‌های مسکونی کارکنان بندر و صنایع پتروشیمی است. بیشتر ساکنان آن از عرب‌های خوزستان، لرها و مهاجران دیگر استان‌ها هستند که در دهه‌های اخیر برای کار به این منطقه آمده‌اند.{{sci-census-2016-khuzestan}} گرمای شدید تابستان، رطوبت بالا و آلودگی هوای ناشی از صنایع، از چالش‌های زندگی در این شهر به شمار می‌روند و طرح‌هایی برای گسترش فضای سبز و پایش آلاینده‌ها در دست اجراست."
+            }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "bandar-imam-khomeini",
+      "title": "Bandar Imam Khomeini",
+      "summary": "Iran's largest bulk and petrochemical port, on the Musa creek in the northern Persian Gulf.",
+      "lead": [
+        "**Bandar Imam Khomeini** is a major port in [[khuzestan-province|Khuzestan Province]] at the head of the Musa creek, one of the deepest inlets of the northern Persian Gulf. Called Bandar Shahpur before the revolution, it is Iran's largest port for bulk cargo, grain and petrochemical products.{{pmo-ports-2023}}",
+        "The Musa creek's depth lets large ships come close to land, which is why Bandar Imam Khomeini has replaced [[khorramshahr-port|Khorramshahr]] in Khuzestan's maritime trade."
+      ],
+      "sections": [
+        {
+          "heading": "History",
+          "blocks": [
+            {
+              "p": "Bandar Shahpur was built in the 1930s as the southern terminus of the Trans-Iranian Railway. During the Second World War the Allies used the port and the railway to send weapons and supplies to the Soviet Union, and its capacity grew rapidly.{{potter-gulf-history}} After the 1979 revolution it was renamed Bandar Imam Khomeini."
+            }
+          ]
+        },
+        {
+          "heading": "Port and industry",
+          "blocks": [
+            {
+              "p": "The port has dozens of berths for bulk cargo, containers, grain, oil products and chemicals, and is linked by rail to the whole country.{{pmo-ports-2023}} The Petrochemical Special Economic Zone, with dozens of plants making polymers, fertilisers and base chemicals, lies beside the port and the town of Mahshahr, and a large share of Iran's petrochemical exports is loaded at its jetties.{{sci-yearbook-2022}}"
+            },
+            {
+              "ul": [
+                "Grain and bulk berths",
+                "Petrochemical products terminal",
+                "Container terminal",
+                "Link to the Trans-Iranian Railway"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "The environment of the Musa creek",
+          "blocks": [
+            {
+              "p": "The Musa creek and its side channels are nursery grounds for young shrimp and commercial fish and home to the [[indo-pacific-humpback-dolphin|humpback dolphin]]. Industry and shipping expose these creeks to oil pollution, heavy metals and industrial effluent, and researchers have repeatedly warned of declining water quality.{{ropme-soe-2021}}{{doe-protected-areas}}"
+            }
+          ]
+        },
+        {
+          "heading": "The town of Bandar Imam",
+          "blocks": [
+            {
+              "p": "The town of Bandar Imam Khomeini, beside the port, is a newly built settlement of housing for port and petrochemical workers. Most residents are Khuzestani Arabs, Lors and migrants from other provinces who came to work in the area in recent decades.{{sci-census-2016-khuzestan}} Intense summer heat, high humidity and industrial air pollution are among the challenges of life here, and projects to expand green space and monitor pollutants are under way."
+            }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "ميناء-الإمام-الخميني",
+      "title": "ميناء الإمام الخميني",
+      "summary": "أكبر ميناء إيراني للبضائع السائبة والبتروكيماويات، على خور موسى في شمال الخليج الفارسي.",
+      "lead": [
+        "**ميناء الإمام الخميني** ميناء كبير في [[khuzestan-province|محافظة خوزستان]] عند رأس خور موسى، أحد أعمق الأخوار في شمال الخليج الفارسي. وكان يُسمّى قبل الثورة «بندر شاهبور»، وهو أكبر ميناء في إيران للبضائع السائبة والحبوب والمنتجات البتروكيماوية.{{pmo-ports-2023}}",
+        "ويتيح عمق خور موسى للسفن الكبيرة الاقتراب من البر، ولهذا حلّ ميناء الإمام الخميني محلّ [[khorramshahr-port|خرمشهر]] في التجارة البحرية لخوزستان."
+      ],
+      "sections": [
+        {
+          "heading": "التاريخ",
+          "blocks": [
+            {
+              "p": "بُني بندر شاهبور في ثلاثينيات القرن العشرين محطةً جنوبية لسكة الحديد العابرة لإيران. وخلال الحرب العالمية الثانية استخدم الحلفاء الميناء والسكة لإيصال الأسلحة والمؤن إلى الاتحاد السوفيتي، فتوسعت طاقته بسرعة.{{potter-gulf-history}} وبعد ثورة ١٩٧٩ تغيّر اسمه إلى ميناء الإمام الخميني."
+            }
+          ]
+        },
+        {
+          "heading": "الميناء والصناعة",
+          "blocks": [
+            {
+              "p": "يضم الميناء عشرات الأرصفة للبضائع السائبة والحاويات والحبوب والمنتجات النفطية والكيماويات، ويرتبط بالسكة الحديدية بأنحاء البلاد.{{pmo-ports-2023}} وتقع المنطقة الاقتصادية الخاصة للبتروكيماويات، بعشرات المصانع المنتجة للبوليمرات والأسمدة والكيماويات الأساسية، بجوار الميناء ومدينة ماهشهر، وتُحمَّل حصة كبيرة من صادرات إيران البتروكيماوية من أرصفته.{{sci-yearbook-2022}}"
+            },
+            {
+              "ul": [
+                "أرصفة الحبوب والبضائع السائبة",
+                "محطة المنتجات البتروكيماوية",
+                "محطة الحاويات",
+                "الربط بسكة الحديد العابرة لإيران"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "بيئة خور موسى",
+          "blocks": [
+            {
+              "p": "يُعدّ خور موسى وقنواته الجانبية حاضنات لصغار الروبيان والأسماك التجارية وموطنًا لـ[[indo-pacific-humpback-dolphin|الدلفين الأحدب]]. وتعرّض الصناعة والملاحة هذه الأخوار للتلوث النفطي والمعادن الثقيلة والمخلفات الصناعية، وقد حذّر الباحثون مرارًا من تراجع جودة المياه فيها.{{ropme-soe-2021}}{{doe-protected-areas}}"
+            }
+          ]
+        },
+        {
+          "heading": "مدينة بندر الإمام",
+          "blocks": [
+            {
+              "p": "مدينة ميناء الإمام الخميني بجوار الميناء مستوطنة حديثة البناء تضم مساكن عاملي الميناء والبتروكيماويات. ومعظم سكانها من عرب خوزستان واللر والمهاجرين من محافظات أخرى قدموا للعمل في المنطقة خلال العقود الأخيرة.{{sci-census-2016-khuzestan}} وتُعدّ حرارة الصيف الشديدة والرطوبة العالية وتلوث الهواء الصناعي من تحديات الحياة فيها، وتُنفَّذ مشاريع لتوسيع المساحات الخضراء ورصد الملوثات."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

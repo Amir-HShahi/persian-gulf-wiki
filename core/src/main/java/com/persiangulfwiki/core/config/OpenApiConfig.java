@@ -56,6 +56,8 @@ public class OpenApiConfig {
             "Dev Test Sources",
             "Articles",
             "Dev Test Articles",
+            "Featured Articles",
+            "Dev Test Featured Articles",
             "Article Media",
             "Dev Test Media",
             "Topics",
@@ -63,7 +65,9 @@ public class OpenApiConfig {
             "Moderation",
             "Dev Test Moderation Tasks",
             "Marine Data",
-            "Dev Test Marine Data");
+            "Dev Test Marine Data",
+            // Mints no single feature's states but the whole demo dataset, so it closes the list.
+            "Dev Demo Content");
 
     // Flattens ApiResult<T> to T on every documented response — see the class javadoc and the
     // "Response envelope" section of the API description below.
@@ -234,6 +238,18 @@ public class OpenApiConfig {
     private static int tagRank(String name) {
         int index = TAG_ORDER.indexOf(name);
         return index < 0 ? TAG_ORDER.size() : index;
+    }
+
+    // Free-form JSON fields (an article body, a subject change's before/after) are read as JsonNode, which
+    // springdoc otherwise describes by its Java getters — including a nodeType enum the API never sends.
+    @Bean
+    OpenApiCustomizer jsonNodeSchemaCustomizer() {
+        return openApi -> {
+            if (openApi.getComponents() != null && openApi.getComponents().getSchemas() != null) {
+                openApi.getComponents().getSchemas().computeIfPresent("JsonNode",
+                        (_, _) -> new Schema<>().description("Any JSON value."));
+            }
+        };
     }
 
     // These two routes are registered by Spring Security's own oauth2Login() support, not by

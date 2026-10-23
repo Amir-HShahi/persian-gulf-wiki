@@ -42,7 +42,8 @@ public class DevUserSeeder implements ApplicationRunner {
     // Shared by every seeded account, and documented in docs/DEV-USERS.md. Satisfies
     // PasswordConstraintValidator's rules so these accounts can also be used to exercise
     // password-change flows that re-validate the current password.
-    private static final String DEV_PASSWORD = "Dev-Password1!";
+    // Package-private so DevDemoContentSeeder gives its demo accounts the same documented password.
+    static final String DEV_PASSWORD = "Dev-Password1!";
 
     // An expert reviewer role with no expertise may verify nothing (see ExpertVerificationService),
     // so the seeded reviewer gets a real one. Written only alongside a newly created user, like

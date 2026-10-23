@@ -1,0 +1,119 @@
+{
+  "key": "khorramshahr-port",
+  "subject": {
+    "kind": "PORT",
+    "names": { "fa": "بندر خرمشهر", "en": "Port of Khorramshahr", "ar": "ميناء خرمشهر" },
+    "aliases": { "fa": ["خرمشهر", "محمره"], "en": ["Khorramshahr", "Mohammerah"], "ar": ["خرمشهر", "المحمرة"] },
+    "geometry": "POINT(48.18 30.43)",
+    "facts": [
+      { "attribute": "place_features", "values": [ { "option": "FREE_ZONE" } ] },
+      { "attribute": "country", "values": [ { "option": "IR" } ] },
+      { "attribute": "province", "values": [ { "subject": "khuzestan-province" } ] },
+      { "attribute": "county", "values": [ { "localized": { "fa": "خرمشهر", "en": "Khorramshahr", "ar": "خرمشهر" } } ] },
+      { "attribute": "district", "values": [ { "localized": { "fa": "بخش مرکزی", "en": "Central District", "ar": "القسم المركزي" } } ] },
+      { "attribute": "population", "values": [ { "number": 133097, "asOf": "2016-01-01", "source": "sci-census-2016-khuzestan" } ] },
+      { "attribute": "ethnic_groups", "values": [ { "localized": { "fa": "عرب‌ها و فارس‌ها", "en": "Arabs and Persians", "ar": "العرب والفرس" } } ] },
+      { "attribute": "languages", "values": [ { "option": "AR" }, { "option": "FA" } ] }
+    ]
+  },
+  "topics": ["ports-and-oil-terminals", "history-and-archaeology", "shipping-and-transit"],
+  "canonicalLanguage": "fa",
+  "gallery": ["arvand-delta-iss", "barge-and-tug"],
+  "history": { "revisions": 4, "contributors": 4 },
+  "verification": "VERIFIED",
+  "translations": {
+    "fa": {
+      "slug": "بندر-خرمشهر",
+      "title": "بندر خرمشهر",
+      "summary": "بندری رودخانه‌ای در خوزستان در محل پیوستن کارون به اروندرود، با نقشی برجسته در تاریخ معاصر ایران.",
+      "lead": [
+        "**بندر خرمشهر** بندری رودخانه‌ای در جنوب [[khuzestan-province|استان خوزستان]] است که در محل پیوستن رود کارون به اروندرود قرار دارد. بر پایهٔ سرشماری ۱۳۹۵، جمعیت شهرستان خرمشهر بیش از صد و سی هزار نفر بوده است.{{sci-census-2016-khuzestan}}",
+        "خرمشهر تا پیش از جنگ ایران و عراق بزرگ‌ترین بندر بازرگانی ایران بود و امروز بخشی از منطقهٔ آزاد اروند به شمار می‌رود.{{pmo-ports-2023}}"
+      ],
+      "sections": [
+        {
+          "heading": "تاریخ",
+          "blocks": [
+            { "p": "این شهر در سده‌های گذشته «محمره» نامیده می‌شد و در سدهٔ نوزدهم، با گسترش کشتیرانی بخاری در کارون، به بندری پررونق تبدیل شد. شیخ خزعل، حاکم محمره، در آغاز سدهٔ بیستم از نیرومندترین چهره‌های سیاسی جنوب ایران بود. در سال ۱۳۰۴ خورشیدی نام شهر به خرمشهر تغییر یافت.{{potter-gulf-history}}" },
+            { "p": "در آغاز جنگ ایران و عراق در سال ۱۳۵۹، خرمشهر پس از ۳۴ روز مقاومت به اشغال نیروهای عراقی درآمد و در خرداد ۱۳۶۱ آزاد شد. ویرانی گستردهٔ شهر و یاد این مقاومت، خرمشهر را به نمادی در حافظهٔ تاریخی ایرانیان تبدیل کرده است." }
+          ]
+        },
+        {
+          "heading": "بندر و منطقهٔ آزاد",
+          "blocks": [
+            { "p": "بندر خرمشهر اسکله‌هایی در کنار کارون و اروندرود دارد که کشتی‌های کوچک‌تر و بارج‌ها را می‌پذیرند. منطقهٔ آزاد اروند، که خرمشهر، آبادان و بخشی از شادگان را در بر می‌گیرد، برای جذب سرمایه و رونق دادوستد با عراق و کشورهای خلیج فارس پایه‌گذاری شده است.{{pmo-ports-2023}}" },
+            { "p": "عمق کم اروندرود و رسوب‌گذاری رودخانه، کشتیرانی بزرگ را دشوار کرده و از همین رو بخش بزرگی از بار خوزستان امروز از [[bandar-imam-khomeini|بندر امام خمینی]] جابه‌جا می‌شود." }
+          ]
+        },
+        {
+          "heading": "طبیعت و زندگی شهری",
+          "blocks": [
+            { "p": "نخلستان‌های گستردهٔ کرانه‌های اروند، که روزگاری میلیون‌ها درخت خرما داشتند، از چشم‌اندازهای شاخص خرمشهرند. شورشدن آب اروند در سال‌های خشک، به این نخلستان‌ها آسیب جدی زده است.{{ropme-soe-2021}} بازار ماهی، پل خرمشهر و مسجد جامع، که در جنگ پابرجا ماند، از نشانه‌های شهرند. غذاهایی مانند صبور (ماهی شور) و نان‌های محلی، پیوند فرهنگ این شهر را با کرانه‌های دجله و فرات نشان می‌دهند." }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "port-of-khorramshahr",
+      "title": "Port of Khorramshahr",
+      "summary": "A river port in Khuzestan where the Karun meets the Arvand Rud, with a prominent place in Iran's modern history.",
+      "lead": [
+        "The **port of Khorramshahr** is a river port in the south of [[khuzestan-province|Khuzestan Province]], at the point where the Karun river joins the Arvand Rud. According to the 2016 census Khorramshahr County had more than 130,000 inhabitants.{{sci-census-2016-khuzestan}}",
+        "Before the Iran–Iraq War, Khorramshahr was Iran's largest commercial port; today it is part of the Arvand Free Zone.{{pmo-ports-2023}}"
+      ],
+      "sections": [
+        {
+          "heading": "History",
+          "blocks": [
+            { "p": "The town was long called Mohammerah, and in the nineteenth century it grew into a busy port as steam navigation spread on the Karun. Sheikh Khazal, ruler of Mohammerah, was one of the most powerful political figures of southern Iran at the start of the twentieth century. In 1925 the town was renamed Khorramshahr.{{potter-gulf-history}}" },
+            { "p": "At the start of the Iran–Iraq War in 1980, Khorramshahr fell to Iraqi forces after 34 days of resistance and was liberated in May 1982. The extensive destruction of the city and the memory of its defence have made Khorramshahr a symbol in Iranians' historical memory." }
+          ]
+        },
+        {
+          "heading": "Port and free zone",
+          "blocks": [
+            { "p": "The port has berths on the Karun and the Arvand that take smaller ships and barges. The Arvand Free Zone, covering Khorramshahr, Abadan and part of Shadegan, was set up to attract investment and boost trade with Iraq and the Gulf states.{{pmo-ports-2023}}" },
+            { "p": "The shallow depth and silting of the Arvand make large-scale shipping difficult, so much of Khuzestan's cargo now moves through [[bandar-imam-khomeini|Bandar Imam Khomeini]] instead." }
+          ]
+        },
+        {
+          "heading": "Nature and city life",
+          "blocks": [
+            { "p": "The vast date groves along the Arvand, which once held millions of palms, are one of Khorramshahr's defining landscapes. Salinisation of the Arvand in dry years has seriously damaged them.{{ropme-soe-2021}} The fish market, the Khorramshahr bridge and the Jameh mosque, which survived the war, are among the city's landmarks. Dishes such as suboor (salted fish) and local breads show the city's cultural ties with the banks of the Tigris and Euphrates." }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "ميناء-خرمشهر",
+      "title": "ميناء خرمشهر",
+      "summary": "ميناء نهري في خوزستان عند التقاء نهر كارون بشط العرب، وله مكانة بارزة في تاريخ إيران المعاصر.",
+      "lead": [
+        "**ميناء خرمشهر** ميناء نهري في جنوب [[khuzestan-province|محافظة خوزستان]]، يقع عند التقاء نهر كارون بشط العرب (أروند رود). وبلغ عدد سكان مقاطعة خرمشهر وفق تعداد عام ٢٠١٦ أكثر من ١٣٠ ألف نسمة.{{sci-census-2016-khuzestan}}",
+        "وكانت خرمشهر قبل الحرب الإيرانية العراقية أكبر ميناء تجاري في إيران، وهي اليوم جزء من منطقة أروند الحرة.{{pmo-ports-2023}}"
+      ],
+      "sections": [
+        {
+          "heading": "التاريخ",
+          "blocks": [
+            { "p": "عُرفت المدينة طويلًا باسم «المحمرة»، وفي القرن التاسع عشر غدت ميناءً مزدهرًا مع انتشار الملاحة البخارية في كارون. وكان الشيخ خزعل حاكم المحمرة من أقوى الشخصيات السياسية في جنوب إيران مطلع القرن العشرين. وفي عام ١٩٢٥ تغيّر اسم المدينة إلى خرمشهر.{{potter-gulf-history}}" },
+            { "p": "وفي بداية الحرب الإيرانية العراقية عام ١٩٨٠ سقطت خرمشهر في يد القوات العراقية بعد ٣٤ يومًا من المقاومة، وتحررت في مايو ١٩٨٢. وجعل الدمار الواسع الذي لحق بالمدينة وذكرى الدفاع عنها خرمشهرَ رمزًا في الذاكرة التاريخية للإيرانيين." }
+          ]
+        },
+        {
+          "heading": "الميناء والمنطقة الحرة",
+          "blocks": [
+            { "p": "للميناء أرصفة على كارون وأروند تستقبل السفن الأصغر والصنادل. وأُنشئت منطقة أروند الحرة، التي تشمل خرمشهر وعبادان وجزءًا من شادكان، لجذب الاستثمار وتنشيط التجارة مع العراق ودول الخليج.{{pmo-ports-2023}}" },
+            { "p": "ويجعل ضحالة أروند وترسب الطمي فيه الملاحة الكبيرة صعبة، ولذلك تنتقل معظم بضائع خوزستان اليوم عبر [[bandar-imam-khomeini|ميناء الإمام الخميني]]." }
+          ]
+        },
+        {
+          "heading": "الطبيعة والحياة الحضرية",
+          "blocks": [
+            { "p": "تُعدّ بساتين النخيل الواسعة على ضفاف أروند، التي ضمت يومًا ملايين النخيل، من أبرز مناظر خرمشهر، غير أن ملوحة مياه أروند في سنوات الجفاف ألحقت بها ضررًا بالغًا.{{ropme-soe-2021}} ومن معالم المدينة سوق السمك وجسر خرمشهر والمسجد الجامع الذي صمد في الحرب، وتكشف أطباق مثل الصبور (السمك المملح) والخبز المحلي صلة ثقافة المدينة بضفاف دجلة والفرات." }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -17,7 +17,7 @@ public record SubjectLookupItemResponse(
         @Schema(description = "Slug of the subject's main article in the reader's language, else in Farsi. Null when "
                 + "the subject has no published article.", nullable = true)
         @Nullable String slug,
-        @Schema(description = "What the search term was found in.")
+        @Schema(description = "What the search term was found in.\n\n" + SubjectLookupMatch.VALUES_DOC)
         SubjectLookupMatch matchedOn,
         @Schema(description = "The name, alias or scientific name that matched, as stored -- which may differ from "
                 + "`name`, e.g. an alias or a name in another language.")

@@ -1,0 +1,150 @@
+{
+  "key": "penaeus-semisulcatus",
+  "subject": {
+    "kind": "SPECIES",
+    "names": { "fa": "میگوی ببری سبز", "en": "Green tiger prawn", "ar": "الروبيان النمري الأخضر" },
+    "aliases": { "fa": ["میگوی ببری", "میگو ببری سبز"], "en": ["Grooved tiger prawn", "Penaeus semisulcatus"], "ar": ["الروبيان النمري", "جمبري نمري"] },
+    "geometry": "POLYGON((48 30, 50.5 29.5, 54 27, 56.5 27.2, 57 25.5, 56.3 24.5, 54 24, 51.5 24.5, 50 26, 48.5 28, 48 30))",
+    "facts": [
+      { "attribute": "scientific_name", "values": [ { "text": "Penaeus semisulcatus" } ] },
+      { "attribute": "category", "values": [ { "option": "CRUSTACEAN" } ] },
+      { "attribute": "iucn_status", "values": [ { "option": "DD" } ] },
+      { "attribute": "habitat", "values": [ { "option": "SEAGRASS" }, { "option": "MUDFLAT" } ] },
+      { "attribute": "species_features", "values": [ { "option": "FISHERY" } ] },
+      { "attribute": "max_length", "values": [ { "number": 23, "source": "fao-species-catalogue-shrimps" } ] }
+    ]
+  },
+  "topics": ["marine-life", "economy-and-trade"],
+  "canonicalLanguage": "fa",
+  "gallery": ["penaeid-shrimp", "scorpionfish-seagrass", "fishing-dhow"],
+  "history": { "revisions": 5, "contributors": 4 },
+  "verification": "VERIFIED",
+  "translations": {
+    "fa": {
+      "slug": "میگوی-ببری-سبز",
+      "title": "میگوی ببری سبز",
+      "summary": "مهم‌ترین گونهٔ تجاری میگو در خلیج فارس که در علفزارهای دریایی و پهنه‌های گلی کم‌عمق زندگی می‌کند.",
+      "lead": [
+        "**میگوی ببری سبز** (نام علمی: *Penaeus semisulcatus*) گونه‌ای از میگوهای خانوادهٔ پنائیده است که در آب‌های گرم و کم‌عمق اقیانوس هند و غرب اقیانوس آرام زندگی می‌کند. این گونه در خلیج فارس مهم‌ترین میگوی تجاری است و بخش بزرگی از صید میگوی ایران، به‌ویژه در [[bushehr-shrimp-grounds|صیدگاه‌های بوشهر]]، را تشکیل می‌دهد.{{fao-species-catalogue-shrimps}}{{ifro-shrimp-stock}}",
+        "نام «ببری» به نوارهای تیره‌ای اشاره دارد که بر بدن سبز مایل به قهوه‌ای این میگو دیده می‌شود."
+      ],
+      "sections": [
+        {
+          "heading": "ویژگی‌های ظاهری",
+          "blocks": [
+            { "p": "بدن میگوی ببری سبز به رنگ سبز زیتونی تا قهوه‌ای روشن است و نوارهای عرضی تیره بر پشت و دم آن دیده می‌شود. شاخک‌ها نوارهای روشن و تیره دارند و پاهای شنا لبه‌ای زرد یا قرمز دارند. ماده‌ها بزرگ‌تر از نرها هستند و طول بدنشان به حدود ۲۳ سانتی‌متر می‌رسد.{{fao-species-catalogue-shrimps}} شیار کم‌عمقی در دو سوی خار جلوی سر، این گونه را از خویشاوند نزدیکش، میگوی ببری سیاه، جدا می‌کند." }
+          ]
+        },
+        {
+          "heading": "زیستگاه و پراکنش",
+          "blocks": [
+            { "p": "این میگو در آب‌های ساحلی با ژرفای کمتر از ۵۰ متر و بستر گلی، ماسه‌ای یا پوشیده از [[halodule-uninervis|علف‌های دریایی]] زندگی می‌کند. نوزادان در خورها، تالاب‌های جزرومدی و میان ریشه‌های [[grey-mangrove|حرا]] رشد می‌کنند و پس از چند ماه به آب‌های ژرف‌تر کوچ می‌کنند.{{carpenter-living-resources}} در خلیج فارس، بیشترین تراکم آن در کرانه‌های بوشهر و خوزستان و در آب‌های کویت گزارش شده است." }
+          ]
+        },
+        {
+          "heading": "زیست‌شناسی و چرخهٔ زندگی",
+          "blocks": [
+            { "p": "میگوی ببری سبز شب‌فعال است و روزها در ماسه یا گل فرو می‌رود. خوراک آن بیشتر از جانوران کوچک کفزی، جلبک‌ها و مواد آلی تشکیل می‌شود. اوج تخم‌ریزی در خلیج فارس در اواخر زمستان و بهار است و هر ماده صدها هزار تخم در آب آزاد رها می‌کند. لاروها چند مرحلهٔ دگردیسی را در پلانکتون‌ها می‌گذرانند تا به ساحل برسند.{{fao-species-catalogue-shrimps}}" },
+            { "ul": ["تخم‌ریزی در آب‌های ژرف‌تر", "رشد نوزادان در خورها و علفزارها", "کوچ بالغ‌ها به دریای باز", "عمر حدود یک تا دو سال"] }
+          ]
+        },
+        {
+          "heading": "صید و ارزش اقتصادی",
+          "blocks": [
+            { "p": "صید این گونه با تورهای ترال کف در فصل کوتاه و نظارت‌شده‌ای انجام می‌شود. میگوی ببری سبز در بازارهای داخلی و صادراتی قیمت بالایی دارد و یکی از منابع درآمد مهم صیادان جنوب ایران است. پرورش آن در استخرهای ساحلی نیز آزموده شده، اما گونهٔ غالب پرورشی در ایران میگوی سفید هندی است.{{fao-fishery-gulf}}" }
+          ]
+        },
+        {
+          "heading": "وضعیت حفاظتی",
+          "blocks": [
+            { "p": "این گونه در فهرست سرخ اتحادیهٔ جهانی حفاظت از طبیعت به سبب کمبود داده ارزیابی نشده است. با این حال، پژوهش‌های منطقه‌ای نشان می‌دهند که صید بیش از حد و تخریب علفزارهای دریایی، ذخایر آن را در برخی نواحی خلیج فارس کاهش داده است.{{iucn-redlist-2024}}{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "green-tiger-prawn",
+      "title": "Green tiger prawn",
+      "summary": "The most important commercial shrimp in the Persian Gulf, living on seagrass beds and shallow mudflats.",
+      "lead": [
+        "The **green tiger prawn** (*Penaeus semisulcatus*) is a penaeid shrimp of the warm, shallow waters of the Indian Ocean and western Pacific. It is the most important commercial shrimp in the Persian Gulf and makes up much of Iran's shrimp catch, especially on the [[bushehr-shrimp-grounds|Bushehr grounds]].{{fao-species-catalogue-shrimps}}{{ifro-shrimp-stock}}",
+        "The name \"tiger\" refers to the dark bands across its greenish-brown body."
+      ],
+      "sections": [
+        {
+          "heading": "Appearance",
+          "blocks": [
+            { "p": "The body is olive green to light brown, with dark transverse bands across the back and tail. The antennae are banded light and dark, and the swimming legs have yellow or red edges. Females are larger than males and reach about 23 centimetres.{{fao-species-catalogue-shrimps}} A shallow groove on each side of the rostrum distinguishes it from its close relative, the giant tiger prawn." }
+          ]
+        },
+        {
+          "heading": "Habitat and distribution",
+          "blocks": [
+            { "p": "It lives in coastal water less than 50 metres deep, on muddy or sandy bottoms or [[halodule-uninervis|seagrass]] beds. The young grow up in creeks, tidal lagoons and among [[grey-mangrove|mangrove]] roots and move to deeper water after a few months.{{carpenter-living-resources}} In the Persian Gulf the highest densities are reported off Bushehr and Khuzestan and in Kuwaiti waters." }
+          ]
+        },
+        {
+          "heading": "Biology and life cycle",
+          "blocks": [
+            { "p": "The green tiger prawn is nocturnal and buries itself in sand or mud by day. It feeds mostly on small bottom-dwelling animals, algae and organic matter. In the Persian Gulf spawning peaks in late winter and spring, and each female releases hundreds of thousands of eggs into open water. The larvae pass through several stages in the plankton before reaching the coast.{{fao-species-catalogue-shrimps}}" },
+            { "ul": ["Spawning in deeper water", "Juveniles grow in creeks and seagrass", "Adults move offshore", "Lifespan of about one to two years"] }
+          ]
+        },
+        {
+          "heading": "Fishery and economic value",
+          "blocks": [
+            { "p": "It is caught with bottom trawls during a short, controlled season. The species fetches high prices on domestic and export markets and is an important source of income for fishermen in southern Iran. Pond farming has been tried, but the dominant farmed species in Iran is the Indian white prawn.{{fao-fishery-gulf}}" }
+          ]
+        },
+        {
+          "heading": "Conservation status",
+          "blocks": [
+            { "p": "The species has not been assessed in detail on the IUCN Red List for lack of data. Regional studies nevertheless show that overfishing and the loss of seagrass beds have reduced its stocks in parts of the Persian Gulf.{{iucn-redlist-2024}}{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "الروبيان-النمري-الأخضر",
+      "title": "الروبيان النمري الأخضر",
+      "summary": "أهم أنواع الروبيان التجارية في الخليج الفارسي، يعيش في مروج الأعشاب البحرية والمسطحات الطينية الضحلة.",
+      "lead": [
+        "**الروبيان النمري الأخضر** (الاسم العلمي: *Penaeus semisulcatus*) نوع من روبيان فصيلة البنايدية يعيش في المياه الدافئة الضحلة للمحيط الهندي وغرب المحيط الهادئ. وهو أهم أنواع الروبيان التجارية في الخليج الفارسي، ويشكّل جزءًا كبيرًا من مصيد إيران، ولا سيما في [[bushehr-shrimp-grounds|مصائد بوشهر]].{{fao-species-catalogue-shrimps}}{{ifro-shrimp-stock}}",
+        "ويشير وصف «النمري» إلى الأشرطة الداكنة على جسمه الأخضر المائل إلى البني."
+      ],
+      "sections": [
+        {
+          "heading": "الشكل",
+          "blocks": [
+            { "p": "لون الجسم أخضر زيتوني إلى بني فاتح، تعلوه أشرطة عرضية داكنة على الظهر والذيل، والقرون الاستشعارية مخططة بالفاتح والداكن، وأطراف أرجل السباحة صفراء أو حمراء. والإناث أكبر من الذكور ويبلغ طولها نحو ٢٣ سنتيمترًا.{{fao-species-catalogue-shrimps}} ويميّزه أخدود ضحل على جانبي المنقار عن قريبه الروبيان النمري العملاق." }
+          ]
+        },
+        {
+          "heading": "الموطن والانتشار",
+          "blocks": [
+            { "p": "يعيش في المياه الساحلية التي يقل عمقها عن ٥٠ مترًا، على القيعان الطينية أو الرملية أو مروج [[halodule-uninervis|الأعشاب البحرية]]. وتنمو صغاره في الأخوار والبحيرات المدّية وبين جذور [[grey-mangrove|القرم]]، ثم تنتقل إلى المياه الأعمق بعد بضعة أشهر.{{carpenter-living-resources}} وتُسجَّل أعلى كثافاته في الخليج قبالة بوشهر وخوزستان وفي المياه الكويتية." }
+          ]
+        },
+        {
+          "heading": "البيولوجيا ودورة الحياة",
+          "blocks": [
+            { "p": "الروبيان النمري الأخضر ليلي النشاط، يدفن نفسه في الرمل أو الطين نهارًا، ويتغذى أساسًا على الحيوانات القاعية الصغيرة والطحالب والمواد العضوية. ويبلغ التكاثر في الخليج ذروته أواخر الشتاء والربيع، وتطلق كل أنثى مئات الآلاف من البيوض في المياه المفتوحة، وتمر اليرقات بعدة أطوار في العوالق قبل أن تبلغ الساحل.{{fao-species-catalogue-shrimps}}" },
+            { "ul": ["التكاثر في المياه الأعمق", "نمو الصغار في الأخوار والأعشاب", "انتقال البالغين إلى البحر المفتوح", "عمر يقارب سنة إلى سنتين"] }
+          ]
+        },
+        {
+          "heading": "الصيد والقيمة الاقتصادية",
+          "blocks": [
+            { "p": "يُصاد بشباك الجرف القاعية خلال موسم قصير خاضع للرقابة، ويحظى بأسعار مرتفعة في الأسواق المحلية والتصديرية، ويُعدّ مصدر دخل مهمًا لصيادي جنوب إيران. وقد جُرّبت تربيته في الأحواض، لكن النوع المستزرع السائد في إيران هو الروبيان الهندي الأبيض.{{fao-fishery-gulf}}" }
+          ]
+        },
+        {
+          "heading": "حالة الحفظ",
+          "blocks": [
+            { "p": "لم يُقيَّم النوع تفصيليًا في القائمة الحمراء للاتحاد الدولي لحفظ الطبيعة لنقص البيانات، غير أن الدراسات الإقليمية تُظهر أن الصيد الجائر وتدهور مروج الأعشاب البحرية قلّلا مخزونه في أجزاء من الخليج.{{iucn-redlist-2024}}{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

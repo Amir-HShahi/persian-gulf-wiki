@@ -1,0 +1,278 @@
+{
+  "key": "bandar-lengeh",
+  "subject": {
+    "kind": "PORT",
+    "names": {
+      "fa": "بندر لنگه",
+      "en": "Bandar Lengeh",
+      "ar": "بندر لنجة"
+    },
+    "aliases": {
+      "fa": [
+        "لنگه"
+      ],
+      "en": [
+        "Lingeh",
+        "Lengeh"
+      ],
+      "ar": [
+        "لنجة"
+      ]
+    },
+    "geometry": "POINT(54.88 26.56)",
+    "facts": [
+      {
+        "attribute": "country",
+        "values": [
+          {
+            "option": "IR"
+          }
+        ]
+      },
+      {
+        "attribute": "province",
+        "values": [
+          {
+            "subject": "hormozgan-province"
+          }
+        ]
+      },
+      {
+        "attribute": "county",
+        "values": [
+          {
+            "localized": {
+              "fa": "بندر لنگه",
+              "en": "Bandar Lengeh",
+              "ar": "بندر لنجة"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "district",
+        "values": [
+          {
+            "localized": {
+              "fa": "بخش مرکزی",
+              "en": "Central District",
+              "ar": "القسم المركزي"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "population",
+        "values": [
+          {
+            "number": 30478,
+            "asOf": "2016-01-01",
+            "source": "sci-census-2016"
+          }
+        ]
+      },
+      {
+        "attribute": "ethnic_groups",
+        "values": [
+          {
+            "localized": {
+              "fa": "فارس‌ها و عرب‌ها",
+              "en": "Persians and Arabs",
+              "ar": "الفرس والعرب"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "languages",
+        "values": [
+          {
+            "option": "FA"
+          },
+          {
+            "option": "AR"
+          }
+        ]
+      }
+    ]
+  },
+  "topics": [
+    "ports-and-oil-terminals",
+    "history-and-archaeology",
+    "culture-and-ethnography"
+  ],
+  "canonicalLanguage": "fa",
+  "gallery": [
+    "fishing-dhow",
+    "uae-coast-iss"
+  ],
+  "history": {
+    "revisions": 3,
+    "contributors": 3
+  },
+  "verification": "NONE",
+  "translations": {
+    "fa": {
+      "slug": "بندر-لنگه",
+      "title": "بندر لنگه",
+      "summary": "بندری تاریخی در غرب هرمزگان که در سدهٔ نوزدهم پررونق‌ترین بندر تجارت مروارید در خلیج فارس بود.",
+      "lead": [
+        "**بندر لنگه** بندری تاریخی در کرانهٔ غربی [[hormozgan-province|استان هرمزگان]] و مرکز شهرستان بندر لنگه است که روبه‌روی جزیرهٔ [[kish-island|کیش]] قرار دارد. بر پایهٔ سرشماری ۱۳۹۵، جمعیت این شهر حدود سی هزار نفر بوده است.{{sci-census-2016}}",
+        "لنگه در سدهٔ نوزدهم میلادی یکی از ثروتمندترین بندرهای خلیج فارس بود و بازار [[pearl-oyster|مروارید]] آن با بمبئی و بصره برابری می‌کرد.{{floor-persian-gulf}}"
+      ],
+      "sections": [
+        {
+          "heading": "دوران شکوفایی",
+          "blocks": [
+            {
+              "p": "در سده‌های هجدهم و نوزدهم، خاندان قواسم بر لنگه فرمان می‌راندند و این بندر به مرکز تجارت مروارید، خرما، پارچه و ادویه تبدیل شد. صدها لنج غواصی از لنگه به صیدگاه‌های مروارید در میانهٔ خلیج فارس می‌رفتند و بازرگانان هندی، عرب و ایرانی در بازارهای آن داد‌وستد می‌کردند.{{potter-gulf-history}}"
+            },
+            {
+              "p": "در سال ۱۸۸۷ میلادی، دولت قاجار لنگه را مستقیماً زیر ادارهٔ خود گرفت. با افزایش گمرک و سپس رکود جهانی تجارت مروارید در دههٔ ۱۹۳۰، بسیاری از خانواده‌های بازرگان به دبی و دیگر بندرهای جنوب خلیج کوچ کردند و رونق لنگه فروکش کرد."
+            }
+          ]
+        },
+        {
+          "heading": "معماری",
+          "blocks": [
+            {
+              "p": "بادگیرهای بلند، خانه‌های سنگی با درهای چوبی کنده‌کاری‌شده، مسجد ملک بن عباس و آب‌انبارهای بزرگ، از یادگارهای دوران شکوفایی لنگه‌اند. بسیاری از عناصر معماری خانه‌های قدیمی دبی، به‌ویژه در محلهٔ بستکیه، از معماری لنگه و بستک اثر پذیرفته است، زیرا سازندگان آن‌ها از مهاجران همین سرزمین بودند."
+            },
+            {
+              "ul": [
+                "بادگیرهای محلهٔ قدیم",
+                "مسجد ملک بن عباس",
+                "آب‌انبارهای سنتی",
+                "اسکلهٔ تاریخی"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "اقتصاد امروز",
+          "blocks": [
+            {
+              "p": "امروز بندر لنگه اسکله‌های بازرگانی و صیادی دارد و کالا و مسافر میان آن و جزایر [[kish-island|کیش]]، [[abu-musa-island|ابوموسی]] و بندرهای امارات جابه‌جا می‌شود.{{pmo-ports-2023}} صیادی و لنج‌سازی سنتی، که مهارت آن نسل‌به‌نسل در خانواده‌های لنگه‌ای منتقل شده، هنوز از پیشه‌های مهم شهر است. گردشگری، به‌ویژه برای دیدن بافت تاریخی و ساحل لنگه، در سال‌های اخیر رشد کرده است."
+            }
+          ]
+        },
+        {
+          "heading": "مردم و فرهنگ",
+          "blocks": [
+            {
+              "p": "مردم لنگه به گویش‌های جنوبی فارسی و به عربی سخن می‌گویند و پیوندهای خانوادگی گسترده‌ای با کرانه‌های جنوبی خلیج فارس دارند. آیین‌های عروسی با موسیقی لیوا و دهل، غذاهایی چون مَهیاوه و قلیه‌ماهی، و جشن‌های پایان فصل غواصی که هنوز در خاطرهٔ سالمندان زنده است، از جلوه‌های فرهنگ این بندرند."
+            }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "bandar-lengeh",
+      "title": "Bandar Lengeh",
+      "summary": "A historic port in western Hormozgan that was the busiest pearl-trading port in the Persian Gulf in the nineteenth century.",
+      "lead": [
+        "**Bandar Lengeh** is a historic port on the western coast of [[hormozgan-province|Hormozgan Province]] and the seat of Bandar Lengeh County, facing [[kish-island|Kish Island]]. According to the 2016 census the town had about 30,000 inhabitants.{{sci-census-2016}}",
+        "In the nineteenth century Lengeh was one of the richest ports of the Persian Gulf, and its [[pearl-oyster|pearl]] market rivalled those of Bombay and Basra.{{floor-persian-gulf}}"
+      ],
+      "sections": [
+        {
+          "heading": "Golden age",
+          "blocks": [
+            {
+              "p": "In the eighteenth and nineteenth centuries Lengeh was ruled by the Qawasim family and became a centre of trade in pearls, dates, cloth and spices. Hundreds of diving dhows sailed from Lengeh to the pearl banks of the central Gulf, and Indian, Arab and Persian merchants traded in its markets.{{potter-gulf-history}}"
+            },
+            {
+              "p": "In 1887 the Qajar government brought Lengeh under its direct rule. With rising customs duties and then the global collapse of the pearl trade in the 1930s, many merchant families moved to Dubai and other ports of the southern Gulf, and Lengeh's prosperity faded."
+            }
+          ]
+        },
+        {
+          "heading": "Architecture",
+          "blocks": [
+            {
+              "p": "Tall wind catchers, stone houses with carved wooden doors, the Malek bin Abbas mosque and large water cisterns are relics of Lengeh's golden age. Many features of the old houses of Dubai, especially in the Bastakiya quarter, reflect the architecture of Lengeh and Bastak, because their builders were migrants from this region."
+            },
+            {
+              "ul": [
+                "Wind catchers of the old quarter",
+                "Malek bin Abbas mosque",
+                "Traditional water cisterns",
+                "The historic jetty"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Economy today",
+          "blocks": [
+            {
+              "p": "Today Bandar Lengeh has commercial and fishing piers, and goods and passengers move between it and the islands of [[kish-island|Kish]] and [[abu-musa-island|Abu Musa]] and the ports of the UAE.{{pmo-ports-2023}} Fishing and traditional dhow building, a craft handed down through Lengeh families, remain important occupations. Tourism, especially to see the historic quarter and the shore, has grown in recent years."
+            }
+          ]
+        },
+        {
+          "heading": "People and culture",
+          "blocks": [
+            {
+              "p": "The people of Lengeh speak southern Persian dialects and Arabic and have wide family ties with the southern shores of the Gulf. Wedding rituals with liwa music and drums, dishes such as mahyaveh fish sauce and qalieh mahi, and the end-of-diving-season celebrations still remembered by elders are among the town's cultural traditions."
+            }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "بندر-لنجة",
+      "title": "بندر لنجة",
+      "summary": "ميناء تاريخي في غرب هرمزغان، كان في القرن التاسع عشر أكثر موانئ تجارة اللؤلؤ ازدهارًا في الخليج الفارسي.",
+      "lead": [
+        "**بندر لنجة** ميناء تاريخي على الساحل الغربي لـ[[hormozgan-province|محافظة هرمزغان]] ومركز مقاطعة بندر لنجة، يقع قبالة [[kish-island|جزيرة كيش]]. وبلغ عدد سكانه وفق تعداد عام ٢٠١٦ نحو ثلاثين ألف نسمة.{{sci-census-2016}}",
+        "وكانت لنجة في القرن التاسع عشر من أغنى موانئ الخليج الفارسي، وكان سوق [[pearl-oyster|اللؤلؤ]] فيها ينافس سوقي بومباي والبصرة.{{floor-persian-gulf}}"
+      ],
+      "sections": [
+        {
+          "heading": "عصر الازدهار",
+          "blocks": [
+            {
+              "p": "في القرنين الثامن عشر والتاسع عشر حكمت أسرة القواسم لنجة، فأصبحت مركزًا لتجارة اللؤلؤ والتمور والأقمشة والتوابل. وكانت مئات مراكب الغوص تبحر من لنجة إلى مغاصات اللؤلؤ في وسط الخليج، ويتاجر التجار الهنود والعرب والفرس في أسواقها.{{potter-gulf-history}}"
+            },
+            {
+              "p": "وفي عام ١٨٨٧ أخضعت الحكومة القاجارية لنجة لإدارتها المباشرة. ومع ارتفاع الرسوم الجمركية ثم انهيار تجارة اللؤلؤ عالميًا في ثلاثينيات القرن العشرين، انتقلت أسر تجارية كثيرة إلى دبي وموانئ أخرى في جنوب الخليج، فخبا ازدهار لنجة."
+            }
+          ]
+        },
+        {
+          "heading": "العمارة",
+          "blocks": [
+            {
+              "p": "تُعدّ الملاقف العالية والبيوت الحجرية ذات الأبواب الخشبية المنقوشة ومسجد ملك بن عباس والصهاريج الكبيرة من آثار عصر ازدهار لنجة. وتعكس سمات كثيرة في بيوت دبي القديمة، ولا سيما في حي البستكية، عمارةَ لنجة وبستك، لأن بُناتها كانوا من المهاجرين من هذه المنطقة."
+            },
+            {
+              "ul": [
+                "ملاقف الحي القديم",
+                "مسجد ملك بن عباس",
+                "الصهاريج التقليدية",
+                "الرصيف التاريخي"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "الاقتصاد اليوم",
+          "blocks": [
+            {
+              "p": "يضم بندر لنجة اليوم أرصفة للتجارة والصيد، وتنتقل البضائع والركاب بينه وبين جزيرتي [[kish-island|كيش]] و[[abu-musa-island|أبو موسى]] وموانئ الإمارات.{{pmo-ports-2023}} ولا يزال الصيد وبناء المراكب التقليدية، وهي حرفة تتوارثها أسر لنجة، من المهن المهمة. كما نمت السياحة في السنوات الأخيرة، ولا سيما لزيارة الحي التاريخي والشاطئ."
+            }
+          ]
+        },
+        {
+          "heading": "السكان والثقافة",
+          "blocks": [
+            {
+              "p": "يتحدث أهل لنجة لهجات فارسية جنوبية والعربية، ولهم روابط عائلية واسعة بسواحل الخليج الجنوبية. ومن مظاهر ثقافة المدينة طقوس الأعراس بموسيقى الليوة والطبول، وأطباق مثل صلصة المهياوة وقلية السمك، واحتفالات نهاية موسم الغوص التي لا يزال كبار السن يتذكرونها."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

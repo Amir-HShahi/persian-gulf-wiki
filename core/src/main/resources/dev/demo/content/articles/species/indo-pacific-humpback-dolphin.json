@@ -1,0 +1,131 @@
+{
+  "key": "indo-pacific-humpback-dolphin",
+  "subject": {
+    "kind": "SPECIES",
+    "names": { "fa": "دلفین گوژپشت اقیانوس هند", "en": "Indian Ocean humpback dolphin", "ar": "الدلفين الأحدب الهندي" },
+    "aliases": { "fa": ["دلفین گوژپشت", "دلفین خلیج فارس"], "en": ["Humpback dolphin", "Sousa plumbea"], "ar": ["الدلفين الأحدب"] },
+    "geometry": "POLYGON((48 30, 50.5 29.5, 54 27, 56.5 27.2, 57 25.5, 56.3 24.5, 54 24, 51.5 24.5, 50 26, 48.5 28, 48 30))",
+    "facts": [
+      { "attribute": "scientific_name", "values": [ { "text": "Sousa plumbea" } ] },
+      { "attribute": "category", "values": [ { "option": "MAMMAL" } ] },
+      { "attribute": "iucn_status", "values": [ { "option": "EN" } ] },
+      { "attribute": "habitat", "values": [ { "option": "MANGROVE" }, { "option": "MUDFLAT" } ] },
+      { "attribute": "max_length", "values": [ { "number": 280, "source": "iucn-redlist-2024" } ] }
+    ]
+  },
+  "topics": ["marine-life", "islands"],
+  "canonicalLanguage": "fa",
+  "gallery": ["bottlenose-dolphin", "mangrove-channel"],
+  "history": { "revisions": 3, "contributors": 3 },
+  "verification": "VERIFIED",
+  "translations": {
+    "fa": {
+      "slug": "دلفین-گوژپشت-اقیانوس-هند",
+      "title": "دلفین گوژپشت اقیانوس هند",
+      "summary": "دلفینی ساحلی با کوهانی زیر بالهٔ پشتی که گروه‌هایش در آب‌های کم‌عمق هنگام و قشم دیده می‌شوند.",
+      "lead": [
+        "**دلفین گوژپشت اقیانوس هند** (نام علمی: *Sousa plumbea*) دلفینی ساحلی است که در آب‌های کم‌عمق و گرم از آفریقای جنوبی تا هند زندگی می‌کند. نام آن از برآمدگی یا «گوژی» گرفته شده که در زیر بالهٔ پشتی بالغ‌ها دیده می‌شود. این گونه در فهرست سرخ جهانی در ردهٔ «در معرض خطر» قرار دارد.{{iucn-redlist-2024}}",
+        "در خلیج فارس، گروه‌های این دلفین به‌طور منظم در آب‌های جنوب [[hengam-island|جزیرهٔ هنگام]] و [[qeshm-island|قشم]] و در خور موسی نزدیک [[bandar-imam-khomeini|بندر امام خمینی]] دیده می‌شوند و تماشای آن‌ها یکی از جاذبه‌های گردشگری هرمزگان است."
+      ],
+      "sections": [
+        {
+          "heading": "ویژگی‌ها",
+          "blocks": [
+            { "p": "طول بدن بالغ‌ها به ۲٫۵ تا ۲٫۸ متر و وزنشان به ۲۵۰ کیلوگرم می‌رسد. پوزهٔ دراز و باریک، بالهٔ پشتی کوچک بر روی کوهانی پهن، و رنگ خاکستری تیره که در بالغ‌های مسن روشن‌تر و گاه صورتی می‌شود، از نشانه‌های شناسایی آن‌اند.{{iucn-redlist-2024}} این دلفین‌ها در مقایسه با دلفین‌های دریای باز، آرام‌تر شنا می‌کنند و کمتر به بیرون از آب می‌پرند." }
+          ]
+        },
+        {
+          "heading": "زیستگاه و رفتار",
+          "blocks": [
+            { "p": "دلفین گوژپشت به آب‌های کمتر از ۲۰ متر ژرفا، نزدیک ساحل، خورها، دهانهٔ رودها و پیرامون جنگل‌های [[grey-mangrove|حرا]] وابسته است. این دلفین‌ها در گروه‌های کوچک سه تا ده‌تایی زندگی می‌کنند و از ماهی‌های ساحلی، ماهی مرکب و میگو تغذیه می‌کنند. گاه دیده شده که برای شکار، ماهی‌ها را به سوی ساحل یا آب‌های کم‌عمق می‌رانند.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "دلفین‌های هنگام",
+          "blocks": [
+            { "p": "آب‌های جنوب هنگام یکی از بهترین مکان‌های تماشای این دلفین‌ها در ایران است. قایق‌های صیادان محلی هر صبح گردشگران را به دریا می‌برند. پژوهشگران هشدار داده‌اند که نزدیک شدن بیش از اندازه و تعقیب گروه‌ها با قایق‌های پرسرعت، رفتار تغذیه و استراحت دلفین‌ها را مختل می‌کند و قواعدی برای فاصله و سرعت قایق‌ها پیشنهاد کرده‌اند.{{doe-protected-areas}}" },
+            { "ul": ["نزدیک نشدن کمتر از ۵۰ متر", "خاموش کردن موتور در کنار گروه", "پرهیز از قطع مسیر حرکت دلفین‌ها", "محدود کردن زمان تماشا"] }
+          ]
+        },
+        {
+          "heading": "تهدیدها",
+          "blocks": [
+            { "p": "وابستگی این گونه به آب‌های ساحلی، آن را بیش از دیگر دلفین‌ها در معرض فعالیت‌های انسانی قرار می‌دهد: گرفتار شدن در تورهای گوشگیر، آلودگی صنعتی و نفتی، سروصدای کشتی‌ها و ساخت‌وساز در ساحل. جمعیت‌های کوچک و پراکندهٔ آن در خلیج فارس، توان بازسازی اندکی دارند.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "indian-ocean-humpback-dolphin",
+      "title": "Indian Ocean humpback dolphin",
+      "summary": "A coastal dolphin with a hump below its dorsal fin, whose groups are seen in the shallow waters off Hengam and Qeshm.",
+      "lead": [
+        "The **Indian Ocean humpback dolphin** (*Sousa plumbea*) is a coastal dolphin of the warm, shallow waters from South Africa to India. It is named for the hump below the dorsal fin of adults. It is listed as Endangered on the IUCN Red List.{{iucn-redlist-2024}}",
+        "In the Persian Gulf, groups are regularly seen south of [[hengam-island|Hengam]] and [[qeshm-island|Qeshm]] and in the Musa creek near [[bandar-imam-khomeini|Bandar Imam Khomeini]], and watching them is one of Hormozgan's tourist attractions."
+      ],
+      "sections": [
+        {
+          "heading": "Description",
+          "blocks": [
+            { "p": "Adults are 2.5 to 2.8 metres long and weigh up to 250 kilograms. A long, slender beak, a small dorsal fin on a broad hump and dark grey skin that pales — sometimes to pink — in older animals are its identifying features.{{iucn-redlist-2024}} Compared with offshore dolphins they swim more slowly and leap less often." }
+          ]
+        },
+        {
+          "heading": "Habitat and behaviour",
+          "blocks": [
+            { "p": "The humpback dolphin depends on water less than 20 metres deep, close to shore, in creeks and estuaries and around [[grey-mangrove|mangrove]] forests. It lives in small groups of three to ten and feeds on coastal fish, cuttlefish and shrimp. It has been seen herding fish towards the shore or into shallow water to catch them.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "The dolphins of Hengam",
+          "blocks": [
+            { "p": "The waters south of Hengam are one of the best places in Iran to see these dolphins, and local fishing boats take visitors out every morning. Researchers warn that approaching too closely and chasing groups with fast boats disrupts the dolphins' feeding and resting, and have proposed rules on distance and speed.{{doe-protected-areas}}" },
+            { "ul": ["Keep at least 50 metres away", "Cut the engine beside a group", "Never cut across their path", "Limit viewing time"] }
+          ]
+        },
+        {
+          "heading": "Threats",
+          "blocks": [
+            { "p": "Its dependence on coastal waters exposes it more than other dolphins to human activity: entanglement in gillnets, industrial and oil pollution, ship noise and coastal construction. Its small, scattered populations in the Persian Gulf have little capacity to recover.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "الدلفين-الأحدب-الهندي",
+      "title": "الدلفين الأحدب الهندي",
+      "summary": "دلفين ساحلي ذو حدبة تحت زعنفته الظهرية، تُشاهد مجموعاته في المياه الضحلة قبالة هنگام وقشم.",
+      "lead": [
+        "**الدلفين الأحدب الهندي** (الاسم العلمي: *Sousa plumbea*) دلفين ساحلي يعيش في المياه الضحلة الدافئة من جنوب أفريقيا حتى الهند، وسُمّي بذلك للحدبة التي تظهر تحت الزعنفة الظهرية للبالغين. وهو مصنف «مهددًا بالانقراض» في القائمة الحمراء.{{iucn-redlist-2024}}",
+        "وفي الخليج الفارسي تُشاهد مجموعاته بانتظام جنوب [[hengam-island|هنگام]] و[[qeshm-island|قشم]] وفي خور موسى قرب [[bandar-imam-khomeini|ميناء الإمام الخميني]]، وتُعدّ مشاهدتها من عوامل الجذب السياحي في هرمزغان."
+      ],
+      "sections": [
+        {
+          "heading": "الوصف",
+          "blocks": [
+            { "p": "يبلغ طول البالغ ٢٫٥ إلى ٢٫٨ متر ووزنه حتى ٢٥٠ كيلوغرامًا. ومن علاماته منقار طويل نحيل، وزعنفة ظهرية صغيرة فوق حدبة عريضة، وجلد رمادي داكن يفتح لونه، وقد يصير ورديًا، لدى المسنّين.{{iucn-redlist-2024}} وهو أبطأ سباحة من دلافين البحر المفتوح وأقل قفزًا خارج الماء." }
+          ]
+        },
+        {
+          "heading": "الموطن والسلوك",
+          "blocks": [
+            { "p": "يعتمد الدلفين الأحدب على المياه التي يقل عمقها عن ٢٠ مترًا قرب الشاطئ وفي الأخوار ومصبات الأنهار وحول غابات [[grey-mangrove|القرم]]. ويعيش في مجموعات صغيرة من ثلاثة إلى عشرة أفراد، ويتغذى على الأسماك الساحلية والحبار والروبيان، وقد شوهد يسوق الأسماك نحو الشاطئ أو المياه الضحلة لاصطيادها.{{carpenter-living-resources}}" }
+          ]
+        },
+        {
+          "heading": "دلافين هنگام",
+          "blocks": [
+            { "p": "تُعدّ المياه جنوب هنگام من أفضل الأماكن في إيران لمشاهدة هذه الدلافين، إذ تنقل قوارب الصيادين المحليين الزوار إلى البحر كل صباح. ويحذر الباحثون من أن الاقتراب الشديد وملاحقة المجموعات بالقوارب السريعة يربك تغذية الدلافين وراحتها، وقد اقترحوا قواعد للمسافة والسرعة.{{doe-protected-areas}}" },
+            { "ul": ["البقاء على بعد ٥٠ مترًا على الأقل", "إطفاء المحرك بجوار المجموعة", "عدم قطع مسار الدلافين", "تحديد مدة المشاهدة"] }
+          ]
+        },
+        {
+          "heading": "التهديدات",
+          "blocks": [
+            { "p": "يجعله اعتماده على المياه الساحلية أكثر عرضة من غيره من الدلافين للنشاط البشري: الوقوع في الشباك الخيشومية، والتلوث الصناعي والنفطي، وضجيج السفن، والبناء على الساحل. ولمجموعاته الصغيرة المتفرقة في الخليج قدرة ضعيفة على التعافي.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

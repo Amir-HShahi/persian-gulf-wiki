@@ -13,9 +13,7 @@ import jakarta.validation.constraints.Size;
 // filter takes a raw String and is parsed by hand instead.
 public record DecideRequest(
         @NotNull
-        @Schema(description = "APPROVE publishes the revision. REJECT ends it permanently -- the author must write a "
-                + "new revision to try again. REQUEST_CHANGES sends it back to the author to fix and "
-                + "resubmit, and keeps this same task alive for another round.")
+        @Schema(description = Decision.VALUES_DOC)
         Decision decision,
 
         // Not @NotBlank: an approval genuinely has nothing to explain. Requiredness depends

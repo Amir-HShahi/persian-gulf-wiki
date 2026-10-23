@@ -1,0 +1,222 @@
+{
+  "key": "soroosh-field",
+  "subject": {
+    "kind": "OIL_FIELD",
+    "names": {
+      "fa": "میدان نفتی سروش",
+      "en": "Soroosh oil field",
+      "ar": "حقل سروش النفطي"
+    },
+    "aliases": {
+      "fa": [
+        "سروش",
+        "سیروس"
+      ],
+      "en": [
+        "Soroosh",
+        "Cyrus"
+      ],
+      "ar": [
+        "سروش"
+      ]
+    },
+    "geometry": "POLYGON((49.6 29.1, 49.9 29.1, 49.9 28.9, 49.6 28.9, 49.6 29.1))",
+    "facts": [
+      {
+        "attribute": "area",
+        "values": [
+          {
+            "number": 220,
+            "source": "eia-iran-2024"
+          }
+        ]
+      },
+      {
+        "attribute": "country",
+        "values": [
+          {
+            "option": "IR"
+          }
+        ]
+      },
+      {
+        "attribute": "province",
+        "values": [
+          {
+            "subject": "bushehr-province"
+          }
+        ]
+      }
+    ]
+  },
+  "topics": [
+    "ports-and-oil-terminals",
+    "economy-and-trade",
+    "pollution-and-environment"
+  ],
+  "canonicalLanguage": "fa",
+  "gallery": [
+    "tanker-omala",
+    "oil-spill-shore"
+  ],
+  "history": {
+    "revisions": 2,
+    "contributors": 2
+  },
+  "verification": "NONE",
+  "translations": {
+    "fa": {
+      "slug": "میدان-نفتی-سروش",
+      "title": "میدان نفتی سروش",
+      "summary": "میدانی دریایی در شمال خلیج فارس با نفت سنگین که تولیدش از پایانهٔ خارک صادر می‌شود.",
+      "lead": [
+        "**میدان نفتی سروش** میدانی دریایی در شمال خلیج فارس است که در حدود ۸۰ کیلومتری غرب [[kharg-island|جزیرهٔ خارک]] قرار دارد. این میدان پیش از انقلاب «سیروس» نامیده می‌شد و نفت آن از نوع سنگین با گرانروی بالاست.{{eia-iran-2024}}",
+        "نفت سروش به همراه نفت میدان همسایهٔ نوروز، با خط لوله به جزیرهٔ خارک منتقل و از آنجا صادر می‌شود.{{nioc-kharg}}"
+      ],
+      "sections": [
+        {
+          "heading": "تاریخچه",
+          "blocks": [
+            {
+              "p": "سروش در دههٔ ۱۹۶۰ میلادی کشف شد و از سال ۱۹۷۴ به تولید رسید. سکوهای این میدان در جنگ ایران و عراق آسیب سختی دیدند و در سال ۱۹۸۷ در جریان درگیری‌های دریایی تخریب شدند.{{potter-gulf-history}} بازسازی میدان در دههٔ ۲۰۰۰ میلادی با مشارکت شرکت‌های خارجی انجام شد و تولید آن از سر گرفته شد."
+            }
+          ]
+        },
+        {
+          "heading": "ویژگی‌های مخزن",
+          "blocks": [
+            {
+              "p": "مخزن سروش در سازند ماسه‌سنگی برگان قرار دارد و نفت آن سنگین و گوگرددار است. استخراج چنین نفتی به فناوری‌های ویژه مانند پمپ‌های درون‌چاهی و تزریق گاز نیاز دارد. برای انتقال نفت سنگین از سکوها به خارک، آن را با نفت سبک‌تر میدان‌های دیگر آمیخته می‌کنند تا روان‌تر شود.{{eia-iran-2024}}"
+            },
+            {
+              "ul": [
+                "نفت سنگین با درجهٔ API پایین",
+                "سکوهای تولید و چاه‌های افقی",
+                "خط لولهٔ زیردریایی به خارک",
+                "مجاور میدان نوروز"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "آلودگی نفتی",
+          "blocks": [
+            {
+              "p": "آسیب دیدن سکوهای نوروز و سروش در سال ۱۹۸۳ یکی از بزرگ‌ترین نشت‌های نفتی تاریخ خلیج فارس را پدید آورد؛ ماه‌ها نفت از چاه‌های آسیب‌دیده به دریا ریخت و لکه‌های نفتی تا سواحل کشورهای جنوبی خلیج رسید.{{ropme-soe-2013}} این رویداد، همراه با آلودگی‌های جنگ ۱۹۹۱، از نمونه‌های شناخته‌شدهٔ آسیب‌پذیری زیست‌بوم‌های این دریای بسته به شمار می‌رود."
+            }
+          ]
+        },
+        {
+          "heading": "تولید امروز",
+          "blocks": [
+            {
+              "p": "پس از بازسازی، سروش و نوروز با هم روزانه ده‌ها هزار بشکه نفت سنگین تولید می‌کنند. شرکت نفت فلات قاره، که مسئول میدان‌های دریایی ایران در خلیج فارس است، برنامه‌هایی برای حفر چاه‌های تازه و افزایش ضریب بازیافت این میدان‌ها دارد. نفت سنگین سروش در ترکیب نفت صادراتی «سنگین ایران» به بازار عرضه می‌شود و خریداران آن بیشتر پالایشگاه‌های آسیایی‌اند.{{eia-iran-2024}}"
+            }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "soroosh-oil-field",
+      "title": "Soroosh oil field",
+      "summary": "An offshore heavy-oil field in the northern Persian Gulf whose output is exported through the Kharg terminal.",
+      "lead": [
+        "The **Soroosh oil field** is an offshore field in the northern Persian Gulf, about 80 kilometres west of [[kharg-island|Kharg Island]]. It was called Cyrus before the revolution, and its crude is heavy and highly viscous.{{eia-iran-2024}}",
+        "Soroosh crude, together with that of the neighbouring Nowruz field, is piped to Kharg Island and exported from there.{{nioc-kharg}}"
+      ],
+      "sections": [
+        {
+          "heading": "History",
+          "blocks": [
+            {
+              "p": "Soroosh was discovered in the 1960s and began production in 1974. Its platforms were badly damaged during the Iran–Iraq War and destroyed in naval clashes in 1987.{{potter-gulf-history}} The field was rebuilt in the 2000s with foreign partners and production resumed."
+            }
+          ]
+        },
+        {
+          "heading": "The reservoir",
+          "blocks": [
+            {
+              "p": "The Soroosh reservoir lies in the Burgan sandstone formation, and its oil is heavy and sour. Producing it needs special techniques such as downhole pumps and gas injection. To move the heavy crude from the platforms to Kharg, it is blended with lighter oil from other fields so that it flows more easily.{{eia-iran-2024}}"
+            },
+            {
+              "ul": [
+                "Heavy crude with low API gravity",
+                "Production platforms and horizontal wells",
+                "Subsea pipeline to Kharg",
+                "Next to the Nowruz field"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Oil pollution",
+          "blocks": [
+            {
+              "p": "Damage to the Nowruz and Soroosh platforms in 1983 caused one of the largest oil spills in Persian Gulf history: for months oil poured from the damaged wells into the sea, and slicks reached the shores of the southern Gulf states.{{ropme-soe-2013}} Together with the pollution of the 1991 war, it is a well-known example of how vulnerable the ecosystems of this enclosed sea are."
+            }
+          ]
+        },
+        {
+          "heading": "Production today",
+          "blocks": [
+            {
+              "p": "Since their reconstruction, Soroosh and Nowruz together produce tens of thousands of barrels of heavy oil a day. The Iranian Offshore Oil Company, responsible for Iran's offshore fields in the Persian Gulf, plans new wells to raise their recovery factor. Soroosh crude is marketed as part of the Iranian Heavy export blend, bought mostly by Asian refineries.{{eia-iran-2024}}"
+            }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "حقل-سروش-النفطي",
+      "title": "حقل سروش النفطي",
+      "summary": "حقل بحري للنفط الثقيل في شمال الخليج الفارسي يُصدَّر إنتاجه عبر محطة خارك.",
+      "lead": [
+        "**حقل سروش النفطي** حقل بحري في شمال الخليج الفارسي، يقع على بعد نحو ٨٠ كيلومترًا غرب [[kharg-island|جزيرة خارك]]. وكان يُسمّى قبل الثورة «سيروس»، ونفطه ثقيل وعالي اللزوجة.{{eia-iran-2024}}",
+        "ويُنقل نفط سروش، مع نفط حقل نوروز المجاور، عبر الأنابيب إلى جزيرة خارك ويُصدَّر منها.{{nioc-kharg}}"
+      ],
+      "sections": [
+        {
+          "heading": "التاريخ",
+          "blocks": [
+            {
+              "p": "اكتُشف حقل سروش في ستينيات القرن العشرين وبدأ الإنتاج عام ١٩٧٤. وتضررت منصاته بشدة خلال الحرب الإيرانية العراقية، ودُمّرت في اشتباكات بحرية عام ١٩٨٧.{{potter-gulf-history}} ثم أُعيد بناء الحقل في العقد الأول من القرن الحادي والعشرين بمشاركة شركاء أجانب واستُؤنف الإنتاج."
+            }
+          ]
+        },
+        {
+          "heading": "المكمن",
+          "blocks": [
+            {
+              "p": "يقع مكمن سروش في تكوين برقان الرملي، ونفطه ثقيل وحامض، ويحتاج إنتاجه إلى تقنيات خاصة مثل المضخات داخل الآبار وحقن الغاز. ولنقل النفط الثقيل من المنصات إلى خارك يُمزج بنفط أخف من حقول أخرى ليجري بسهولة أكبر.{{eia-iran-2024}}"
+            },
+            {
+              "ul": [
+                "نفط ثقيل منخفض الكثافة النوعية",
+                "منصات إنتاج وآبار أفقية",
+                "أنبوب تحت البحر إلى خارك",
+                "مجاور لحقل نوروز"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "التلوث النفطي",
+          "blocks": [
+            {
+              "p": "تسبب تضرر منصتي نوروز وسروش عام ١٩٨٣ في واحد من أكبر التسربات النفطية في تاريخ الخليج الفارسي؛ إذ تدفق النفط لأشهر من الآبار المتضررة إلى البحر، ووصلت البقع إلى شواطئ دول جنوب الخليج.{{ropme-soe-2013}} ويُعدّ هذا الحدث، مع تلوث حرب ١٩٩١، مثالًا معروفًا على هشاشة النظم البيئية في هذا البحر شبه المغلق."
+            }
+          ]
+        },
+        {
+          "heading": "الإنتاج اليوم",
+          "blocks": [
+            {
+              "p": "بعد إعادة بنائهما ينتج حقلا سروش ونوروز معًا عشرات الآلاف من براميل النفط الثقيل يوميًا. وتخطط شركة النفط البحرية الإيرانية، المسؤولة عن حقول إيران البحرية في الخليج، لحفر آبار جديدة لرفع معامل الاستخلاص فيهما. ويُسوَّق نفط سروش ضمن خام «الإيراني الثقيل» للتصدير، ومعظم مشتريه مصافٍ آسيوية.{{eia-iran-2024}}"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

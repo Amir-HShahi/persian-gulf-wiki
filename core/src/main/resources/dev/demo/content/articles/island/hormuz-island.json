@@ -1,0 +1,122 @@
+{
+  "key": "hormuz-island",
+  "subject": {
+    "kind": "ISLAND",
+    "names": { "fa": "جزیرهٔ هرمز", "en": "Hormuz Island", "ar": "جزيرة هرمز" },
+    "aliases": { "fa": ["هرمز", "جرون"], "en": ["Hormuz", "Ormuz", "Jarun"], "ar": ["هرمز", "جرون"] },
+    "geometry": "POINT(56.46 27.06)",
+    "facts": [
+      { "attribute": "located_in", "values": [ { "subject": "strait-of-hormuz" } ] },
+      { "attribute": "area", "values": [ { "number": 42, "source": "ncc-gazetteer" } ] },
+      { "attribute": "place_features", "values": [ { "option": "PROTECTED_AREA" } ] },
+      { "attribute": "country", "values": [ { "option": "IR" } ] },
+      { "attribute": "province", "values": [ { "subject": "hormozgan-province" } ] },
+      { "attribute": "county", "values": [ { "localized": { "fa": "قشم", "en": "Qeshm", "ar": "قشم" } } ] },
+      { "attribute": "district", "values": [ { "localized": { "fa": "بخش هرمز", "en": "Hormuz District", "ar": "قسم هرمز" } } ] },
+      { "attribute": "population", "values": [ { "number": 5891, "asOf": "2016-01-01", "source": "sci-census-2016" } ] },
+      { "attribute": "ethnic_groups", "values": [ { "localized": { "fa": "فارس‌ها", "en": "Persians", "ar": "الفرس" } } ] },
+      { "attribute": "languages", "values": [ { "option": "FA" } ] }
+    ]
+  },
+  "topics": ["islands", "history-and-archaeology", "culture-and-ethnography"],
+  "canonicalLanguage": "fa",
+  "gallery": ["iran-iss-51", "bahrain-fort", "strait-hormuz-modis"],
+  "panorama": "pano-sandy-beach",
+  "history": { "revisions": 7, "contributors": 6 },
+  "verification": "VERIFIED",
+  "translations": {
+    "fa": {
+      "slug": "جزیره-هرمز",
+      "title": "جزیرهٔ هرمز",
+      "summary": "جزیره‌ای کوچک و رنگارنگ در دهانهٔ تنگهٔ هرمز که روزگاری مرکز پادشاهی بازرگانی هرمز و از ثروتمندترین بندرهای جهان بود.",
+      "lead": [
+        "**جزیرهٔ هرمز** جزیره‌ای کوچک با مساحتی حدود ۴۲ کیلومتر مربع است که در شرق [[qeshm-island|قشم]] و در هشت کیلومتری [[bandar-abbas|بندرعباس]] در دهانهٔ [[strait-of-hormuz|تنگهٔ هرمز]] قرار دارد.{{ncc-gazetteer}} این جزیره به‌خاطر خاک‌های رنگی، کوه‌های نمک و ساحل‌های سرخ‌رنگش، یکی از دیدنی‌ترین جزایر خلیج فارس به شمار می‌رود.",
+        "هرمز از سدهٔ چهاردهم تا شانزدهم میلادی پایتخت پادشاهی بازرگانی هرمز بود و جهانگردان آن روزگار آن را «نگین انگشتری جهان» می‌خواندند.{{iranica-hormuz}}"
+      ],
+      "sections": [
+        {
+          "heading": "زمین‌شناسی و خاک‌های رنگی",
+          "blocks": [
+            { "p": "هرمز در واقع یک گنبد نمکی است که لایه‌های نمک کهن از ژرفای زمین بالا آورده‌اند. اکسیدهای آهن، گوگرد و دیگر کانی‌ها، خاک جزیره را به رنگ‌های سرخ، زرد، نارنجی و بنفش درآورده‌اند. خاک سرخ هرمز، که مردم محلی «گِلَک» می‌نامند، از دیرباز در رنگرزی، سفالگری و حتی آشپزی به کار رفته است.{{ncc-coastal-atlas}}" },
+            { "ul": ["ساحل سرخ و کوه‌های رنگی", "درهٔ رنگین‌کمان", "غار نمکی و کوه نمک", "دیوارهٔ صخره‌ای مجسمه‌ها"] }
+          ]
+        },
+        {
+          "heading": "پادشاهی هرمز",
+          "blocks": [
+            { "p": "بندر کهن هرمز در آغاز بر کرانهٔ خشکی، نزدیک میناب امروزی، جای داشت. در حدود سال ۱۳۰۰ میلادی، امیران هرمز برای در امان ماندن از یورش‌های مغولان پایتخت خود را به جزیرهٔ جرون منتقل کردند و نام هرمز با آنان به جزیره آمد.{{iranica-hormuz}} بندر نو به‌سرعت به بارانداز اصلی ادویه، مروارید، اسب و پارچه میان هند، ایران، عربستان و شرق آفریقا تبدیل شد." },
+            { "p": "پرتغالی‌ها به فرماندهی آلفونسو دو آلبوکرکی در سال ۱۵۰۷ به هرمز رسیدند و در سال ۱۵۱۵ قلعه‌ای استوار در شمال جزیره ساختند. یک سده بعد، در سال ۱۶۲۲، سپاه شاه عباس صفوی با پشتیبانی کشتی‌های انگلیسی هرمز را بازپس گرفت و با برآمدن [[bandar-abbas|بندرعباس]] در خشکی، دوران شکوه هرمز به پایان رسید.{{floor-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "مردم و گردشگری",
+          "blocks": [
+            { "p": "بر پایهٔ سرشماری ۱۳۹۵، نزدیک به شش هزار نفر در شهر هرمز زندگی می‌کردند.{{sci-census-2016}} صیادی، صنایع دستی و گردشگری پیشهٔ اصلی مردم است. در سال‌های اخیر، اقامتگاه‌های بوم‌گردی و نگارخانه‌های هنرمندان محلی، جزیره را به یکی از مقصدهای محبوب گردشگری جنوب ایران تبدیل کرده‌اند." }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "hormuz-island",
+      "title": "Hormuz Island",
+      "summary": "A small, colourful island at the mouth of the Strait of Hormuz, once the seat of the trading kingdom of Hormuz and one of the richest ports in the world.",
+      "lead": [
+        "**Hormuz Island** is a small island of about 42 square kilometres lying east of [[qeshm-island|Qeshm]] and eight kilometres off [[bandar-abbas|Bandar Abbas]], at the mouth of the [[strait-of-hormuz|Strait of Hormuz]].{{ncc-gazetteer}} Its coloured soils, salt mountains and red beaches make it one of the most striking islands of the Persian Gulf.",
+        "From the fourteenth to the sixteenth century Hormuz was the capital of the trading kingdom of Hormuz, which travellers of the age called \"the jewel in the ring of the world\".{{iranica-hormuz}}"
+      ],
+      "sections": [
+        {
+          "heading": "Geology and coloured soils",
+          "blocks": [
+            { "p": "Hormuz is in fact a salt dome, pushed up from deep underground by ancient layers of salt. Iron oxides, sulphur and other minerals have stained its soil red, yellow, orange and violet. The red earth of Hormuz, which islanders call gelak, has long been used in dyeing, pottery and even cooking.{{ncc-coastal-atlas}}" },
+            { "ul": ["The Red Beach and coloured hills", "Rainbow Valley", "The salt cave and salt mountain", "The Valley of Statues rock wall"] }
+          ]
+        },
+        {
+          "heading": "The kingdom of Hormuz",
+          "blocks": [
+            { "p": "Old Hormuz first stood on the mainland, near today's Minab. Around 1300 its rulers moved their capital to the island of Jarun to escape Mongol raids, and the name Hormuz moved with them.{{iranica-hormuz}} The new port quickly became the main entrepôt for spices, pearls, horses and cloth between India, Persia, Arabia and East Africa." },
+            { "p": "The Portuguese under Afonso de Albuquerque arrived in 1507 and in 1515 built a strong fort on the north of the island. A century later, in 1622, the army of Shah Abbas I, supported by English ships, recaptured Hormuz, and with the rise of [[bandar-abbas|Bandar Abbas]] on the mainland the island's age of splendour came to an end.{{floor-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "People and tourism",
+          "blocks": [
+            { "p": "According to the 2016 census, close to six thousand people lived in the town of Hormuz.{{sci-census-2016}} Fishing, handicrafts and tourism are the main livelihoods. In recent years eco-lodges and the galleries of local artists have made the island one of the most popular destinations in southern Iran." }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "جزيرة-هرمز",
+      "title": "جزيرة هرمز",
+      "summary": "جزيرة صغيرة ملوّنة عند مدخل مضيق هرمز، كانت مقرّ مملكة هرمز التجارية ومن أغنى موانئ العالم.",
+      "lead": [
+        "**جزيرة هرمز** جزيرة صغيرة مساحتها نحو ٤٢ كيلومترًا مربعًا، تقع شرق [[qeshm-island|قشم]] وعلى بعد ثمانية كيلومترات من [[bandar-abbas|بندر عباس]] عند مدخل [[strait-of-hormuz|مضيق هرمز]].{{ncc-gazetteer}} وتجعلها تربتها الملوّنة وجبالها الملحية وشواطئها الحمراء من أروع جزر الخليج الفارسي.",
+        "وكانت هرمز من القرن الرابع عشر إلى القرن السادس عشر عاصمة مملكة هرمز التجارية، التي سمّاها رحالة ذلك العصر «فصّ خاتم الدنيا».{{iranica-hormuz}}"
+      ],
+      "sections": [
+        {
+          "heading": "الجيولوجيا والتربة الملوّنة",
+          "blocks": [
+            { "p": "هرمز في الحقيقة قبة ملحية دفعتها طبقات ملحية قديمة من أعماق الأرض. وقد صبغت أكاسيد الحديد والكبريت ومعادن أخرى تربتها بالأحمر والأصفر والبرتقالي والبنفسجي. واستُخدمت تربة هرمز الحمراء، التي يسميها الأهالي «كِلَك»، منذ القدم في الصباغة وصناعة الفخار وحتى في الطبخ.{{ncc-coastal-atlas}}" },
+            { "ul": ["الشاطئ الأحمر والتلال الملوّنة", "وادي قوس قزح", "الكهف الملحي والجبل الملحي", "جدار التماثيل الصخري"] }
+          ]
+        },
+        {
+          "heading": "مملكة هرمز",
+          "blocks": [
+            { "p": "كانت هرمز القديمة تقع أولًا على البر قرب ميناب الحالية، ونحو عام ١٣٠٠ نقل حكامها عاصمتهم إلى جزيرة جرون هربًا من غارات المغول، فانتقل اسم هرمز معهم.{{iranica-hormuz}} وسرعان ما أصبح الميناء الجديد السوق الرئيسية للتوابل واللؤلؤ والخيول والأقمشة بين الهند وفارس والجزيرة العربية وشرق أفريقيا." },
+            { "p": "ووصل البرتغاليون بقيادة ألفونسو دي ألبوكيرك عام ١٥٠٧، وبنوا عام ١٥١٥ قلعة حصينة في شمال الجزيرة. وبعد قرن، عام ١٦٢٢، استعاد جيش الشاه عباس الأول هرمز بمساندة سفن إنجليزية، ومع صعود [[bandar-abbas|بندر عباس]] على البر انتهى عصر ازدهار الجزيرة.{{floor-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "السكان والسياحة",
+          "blocks": [
+            { "p": "بلغ عدد سكان مدينة هرمز نحو ستة آلاف نسمة وفق تعداد عام ٢٠١٦.{{sci-census-2016}} ويمثل صيد الأسماك والحرف اليدوية والسياحة أهم مصادر الرزق، وقد جعلت النُّزل البيئية ومعارض الفنانين المحليين الجزيرة في السنوات الأخيرة من أشهر الوجهات السياحية في جنوب إيران." }
+          ]
+        }
+      ]
+    }
+  }
+}

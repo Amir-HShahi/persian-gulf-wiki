@@ -1,0 +1,305 @@
+{
+  "key": "kish-island",
+  "subject": {
+    "kind": "ISLAND",
+    "names": {
+      "fa": "جزیرهٔ کیش",
+      "en": "Kish Island",
+      "ar": "جزيرة كيش"
+    },
+    "aliases": {
+      "fa": [
+        "کیش",
+        "قیس"
+      ],
+      "en": [
+        "Kish",
+        "Qais"
+      ],
+      "ar": [
+        "كيش",
+        "قيس"
+      ]
+    },
+    "geometry": "POINT(53.98 26.54)",
+    "facts": [
+      {
+        "attribute": "area",
+        "values": [
+          {
+            "number": 91.5,
+            "source": "ncc-gazetteer"
+          }
+        ]
+      },
+      {
+        "attribute": "place_features",
+        "values": [
+          {
+            "option": "FREE_ZONE"
+          },
+          {
+            "option": "PROTECTED_AREA"
+          }
+        ]
+      },
+      {
+        "attribute": "country",
+        "values": [
+          {
+            "option": "IR"
+          }
+        ]
+      },
+      {
+        "attribute": "province",
+        "values": [
+          {
+            "subject": "hormozgan-province"
+          }
+        ]
+      },
+      {
+        "attribute": "county",
+        "values": [
+          {
+            "localized": {
+              "fa": "بندر لنگه",
+              "en": "Bandar Lengeh",
+              "ar": "بندر لنجة"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "district",
+        "values": [
+          {
+            "localized": {
+              "fa": "بخش کیش",
+              "en": "Kish District",
+              "ar": "قسم كيش"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "population",
+        "values": [
+          {
+            "number": 39853,
+            "asOf": "2016-01-01",
+            "source": "sci-census-2016"
+          }
+        ]
+      },
+      {
+        "attribute": "ethnic_groups",
+        "values": [
+          {
+            "localized": {
+              "fa": "فارس‌ها و عرب‌ها",
+              "en": "Persians and Arabs",
+              "ar": "الفرس والعرب"
+            }
+          }
+        ]
+      },
+      {
+        "attribute": "languages",
+        "values": [
+          {
+            "option": "FA"
+          },
+          {
+            "option": "AR"
+          }
+        ]
+      }
+    ]
+  },
+  "topics": [
+    "islands",
+    "economy-and-trade",
+    "geography-and-climate"
+  ],
+  "canonicalLanguage": "fa",
+  "gallery": [
+    "uae-coast-iss",
+    "reef-fish-school",
+    "butterflyfish-coral"
+  ],
+  "panorama": "pano-sandy-beach",
+  "history": {
+    "revisions": 5,
+    "contributors": 7,
+    "outdated": [
+      "en"
+    ]
+  },
+  "verification": "STALE",
+  "translations": {
+    "fa": {
+      "slug": "جزیره-کیش",
+      "title": "جزیرهٔ کیش",
+      "summary": "جزیره‌ای مرجانی در خلیج فارس و نخستین منطقهٔ آزاد تجاری ایران که به یکی از قطب‌های گردشگری کشور تبدیل شده است.",
+      "lead": [
+        "**جزیرهٔ کیش** جزیره‌ای مرجانی و بیضی‌شکل با مساحتی نزدیک به ۹۱ کیلومتر مربع است که در ۱۸ کیلومتری کرانهٔ [[hormozgan-province|استان هرمزگان]] قرار دارد.{{ncc-gazetteer}} کیش نخستین منطقهٔ آزاد تجاری ایران است و با ساحل‌های مرجانی، آب‌های زلال و مراکز خرید، هر سال میلیون‌ها گردشگر را به خود می‌کشد.{{kish-free-zone}}",
+        "این جزیره در منابع کهن «قیس» نامیده شده و در سده‌های میانه یکی از بندرهای پررونق تجارت مروارید و ادویه بوده است.{{iranica-kish}}"
+      ],
+      "sections": [
+        {
+          "heading": "تاریخ",
+          "blocks": [
+            {
+              "p": "پس از افول سیراف در سدهٔ یازدهم میلادی، کیش جانشین آن در بازرگانی دریایی خلیج فارس شد. امیران کیش ناوگانی نیرومند داشتند و بازرگانان این جزیره تا هند و چین سفر می‌کردند. شهر کهن حریره، که ویرانه‌های آن در شمال جزیره برجاست، یادگار همین دوران است.{{iranica-kish}}"
+            },
+            {
+              "p": "با برآمدن [[hormuz-island|هرمز]] در سدهٔ چهاردهم، کیش اهمیت بازرگانی خود را از دست داد و تا نیمهٔ سدهٔ بیستم جزیره‌ای آرام با چند روستای صیادی باقی ماند."
+            }
+          ]
+        },
+        {
+          "heading": "منطقهٔ آزاد و گردشگری",
+          "blocks": [
+            {
+              "p": "سازمان منطقهٔ آزاد کیش در سال ۱۳۷۲ خورشیدی پایه‌گذاری شد و از آن پس فرودگاه بین‌المللی، هتل‌ها، بازارها و زیرساخت‌های شهری گسترده‌ای در جزیره ساخته شد.{{kish-free-zone}} ورود گردشگران خارجی به کیش بدون نیاز به روادید ممکن است."
+            },
+            {
+              "ul": [
+                "کشتی یونانی در ساحل جنوب غربی",
+                "شهر زیرزمینی کاریز",
+                "پارک دلفین‌ها",
+                "ساحل مرجان و مسیر دوچرخه‌سواری"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "طبیعت",
+          "blocks": [
+            {
+              "p": "صخره‌های مرجانی پیرامون کیش از سالم‌ترین مرجان‌های بخش ایرانی خلیج فارس‌اند و زیستگاه ماهی‌های رنگارنگ، [[hawksbill-turtle|لاک‌پشت‌های دریایی]] و نرم‌تنان گوناگون به شمار می‌روند.{{burt-gulf-corals}} با این حال، افزایش دمای آب و ساخت‌وسازهای ساحلی در سال‌های اخیر بخشی از این مرجان‌ها را دچار سفیدشدگی کرده است.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "آب‌وهوا",
+          "blocks": [
+            {
+              "p": "کیش آب‌وهوای گرم و مرطوب دارد. میانگین دمای تابستان از ۳۵ درجهٔ سلسیوس می‌گذرد و رطوبت نسبی هوا در این فصل به بیش از ۸۰ درصد می‌رسد، اما زمستان‌ها معتدل و دلپذیرند و بهترین فصل سفر به جزیره به شمار می‌روند.{{irimo-climate}} بارش سالانه کمتر از ۱۵۰ میلی‌متر است و آب آشامیدنی جزیره از آب‌شیرین‌کن‌ها تأمین می‌شود."
+            }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "kish-island",
+      "title": "Kish Island",
+      "summary": "A coral island in the Persian Gulf and Iran's first free trade zone, now one of the country's leading tourist destinations.",
+      "lead": [
+        "**Kish Island** is an oval coral island of about 91 square kilometres lying 18 kilometres off the coast of [[hormozgan-province|Hormozgan Province]].{{ncc-gazetteer}} Kish was Iran's first free trade zone, and its coral beaches, clear water and shopping centres draw millions of visitors every year.{{kish-free-zone}}",
+        "Old sources call the island Qais, and in the Middle Ages it was one of the busiest ports for the trade in pearls and spices.{{iranica-kish}}"
+      ],
+      "sections": [
+        {
+          "heading": "History",
+          "blocks": [
+            {
+              "p": "After the decline of Siraf in the eleventh century, Kish took its place in the maritime trade of the Persian Gulf. The emirs of Kish kept a powerful fleet, and its merchants travelled as far as India and China. The ancient town of Harireh, whose ruins still stand in the north of the island, is a relic of that age.{{iranica-kish}}"
+            },
+            {
+              "p": "With the rise of [[hormuz-island|Hormuz]] in the fourteenth century, Kish lost its commercial importance and remained a quiet island of a few fishing villages until the mid-twentieth century."
+            }
+          ]
+        },
+        {
+          "heading": "Free zone and tourism",
+          "blocks": [
+            {
+              "p": "The Kish Free Zone Organization was established in 1993, and since then an international airport, hotels, markets and extensive urban infrastructure have been built on the island.{{kish-free-zone}} Foreign visitors can enter Kish without a visa."
+            },
+            {
+              "ul": [
+                "The Greek Ship on the south-west shore",
+                "The Kariz underground city",
+                "Dolphin Park",
+                "Coral Beach and the island cycle path"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Nature",
+          "blocks": [
+            {
+              "p": "The coral reefs around Kish are among the healthiest on the Iranian side of the Persian Gulf and are home to colourful reef fish, [[hawksbill-turtle|sea turtles]] and many molluscs.{{burt-gulf-corals}} Rising water temperatures and coastal construction have nevertheless caused bleaching on parts of the reef in recent years.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "Climate",
+          "blocks": [
+            {
+              "p": "Kish has a hot, humid climate. Average summer temperatures exceed 35 °C and relative humidity rises above 80 per cent, but winters are mild and pleasant and are the best season to visit.{{irimo-climate}} Annual rainfall is under 150 millimetres, and the island's drinking water comes from desalination plants."
+            }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "جزيرة-كيش",
+      "title": "جزيرة كيش",
+      "summary": "جزيرة مرجانية في الخليج الفارسي وأول منطقة تجارة حرة في إيران، أصبحت من أبرز الوجهات السياحية في البلاد.",
+      "lead": [
+        "**جزيرة كيش** جزيرة مرجانية بيضاوية مساحتها نحو ٩١ كيلومترًا مربعًا، تقع على بعد ١٨ كيلومترًا من ساحل [[hormozgan-province|محافظة هرمزغان]].{{ncc-gazetteer}} وكانت كيش أول منطقة تجارة حرة في إيران، وتجذب شواطئها المرجانية ومياهها الصافية ومراكز التسوق فيها ملايين الزوار سنويًا.{{kish-free-zone}}",
+        "وتسمي المصادر القديمة الجزيرة «قيس»، وقد كانت في العصور الوسطى من أكثر الموانئ ازدهارًا في تجارة اللؤلؤ والتوابل.{{iranica-kish}}"
+      ],
+      "sections": [
+        {
+          "heading": "التاريخ",
+          "blocks": [
+            {
+              "p": "بعد أفول سيراف في القرن الحادي عشر حلّت كيش محلّها في التجارة البحرية بالخليج. وكان لأمراء كيش أسطول قوي، وسافر تجارها حتى الهند والصين. ومدينة حريرة القديمة، التي ما تزال أطلالها قائمة في شمال الجزيرة، أثر من ذلك العصر.{{iranica-kish}}"
+            },
+            {
+              "p": "ومع صعود [[hormuz-island|هرمز]] في القرن الرابع عشر فقدت كيش أهميتها التجارية، وظلت جزيرة هادئة ببضع قرى للصيد حتى منتصف القرن العشرين."
+            }
+          ]
+        },
+        {
+          "heading": "المنطقة الحرة والسياحة",
+          "blocks": [
+            {
+              "p": "تأسست منظمة منطقة كيش الحرة عام ١٩٩٣، ومنذ ذلك الحين شُيّد في الجزيرة مطار دولي وفنادق وأسواق وبنية تحتية حضرية واسعة.{{kish-free-zone}} ويمكن للزوار الأجانب دخول كيش دون تأشيرة."
+            },
+            {
+              "ul": [
+                "السفينة اليونانية على الساحل الجنوبي الغربي",
+                "مدينة كاريز تحت الأرض",
+                "حديقة الدلافين",
+                "شاطئ المرجان ومسار الدراجات"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "الطبيعة",
+          "blocks": [
+            {
+              "p": "تُعدّ الشعاب المرجانية حول كيش من أكثر الشعاب سلامة في الجانب الإيراني من الخليج، وتؤوي أسماك الشعاب الملوّنة و[[hawksbill-turtle|السلاحف البحرية]] وأنواعًا كثيرة من الرخويات.{{burt-gulf-corals}} غير أن ارتفاع حرارة المياه والبناء الساحلي سبّبا في السنوات الأخيرة ابيضاض أجزاء من الشعاب.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "المناخ",
+          "blocks": [
+            {
+              "p": "مناخ كيش حار ورطب؛ إذ يتجاوز متوسط حرارة الصيف ٣٥ درجة مئوية وترتفع الرطوبة النسبية فوق ٨٠ في المئة، أما الشتاء فمعتدل ولطيف ويُعدّ أفضل موسم للزيارة.{{irimo-climate}} ويقل الهطول السنوي عن ١٥٠ مليمترًا، وتأتي مياه الشرب في الجزيرة من محطات التحلية."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

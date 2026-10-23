@@ -48,6 +48,7 @@ import org.springframework.util.MultiValueMap;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -284,9 +285,7 @@ public class SubjectListingService {
                 .collect(Collectors.toMap(Subject::getId, Function.identity()));
         Map<UUID, LocalizedLabelResponse> names = labelService.resolveSubjects(ids, language);
         Map<UUID, String> slugs = subjectArticleService.mainArticleSlugs(ids, language);
-        Map<UUID, SubjectImage> images = mediaReadService.publishedImagesOfSubjects(
-                subjectLiveRevisionRepository.findMainImages(ids).stream()
-                        .collect(Collectors.toMap(MainImage::getSubjectId, MainImage::getMediaId)));
+        Map<UUID, SubjectMainImageResponse> images = mainImages(ids);
         Map<UUID, Map<String, String>> badges = new HashMap<>();
         for (Badge badge : subjectFactRepository.findBadges(ids)) {
             badges.computeIfAbsent(badge.getSubjectId(), _ -> new LinkedHashMap<>())
@@ -295,7 +294,7 @@ public class SubjectListingService {
 
         return ids.stream()
                 .map(id -> new SubjectListItemResponse(id, subjects.get(id).getKind(), names.get(id), slugs.get(id),
-                        mainImage(images.get(id)),
+                        images.get(id),
                         Collections.unmodifiableMap(badges.getOrDefault(id, new LinkedHashMap<>()))))
                 .toList();
     }
@@ -403,12 +402,22 @@ public class SubjectListingService {
                         .collect(Collectors.groupingBy(AttributeOption::getAttributeId));
     }
 
-    // Comma-separated and/or repeated; blanks dropped, duplicates collapsed, order kept.
-    private static @Nullable SubjectMainImageResponse mainImage(@Nullable SubjectImage image) {
-        return image != null
-                ? new SubjectMainImageResponse(image.mediaId(), image.placeholder(), image.variants())
-                : null;
+    // Subjects whose live revision picks no main image, or one no longer public, are absent.
+    @Transactional(readOnly = true)
+    public Map<UUID, SubjectMainImageResponse> mainImages(Collection<UUID> subjectIds) {
+        if (subjectIds.isEmpty()) {
+            return Map.of();
+        }
+        Map<UUID, SubjectImage> images = mediaReadService.publishedImagesOfSubjects(
+                subjectLiveRevisionRepository.findMainImages(subjectIds).stream()
+                        .collect(Collectors.toMap(MainImage::getSubjectId, MainImage::getMediaId)));
+        Map<UUID, SubjectMainImageResponse> responses = new HashMap<>();
+        images.forEach((subjectId, image) -> responses.put(subjectId,
+                new SubjectMainImageResponse(image.mediaId(), image.placeholder(), image.variants())));
+        return Map.copyOf(responses);
     }
+
+    // Comma-separated and/or repeated; blanks dropped, duplicates collapsed, order kept.
 
     private static Set<String> splitValues(List<String> values) {
         Set<String> split = new LinkedHashSet<>();

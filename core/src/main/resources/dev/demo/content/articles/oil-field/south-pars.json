@@ -1,0 +1,235 @@
+{
+  "key": "south-pars",
+  "subject": {
+    "kind": "OIL_FIELD",
+    "names": {
+      "fa": "میدان گازی پارس جنوبی",
+      "en": "South Pars gas field",
+      "ar": "حقل بارس الجنوبي للغاز"
+    },
+    "aliases": {
+      "fa": [
+        "پارس جنوبی"
+      ],
+      "en": [
+        "South Pars",
+        "South Pars/North Dome"
+      ],
+      "ar": [
+        "بارس الجنوبي",
+        "حقل الشمال"
+      ]
+    },
+    "geometry": "POLYGON((51.9 26.9, 52.4 26.8, 52.5 26.3, 52.0 26.4, 51.9 26.9))",
+    "facts": [
+      {
+        "attribute": "area",
+        "values": [
+          {
+            "number": 3700,
+            "source": "pogc-south-pars"
+          }
+        ]
+      },
+      {
+        "attribute": "country",
+        "values": [
+          {
+            "option": "IR"
+          },
+          {
+            "option": "QA"
+          }
+        ]
+      },
+      {
+        "attribute": "province",
+        "values": [
+          {
+            "subject": "bushehr-province"
+          }
+        ]
+      }
+    ]
+  },
+  "topics": [
+    "ports-and-oil-terminals",
+    "economy-and-trade",
+    "pollution-and-environment"
+  ],
+  "canonicalLanguage": "fa",
+  "gallery": [
+    "gulf-night-iss",
+    "barge-and-tug"
+  ],
+  "history": {
+    "revisions": 6,
+    "contributors": 5
+  },
+  "verification": "VERIFIED",
+  "featured": 2,
+  "translations": {
+    "fa": {
+      "slug": "میدان-گازی-پارس-جنوبی",
+      "title": "میدان گازی پارس جنوبی",
+      "summary": "بزرگ‌ترین میدان گاز طبیعی جهان که میان ایران و قطر مشترک است و ستون اصلی تأمین گاز ایران به شمار می‌رود.",
+      "lead": [
+        "**میدان گازی پارس جنوبی** بخش ایرانی بزرگ‌ترین میدان گاز طبیعی جهان است که در میانهٔ خلیج فارس، در آب‌های ایران و قطر، قرار دارد. بخش قطری این میدان «گنبد شمالی» نام دارد و کل این ساختار زمین‌شناختی نزدیک به نیمی از ذخایر گاز اثبات‌شدهٔ ایران و بخش عمدهٔ ذخایر قطر را در بر می‌گیرد.{{eia-qatar-2024}}{{pogc-south-pars}}",
+        "سهم ایران حدود ۳٬۷۰۰ کیلومتر مربع از وسعت میدان است و گاز آن در پالایشگاه‌های عسلویه و کنگان در [[bushehr-province|استان بوشهر]] فراوری می‌شود."
+      ],
+      "sections": [
+        {
+          "heading": "کشف و توسعه",
+          "blocks": [
+            {
+              "p": "این میدان در سال ۱۳۶۹ خورشیدی کشف شد و توسعهٔ آن در قالب فازهای جداگانه از اواخر دههٔ ۱۳۷۰ آغاز گردید. هر فاز شامل سکوهای دریایی، خطوط لولهٔ زیردریایی و یک پالایشگاه در خشکی است.{{pogc-south-pars}} تا امروز بیش از بیست فاز به بهره‌برداری رسیده و تولید روزانهٔ گاز از بخش ایرانی میدان به بیش از ۷۰۰ میلیون متر مکعب رسیده است.{{eia-iran-2024}}"
+            },
+            {
+              "ul": [
+                "سکوهای تولید دریایی",
+                "خطوط لولهٔ زیردریایی ۳۲ اینچی",
+                "پالایشگاه‌های گاز عسلویه و کنگان",
+                "واحدهای تولید میعانات گازی و گاز مایع"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "اهمیت اقتصادی",
+          "blocks": [
+            {
+              "p": "پارس جنوبی بیش از دوسوم گاز مصرفی ایران را تأمین می‌کند و گاز آن در نیروگاه‌ها، صنایع، خانه‌ها و تزریق به میدان‌های نفتی برای افزایش برداشت به کار می‌رود. میعانات گازی و فراورده‌های پتروشیمی منطقهٔ ویژهٔ اقتصادی انرژی پارس، از مهم‌ترین اقلام صادراتی کشورند.{{eia-iran-2024}}"
+            },
+            {
+              "p": "قطر در بخش خود، با ساخت تأسیسات بزرگ مایع‌سازی گاز در راس لفان، به یکی از بزرگ‌ترین صادرکنندگان گاز طبیعی مایع جهان تبدیل شده است.{{eia-qatar-2024}} محمولهٔ این صادرات از [[strait-of-hormuz|تنگهٔ هرمز]] می‌گذرد."
+            }
+          ]
+        },
+        {
+          "heading": "پیامدهای زیست‌محیطی",
+          "blocks": [
+            {
+              "p": "گسترش سریع صنعت در عسلویه، آلودگی هوا، فلرسوزی گاز و تخلیهٔ پساب‌ها را به دنبال داشته و صخره‌های مرجانی نزدیک به ساحل و زیستگاه‌های لاک‌پشت‌های دریایی را تحت فشار قرار داده است. پایش‌های منطقه‌ای کاهش کیفیت آب و هوا را در این ناحیه گزارش کرده‌اند.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "عسلویه",
+          "blocks": [
+            {
+              "p": "عسلویه تا دههٔ ۱۳۷۰ روستایی کوچک و صیادی بود. با آغاز توسعهٔ پارس جنوبی، این ناحیه به منطقهٔ ویژهٔ اقتصادی انرژی پارس تبدیل شد و ده‌ها هزار کارگر و مهندس از سراسر ایران در آن به کار مشغول شدند. فرودگاه، بندر خدماتی، شهرک‌های مسکونی و مجتمع‌های پتروشیمی در فاصله‌ای کوتاه ساخته شدند و چهرهٔ کرانهٔ کوهستانی میان کنگان و نخل تقی را یکسره دگرگون کردند."
+            }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "south-pars-gas-field",
+      "title": "South Pars gas field",
+      "summary": "The world's largest natural gas field, shared between Iran and Qatar, and the backbone of Iran's gas supply.",
+      "lead": [
+        "The **South Pars gas field** is the Iranian part of the largest natural gas field in the world, lying in the middle of the Persian Gulf in Iranian and Qatari waters. The Qatari part is called the North Dome, and the whole structure holds close to half of Iran's proven gas reserves and most of Qatar's.{{eia-qatar-2024}}{{pogc-south-pars}}",
+        "Iran's share covers about 3,700 square kilometres, and its gas is processed at the Asaluyeh and Kangan refineries in [[bushehr-province|Bushehr Province]]."
+      ],
+      "sections": [
+        {
+          "heading": "Discovery and development",
+          "blocks": [
+            {
+              "p": "The field was discovered in 1990, and its development began in separate phases at the end of the 1990s. Each phase consists of offshore platforms, subsea pipelines and an onshore refinery.{{pogc-south-pars}} More than twenty phases are now in production, and daily output from the Iranian side has exceeded 700 million cubic metres.{{eia-iran-2024}}"
+            },
+            {
+              "ul": [
+                "Offshore production platforms",
+                "32-inch subsea pipelines",
+                "Asaluyeh and Kangan gas refineries",
+                "Condensate and LPG units"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Economic importance",
+          "blocks": [
+            {
+              "p": "South Pars supplies more than two-thirds of the gas Iran consumes, used in power stations, industry, homes and for reinjection into oil fields to raise recovery. Gas condensate and the petrochemical products of the Pars Special Economic Energy Zone are among the country's most important exports.{{eia-iran-2024}}"
+            },
+            {
+              "p": "On its side, Qatar has become one of the world's largest exporters of liquefied natural gas by building huge liquefaction plants at Ras Laffan.{{eia-qatar-2024}} These cargoes pass through the [[strait-of-hormuz|Strait of Hormuz]]."
+            }
+          ]
+        },
+        {
+          "heading": "Environmental impact",
+          "blocks": [
+            {
+              "p": "The rapid growth of industry at Asaluyeh has brought air pollution, gas flaring and effluent discharges, putting pressure on nearby coral reefs and sea turtle habitats. Regional monitoring has reported declining air and water quality in the area.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "Asaluyeh",
+          "blocks": [
+            {
+              "p": "Until the 1990s Asaluyeh was a small fishing village. With the start of South Pars development, the area became the Pars Special Economic Energy Zone, and tens of thousands of workers and engineers from across Iran came to work there. An airport, a service port, housing estates and petrochemical complexes were built within a few years, transforming the mountainous coast between Kangan and Nakhl-e Taqi. The rapid growth also brought housing shortages, traffic on the coastal road and strain on local water supplies."
+            }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "حقل-بارس-الجنوبي",
+      "title": "حقل بارس الجنوبي للغاز",
+      "summary": "أكبر حقل للغاز الطبيعي في العالم، مشترك بين إيران وقطر، وهو العمود الفقري لإمدادات الغاز في إيران.",
+      "lead": [
+        "**حقل بارس الجنوبي للغاز** هو الجزء الإيراني من أكبر حقل للغاز الطبيعي في العالم، ويقع في وسط الخليج الفارسي في المياه الإيرانية والقطرية. ويُسمّى الجزء القطري «حقل الشمال»، وتضم البنية الجيولوجية كلها قرابة نصف احتياطيات إيران المؤكدة من الغاز ومعظم احتياطيات قطر.{{eia-qatar-2024}}{{pogc-south-pars}}",
+        "وتبلغ حصة إيران نحو ٣٧٠٠ كيلومتر مربع، ويُعالج غازها في مصافي عسلوية وكنكان في [[bushehr-province|محافظة بوشهر]]."
+      ],
+      "sections": [
+        {
+          "heading": "الاكتشاف والتطوير",
+          "blocks": [
+            {
+              "p": "اكتُشف الحقل عام ١٩٩٠، وبدأ تطويره على مراحل منفصلة في أواخر تسعينيات القرن العشرين، وتتألف كل مرحلة من منصات بحرية وخطوط أنابيب تحت البحر ومصفاة على البر.{{pogc-south-pars}} وتعمل اليوم أكثر من عشرين مرحلة، وتجاوز الإنتاج اليومي من الجانب الإيراني ٧٠٠ مليون متر مكعب.{{eia-iran-2024}}"
+            },
+            {
+              "ul": [
+                "منصات الإنتاج البحرية",
+                "أنابيب تحت البحر بقطر ٣٢ بوصة",
+                "مصافي عسلوية وكنكان للغاز",
+                "وحدات المكثفات والغاز المسال"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "الأهمية الاقتصادية",
+          "blocks": [
+            {
+              "p": "يوفر بارس الجنوبي أكثر من ثلثي الغاز الذي تستهلكه إيران، ويُستخدم في محطات الكهرباء والصناعة والمنازل وفي إعادة الحقن في حقول النفط لزيادة الاستخلاص. وتُعدّ المكثفات الغازية ومنتجات منطقة بارس الاقتصادية الخاصة للطاقة من أهم صادرات البلاد.{{eia-iran-2024}}"
+            },
+            {
+              "p": "أما قطر فقد أصبحت، ببنائها منشآت تسييل ضخمة في راس لفان، من أكبر مصدّري الغاز الطبيعي المسال في العالم.{{eia-qatar-2024}} وتمر هذه الشحنات عبر [[strait-of-hormuz|مضيق هرمز]]."
+            }
+          ]
+        },
+        {
+          "heading": "الأثر البيئي",
+          "blocks": [
+            {
+              "p": "جلب النمو الصناعي السريع في عسلوية تلوث الهواء وحرق الغاز وتصريف المخلفات، مما ضغط على الشعاب المرجانية القريبة وموائل السلاحف البحرية، وقد رصدت المتابعات الإقليمية تراجع جودة الهواء والمياه في المنطقة.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "عسلوية",
+          "blocks": [
+            {
+              "p": "كانت عسلوية حتى تسعينيات القرن العشرين قرية صيد صغيرة. ومع بدء تطوير بارس الجنوبي تحولت المنطقة إلى منطقة بارس الاقتصادية الخاصة للطاقة، وجاء إليها عشرات الآلاف من العمال والمهندسين من أنحاء إيران. وشُيّد خلال سنوات قليلة مطار وميناء خدمات وأحياء سكنية ومجمعات بتروكيماوية غيّرت تمامًا وجه الساحل الجبلي بين كنكان ونخل تقي. كما جلب النمو السريع نقصًا في المساكن وازدحامًا على الطريق الساحلي وضغطًا على موارد المياه المحلية."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

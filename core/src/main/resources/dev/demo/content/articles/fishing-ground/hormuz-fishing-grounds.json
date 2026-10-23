@@ -1,0 +1,237 @@
+{
+  "key": "hormuz-fishing-grounds",
+  "subject": {
+    "kind": "FISHING_GROUND",
+    "names": {
+      "fa": "صیدگاه‌های تنگهٔ هرمز",
+      "en": "Strait of Hormuz fishing grounds",
+      "ar": "مصائد مضيق هرمز"
+    },
+    "aliases": {
+      "fa": [
+        "صیدگاه هرمز"
+      ],
+      "en": [
+        "Hormuz fishing grounds"
+      ],
+      "ar": [
+        "مصائد هرمز"
+      ]
+    },
+    "geometry": "POLYGON((56.0 26.9, 56.7 27.0, 56.9 26.5, 56.3 26.4, 56.0 26.9))",
+    "facts": [
+      {
+        "attribute": "located_in",
+        "values": [
+          {
+            "subject": "strait-of-hormuz"
+          }
+        ]
+      },
+      {
+        "attribute": "area",
+        "values": [
+          {
+            "number": 3100,
+            "source": "fao-fishery-gulf"
+          }
+        ]
+      },
+      {
+        "attribute": "place_features",
+        "values": [
+          {
+            "option": "PROTECTED_AREA"
+          }
+        ]
+      },
+      {
+        "attribute": "country",
+        "values": [
+          {
+            "option": "IR"
+          }
+        ]
+      },
+      {
+        "attribute": "province",
+        "values": [
+          {
+            "subject": "hormozgan-province"
+          }
+        ]
+      }
+    ]
+  },
+  "topics": [
+    "economy-and-trade",
+    "marine-life",
+    "shipping-and-transit"
+  ],
+  "canonicalLanguage": "fa",
+  "gallery": [
+    "reef-fish-school",
+    "fishing-dhow",
+    "whale-shark"
+  ],
+  "history": {
+    "revisions": 2,
+    "contributors": 2
+  },
+  "verification": "NONE",
+  "translations": {
+    "fa": {
+      "slug": "صیدگاه‌های-تنگه-هرمز",
+      "title": "صیدگاه‌های تنگهٔ هرمز",
+      "summary": "آب‌های پرجریان پیرامون جزایر هرمز، لارک و قشم که صیدگاه مهم ماهی‌های سطح‌زی و کفزی در شرق خلیج فارس‌اند.",
+      "lead": [
+        "**صیدگاه‌های تنگهٔ هرمز** به آب‌های پیرامون جزایر [[hormuz-island|هرمز]]، [[larak-island|لارک]] و کرانهٔ شرقی [[qeshm-island|قشم]] گفته می‌شود که در دهانهٔ [[strait-of-hormuz|تنگهٔ هرمز]] قرار دارند. جریان‌های قوی و آمیختگی آب‌های خلیج فارس و دریای عمان، این ناحیه را به یکی از پربارترین صیدگاه‌های [[hormozgan-province|هرمزگان]] تبدیل کرده است.{{fao-fishery-gulf}}",
+        "در این آب‌ها هم ماهی‌های سطح‌زی مهاجر و هم ماهی‌های کفزی صخره‌ای صید می‌شوند و صیادان محلی با لنج و قایق‌های کوچک فایبرگلاس در آن فعال‌اند."
+      ],
+      "sections": [
+        {
+          "heading": "گونه‌های صیدشده",
+          "blocks": [
+            {
+              "p": "مهم‌ترین گونهٔ سطح‌زی این صیدگاه‌ها [[narrow-barred-spanish-mackerel|شیر ماهی]] است که در فصل‌های مهاجرت به گروه‌های بزرگ در تنگه دیده می‌شود. گیدر، هوور و ساردین‌ها نیز به مقدار زیاد صید می‌شوند. در میان ماهی‌های کفزی، [[orange-spotted-grouper|هامور]]، سرخو و کوتر ارزش اقتصادی بالایی دارند.{{carpenter-living-resources}}"
+            },
+            {
+              "ul": [
+                "شیر ماهی و گیدر",
+                "هامور و سرخو",
+                "ساردین و موتو برای پودر ماهی",
+                "میگو در خورهای کم‌عمق"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "روش‌های صید",
+          "blocks": [
+            {
+              "p": "صید سنتی با قلاب، تور گوشگیر و «گرگور»، یعنی تله‌های قفسی سیمی که در بستر دریا گذاشته می‌شوند، رایج است. در سال‌های اخیر استفاده از تورهای گوشگیر بلند، که گاه رها شده و به «تورهای ارواح» تبدیل می‌شوند، نگرانی‌هایی دربارهٔ مرگ لاک‌پشت‌ها و پستانداران دریایی پدید آورده است.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "حفاظت و تنش با کشتیرانی",
+          "blocks": [
+            {
+              "p": "عبور روزانهٔ کشتی‌های بزرگ از خطوط کشتیرانی تنگه، خطر برخورد با قایق‌های صیادی و آسیب به تورها را در پی دارد. از سوی دیگر، این آب‌ها زیستگاه [[whale-shark|کوسهٔ نهنگ]] و دلفین‌هاست و بخش‌هایی از آن‌ها در قالب مناطق حفاظت‌شدهٔ دریایی مدیریت می‌شوند. برنامه‌های آموزشی برای صیادان، رهاسازی گونه‌های حمایت‌شده از تورها را ترویج می‌کنند.{{doe-protected-areas}}"
+            }
+          ]
+        },
+        {
+          "heading": "جوامع صیادی",
+          "blocks": [
+            {
+              "p": "روستاهای صیادی سوزا و درگهان در قشم، لارک‌شهری و هرمز، و محله‌های صیادی بندرعباس، زندگی خود را به این صیدگاه‌ها گره زده‌اند. صیادان در تعاونی‌های صیادی گرد آمده‌اند که سوخت، یخ و بازار فروش را برای اعضا فراهم می‌کنند. «نوروز صیاد»، جشنی کهن که آغاز سال صیادی را نشان می‌دهد، هنوز در برخی روستاهای قشم و هرمز برگزار می‌شود و با آیین‌های دریایی، موسیقی و غذای جمعی همراه است."
+            }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "strait-of-hormuz-fishing-grounds",
+      "title": "Strait of Hormuz fishing grounds",
+      "summary": "The current-swept waters around Hormuz, Larak and Qeshm that are a major fishery for pelagic and bottom fish in the eastern Persian Gulf.",
+      "lead": [
+        "The **Strait of Hormuz fishing grounds** are the waters around the islands of [[hormuz-island|Hormuz]] and [[larak-island|Larak]] and the eastern shore of [[qeshm-island|Qeshm]], at the mouth of the [[strait-of-hormuz|Strait of Hormuz]]. Strong currents and the mixing of Persian Gulf and Gulf of Oman waters make this one of the richest fisheries in [[hormozgan-province|Hormozgan]].{{fao-fishery-gulf}}",
+        "Both migratory pelagic fish and reef-dwelling bottom fish are caught here, and local fishermen work these waters in dhows and small fibreglass boats."
+      ],
+      "sections": [
+        {
+          "heading": "Species caught",
+          "blocks": [
+            {
+              "p": "The most important pelagic species is the [[narrow-barred-spanish-mackerel|narrow-barred Spanish mackerel]], seen in large shoals in the strait during its migrations. Yellowfin tuna, longtail tuna and sardines are also caught in quantity. Among bottom fish, the [[orange-spotted-grouper|orange-spotted grouper]], snappers and emperors are of high value.{{carpenter-living-resources}}"
+            },
+            {
+              "ul": [
+                "Spanish mackerel and yellowfin tuna",
+                "Grouper and snapper",
+                "Sardines and anchovies for fishmeal",
+                "Shrimp in shallow creeks"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Fishing methods",
+          "blocks": [
+            {
+              "p": "Traditional fishing with hand lines, gillnets and gargur — wire cage traps set on the seabed — is common. In recent years long gillnets, which are sometimes lost and become \"ghost nets\", have raised concern over the deaths of turtles and marine mammals.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "Conservation and shipping",
+          "blocks": [
+            {
+              "p": "The daily passage of large ships through the strait's shipping lanes brings a risk of collisions with fishing boats and damage to nets. These waters are also home to the [[whale-shark|whale shark]] and dolphins, and parts of them are managed as marine protected areas. Training programmes for fishermen promote the release of protected species from nets.{{doe-protected-areas}}"
+            }
+          ]
+        },
+        {
+          "heading": "Fishing communities",
+          "blocks": [
+            {
+              "p": "The fishing villages of Suza and Dargahan on Qeshm, Larak Shahri and Hormuz, and the fishing quarters of Bandar Abbas depend on these grounds. Fishermen are organised in cooperatives that supply members with fuel, ice and a market for their catch. The fishermen's Nowruz, an old festival marking the start of the fishing year, is still held in some villages of Qeshm and Hormuz with sea rituals, music and a shared meal."
+            }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "مصائد-مضيق-هرمز",
+      "title": "مصائد مضيق هرمز",
+      "summary": "المياه الغزيرة التيارات حول هرمز ولارك وقشم، وهي مصائد رئيسية للأسماك السطحية والقاعية في شرق الخليج الفارسي.",
+      "lead": [
+        "**مصائد مضيق هرمز** هي المياه المحيطة بجزيرتي [[hormuz-island|هرمز]] و[[larak-island|لارك]] والساحل الشرقي لـ[[qeshm-island|قشم]] عند مدخل [[strait-of-hormuz|مضيق هرمز]]. وتجعل التيارات القوية واختلاط مياه الخليج الفارسي ببحر عُمان هذه المنطقة من أغنى مصائد [[hormozgan-province|هرمزغان]].{{fao-fishery-gulf}}",
+        "وتُصاد هنا الأسماك السطحية المهاجرة والأسماك القاعية التي تعيش بين الشعاب، ويعمل الصيادون المحليون فيها بالمراكب والقوارب الصغيرة المصنوعة من الألياف الزجاجية."
+      ],
+      "sections": [
+        {
+          "heading": "الأنواع المصيدة",
+          "blocks": [
+            {
+              "p": "أهم الأنواع السطحية [[narrow-barred-spanish-mackerel|الكنعد]]، الذي يُشاهد في أسراب كبيرة في المضيق خلال هجرته، كما تُصاد التونة صفراء الزعانف والتونة طويلة الذيل والسردين بكميات كبيرة. ومن الأسماك القاعية يتمتع [[orange-spotted-grouper|الهامور]] والنهاش والشعري بقيمة عالية.{{carpenter-living-resources}}"
+            },
+            {
+              "ul": [
+                "الكنعد والتونة صفراء الزعانف",
+                "الهامور والنهاش",
+                "السردين والأنشوجة لدقيق السمك",
+                "الروبيان في الأخوار الضحلة"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "طرق الصيد",
+          "blocks": [
+            {
+              "p": "يشيع الصيد التقليدي بالخيط والشباك الخيشومية و«القراقير»، وهي مصائد قفصية سلكية تُوضع على قاع البحر. وفي السنوات الأخيرة أثارت الشباك الخيشومية الطويلة، التي تضيع أحيانًا فتصبح «شباكًا شبحية»، القلق من نفوق السلاحف والثدييات البحرية.{{ropme-soe-2021}}"
+            }
+          ]
+        },
+        {
+          "heading": "الحماية والملاحة",
+          "blocks": [
+            {
+              "p": "يحمل المرور اليومي للسفن الكبيرة في ممرات المضيق خطر الاصطدام بقوارب الصيد وإتلاف الشباك. وهذه المياه موطن أيضًا لـ[[whale-shark|القرش الحوتي]] والدلافين، وتُدار أجزاء منها بوصفها مناطق بحرية محمية، وتشجع برامج تدريب الصيادين على إطلاق الأنواع المحمية من الشباك.{{doe-protected-areas}}"
+            }
+          ]
+        },
+        {
+          "heading": "مجتمعات الصيد",
+          "blocks": [
+            {
+              "p": "ترتبط حياة قرى الصيد سوزا ودرگهان في قشم، ولارك شهري وهرمز، وأحياء الصيادين في بندر عباس بهذه المصائد. وينتظم الصيادون في تعاونيات توفر للأعضاء الوقود والثلج وسوقًا لبيع المصيد. ولا يزال «نوروز الصيادين»، وهو احتفال قديم يعلن بداية سنة الصيد، يُقام في بعض قرى قشم وهرمز بطقوس بحرية وموسيقى ووجبة جماعية."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

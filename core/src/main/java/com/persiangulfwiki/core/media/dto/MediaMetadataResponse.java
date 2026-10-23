@@ -37,7 +37,7 @@ public record MediaMetadataResponse(
                 + "a 360° panorama, the direction its horizontal centre faces.", nullable = true, example = "135")
         @Nullable BigDecimal headingDeg,
 
-        @Schema(description = "Which north `headingDeg` is measured from. May be absent even when `headingDeg` is set.",
-                nullable = true)
+        @Schema(description = "Which north `headingDeg` is measured from. May be absent even when `headingDeg` is set."
+                + "\n\n" + HeadingReference.VALUES_DOC, nullable = true)
         @Nullable HeadingReference headingRef) {
 }

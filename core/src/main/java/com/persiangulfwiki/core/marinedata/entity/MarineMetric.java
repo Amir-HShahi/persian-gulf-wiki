@@ -38,6 +38,20 @@ public enum MarineMetric {
     DUST("dust", MarineSource.OPEN_METEO_AIR_QUALITY,
             MarineGranularity.HOURLY, MarineAggregation.AVG, "ug_m3");
 
+    // One line per value; shown wherever this type appears in the API docs.
+    public static final String VALUES_DOC = """
+            - `sea_surface_temperature`: sea surface temperature, in °C.
+            - `sea_surface_temperature_anomaly`: how far the sea surface temperature is from its long-term average, in \
+            °C.
+            - `coral_bleaching_alert`: coral bleaching alert level from 0 (no stress) to 4.
+            - `degree_heating_weeks`: accumulated heat stress on corals, in °C-weeks.
+            - `air_quality_index`: European air quality index.
+            - `pm2_5`: fine particulate matter (PM2.5), in µg/m³.
+            - `pm10`: particulate matter (PM10), in µg/m³.
+            - `sulphur_dioxide`: sulphur dioxide, in µg/m³.
+            - `nitrogen_dioxide`: nitrogen dioxide, in µg/m³.
+            - `dust`: airborne dust, in µg/m³.""";
+
     private static final BigDecimal SST_ANOMALY_WARNING = BigDecimal.ONE;
 
     private final String key;

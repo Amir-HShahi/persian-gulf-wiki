@@ -1,0 +1,135 @@
+{
+  "key": "strait-of-hormuz",
+  "subject": {
+    "kind": "STRAIT",
+    "names": { "fa": "تنگهٔ هرمز", "en": "Strait of Hormuz", "ar": "مضيق هرمز" },
+    "aliases": { "fa": ["تنگه هرمز"], "en": ["Hormuz Strait", "Strait of Ormuz"], "ar": ["هرمز"] },
+    "geometry": "POLYGON((55.9 26.9, 56.6 27.1, 56.9 26.4, 56.5 25.9, 55.9 26.3, 55.9 26.9))",
+    "facts": [
+      { "attribute": "country", "values": [ { "option": "IR" }, { "option": "OM" } ] }
+    ]
+  },
+  "topics": ["shipping-and-transit", "geography-and-climate", "economy-and-trade"],
+  "canonicalLanguage": "fa",
+  "gallery": ["strait-hormuz-modis", "musandam-iss", "tanker-omala", "gulf-oman-night-iss"],
+  "panorama": "pano-cliff-trail",
+  "history": { "revisions": 8, "contributors": 9 },
+  "verification": "VERIFIED",
+  "featured": 1,
+  "translations": {
+    "fa": {
+      "slug": "تنگه-هرمز",
+      "title": "تنگهٔ هرمز",
+      "summary": "گذرگاه دریایی راهبردی میان خلیج فارس و دریای عمان که حدود یک‌پنجم نفت مصرفی جهان از آن می‌گذرد.",
+      "lead": [
+        "**تنگهٔ هرمز** یک تنگهٔ استراتژیک و مهم است که خلیج فارس را به دریای عمان متصل می‌کند و در باریک‌ترین نقطه حدود ۲۱ مایل (۳۹ کیلومتر) عرض دارد.{{eia-hormuz-2023}} این تنگه از شمال به ایران و از جنوب به شبه‌جزیرهٔ مسندم در عمان و امارات متحده عربی محدود می‌شود.",
+        "تنگهٔ هرمز به‌عنوان یک گذرگاه حیاتی برای حمل‌ونقل نفت جهانی عمل می‌کند، به طوری که حدود ۲۰ درصد عرضهٔ نفت جهان از این تنگه عبور می‌کند. این موضوع تنگهٔ هرمز را برای امنیت انرژی جهانی حیاتی می‌سازد، زیرا هر گونه اختلال در این مسیر می‌تواند منجر به نوسانات قابل توجهی در قیمت نفت و تأثیر آن بر اقتصاد جهانی شود.{{eia-hormuz-2023}}"
+      ],
+      "sections": [
+        {
+          "heading": "جغرافیا",
+          "blocks": [
+            { "p": "تنگه به شکل کمانی از غرب به شرق خم می‌شود. جزایر [[qeshm-island|قشم]]، [[hormuz-island|هرمز]]، [[larak-island|لارک]] و [[hengam-island|هنگام]] در کرانهٔ شمالی آن و دماغهٔ مسندم با خورهای ژرف و صخره‌ای خود در کرانهٔ جنوبی قرار دارند.{{ncc-gazetteer}} ژرفای آب در گذرگاه اصلی کشتیرانی به بیش از ۷۰ متر می‌رسد، اما در نزدیکی سواحل ایران کم‌عمق‌تر است." },
+            { "p": "جریان‌های سطحی آب شیرین‌تر دریای عمان از راه تنگه به خلیج فارس وارد می‌شوند و در ژرفا، آب شورتر و چگال‌تر خلیج فارس به سوی اقیانوس هند بیرون می‌رود. همین گردش، آب خلیج فارس را در بازه‌ای چندساله نو می‌کند.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "کشتیرانی و طرح جداسازی تردد",
+          "blocks": [
+            { "p": "برای پیشگیری از برخورد کشتی‌ها، سازمان بین‌المللی دریانوردی یک طرح جداسازی تردد در تنگه تعیین کرده است: دو خط ورودی و خروجی، هر یک به پهنای دو مایل، که با یک منطقهٔ حائل دومایلی از هم جدا شده‌اند.{{unctad-maritime-2023}} نفتکش‌ها، کشتی‌های کانتینری و حامل‌های گاز مایع روزانه در این مسیر رفت‌وآمد می‌کنند." },
+            { "p": "تنگهٔ هرمز در تعریف کنوانسیون حقوق دریاها یک تنگهٔ بین‌المللی است و مسئلهٔ «عبور ترانزیت» و «عبور بی‌ضرر» در آن، از موضوعات دیرینهٔ حقوق بین‌الملل دریاها بوده است.{{unclos}}" }
+          ]
+        },
+        {
+          "heading": "اهمیت برای انرژی جهان",
+          "blocks": [
+            { "p": "بیشتر نفت صادراتی عربستان سعودی، عراق، کویت، امارات و ایران و تقریباً همهٔ گاز طبیعی مایع قطر باید از این تنگه بگذرد. تنها چند خط لولهٔ جایگزین، از جمله خط لولهٔ شرق به غرب عربستان و خط لولهٔ حبشان به فجیره، می‌توانند بخشی از این جریان را دور بزنند.{{eia-hormuz-2023}}" },
+            { "ul": ["حدود ۲۰ میلیون بشکه نفت و فراورده در روز", "حدود یک‌پنجم تجارت جهانی گاز طبیعی مایع", "صدها کشتی بازرگانی در هفته"] }
+          ]
+        },
+        {
+          "heading": "تاریخ",
+          "blocks": [
+            { "p": "نام تنگه از پادشاهی و بندر کهن [[hormuz-island|هرمز]] گرفته شده است که از سدهٔ چهاردهم تا شانزدهم میلادی بر تجارت میان هند، ایران و جهان عرب فرمان می‌راند. پرتغالی‌ها در سال ۱۵۰۷ با تصرف هرمز بر این گذرگاه چیره شدند و تا سال ۱۶۲۲ آن را در دست داشتند.{{iranica-hormuz}}{{floor-persian-gulf}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "strait-of-hormuz",
+      "title": "Strait of Hormuz",
+      "summary": "The strategic passage between the Persian Gulf and the Gulf of Oman, through which about a fifth of the world's oil supply passes.",
+      "lead": [
+        "The **Strait of Hormuz** is a strategic and important strait that connects the Persian Gulf to the Gulf of Oman; at its narrowest point it is about 21 miles (39 kilometres) wide.{{eia-hormuz-2023}} It is bounded by Iran to the north and by Oman's Musandam Peninsula and the United Arab Emirates to the south.",
+        "The strait acts as a vital passage for the world's oil transport, with about 20 per cent of the global oil supply passing through it. This makes the Strait of Hormuz critical to global energy security, since any disruption on the route can cause significant swings in oil prices and affect the world economy.{{eia-hormuz-2023}}"
+      ],
+      "sections": [
+        {
+          "heading": "Geography",
+          "blocks": [
+            { "p": "The strait curves in an arc from west to east. The islands of [[qeshm-island|Qeshm]], [[hormuz-island|Hormuz]], [[larak-island|Larak]] and [[hengam-island|Hengam]] line its northern side, while the Musandam headland, with its deep rocky inlets, forms the southern shore.{{ncc-gazetteer}} Water depth in the main shipping channel exceeds 70 metres but is much shallower near the Iranian coast." },
+            { "p": "Fresher surface water from the Gulf of Oman flows into the Persian Gulf through the strait, while saltier, denser Gulf water flows out towards the Indian Ocean along the bottom. This exchange renews the water of the Persian Gulf over a period of several years.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "Shipping and the traffic separation scheme",
+          "blocks": [
+            { "p": "To prevent collisions, the International Maritime Organization has established a traffic separation scheme in the strait: an inbound and an outbound lane, each two miles wide, separated by a two-mile buffer zone.{{unctad-maritime-2023}} Tankers, container ships and LNG carriers use these lanes every day." },
+            { "p": "Under the Convention on the Law of the Sea the Strait of Hormuz is an international strait, and the question of \"transit passage\" versus \"innocent passage\" through it is a long-standing issue in the international law of the sea.{{unclos}}" }
+          ]
+        },
+        {
+          "heading": "Importance for world energy",
+          "blocks": [
+            { "p": "Most of the oil exported by Saudi Arabia, Iraq, Kuwait, the UAE and Iran, and almost all of Qatar's liquefied natural gas, must pass through the strait. Only a few alternative pipelines, such as Saudi Arabia's East–West pipeline and the Habshan–Fujairah line, can carry part of this flow around it.{{eia-hormuz-2023}}" },
+            { "ul": ["About 20 million barrels of oil and products a day", "About a fifth of world LNG trade", "Hundreds of merchant ships a week"] }
+          ]
+        },
+        {
+          "heading": "History",
+          "blocks": [
+            { "p": "The strait is named after the ancient kingdom and port of [[hormuz-island|Hormuz]], which dominated trade between India, Persia and the Arab world from the fourteenth to the sixteenth century. The Portuguese seized Hormuz in 1507, and with it control of the passage, holding it until 1622.{{iranica-hormuz}}{{floor-persian-gulf}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "مضيق-هرمز",
+      "title": "مضيق هرمز",
+      "summary": "الممر البحري الاستراتيجي بين الخليج الفارسي وبحر عُمان، الذي يمر عبره نحو خُمس إمدادات النفط في العالم.",
+      "lead": [
+        "**مضيق هرمز** مضيق استراتيجي مهم يصل الخليج الفارسي ببحر عُمان، ويبلغ عرضه في أضيق نقطة نحو ٢١ ميلًا (٣٩ كيلومترًا).{{eia-hormuz-2023}} ويحده من الشمال إيران ومن الجنوب شبه جزيرة مسندم العُمانية والإمارات العربية المتحدة.",
+        "ويؤدي المضيق دور ممر حيوي لنقل النفط عالميًا، إذ يعبره نحو ٢٠ في المئة من إمدادات النفط في العالم، مما يجعله بالغ الأهمية لأمن الطاقة العالمي؛ فأي اضطراب في هذا الطريق قد يسبب تقلبات كبيرة في أسعار النفط ويؤثر في الاقتصاد العالمي.{{eia-hormuz-2023}}"
+      ],
+      "sections": [
+        {
+          "heading": "الجغرافيا",
+          "blocks": [
+            { "p": "ينحني المضيق في قوس من الغرب إلى الشرق، وتصطف على جانبه الشمالي جزر [[qeshm-island|قشم]] و[[hormuz-island|هرمز]] و[[larak-island|لارك]] و[[hengam-island|هنگام]]، بينما يشكّل رأس مسندم بخلجانه الصخرية العميقة ساحله الجنوبي.{{ncc-gazetteer}} ويتجاوز عمق الماء في قناة الملاحة الرئيسية ٧٠ مترًا، لكنه أقل كثيرًا قرب الساحل الإيراني." },
+            { "p": "تدخل المياه السطحية الأقل ملوحة من بحر عُمان إلى الخليج عبر المضيق، في حين تخرج مياه الخليج الأكثر ملوحة وكثافة نحو المحيط الهندي على طول القاع، ويجدّد هذا التبادل مياه الخليج على مدى بضع سنوات.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "الملاحة ونظام فصل حركة المرور",
+          "blocks": [
+            { "p": "لتجنب التصادم أقرّت المنظمة البحرية الدولية نظامًا لفصل حركة المرور في المضيق: ممر للدخول وآخر للخروج، عرض كل منهما ميلان، يفصل بينهما نطاق عازل عرضه ميلان.{{unctad-maritime-2023}} وتستخدم هذه الممرات يوميًا ناقلات النفط وسفن الحاويات وناقلات الغاز المسال." },
+            { "p": "ويُعدّ مضيق هرمز وفق اتفاقية قانون البحار مضيقًا دوليًا، وتمثل مسألة «المرور العابر» و«المرور البريء» فيه قضية قديمة في القانون الدولي للبحار.{{unclos}}" }
+          ]
+        },
+        {
+          "heading": "أهميته للطاقة العالمية",
+          "blocks": [
+            { "p": "يجب أن تمر عبر المضيق معظم صادرات النفط من السعودية والعراق والكويت والإمارات وإيران، وكل الغاز الطبيعي المسال القطري تقريبًا. ولا يستطيع الالتفاف على جزء من هذا التدفق إلا عدد قليل من خطوط الأنابيب البديلة، مثل خط شرق-غرب السعودي وخط حبشان-الفجيرة.{{eia-hormuz-2023}}" },
+            { "ul": ["نحو ٢٠ مليون برميل من النفط والمنتجات يوميًا", "نحو خُمس تجارة الغاز المسال العالمية", "مئات السفن التجارية أسبوعيًا"] }
+          ]
+        },
+        {
+          "heading": "التاريخ",
+          "blocks": [
+            { "p": "سُمّي المضيق باسم مملكة [[hormuz-island|هرمز]] ومينائها القديم، الذي هيمن على التجارة بين الهند وفارس والعالم العربي من القرن الرابع عشر إلى القرن السادس عشر. واستولى البرتغاليون على هرمز عام ١٥٠٧ ومعها السيطرة على الممر، واحتفظوا بها حتى عام ١٦٢٢.{{iranica-hormuz}}{{floor-persian-gulf}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

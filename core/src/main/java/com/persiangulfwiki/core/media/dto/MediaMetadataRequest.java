@@ -55,7 +55,8 @@ public record MediaMetadataRequest(
                 + "to 360 (exclusive), at most two decimals.", example = "135")
         BigDecimal headingDeg,
 
-        @Schema(description = "Which north `headingDeg` is measured from. Requires `headingDeg`; omit when unknown.")
+        @Schema(description = "Which north `headingDeg` is measured from. Requires `headingDeg`; omit when unknown.\n\n"
+                + HeadingReference.VALUES_DOC)
         HeadingReference headingRef,
 
         @Size(max = 10, message = "{validation.mediaDescriptions.tooMany}")

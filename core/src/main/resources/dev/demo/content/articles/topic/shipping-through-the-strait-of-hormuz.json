@@ -1,0 +1,117 @@
+{
+  "key": "shipping-through-the-strait-of-hormuz",
+  "topics": ["shipping-and-transit", "economy-and-trade", "ports-and-oil-terminals"],
+  "canonicalLanguage": "en",
+  "gallery": ["tanker-omala", "basrah-tankers", "gulf-oman-night-iss"],
+  "history": { "revisions": 6, "contributors": 6 },
+  "translations": {
+    "fa": {
+      "slug": "کشتیرانی-در-تنگه-هرمز",
+      "title": "کشتیرانی در تنگهٔ هرمز",
+      "summary": "تنگهٔ هرمز چگونه به شلوغ‌ترین گذرگاه انرژی جهان تبدیل شد و تردد روزانهٔ کشتی‌ها در آن چگونه سازمان می‌یابد.",
+      "lead": [
+        "**کشتیرانی در تنگهٔ هرمز** یکی از حساس‌ترین رشته‌های تجارت جهانی است. هر روز ده‌ها نفتکش، کشتی کانتینری، حامل گاز مایع و کشتی فله‌بر از [[strait-of-hormuz|تنگهٔ هرمز]] می‌گذرند و حدود یک‌پنجم نفت و گاز طبیعی مایع مصرفی جهان از این مسیر جابه‌جا می‌شود.{{eia-hormuz-2023}}",
+        "بندرهای بزرگی چون [[bandar-abbas|بندرعباس]]، جبل علی، دمام و بندرهای کویت و قطر، و پایانه‌های نفتی چون [[kharg-island|خارک]]، همه برای پیوند با بازارهای جهانی به این گذرگاه وابسته‌اند.{{unctad-maritime-2023}}"
+      ],
+      "sections": [
+        {
+          "heading": "حجم تردد",
+          "blocks": [
+            { "p": "بر پایهٔ برآوردهای ادارهٔ اطلاعات انرژی آمریکا، روزانه حدود ۲۰ میلیون بشکه نفت خام و فراورده‌های نفتی از تنگهٔ هرمز می‌گذرد. بیشتر این محموله‌ها به سوی بازارهای آسیایی، به‌ویژه چین، هند، ژاپن و کرهٔ جنوبی، می‌روند.{{eia-hormuz-2023}} افزون بر انرژی، کالاهای مصرفی، مواد غذایی و ماشین‌آلات مورد نیاز کشورهای حاشیهٔ خلیج فارس نیز از همین مسیر وارد می‌شوند." },
+            { "ul": ["حدود ۲۰ میلیون بشکه نفت در روز", "حدود ۲۰ درصد تجارت گاز طبیعی مایع جهان", "بیشتر واردات کالای کشورهای حاشیه", "صدها حرکت کشتی در هفته"] }
+          ]
+        },
+        {
+          "heading": "طرح جداسازی تردد",
+          "blocks": [
+            { "p": "برای کاهش خطر برخورد، سازمان بین‌المللی دریانوردی در تنگهٔ هرمز یک طرح جداسازی تردد تعیین کرده است. کشتی‌های ورودی و خروجی هر یک در خطی به پهنای دو مایل حرکت می‌کنند و یک منطقهٔ حائل دومایلی آن‌ها را از هم جدا می‌کند. این خطوط در آب‌های سرزمینی عمان، در جنوب جزیرهٔ [[larak-island|لارک]]، قرار دارند.{{unctad-maritime-2023}}" }
+          ]
+        },
+        {
+          "heading": "ریسک‌ها و بیمه",
+          "blocks": [
+            { "p": "تنش‌های سیاسی و نظامی در منطقه بارها بر کشتیرانی تنگه اثر گذاشته است؛ از «جنگ نفتکش‌ها» در دههٔ ۱۹۸۰ تا رویدادهای توقیف و حمله به کشتی‌ها در سال‌های اخیر. در چنین دوره‌هایی، شرکت‌های بیمه حق بیمهٔ «ریسک جنگ» را برای کشتی‌های عبوری افزایش می‌دهند و همین امر بهای حمل‌ونقل و قیمت نفت را بالا می‌برد.{{eia-hormuz-2023}}{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "مسیرهای جایگزین",
+          "blocks": [
+            { "p": "تنها بخش کوچکی از جریان انرژی می‌تواند تنگه را دور بزند. خط لولهٔ شرق به غرب عربستان نفت را به بندر ینبع در دریای سرخ می‌برد و خط لولهٔ حبشان به فجیره در امارات، نفت ابوظبی را به کرانهٔ دریای عمان می‌رساند. ایران نیز پایانهٔ نفتی جاسک را در بیرون از تنگه ساخته است. با این حال، ظرفیت این مسیرها بسیار کمتر از حجم تردد تنگه است.{{eia-hormuz-2023}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "shipping-through-the-strait-of-hormuz",
+      "title": "Shipping through the Strait of Hormuz",
+      "summary": "How the Strait of Hormuz became the world's busiest energy chokepoint, and how its daily traffic is organised.",
+      "lead": [
+        "**Shipping through the Strait of Hormuz** is one of the most sensitive threads of world trade. Every day dozens of tankers, container ships, LNG carriers and bulk carriers pass through the [[strait-of-hormuz|Strait of Hormuz]], carrying about a fifth of the oil and liquefied natural gas the world consumes.{{eia-hormuz-2023}}",
+        "Major ports such as [[bandar-abbas|Bandar Abbas]], Jebel Ali, Dammam and the ports of Kuwait and Qatar, and oil terminals such as [[kharg-island|Kharg]], all depend on this passage to reach world markets.{{unctad-maritime-2023}}"
+      ],
+      "sections": [
+        {
+          "heading": "Traffic volume",
+          "blocks": [
+            { "p": "According to the US Energy Information Administration, about 20 million barrels of crude oil and petroleum products pass through the strait every day. Most of these cargoes go to Asian markets, especially China, India, Japan and South Korea.{{eia-hormuz-2023}} Besides energy, the consumer goods, food and machinery the Gulf states need also come in by this route." },
+            { "ul": ["About 20 million barrels of oil a day", "About 20 per cent of world LNG trade", "Most goods imports of the Gulf states", "Hundreds of ship movements a week"] }
+          ]
+        },
+        {
+          "heading": "The traffic separation scheme",
+          "blocks": [
+            { "p": "To reduce the risk of collision, the International Maritime Organization has set up a traffic separation scheme in the strait. Inbound and outbound ships each use a lane two miles wide, separated by a two-mile buffer zone. The lanes lie in Omani territorial waters, south of [[larak-island|Larak Island]].{{unctad-maritime-2023}}" }
+          ]
+        },
+        {
+          "heading": "Risk and insurance",
+          "blocks": [
+            { "p": "Political and military tension in the region has repeatedly affected shipping in the strait, from the \"Tanker War\" of the 1980s to seizures of and attacks on ships in recent years. At such times insurers raise war-risk premiums for ships in transit, pushing up freight rates and oil prices.{{eia-hormuz-2023}}{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "Alternative routes",
+          "blocks": [
+            { "p": "Only a small part of the energy flow can bypass the strait. Saudi Arabia's East–West pipeline carries oil to Yanbu on the Red Sea, and the UAE's Habshan–Fujairah pipeline takes Abu Dhabi's oil to the Gulf of Oman coast. Iran has also built the Jask oil terminal outside the strait. The capacity of these routes is nonetheless far smaller than the traffic through the strait.{{eia-hormuz-2023}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "الملاحة-عبر-مضيق-هرمز",
+      "title": "الملاحة عبر مضيق هرمز",
+      "summary": "كيف أصبح مضيق هرمز أكثر ممرات الطاقة ازدحامًا في العالم، وكيف تُنظَّم حركة السفن اليومية فيه.",
+      "lead": [
+        "تُعدّ **الملاحة عبر مضيق هرمز** من أكثر خيوط التجارة العالمية حساسية؛ إذ تعبر [[strait-of-hormuz|مضيق هرمز]] يوميًا عشرات الناقلات وسفن الحاويات وناقلات الغاز المسال وسفن البضائع السائبة، حاملة نحو خُمس النفط والغاز الطبيعي المسال الذي يستهلكه العالم.{{eia-hormuz-2023}}",
+        "وتعتمد الموانئ الكبرى مثل [[bandar-abbas|بندر عباس]] وجبل علي والدمام وموانئ الكويت وقطر، والمحطات النفطية مثل [[kharg-island|خارك]]، على هذا الممر للوصول إلى الأسواق العالمية.{{unctad-maritime-2023}}"
+      ],
+      "sections": [
+        {
+          "heading": "حجم الحركة",
+          "blocks": [
+            { "p": "وفق إدارة معلومات الطاقة الأمريكية، يمر عبر المضيق يوميًا نحو ٢٠ مليون برميل من النفط الخام والمنتجات النفطية، يتجه معظمها إلى الأسواق الآسيوية، ولا سيما الصين والهند واليابان وكوريا الجنوبية.{{eia-hormuz-2023}} وإلى جانب الطاقة تدخل عبر هذا الطريق أيضًا السلع الاستهلاكية والأغذية والآلات التي تحتاجها دول الخليج." },
+            { "ul": ["نحو ٢٠ مليون برميل من النفط يوميًا", "نحو ٢٠ في المئة من تجارة الغاز المسال العالمية", "معظم واردات دول الخليج من السلع", "مئات حركات السفن أسبوعيًا"] }
+          ]
+        },
+        {
+          "heading": "نظام فصل حركة المرور",
+          "blocks": [
+            { "p": "لتقليل خطر التصادم أقرّت المنظمة البحرية الدولية نظامًا لفصل حركة المرور في المضيق، تستخدم فيه السفن الداخلة والخارجة ممرًا عرضه ميلان لكل منهما، يفصل بينهما نطاق عازل عرضه ميلان، وتقع هذه الممرات في المياه الإقليمية العُمانية جنوب [[larak-island|جزيرة لارك]].{{unctad-maritime-2023}}" }
+          ]
+        },
+        {
+          "heading": "المخاطر والتأمين",
+          "blocks": [
+            { "p": "أثّر التوتر السياسي والعسكري في المنطقة مرارًا في الملاحة عبر المضيق، من «حرب الناقلات» في ثمانينيات القرن العشرين إلى احتجاز السفن ومهاجمتها في السنوات الأخيرة. وفي مثل هذه الأوقات يرفع المؤمّنون أقساط «مخاطر الحرب» على السفن العابرة، فترتفع أجور الشحن وأسعار النفط.{{eia-hormuz-2023}}{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "الطرق البديلة",
+          "blocks": [
+            { "p": "لا يستطيع الالتفاف على المضيق إلا جزء صغير من تدفق الطاقة؛ فخط أنابيب شرق-غرب السعودي ينقل النفط إلى ينبع على البحر الأحمر، وخط حبشان-الفجيرة الإماراتي ينقل نفط أبوظبي إلى ساحل بحر عُمان، كما بنت إيران محطة جاسك النفطية خارج المضيق. ومع ذلك تبقى طاقة هذه الطرق أقل بكثير من حجم الحركة عبر المضيق.{{eia-hormuz-2023}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

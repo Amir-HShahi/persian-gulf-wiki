@@ -32,6 +32,21 @@ public enum MediaFailureCode {
     CHECKSUM_MISMATCH("checksum_mismatch", "media.failure.checksumMismatch", true),
     PANORAMA_ASPECT_RATIO("panorama_aspect_ratio", "media.failure.panoramaAspectRatio", true);
 
+    // One line per value; shown wherever this type appears in the API docs.
+    public static final String VALUES_DOC = """
+            - `upload_missing`: nothing was uploaded.
+            - `upload_mismatch`: the uploaded file's size or checksum differs from what was declared.
+            - `duplicate`: the same file is already in this article's gallery.
+            - `unsupported_format`: the file's format isn't accepted.
+            - `corrupt_file`: the file couldn't be read.
+            - `dimensions_too_large`: the image is wider or taller than allowed.
+            - `checksum_mismatch`: the file changed between upload and processing.
+            - `panorama_aspect_ratio`: a 360° panorama must be twice as wide as it is tall.
+            - `rejected`: the file was refused for a reason with no more specific code. Treat an unknown code like \
+            this one.
+            - `processing_error`: processing broke down; the file itself may be fine.
+            - `processing_timeout`: processing didn't finish in time.""";
+
     private final String code;
     private final String messageKey;
     private final boolean isPipelineCode;

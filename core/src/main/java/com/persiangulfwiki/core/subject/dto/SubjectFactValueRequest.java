@@ -32,8 +32,7 @@ public record SubjectFactValueRequest(
         @Nullable LocalDate asOf,
         @Schema(description = "The source the value is cited from. Required on a NUMBER value.", nullable = true)
         @Nullable UUID sourceId,
-        @Schema(description = "PREFERRED (the default) or NORMAL. Only PREFERRED values are shown and counted in "
-                + "filters; NORMAL keeps an alternative on record, such as an older census figure. A field that "
-                + "takes a single value may still have several values, but at most one PREFERRED.", nullable = true)
+        @Schema(description = "Defaults to PREFERRED. A field that takes a single value may still have several "
+                + "values, but at most one PREFERRED.\n\n" + FactRank.VALUES_DOC, nullable = true)
         @Nullable FactRank rank) {
 }

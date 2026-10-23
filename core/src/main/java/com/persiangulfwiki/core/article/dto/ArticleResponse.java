@@ -14,7 +14,8 @@ import java.util.UUID;
 public record ArticleResponse(
         UUID id,
         UUID subjectId,
-        @Schema(description = "The kind of the subject this article is about; null when the article has no subject.") SubjectKind subjectKind,
+        @Schema(description = "The kind of the subject this article is about; null when the article has no subject.\n\n"
+                + SubjectKind.VALUES_DOC) SubjectKind subjectKind,
         String canonicalLanguage,
         UUID createdByUserId,
         Instant createdAt,

@@ -1,0 +1,117 @@
+{
+  "key": "persian-gulf-day",
+  "topics": ["culture-and-ethnography", "history-and-archaeology"],
+  "canonicalLanguage": "fa",
+  "gallery": ["persian-gulf-modis", "iran-coast-iss"],
+  "history": { "revisions": 5, "contributors": 6 },
+  "translations": {
+    "fa": {
+      "slug": "روز-ملی-خلیج-فارس",
+      "title": "روز ملی خلیج فارس",
+      "summary": "روز دهم اردیبهشت، سالروز بیرون راندن پرتغالی‌ها از تنگهٔ هرمز، که در تقویم رسمی ایران روز ملی خلیج فارس نام گرفته است.",
+      "lead": [
+        "**روز ملی خلیج فارس** روز دهم اردیبهشت (۳۰ آوریل) است که در سال ۱۳۸۴ خورشیدی در تقویم رسمی ایران ثبت شد. این روز سالروز پیروزی نیروهای ایرانی در بیرون راندن پرتغالی‌ها از [[hormuz-island|جزیرهٔ هرمز]] در سال ۱۶۲۲ میلادی است.{{potter-gulf-history}}",
+        "در این روز، همایش‌ها، نمایشگاه‌ها و جشنواره‌هایی در شهرهای ساحلی و سراسر ایران برای پاسداشت تاریخ، فرهنگ و طبیعت خلیج فارس برگزار می‌شود."
+      ],
+      "sections": [
+        {
+          "heading": "پیشینهٔ تاریخی",
+          "blocks": [
+            { "p": "پرتغالی‌ها بیش از یک سده بر هرمز و گذرگاه [[strait-of-hormuz|تنگهٔ هرمز]] چیره بودند. در بهار سال ۱۶۲۲، سپاه شاه عباس صفوی به فرماندهی امام‌قلی‌خان، با همراهی ناوگان انگلیسی، دژ پرتغالی هرمز را محاصره کرد و پس از چند هفته آن را گشود. این پیروزی پایان سلطهٔ پرتغال بر خلیج فارس و آغاز دوران تازه‌ای در بازرگانی منطقه بود.{{floor-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "نام‌گذاری روز ملی",
+          "blocks": [
+            { "p": "انتخاب این روز به‌عنوان روز ملی، از یک سو یادآور این رویداد تاریخی و از سوی دیگر واکنشی فرهنگی به کاربرد نام‌های جعلی برای خلیج فارس در برخی رسانه‌ها و نقشه‌ها بود. شورای فرهنگ عمومی کشور در سال ۱۳۸۴ این پیشنهاد را تصویب کرد و از آن پس، روز دهم اردیبهشت هر سال با برنامه‌های فرهنگی گرامی داشته می‌شود.{{iranica-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "برنامه‌ها و آیین‌ها",
+          "blocks": [
+            { "p": "در شهرهای ساحلی مانند [[bandar-abbas|بندرعباس]]، [[bushehr-port|بوشهر]] و [[qeshm-island|قشم]]، رژه‌های دریایی لنج‌ها، اجرای موسیقی بندری، نمایشگاه‌های صنایع دستی و عکس، و همایش‌های علمی دربارهٔ تاریخ و محیط زیست خلیج فارس برگزار می‌شود. دانش‌آموزان و دانشجویان نیز با برنامه‌هایی چون پاک‌سازی ساحل‌ها، در این روز به حفاظت از محیط زیست دریایی می‌پردازند." },
+            { "ul": ["رژهٔ دریایی لنج‌ها", "جشنوارهٔ موسیقی بندری", "همایش‌های علمی و تاریخی", "پاک‌سازی ساحل‌ها"] }
+          ]
+        },
+        {
+          "heading": "پیوند با محیط زیست",
+          "blocks": [
+            { "p": "در سال‌های اخیر، روز ملی خلیج فارس بیش از پیش به فرصتی برای توجه به مسائل زیست‌محیطی این دریا تبدیل شده است؛ از حفاظت از جنگل‌های [[grey-mangrove|حرا]] و [[hawksbill-turtle|لاک‌پشت‌های دریایی]] تا کاهش آلودگی نفتی و پلاستیکی. سازمان‌های مردم‌نهاد محیط زیستی این روز را برای آموزش همگانی و جلب مشارکت مردم محلی به کار می‌گیرند.{{doe-protected-areas}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "persian-gulf-day",
+      "title": "Persian Gulf Day",
+      "summary": "30 April, the anniversary of the expulsion of the Portuguese from the Strait of Hormuz, named National Persian Gulf Day in Iran's official calendar.",
+      "lead": [
+        "**National Persian Gulf Day** falls on 10 Ordibehesht (30 April) and was added to Iran's official calendar in 2005. It marks the anniversary of the victory of Persian forces in driving the Portuguese from [[hormuz-island|Hormuz Island]] in 1622.{{potter-gulf-history}}",
+        "On this day conferences, exhibitions and festivals are held in coastal cities and across Iran to celebrate the history, culture and nature of the Persian Gulf."
+      ],
+      "sections": [
+        {
+          "heading": "Historical background",
+          "blocks": [
+            { "p": "For more than a century the Portuguese controlled Hormuz and the [[strait-of-hormuz|Strait of Hormuz]]. In the spring of 1622 the army of Shah Abbas, led by Imam Qoli Khan and supported by an English fleet, besieged the Portuguese fort on Hormuz and took it after several weeks. The victory ended Portuguese dominance in the Persian Gulf and opened a new era in the region's trade.{{floor-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "Naming the day",
+          "blocks": [
+            { "p": "Choosing this date as a national day both commemorates the historic event and was a cultural response to the use of invented names for the Persian Gulf in some media and maps. Iran's Public Culture Council approved the proposal in 2005, and 30 April has been marked with cultural events every year since.{{iranica-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "Events and celebrations",
+          "blocks": [
+            { "p": "Coastal cities such as [[bandar-abbas|Bandar Abbas]], [[bushehr-port|Bushehr]] and [[qeshm-island|Qeshm]] hold dhow parades, Bandari music performances, handicraft and photography exhibitions, and conferences on the history and environment of the Persian Gulf. Schoolchildren and students also take part in programmes such as beach clean-ups on this day." },
+            { "ul": ["Dhow parades at sea", "Bandari music festivals", "Academic and historical conferences", "Beach clean-ups"] }
+          ]
+        },
+        {
+          "heading": "A day for the environment",
+          "blocks": [
+            { "p": "In recent years Persian Gulf Day has increasingly become a moment to draw attention to the sea's environmental problems, from protecting [[grey-mangrove|mangroves]] and [[hawksbill-turtle|sea turtles]] to reducing oil and plastic pollution. Environmental NGOs use the day for public education and to involve local communities.{{doe-protected-areas}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "يوم-الخليج-الفارسي",
+      "title": "يوم الخليج الفارسي",
+      "summary": "الثلاثون من أبريل، ذكرى طرد البرتغاليين من مضيق هرمز، الذي سُمّي اليوم الوطني للخليج الفارسي في التقويم الرسمي الإيراني.",
+      "lead": [
+        "**اليوم الوطني للخليج الفارسي** يوافق العاشر من أرديبهشت (٣٠ أبريل)، وقد أُدرج في التقويم الرسمي الإيراني عام ٢٠٠٥، ويُحيي ذكرى انتصار القوات الإيرانية في طرد البرتغاليين من [[hormuz-island|جزيرة هرمز]] عام ١٦٢٢.{{potter-gulf-history}}",
+        "وفي هذا اليوم تُقام المؤتمرات والمعارض والمهرجانات في المدن الساحلية وأنحاء إيران احتفاءً بتاريخ الخليج الفارسي وثقافته وطبيعته."
+      ],
+      "sections": [
+        {
+          "heading": "الخلفية التاريخية",
+          "blocks": [
+            { "p": "سيطر البرتغاليون أكثر من قرن على هرمز و[[strait-of-hormuz|مضيق هرمز]]. وفي ربيع عام ١٦٢٢ حاصر جيش الشاه عباس، بقيادة إمام قلي خان وبمساندة أسطول إنجليزي، القلعة البرتغالية في هرمز واستولى عليها بعد أسابيع، فأنهى هذا النصر الهيمنة البرتغالية على الخليج وفتح عهدًا جديدًا في تجارة المنطقة.{{floor-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "تسمية اليوم",
+          "blocks": [
+            { "p": "جاء اختيار هذا التاريخ يومًا وطنيًا لإحياء ذكرى الحدث التاريخي من جهة، وردًّا ثقافيًا على استعمال أسماء مختلَقة للخليج الفارسي في بعض وسائل الإعلام والخرائط من جهة أخرى. وقد أقرّ مجلس الثقافة العامة في إيران الاقتراح عام ٢٠٠٥، ومنذ ذلك الحين يُحتفى بالثلاثين من أبريل كل عام بفعاليات ثقافية.{{iranica-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "الفعاليات والاحتفالات",
+          "blocks": [
+            { "p": "تنظّم المدن الساحلية مثل [[bandar-abbas|بندر عباس]] و[[bushehr-port|بوشهر]] و[[qeshm-island|قشم]] مسيرات بحرية للمراكب، وعروضًا للموسيقى البندرية، ومعارض للحرف اليدوية والتصوير، ومؤتمرات حول تاريخ الخليج وبيئته، ويشارك التلاميذ والطلاب في هذا اليوم في برامج مثل تنظيف الشواطئ." },
+            { "ul": ["مسيرات بحرية للمراكب", "مهرجانات الموسيقى البندرية", "مؤتمرات علمية وتاريخية", "تنظيف الشواطئ"] }
+          ]
+        },
+        {
+          "heading": "يوم للبيئة",
+          "blocks": [
+            { "p": "أصبح يوم الخليج الفارسي في السنوات الأخيرة على نحو متزايد مناسبة للفت الانتباه إلى مشكلات البحر البيئية، من حماية [[grey-mangrove|القرم]] و[[hawksbill-turtle|السلاحف البحرية]] إلى الحد من التلوث النفطي والبلاستيكي، وتستثمره المنظمات البيئية غير الحكومية للتوعية العامة وإشراك المجتمعات المحلية.{{doe-protected-areas}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "key": "portuguese-in-the-persian-gulf",
+  "topics": ["history-and-archaeology", "shipping-and-transit", "islands"],
+  "canonicalLanguage": "fa",
+  "gallery": ["bahrain-fort", "strait-hormuz-modis"],
+  "history": { "revisions": 4, "contributors": 5 },
+  "translations": {
+    "fa": {
+      "slug": "پرتغالی‌ها-در-خلیج-فارس",
+      "title": "پرتغالی‌ها در خلیج فارس",
+      "summary": "یک سدهٔ چیرگی دریایی پرتغال بر خلیج فارس، از تصرف هرمز در ۱۵۰۷ تا بیرون‌رانده‌شدن در ۱۶۲۲.",
+      "lead": [
+        "**حضور پرتغالی‌ها در خلیج فارس** از آغاز سدهٔ شانزدهم تا ربع نخست سدهٔ هفدهم میلادی به درازا کشید. پرتغالی‌ها با تصرف [[hormuz-island|هرمز]] در سال ۱۵۰۷ بر گذرگاه [[strait-of-hormuz|تنگهٔ هرمز]] چیره شدند و با ساختن دژهایی در هرمز، [[qeshm-island|قشم]]، بحرین و مسقط، بازرگانی دریایی منطقه را زیر نظارت گرفتند.{{floor-persian-gulf}}",
+        "این دوره با بازپس‌گیری هرمز به دست سپاه شاه عباس صفوی در سال ۱۶۲۲ به پایان رسید و آغازگر رقابت کمپانی‌های هند شرقی انگلیس و هلند در خلیج فارس بود.{{potter-gulf-history}}"
+      ],
+      "sections": [
+        {
+          "heading": "رسیدن آلبوکرکی",
+          "blocks": [
+            { "p": "پس از آنکه واسکو دا گاما در سال ۱۴۹۸ راه دریایی دور آفریقا به هند را گشود، پرتغالی‌ها کوشیدند بازرگانی ادویه را در اقیانوس هند در انحصار خود بگیرند. آلفونسو دو آلبوکرکی، فرماندهٔ ناوگان پرتغال، دریافت که برای این کار باید سه دروازهٔ این اقیانوس، یعنی عدن، مالاکا و هرمز، را در دست داشت. او در سال ۱۵۰۷ با چند کشتی به هرمز رسید و پادشاه هرمز را به پذیرش باج‌گزاری واداشت.{{floor-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "دژها و نظام کارتاز",
+          "blocks": [
+            { "p": "آلبوکرکی در سال ۱۵۱۵ بازگشت و دژ بزرگ هرمز را ساخت که ویرانه‌هایش هنوز در شمال جزیره پیداست. پرتغالی‌ها با نظام «کارتاز»، یعنی پروانهٔ دریانوردی، کشتی‌های بازرگانان آسیایی را وادار به پرداخت عوارض و گذر از بندرهای زیر نظارت خود می‌کردند. کشتی‌های بی‌پروانه توقیف یا غرق می‌شدند.{{potter-gulf-history}}" },
+            { "ul": ["دژ هرمز (۱۵۱۵)", "دژ قشم", "دژ بحرین (قلعة البحرین)", "دژهای جلالی و میرانی در مسقط"] }
+          ]
+        },
+        {
+          "heading": "پایان دوران پرتغالی",
+          "blocks": [
+            { "p": "در آغاز سدهٔ هفدهم، شاه عباس یکم که می‌خواست بازرگانی ابریشم ایران را از راه خلیج فارس گسترش دهد، با کمپانی هند شرقی انگلیس پیمان بست. نیروهای ایرانی به فرماندهی امام‌قلی‌خان، با پشتیبانی کشتی‌های انگلیسی، نخست قشم و سپس در آوریل ۱۶۲۲ هرمز را پس گرفتند. شاه عباس پس از آن بازرگانی را به بندر گمبرون در خشکی منتقل کرد که به [[bandar-abbas|بندرعباس]] نامور شد.{{floor-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "میراث",
+          "blocks": [
+            { "p": "دژهای پرتغالی در هرمز، قشم، [[larak-island|لارک]] و بحرین، توپ‌های آهنی، سنگ‌قبرها و واژه‌هایی که از پرتغالی به گویش‌های بندری و زبان [[larak-island|کمزاری]] راه یافته‌اند، یادگارهای این دوران‌اند. دژ هرمز امروز در فهرست میراث ملی ایران جای دارد و بخشی از برنامه‌های مرمت و گردشگری جزیره است.{{iranica-hormuz}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "portuguese-in-the-persian-gulf",
+      "title": "The Portuguese in the Persian Gulf",
+      "summary": "A century of Portuguese naval dominance in the Persian Gulf, from the seizure of Hormuz in 1507 to their expulsion in 1622.",
+      "lead": [
+        "The **Portuguese presence in the Persian Gulf** lasted from the early sixteenth century to the first quarter of the seventeenth. By seizing [[hormuz-island|Hormuz]] in 1507 the Portuguese gained control of the [[strait-of-hormuz|Strait of Hormuz]], and with forts on Hormuz, [[qeshm-island|Qeshm]], Bahrain and Muscat they took charge of the region's sea trade.{{floor-persian-gulf}}",
+        "The period ended when the army of Shah Abbas recaptured Hormuz in 1622, opening the rivalry of the English and Dutch East India Companies in the Gulf.{{potter-gulf-history}}"
+      ],
+      "sections": [
+        {
+          "heading": "The arrival of Albuquerque",
+          "blocks": [
+            { "p": "After Vasco da Gama opened the sea route around Africa to India in 1498, the Portuguese set out to monopolise the spice trade of the Indian Ocean. Afonso de Albuquerque, commander of the Portuguese fleet, saw that this required holding the ocean's three gateways: Aden, Malacca and Hormuz. In 1507 he reached Hormuz with a handful of ships and forced its king to pay tribute.{{floor-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "Forts and the cartaz system",
+          "blocks": [
+            { "p": "Albuquerque returned in 1515 and built the great fort of Hormuz, whose ruins still stand on the north of the island. Through the cartaz, a licence to sail, the Portuguese forced Asian merchants' ships to pay duties and to call at ports under their control. Ships without a licence were seized or sunk.{{potter-gulf-history}}" },
+            { "ul": ["Hormuz fort (1515)", "Qeshm fort", "Bahrain fort (Qal'at al-Bahrain)", "Jalali and Mirani forts in Muscat"] }
+          ]
+        },
+        {
+          "heading": "The end of the Portuguese era",
+          "blocks": [
+            { "p": "In the early seventeenth century Shah Abbas I, who wanted to expand Iran's silk trade through the Gulf, allied with the English East India Company. Persian forces under Imam Qoli Khan, supported by English ships, took Qeshm and then, in April 1622, Hormuz. Shah Abbas then moved trade to the mainland port of Gombroon, which became known as [[bandar-abbas|Bandar Abbas]].{{floor-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "Legacy",
+          "blocks": [
+            { "p": "Portuguese forts on Hormuz, Qeshm, [[larak-island|Larak]] and Bahrain, iron cannon, gravestones and words that passed from Portuguese into the Bandari dialects and the Kumzari language are the legacy of this period. The Hormuz fort is now a listed national monument and part of the island's restoration and tourism plans.{{iranica-hormuz}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "البرتغاليون-في-الخليج-الفارسي",
+      "title": "البرتغاليون في الخليج الفارسي",
+      "summary": "قرن من السيطرة البحرية البرتغالية على الخليج الفارسي، من الاستيلاء على هرمز عام ١٥٠٧ حتى طردهم عام ١٦٢٢.",
+      "lead": [
+        "امتد **الوجود البرتغالي في الخليج الفارسي** من مطلع القرن السادس عشر إلى الربع الأول من القرن السابع عشر. فبالاستيلاء على [[hormuz-island|هرمز]] عام ١٥٠٧ سيطر البرتغاليون على [[strait-of-hormuz|مضيق هرمز]]، وبقلاعهم في هرمز و[[qeshm-island|قشم]] والبحرين ومسقط أحكموا قبضتهم على تجارة المنطقة البحرية.{{floor-persian-gulf}}",
+        "وانتهت هذه المرحلة حين استعاد جيش الشاه عباس هرمز عام ١٦٢٢، لتبدأ منافسة شركتي الهند الشرقية الإنجليزية والهولندية في الخليج.{{potter-gulf-history}}"
+      ],
+      "sections": [
+        {
+          "heading": "وصول ألبوكيرك",
+          "blocks": [
+            { "p": "بعد أن فتح فاسكو دا غاما الطريق البحري حول أفريقيا إلى الهند عام ١٤٩٨، سعى البرتغاليون إلى احتكار تجارة التوابل في المحيط الهندي. وأدرك ألفونسو دي ألبوكيرك، قائد الأسطول البرتغالي، أن ذلك يتطلب السيطرة على بوابات المحيط الثلاث: عدن وملقا وهرمز، فوصل هرمز عام ١٥٠٧ ببضع سفن وأجبر ملكها على دفع الجزية.{{floor-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "القلاع ونظام الكارتاز",
+          "blocks": [
+            { "p": "عاد ألبوكيرك عام ١٥١٥ وبنى قلعة هرمز الكبيرة التي ما تزال أطلالها قائمة في شمال الجزيرة. ومن خلال «الكارتاز»، أي رخصة الملاحة، أجبر البرتغاليون سفن التجار الآسيويين على دفع الرسوم والمرور بالموانئ الخاضعة لهم، وكانت السفن غير المرخصة تُصادر أو تُغرق.{{potter-gulf-history}}" },
+            { "ul": ["قلعة هرمز (١٥١٥)", "قلعة قشم", "قلعة البحرين", "قلعتا الجلالي والميراني في مسقط"] }
+          ]
+        },
+        {
+          "heading": "نهاية العهد البرتغالي",
+          "blocks": [
+            { "p": "في مطلع القرن السابع عشر تحالف الشاه عباس الأول، الراغب في توسيع تجارة الحرير الإيرانية عبر الخليج، مع شركة الهند الشرقية الإنجليزية. واستولت القوات الإيرانية بقيادة إمام قلي خان، بمساندة السفن الإنجليزية، على قشم ثم على هرمز في أبريل ١٦٢٢، ونقل الشاه عباس بعدها التجارة إلى ميناء جمبرون على البر الذي عُرف بـ[[bandar-abbas|بندر عباس]].{{floor-persian-gulf}}" }
+          ]
+        },
+        {
+          "heading": "الإرث",
+          "blocks": [
+            { "p": "تُعدّ القلاع البرتغالية في هرمز وقشم و[[larak-island|لارك]] والبحرين، والمدافع الحديدية، وشواهد القبور، والكلمات التي انتقلت من البرتغالية إلى اللهجات البندرية واللغة الكمزارية، إرث هذه المرحلة. وقلعة هرمز اليوم معلم وطني مسجّل وجزء من خطط الترميم والسياحة في الجزيرة.{{iranica-hormuz}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

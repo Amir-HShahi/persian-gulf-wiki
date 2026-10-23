@@ -1,0 +1,117 @@
+{
+  "key": "climate-of-the-persian-gulf",
+  "topics": ["geography-and-climate", "pollution-and-environment"],
+  "canonicalLanguage": "fa",
+  "gallery": ["gulf-dust-storm-2003", "gulf-dust-plume", "persian-gulf-modis"],
+  "history": { "revisions": 4, "contributors": 4 },
+  "translations": {
+    "fa": {
+      "slug": "آب‌وهوای-خلیج-فارس",
+      "title": "آب‌وهوای خلیج فارس",
+      "summary": "اقلیم گرم، شرجی و خشک خلیج فارس، با تابستان‌های سوزان، طوفان‌های گردوغبار و یکی از گرم‌ترین آب‌های دریایی جهان.",
+      "lead": [
+        "**آب‌وهوای خلیج فارس** از گرم‌ترین و سخت‌ترین اقلیم‌های جهان است. تابستان‌ها طولانی، بسیار گرم و شرجی‌اند و دمای هوا در کرانه‌ها گاه از ۵۰ درجهٔ سلسیوس می‌گذرد. زمستان‌ها کوتاه و معتدل‌اند و بیشتر بارش اندک سالانه در همین فصل می‌بارد.{{irimo-climate}}",
+        "دمای آب خلیج فارس در تابستان به بیش از ۳۴ درجه می‌رسد که آن را به یکی از گرم‌ترین دریاهای جهان تبدیل می‌کند.{{ropme-soe-2021}}"
+      ],
+      "sections": [
+        {
+          "heading": "دما و رطوبت",
+          "blocks": [
+            { "p": "ترکیب گرمای بالا و رطوبت زیاد، «دمای احساسی» را در کرانه‌های خلیج فارس به حدی می‌رساند که در برخی روزهای تابستان برای بدن انسان خطرناک است. شهرهایی چون [[bandar-abbas|بندرعباس]]، [[bushehr-port|بوشهر]] و بندر ماهشهر هر سال روزهایی با شاخص گرمای بسیار بالا ثبت می‌کنند. پژوهشگران هشدار داده‌اند که با گرمایش جهانی، این روزها در دهه‌های آینده بیشتر خواهند شد.{{irimo-climate}}" },
+            { "ul": ["میانگین دمای تابستان: ۳۵ تا ۴۰ درجه", "رطوبت نسبی تابستان: بیش از ۷۰ درصد در کرانه‌ها", "بارش سالانه: کمتر از ۲۰۰ میلی‌متر", "دمای آب تابستان: بیش از ۳۲ درجه"] }
+          ]
+        },
+        {
+          "heading": "بادها",
+          "blocks": [
+            { "p": "باد غالب خلیج فارس «شمال» نام دارد؛ بادی شمال غربی که در تابستان و گاه در زمستان از سوی بین‌النهرین می‌وزد و گردوغبار فراوانی با خود می‌آورد. در کرانه‌های ایرانی، بادهای محلی دیگری مانند «قوس» از جنوب شرق و «سهیلی» نیز شناخته شده‌اند که در دریانوردی و صیادی سنتی اهمیت داشتند.{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "طوفان‌های گردوغبار",
+          "blocks": [
+            { "p": "طوفان‌های گردوغبار، که بیشتر از بیابان‌ها و تالاب‌های خشک‌شدهٔ عراق، سوریه و عربستان برمی‌خیزند، از ویژگی‌های اقلیم منطقه‌اند. این طوفان‌ها دید را کاهش می‌دهند، به سلامت مردم آسیب می‌زنند و گاه فرودگاه‌ها و بندرها را تعطیل می‌کنند. گردوغبار فرونشسته بر آب، مواد مغذی مانند آهن را نیز به دریا می‌رساند و بر پلانکتون‌ها اثر می‌گذارد.{{nasa-earth-observatory-gulf}}" }
+          ]
+        },
+        {
+          "heading": "تغییر اقلیم",
+          "blocks": [
+            { "p": "دمای سطح آب خلیج فارس در دهه‌های اخیر سریع‌تر از میانگین جهانی افزایش یافته است. پیامدهای این گرمایش، از [[acropora-downingi|سفیدشدگی مرجان‌ها]] و کاهش اکسیژن آب تا افزایش شکوفایی‌های جلبکی و [[crambionella-orsini|عروس‌های دریایی]]، در سراسر منطقه دیده می‌شود. بالا آمدن سطح دریا نیز جزایر کم‌ارتفاع و پهنه‌های جزرومدی را تهدید می‌کند.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "climate-of-the-persian-gulf",
+      "title": "Climate of the Persian Gulf",
+      "summary": "The hot, humid and dry climate of the Persian Gulf, with scorching summers, dust storms and some of the warmest sea water on Earth.",
+      "lead": [
+        "The **climate of the Persian Gulf** is among the hottest and harshest in the world. Summers are long, very hot and humid, with coastal air temperatures sometimes above 50 °C. Winters are short and mild, and most of the scant annual rain falls in this season.{{irimo-climate}}",
+        "Summer sea temperatures exceed 34 °C, making the Persian Gulf one of the warmest seas on Earth.{{ropme-soe-2021}}"
+      ],
+      "sections": [
+        {
+          "heading": "Temperature and humidity",
+          "blocks": [
+            { "p": "The combination of heat and humidity pushes the \"feels-like\" temperature on the Gulf coast to levels dangerous to the human body on some summer days. Cities such as [[bandar-abbas|Bandar Abbas]], [[bushehr-port|Bushehr]] and Bandar Mahshahr record days with extreme heat index values every year. Researchers warn that such days will become more frequent in the coming decades with global warming.{{irimo-climate}}" },
+            { "ul": ["Average summer temperature: 35 to 40 °C", "Summer relative humidity: above 70 per cent on the coast", "Annual rainfall: under 200 mm", "Summer sea temperature: above 32 °C"] }
+          ]
+        },
+        {
+          "heading": "Winds",
+          "blocks": [
+            { "p": "The prevailing wind of the Persian Gulf is the shamal, a north-westerly blowing from Mesopotamia in summer and sometimes in winter, carrying a great deal of dust. On the Iranian coast other local winds, such as the kaus from the south-east and the soheili, are also known and mattered greatly to traditional sailing and fishing.{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "Dust storms",
+          "blocks": [
+            { "p": "Dust storms, rising mostly from the deserts and dried-up marshes of Iraq, Syria and Saudi Arabia, are a defining feature of the region's climate. They cut visibility, harm people's health and sometimes close airports and ports. Dust settling on the water also brings nutrients such as iron to the sea, affecting plankton.{{nasa-earth-observatory-gulf}}" }
+          ]
+        },
+        {
+          "heading": "Climate change",
+          "blocks": [
+            { "p": "The surface temperature of the Persian Gulf has risen faster than the global average in recent decades. The effects — from [[acropora-downingi|coral bleaching]] and falling oxygen levels to more algal blooms and [[crambionella-orsini|jellyfish]] outbreaks — are visible across the region. Rising sea level also threatens low-lying islands and tidal flats.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "مناخ-الخليج-الفارسي",
+      "title": "مناخ الخليج الفارسي",
+      "summary": "مناخ الخليج الفارسي الحار الرطب الجاف، بصيفه اللاهب وعواصفه الغبارية ومياهه التي من بين الأدفأ على الأرض.",
+      "lead": [
+        "يُعدّ **مناخ الخليج الفارسي** من أشد مناخات العالم حرارة وقسوة؛ فالصيف طويل شديد الحرارة والرطوبة، وقد تتجاوز حرارة الهواء على السواحل ٥٠ درجة مئوية، والشتاء قصير معتدل يهطل فيه معظم المطر السنوي القليل.{{irimo-climate}}",
+        "وتتجاوز حرارة مياه الخليج صيفًا ٣٤ درجة مئوية، مما يجعله من أدفأ بحار الأرض.{{ropme-soe-2021}}"
+      ],
+      "sections": [
+        {
+          "heading": "الحرارة والرطوبة",
+          "blocks": [
+            { "p": "يرفع اجتماع الحرارة والرطوبة «درجة الحرارة المحسوسة» على سواحل الخليج إلى مستويات خطرة على جسم الإنسان في بعض أيام الصيف، وتسجّل مدن مثل [[bandar-abbas|بندر عباس]] و[[bushehr-port|بوشهر]] وبندر ماهشهر كل عام أيامًا بمؤشر حرارة شديد. ويحذر الباحثون من أن هذه الأيام ستزداد في العقود المقبلة مع الاحترار العالمي.{{irimo-climate}}" },
+            { "ul": ["متوسط حرارة الصيف: ٣٥ إلى ٤٠ درجة", "الرطوبة النسبية صيفًا: أكثر من ٧٠ في المئة على الساحل", "الهطول السنوي: أقل من ٢٠٠ مليمتر", "حرارة مياه البحر صيفًا: أكثر من ٣٢ درجة"] }
+          ]
+        },
+        {
+          "heading": "الرياح",
+          "blocks": [
+            { "p": "الريح السائدة في الخليج هي «الشمال»، ريح شمالية غربية تهب من بلاد الرافدين صيفًا وأحيانًا شتاءً حاملة كثيرًا من الغبار. وعلى الساحل الإيراني تُعرف رياح محلية أخرى مثل «الكوس» من الجنوب الشرقي و«السهيلي»، وكانت لها أهمية كبيرة في الملاحة والصيد التقليديين.{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "العواصف الغبارية",
+          "blocks": [
+            { "p": "تُعدّ العواصف الغبارية، التي تهب غالبًا من صحارى العراق وسوريا والسعودية وأهوارها الجافة، من سمات مناخ المنطقة؛ فهي تحجب الرؤية وتضر بصحة الناس وتغلق أحيانًا المطارات والموانئ. كما يحمل الغبار المترسب على الماء مغذيات كالحديد إلى البحر فيؤثر في العوالق.{{nasa-earth-observatory-gulf}}" }
+          ]
+        },
+        {
+          "heading": "تغيّر المناخ",
+          "blocks": [
+            { "p": "ارتفعت حرارة سطح مياه الخليج في العقود الأخيرة أسرع من المتوسط العالمي، وتظهر آثار ذلك في أنحاء المنطقة، من [[acropora-downingi|ابيضاض المرجان]] وتراجع الأكسجين إلى ازدياد أزهار الطحالب و[[crambionella-orsini|قناديل البحر]]. كما يهدد ارتفاع مستوى البحر الجزر المنخفضة والمسطحات المدّية.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

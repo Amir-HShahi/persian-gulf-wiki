@@ -1,0 +1,117 @@
+{
+  "key": "oil-pollution-persian-gulf",
+  "topics": ["pollution-and-environment", "ports-and-oil-terminals", "marine-life"],
+  "canonicalLanguage": "fa",
+  "gallery": ["oil-spill-shore", "basrah-tankers", "gulf-night-iss"],
+  "history": { "revisions": 5, "contributors": 5 },
+  "translations": {
+    "fa": {
+      "slug": "آلودگی-نفتی-خلیج-فارس",
+      "title": "آلودگی نفتی در خلیج فارس",
+      "summary": "منابع، رویدادهای بزرگ و پیامدهای آلودگی نفتی در یکی از پرترددترین دریاهای نفتی جهان.",
+      "lead": [
+        "**آلودگی نفتی** یکی از بزرگ‌ترین تهدیدهای زیست‌محیطی خلیج فارس است. این دریای کم‌عمق و نیمه‌بسته، که آبش هر چند سال یک بار از راه [[strait-of-hormuz|تنگهٔ هرمز]] نو می‌شود، میزبان صدها سکوی نفتی، ده‌ها پایانهٔ صادراتی و رفت‌وآمد روزانهٔ نفتکش‌های بسیار است.{{ropme-soe-2021}}",
+        "برآوردها نشان می‌دهد که خلیج فارس، به نسبت وسعتش، یکی از آلوده‌ترین دریاهای جهان از نظر نفت است؛ هم به سبب نشت‌های بزرگ تاریخی و هم به سبب آلودگی‌های کوچک و پیوسته.{{ropme-soe-2013}}"
+      ],
+      "sections": [
+        {
+          "heading": "منابع آلودگی",
+          "blocks": [
+            { "p": "بخش بزرگی از آلودگی نفتی خلیج فارس از منابع پیوسته و کوچک می‌آید و نه از حادثه‌های بزرگ. تخلیهٔ آب توازن آلوده از نفتکش‌ها، شست‌وشوی مخازن، نشت از خطوط لوله و سکوها، آب‌های تولیدی همراه نفت و پساب پالایشگاه‌ها، هر روز مقداری نفت به دریا می‌رسانند.{{ropme-soe-2021}}" },
+            { "ul": ["تخلیهٔ آب توازن و شست‌وشوی مخازن نفتکش‌ها", "نشت از سکوها و خطوط لولهٔ زیردریایی", "پساب پالایشگاه‌ها و مجتمع‌های پتروشیمی", "تراوش طبیعی نفت از بستر دریا"] }
+          ]
+        },
+        {
+          "heading": "رویدادهای بزرگ",
+          "blocks": [
+            { "p": "در سال ۱۹۸۳، در جریان جنگ ایران و عراق، چاه‌ها و سکوهای میدان‌های نوروز و [[soroosh-field|سروش]] آسیب دیدند و ماه‌ها نفت به دریا ریخت. بزرگ‌ترین فاجعهٔ نفتی تاریخ خلیج فارس در جنگ ۱۹۹۱ رخ داد، هنگامی که میلیون‌ها بشکه نفت از پایانه‌ها و نفتکش‌های کویت به دریا رها شد و صدها کیلومتر از سواحل عربستان را پوشاند.{{ropme-soe-2013}}{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "پیامدها برای زیست‌بوم",
+          "blocks": [
+            { "p": "نفت بر سطح آب، پرندگان دریایی را آلوده و ناتوان از پرواز و گرم نگه داشتن بدن می‌کند. لایه‌های نفت در پهنه‌های جزرومدی و جنگل‌های [[grey-mangrove|حرا]] سال‌ها باقی می‌مانند و ریشه‌های تنفسی درختان را می‌پوشانند. صخره‌های مرجانی، علفزارهای دریایی و زیستگاه‌های [[penaeus-semisulcatus|میگو]] و ماهی نیز از ترکیبات سمی نفت آسیب می‌بینند و اثر آن بر صیادی سال‌ها پس از یک رویداد بزرگ دیده می‌شود.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "همکاری منطقه‌ای",
+          "blocks": [
+            { "p": "هشت کشور حاشیهٔ خلیج فارس در سال ۱۹۷۸ کنوانسیون کویت را امضا کردند و سازمان منطقه‌ای حفاظت از محیط زیست دریایی (راپمی) را پدید آوردند. مرکز کمک‌های متقابل اضطراری دریایی این سازمان، واکنش هماهنگ به نشت‌های بزرگ را سازمان‌دهی می‌کند. پایش ماهواره‌ای لکه‌های نفتی و ممنوعیت تخلیهٔ آب توازن آلوده در آب‌های منطقه از دیگر اقدام‌های این همکاری‌اند.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "oil-pollution-in-the-persian-gulf",
+      "title": "Oil pollution in the Persian Gulf",
+      "summary": "The sources, major incidents and effects of oil pollution in one of the world's busiest oil seas.",
+      "lead": [
+        "**Oil pollution** is one of the greatest environmental threats to the Persian Gulf. This shallow, semi-enclosed sea, whose water is renewed only every few years through the [[strait-of-hormuz|Strait of Hormuz]], hosts hundreds of oil platforms, dozens of export terminals and constant tanker traffic.{{ropme-soe-2021}}",
+        "Estimates suggest that, relative to its size, the Persian Gulf is one of the most oil-polluted seas in the world, because of both large historic spills and small, continuous pollution.{{ropme-soe-2013}}"
+      ],
+      "sections": [
+        {
+          "heading": "Sources of pollution",
+          "blocks": [
+            { "p": "Much of the Gulf's oil pollution comes not from major accidents but from small, continuous sources. Discharges of oily ballast water and tank washings, leaks from pipelines and platforms, produced water and refinery effluent put some oil into the sea every day.{{ropme-soe-2021}}" },
+            { "ul": ["Ballast water and tank washings from tankers", "Leaks from platforms and subsea pipelines", "Effluent from refineries and petrochemical plants", "Natural seepage of oil from the seabed"] }
+          ]
+        },
+        {
+          "heading": "Major incidents",
+          "blocks": [
+            { "p": "In 1983, during the Iran–Iraq War, wells and platforms of the Nowruz and [[soroosh-field|Soroosh]] fields were damaged and oil flowed into the sea for months. The worst oil disaster in the Gulf's history came in the 1991 war, when millions of barrels were released from Kuwaiti terminals and tankers and coated hundreds of kilometres of the Saudi coast.{{ropme-soe-2013}}{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "Effects on the ecosystem",
+          "blocks": [
+            { "p": "Oil on the surface coats seabirds, leaving them unable to fly or keep warm. Oil layers persist for years on tidal flats and in [[grey-mangrove|mangrove]] forests, smothering the trees' breathing roots. Coral reefs, seagrass beds and the habitats of [[penaeus-semisulcatus|shrimp]] and fish also suffer from oil's toxic compounds, and the effects on fisheries can be seen for years after a major incident.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "Regional cooperation",
+          "blocks": [
+            { "p": "In 1978 the eight Gulf states signed the Kuwait Convention and created the Regional Organization for the Protection of the Marine Environment (ROPME). Its Marine Emergency Mutual Aid Centre coordinates the response to major spills. Satellite monitoring of oil slicks and a ban on discharging oily ballast water in regional waters are among its other measures.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "التلوث-النفطي-في-الخليج-الفارسي",
+      "title": "التلوث النفطي في الخليج الفارسي",
+      "summary": "مصادر التلوث النفطي وحوادثه الكبرى وآثاره في واحد من أكثر بحار العالم ازدحامًا بالنفط.",
+      "lead": [
+        "يُعدّ **التلوث النفطي** من أخطر التهديدات البيئية للخليج الفارسي؛ فهذا البحر الضحل شبه المغلق، الذي لا تتجدد مياهه عبر [[strait-of-hormuz|مضيق هرمز]] إلا كل بضع سنوات، يضم مئات المنصات النفطية وعشرات محطات التصدير وحركة ناقلات لا تتوقف.{{ropme-soe-2021}}",
+        "وتشير التقديرات إلى أن الخليج، قياسًا إلى مساحته، من أكثر بحار العالم تلوثًا بالنفط، بسبب التسربات التاريخية الكبرى والتلوث الصغير المستمر معًا.{{ropme-soe-2013}}"
+      ],
+      "sections": [
+        {
+          "heading": "مصادر التلوث",
+          "blocks": [
+            { "p": "لا يأتي معظم التلوث النفطي في الخليج من الحوادث الكبرى، بل من مصادر صغيرة مستمرة؛ إذ يصل إلى البحر يوميًا قدر من النفط عبر تصريف مياه الصابورة الملوثة وغسيل خزانات الناقلات، والتسربات من الأنابيب والمنصات، والمياه المصاحبة للإنتاج، ومخلفات المصافي.{{ropme-soe-2021}}" },
+            { "ul": ["مياه الصابورة وغسيل خزانات الناقلات", "التسربات من المنصات والأنابيب البحرية", "مخلفات المصافي ومجمعات البتروكيماويات", "التسرب الطبيعي للنفط من قاع البحر"] }
+          ]
+        },
+        {
+          "heading": "الحوادث الكبرى",
+          "blocks": [
+            { "p": "في عام ١٩٨٣، خلال الحرب الإيرانية العراقية، تضررت آبار حقلي نوروز و[[soroosh-field|سروش]] ومنصاتهما، فتدفق النفط إلى البحر شهورًا. ووقعت أسوأ كارثة نفطية في تاريخ الخليج في حرب ١٩٩١، حين أُطلقت ملايين البراميل من محطات الكويت وناقلاتها فغطّت مئات الكيلومترات من الساحل السعودي.{{ropme-soe-2013}}{{potter-gulf-history}}" }
+          ]
+        },
+        {
+          "heading": "الآثار على النظام البيئي",
+          "blocks": [
+            { "p": "يغطي النفط الطافي الطيورَ البحرية فيُعجزها عن الطيران والحفاظ على حرارة أجسامها، وتبقى طبقاته سنوات في المسطحات المدّية وغابات [[grey-mangrove|القرم]] فتخنق جذور الأشجار التنفسية. كما تتضرر الشعاب المرجانية ومروج الأعشاب البحرية وموائل [[penaeus-semisulcatus|الروبيان]] والأسماك من مركّبات النفط السامة، وتظهر آثارها على الصيد سنوات بعد الحادثة الكبرى.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "التعاون الإقليمي",
+          "blocks": [
+            { "p": "وقّعت دول الخليج الثماني عام ١٩٧٨ اتفاقية الكويت وأنشأت المنظمة الإقليمية لحماية البيئة البحرية (روبمي)، التي ينسق مركزها للمساعدة المتبادلة في حالات الطوارئ البحرية الاستجابة للتسربات الكبرى. ومن تدابيرها الأخرى رصد البقع النفطية بالأقمار الصناعية وحظر تصريف مياه الصابورة الملوثة في مياه المنطقة.{{ropme-soe-2021}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

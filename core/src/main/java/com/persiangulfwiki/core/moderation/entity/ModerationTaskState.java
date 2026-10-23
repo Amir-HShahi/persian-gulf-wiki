@@ -1,7 +1,10 @@
 package com.persiangulfwiki.core.moderation.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 // Where a task sits in the moderator queue. Mirrored by ck_moderation_tasks_state in V17 --
 // a new value here means a migration.
+@Schema(description = ModerationTaskState.VALUES_DOC)
 public enum ModerationTaskState {
 
     // In the queue, claimable by any moderator. A task is OPEN both before it has ever been
@@ -21,5 +24,12 @@ public enum ModerationTaskState {
 
     // Terminal. Reached only by an APPROVE or a REJECT; a REQUEST_CHANGES never lands here,
     // which is the whole reason a task can accumulate more than one decision row.
-    DECIDED
+    DECIDED;
+
+    // One line per value; shown wherever this type appears in the API docs.
+    public static final String VALUES_DOC = """
+            - `OPEN`: in the queue; any moderator can claim it. A task also returns here after REQUEST_CHANGES, and \
+            can't be decided until the author resubmits.
+            - `CLAIMED`: a moderator holds it, and only they can decide it.
+            - `DECIDED`: final, after an APPROVE or a REJECT.""";
 }

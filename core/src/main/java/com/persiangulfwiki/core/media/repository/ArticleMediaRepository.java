@@ -139,4 +139,7 @@ public interface ArticleMediaRepository extends JpaRepository<ArticleMedia, UUID
     List<ArticleMedia> findByPublicationStatusAndUpdatedAtBefore(PublicationStatus publicationStatus, Instant threshold);
 
     long deleteByDevMarkerAndCreatedAtBefore(String devMarker, Instant threshold);
+
+    // The dev demo-content wipe deletes each item's storage prefix before its row.
+    List<ArticleMedia> findByDevMarker(String devMarker);
 }

@@ -1,0 +1,131 @@
+{
+  "key": "crambionella-orsini",
+  "subject": {
+    "kind": "SPECIES",
+    "names": { "fa": "عروس دریایی خلیج فارس", "en": "Orsini's jellyfish", "ar": "قنديل البحر الخليجي" },
+    "aliases": { "fa": ["عروس دریایی کرامبیونلا"], "en": ["Crambionella orsini", "Gulf jellyfish"], "ar": ["كرامبيونيلا أورسيني"] },
+    "geometry": "POLYGON((48 30, 50.5 29.5, 54 27, 56.5 27.2, 57 25.5, 56.3 24.5, 54 24, 51.5 24.5, 50 26, 48.5 28, 48 30))",
+    "facts": [
+      { "attribute": "scientific_name", "values": [ { "text": "Crambionella orsini" } ] },
+      { "attribute": "category", "values": [ { "option": "CNIDARIAN" } ] },
+      { "attribute": "iucn_status", "values": [ { "option": "DD" } ] },
+      { "attribute": "habitat", "values": [ { "option": "PELAGIC" } ] },
+      { "attribute": "max_length", "values": [ { "number": 30, "source": "ropme-soe-2021" } ] }
+    ]
+  },
+  "topics": ["marine-life", "pollution-and-environment"],
+  "canonicalLanguage": "fa",
+  "gallery": ["moon-jellyfish"],
+  "history": { "revisions": 1, "contributors": 1 },
+  "verification": "NONE",
+  "translations": {
+    "fa": {
+      "slug": "عروس-دریایی-خلیج-فارس",
+      "title": "عروس دریایی خلیج فارس",
+      "summary": "عروس دریایی ریشه‌دهان که شکوفایی‌های انبوه آن گاه آب‌گیر نیروگاه‌ها و آب‌شیرین‌کن‌های کرانهٔ خلیج فارس را می‌بندد.",
+      "lead": [
+        "**عروس دریایی خلیج فارس** (نام علمی: *Crambionella orsini*) گونه‌ای عروس دریایی از راستهٔ ریشه‌دهانان است که در خلیج فارس، دریای عمان، دریای سرخ و شمال اقیانوس هند زندگی می‌کند. این گونه به سبب «شکوفایی‌های» ناگهانی و انبوهش شناخته می‌شود؛ هنگامی که میلیون‌ها عروس دریایی در مدتی کوتاه در آب‌های ساحلی پدیدار می‌شوند.{{ropme-soe-2021}}",
+        "داده‌های کافی برای ارزیابی وضعیت حفاظتی این گونه در فهرست سرخ جهانی وجود ندارد.{{iucn-redlist-2024}}"
+      ],
+      "sections": [
+        {
+          "heading": "ویژگی‌ها",
+          "blocks": [
+            { "p": "چتر این عروس دریایی گنبدی، سفت و به قطر ۱۵ تا ۳۰ سانتی‌متر است و رنگی شیری، آبی یا قهوه‌ای کم‌رنگ دارد. برخلاف بسیاری از عروس‌های دریایی، شاخک‌های بلندی بر لبهٔ چتر ندارد و به جای آن، هشت بازوی دهانی ضخیم و منشعب در زیر چتر آویزان است. نیش آن برای انسان معمولاً خفیف است و تنها سوزش و خارش کوتاه‌مدت پدید می‌آورد." }
+          ]
+        },
+        {
+          "heading": "شکوفایی‌ها",
+          "blocks": [
+            { "p": "شکوفایی‌های این گونه بیشتر در پاییز و زمستان در شمال و شرق خلیج فارس و دریای عمان رخ می‌دهد. پژوهشگران افزایش مواد مغذی در آب، صید بیش از حد ماهی‌هایی که با عروس‌های دریایی برای غذا رقابت می‌کنند، گرم شدن آب و افزایش سازه‌های دریایی که برای مرحلهٔ پولیپ این جانوران بستر فراهم می‌کنند را در افزایش شکوفایی‌ها مؤثر می‌دانند.{{ropme-soe-2021}}" },
+            { "ul": ["افزایش مواد مغذی و پساب‌ها", "صید بیش از حد ماهی‌های رقیب", "گرم شدن آب دریا", "سازه‌های دریایی به‌عنوان بستر پولیپ"] }
+          ]
+        },
+        {
+          "heading": "اثر بر صنعت",
+          "blocks": [
+            { "p": "عروس‌های دریایی انبوه گاه با آب دریا به درون آب‌گیرهای نیروگاه‌ها، پالایشگاه‌ها و آب‌شیرین‌کن‌های ساحلی کشیده می‌شوند و صافی‌ها را می‌بندند. در کشورهای جنوب خلیج فارس، که بخش بزرگی از آب آشامیدنی از آب‌شیرین‌کن‌ها تأمین می‌شود، چنین رویدادهایی چند بار به توقف موقت تأسیسات انجامیده است. تورهای ماهیگیری نیز در هنگام شکوفایی پر از عروس دریایی می‌شوند و صید را مختل می‌کنند.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "کاربردها",
+          "blocks": [
+            { "p": "در برخی کشورهای آسیای شرقی، عروس‌های دریایی ریشه‌دهان پس از فراوری خورده می‌شوند. در سال‌های اخیر، صید و صادرات این گونه از عمان و کرانه‌های جنوبی ایران به‌عنوان راهی برای بهره‌برداری از شکوفایی‌ها آزموده شده است. پژوهش‌هایی نیز دربارهٔ استفاده از کلاژن آن در صنایع آرایشی و دارویی در جریان است.{{fao-fishery-gulf}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "orsinis-jellyfish",
+      "title": "Orsini's jellyfish",
+      "summary": "A root-mouthed jellyfish whose mass blooms sometimes clog the intakes of power and desalination plants on the Persian Gulf coast.",
+      "lead": [
+        "**Orsini's jellyfish** (*Crambionella orsini*) is a jellyfish of the order Rhizostomeae found in the Persian Gulf, the Gulf of Oman, the Red Sea and the northern Indian Ocean. It is known for its sudden mass \"blooms\", when millions of jellyfish appear in coastal waters within a short time.{{ropme-soe-2021}}",
+        "There are not enough data to assess its conservation status on the IUCN Red List.{{iucn-redlist-2024}}"
+      ],
+      "sections": [
+        {
+          "heading": "Description",
+          "blocks": [
+            { "p": "The bell is dome-shaped and firm, 15 to 30 centimetres across, and milky white, bluish or pale brown. Unlike many jellyfish it has no long tentacles around the rim; instead, eight thick, branched oral arms hang beneath the bell. Its sting is usually mild for people, causing only brief burning and itching." }
+          ]
+        },
+        {
+          "heading": "Blooms",
+          "blocks": [
+            { "p": "Blooms of this species occur mostly in autumn and winter in the northern and eastern Persian Gulf and the Gulf of Oman. Researchers link their increase to rising nutrient levels, overfishing of fish that compete with jellyfish for food, warming water and the growing number of marine structures that give the jellyfish's polyp stage somewhere to settle.{{ropme-soe-2021}}" },
+            { "ul": ["Rising nutrients and effluent", "Overfishing of competing fish", "Warming sea water", "Marine structures as polyp habitat"] }
+          ]
+        },
+        {
+          "heading": "Impact on industry",
+          "blocks": [
+            { "p": "Mass jellyfish are sometimes drawn with seawater into the intakes of coastal power stations, refineries and desalination plants, blocking their screens. In the southern Gulf states, where much of the drinking water comes from desalination, such events have several times forced plants to shut down temporarily. Fishing nets also fill with jellyfish during blooms, disrupting the catch.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "Uses",
+          "blocks": [
+            { "p": "In some East Asian countries root-mouthed jellyfish are eaten after processing. In recent years, catching and exporting this species from Oman and southern Iran has been tried as a way of using the blooms. Research is also under way on using its collagen in cosmetics and medicine.{{fao-fishery-gulf}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "قنديل-البحر-الخليجي",
+      "title": "قنديل البحر الخليجي",
+      "summary": "قنديل بحر جذري الفم تسد أزهاره الكثيفة أحيانًا مآخذ محطات الكهرباء والتحلية على ساحل الخليج الفارسي.",
+      "lead": [
+        "**قنديل البحر الخليجي** (الاسم العلمي: *Crambionella orsini*) قنديل بحر من رتبة جذرية الفم يعيش في الخليج الفارسي وبحر عُمان والبحر الأحمر وشمال المحيط الهندي، ويُعرف بـ«أزهاره» المفاجئة الكثيفة، حين تظهر ملايين القناديل في المياه الساحلية خلال وقت قصير.{{ropme-soe-2021}}",
+        "ولا تتوافر بيانات كافية لتقييم حالة حفظه في القائمة الحمراء.{{iucn-redlist-2024}}"
+      ],
+      "sections": [
+        {
+          "heading": "الوصف",
+          "blocks": [
+            { "p": "مظلته قبابية صلبة يتراوح قطرها بين ١٥ و٣٠ سنتيمترًا، ولونها أبيض حليبي أو مزرق أو بني باهت. وعلى خلاف كثير من القناديل لا تحمل حافته لوامس طويلة، بل تتدلى تحت المظلة ثمانية أذرع فموية سميكة متفرعة. ولسعته خفيفة عادة على الإنسان، لا تسبب سوى حرقة وحكة قصيرتين." }
+          ]
+        },
+        {
+          "heading": "الأزهار",
+          "blocks": [
+            { "p": "تحدث أزهار هذا النوع غالبًا في الخريف والشتاء في شمال الخليج وشرقه وفي بحر عُمان. ويربط الباحثون ازديادها بارتفاع المغذيات، والصيد الجائر للأسماك المنافسة للقناديل على الغذاء، وارتفاع حرارة المياه، وتكاثر المنشآت البحرية التي توفر لطور البوليب مكانًا للاستقرار.{{ropme-soe-2021}}" },
+            { "ul": ["ارتفاع المغذيات والمخلفات", "الصيد الجائر للأسماك المنافسة", "ارتفاع حرارة مياه البحر", "المنشآت البحرية موطنًا للبوليب"] }
+          ]
+        },
+        {
+          "heading": "الأثر على الصناعة",
+          "blocks": [
+            { "p": "تُسحب القناديل الكثيفة أحيانًا مع مياه البحر إلى مآخذ محطات الكهرباء والمصافي ومحطات التحلية الساحلية فتسد مصافيها. وفي دول جنوب الخليج، حيث يأتي معظم مياه الشرب من التحلية، أدت هذه الأحداث مرات عدة إلى إيقاف المحطات مؤقتًا. كما تمتلئ شباك الصيد بالقناديل أثناء الأزهار فيضطرب الصيد.{{ropme-soe-2021}}" }
+          ]
+        },
+        {
+          "heading": "الاستخدامات",
+          "blocks": [
+            { "p": "تؤكل قناديل البحر جذرية الفم بعد معالجتها في بعض دول شرق آسيا، وقد جُرّب في السنوات الأخيرة صيد هذا النوع وتصديره من عُمان وجنوب إيران وسيلةً للاستفادة من الأزهار. كما تُجرى بحوث على استخدام الكولاجين المستخرج منه في صناعة مستحضرات التجميل والأدوية.{{fao-fishery-gulf}}" }
+          ]
+        }
+      ]
+    }
+  }
+}

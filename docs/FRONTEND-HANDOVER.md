@@ -44,6 +44,30 @@ The first start takes about a minute while the database migrates.
   - Safari does not, so use another browser.
   - The frontend must call the API as `localhost`, not `127.0.0.1`, because the cookie domain is `localhost`.
 
+## Demo content
+
+An empty database shows empty pages. One call fills it with a demo dataset that covers the home page, the species bank and the reader page:
+
+```
+curl -X POST http://localhost:8080/api/dev/demo-content     # start a fill: answers 202 at once
+curl http://localhost:8080/api/dev/demo-content             # follow it: RUNNING (with the step), then SUCCEEDED or FAILED
+curl -X DELETE http://localhost:8080/api/dev/demo-content   # remove it again
+```
+
+A fill takes about 15 seconds and runs in the background, so poll the status route every second or two until it leaves `RUNNING`. Starting another fill replaces the dataset; starting one (or removing) while a fill runs answers 409. A `FAILED` status carries the reason in `error`, and the next fill or removal cleans up whatever it had created.
+
+- **What you get:**
+  - 50 published articles in Persian, English and Arabic, spread over every home-page topic.
+  - Their subjects (islands, ports, straits, provinces, oil fields, fishing grounds and 16 species), each with a complete infobox.
+  - Citations, links between articles, and revision histories by several contributors.
+  - Image galleries with real photos in every size, and 360° panoramas on some places.
+  - Expert verifications (current, stale and none), a few revisions awaiting a moderator, and a featured article.
+- **Same every time:** the slugs and contents don't change between fills, so screenshots stay comparable.
+- **Demo accounts:** the contributors, moderator and experts behind the content can log in as `demo-<name>@dev.local` with the same `Dev-Password1!`. See @docs/DEV-USERS.md.
+- **What is left alone:** anything you create yourself, and every E2E fixture. Content you add *to* a demo article (a revision, a photo) is removed with that article on the next fill or removal. A demo subject that your own content links to is kept.
+- **E2E suites sharing this database:** while demo content exists, global counts are not zero, so a test asserting "the species list has 1 item" fails. Assert on your own fixtures by id or slug, or remove the demo content before the run.
+- **The text is demo text.** Names, places and scientific names are real, but figures and details are approximate. Don't copy it into real content.
+
 ## Frontend origin
 
 - CORS on the API and on MinIO allows only `FRONTEND_ORIGINS`. The default is `http://localhost:3000`.

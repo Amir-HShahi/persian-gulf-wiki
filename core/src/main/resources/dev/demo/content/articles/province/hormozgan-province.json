@@ -1,0 +1,128 @@
+{
+  "key": "hormozgan-province",
+  "subject": {
+    "kind": "PROVINCE",
+    "names": { "fa": "استان هرمزگان", "en": "Hormozgan Province", "ar": "محافظة هرمزغان" },
+    "aliases": { "fa": ["هرمزگان"], "en": ["Hormozgan"], "ar": ["هرمزغان", "هرمزگان"] },
+    "geometry": "POLYGON((53.5 27.5, 55.0 27.8, 57.0 27.6, 59.0 26.5, 58.7 25.6, 57.3 25.7, 56.3 26.9, 55.1 26.6, 53.9 26.6, 53.5 27.5))",
+    "facts": []
+  },
+  "topics": ["geography-and-climate", "islands", "economy-and-trade"],
+  "canonicalLanguage": "fa",
+  "gallery": ["iran-coast-iss", "strait-hormuz-modis"],
+  "history": { "revisions": 4, "contributors": 4 },
+  "verification": "NONE",
+  "translations": {
+    "fa": {
+      "slug": "استان-هرمزگان",
+      "title": "استان هرمزگان",
+      "summary": "استانی ساحلی در جنوب ایران که تنگهٔ هرمز، بندرعباس و چهارده جزیرهٔ خلیج فارس را در بر می‌گیرد.",
+      "lead": [
+        "**استان هرمزگان** یکی از استان‌های جنوبی ایران است که در کرانهٔ شمالی خلیج فارس و دریای عمان گسترده شده و مرکز آن شهر [[bandar-abbas|بندرعباس]] است. نام استان از جزیره و پادشاهی تاریخی [[hormuz-island|هرمز]] گرفته شده و [[strait-of-hormuz|تنگهٔ هرمز]]، گذرگاه بخش بزرگی از نفت جهان، در محدودهٔ آبی آن قرار دارد.{{ncc-coastal-atlas}}",
+        "هرمزگان با بیش از هزار کیلومتر خط ساحلی و جزایری چون [[qeshm-island|قشم]]، [[kish-island|کیش]]، [[larak-island|لارک]] و [[hengam-island|هنگام]]، یکی از متنوع‌ترین استان‌های ایران از نظر طبیعت و فرهنگ است."
+      ],
+      "sections": [
+        {
+          "heading": "جغرافیا",
+          "blocks": [
+            { "p": "سرزمین هرمزگان نواری باریک از جلگه‌های ساحلی است که در پشت آن رشته‌کوه‌های زاگرس جنوبی سر برآورده‌اند. اقلیم استان گرم و شرجی است؛ دمای تابستان در بندرعباس گاه از ۴۵ درجهٔ سلسیوس می‌گذرد و رطوبت هوا در بیشتر روزهای سال بالاست.{{irimo-climate}} بارش اندک و نامنظم است و بیشتر در زمستان می‌بارد." },
+            { "p": "جنگل‌های حرا در خورهای میان [[qeshm-island|قشم]] و خشکی، و نیز در سواحل سیریک و جاسک، از ارزشمندترین زیست‌بوم‌های استان‌اند و بخشی از آن‌ها در قالب منطقهٔ حفاظت‌شدهٔ حرا اداره می‌شود.{{doe-mangroves}}" }
+          ]
+        },
+        {
+          "heading": "تقسیمات کشوری",
+          "blocks": [
+            { "p": "هرمزگان در سال ۱۳۵۵ خورشیدی از استان فارس و کرمان جدا شد و به استانی مستقل تبدیل گردید. شهرستان‌های این استان عبارت‌اند از:" },
+            { "ul": ["بندرعباس", "قشم", "بندر لنگه", "میناب", "جاسک", "رودان", "بستک", "پارسیان", "حاجی‌آباد", "سیریک", "ابوموسی"] }
+          ]
+        },
+        {
+          "heading": "اقتصاد",
+          "blocks": [
+            { "p": "اقتصاد هرمزگان بر دریا استوار است. بندر شهید رجایی در بندرعباس بزرگ‌ترین بندر کانتینری ایران است و بیش از نیمی از تخلیه و بارگیری کالای بازرگانی کشور را بر عهده دارد.{{pmo-ports-2023}} مناطق آزاد [[qeshm-island|قشم]] و [[kish-island|کیش]]، صنایع فولاد و آلومینیوم، پالایشگاه‌های میعانات گازی، صیادی و کشاورزی نخیلات و مرکبات در میناب و رودان، دیگر پایه‌های اقتصاد استان‌اند.{{sci-yearbook-2022}}" }
+          ]
+        },
+        {
+          "heading": "مردم و فرهنگ",
+          "blocks": [
+            { "p": "مردم هرمزگان به گویش‌های گوناگون جنوبی فارسی، از جمله بندری و قشمی، و نیز به زبان‌های عربی و بلوچی سخن می‌گویند. موسیقی بندری، رقص‌های گروهی، آیین زار و پوشش‌های رنگارنگ زنان با بُرقع، از نشانه‌های فرهنگ چندلایهٔ این سرزمین است که از قرن‌ها دادوستد با هند، عربستان و شرق آفریقا اثر پذیرفته است.{{potter-gulf-history}}" }
+          ]
+        }
+      ]
+    },
+    "en": {
+      "slug": "hormozgan-province",
+      "title": "Hormozgan Province",
+      "summary": "A coastal province in southern Iran that takes in the Strait of Hormuz, Bandar Abbas and fourteen Persian Gulf islands.",
+      "lead": [
+        "**Hormozgan Province** is one of the southern provinces of Iran, stretching along the northern shore of the Persian Gulf and the Gulf of Oman. Its capital is [[bandar-abbas|Bandar Abbas]]. The province takes its name from the historic island and kingdom of [[hormuz-island|Hormuz]], and its waters include the [[strait-of-hormuz|Strait of Hormuz]], through which a large share of the world's oil passes.{{ncc-coastal-atlas}}",
+        "With more than a thousand kilometres of coastline and islands such as [[qeshm-island|Qeshm]], [[kish-island|Kish]], [[larak-island|Larak]] and [[hengam-island|Hengam]], Hormozgan is one of Iran's most varied provinces in both nature and culture."
+      ],
+      "sections": [
+        {
+          "heading": "Geography",
+          "blocks": [
+            { "p": "Hormozgan is a narrow strip of coastal plain backed by the ranges of the southern Zagros. The climate is hot and humid: summer temperatures in Bandar Abbas sometimes exceed 45 °C, and humidity stays high for most of the year.{{irimo-climate}} Rainfall is low and irregular and falls mostly in winter." },
+            { "p": "The mangrove forests in the creeks between [[qeshm-island|Qeshm]] and the mainland, and along the coasts of Sirik and Jask, are among the province's most valuable ecosystems, and part of them is managed as the Hara Protected Area.{{doe-mangroves}}" }
+          ]
+        },
+        {
+          "heading": "Administrative divisions",
+          "blocks": [
+            { "p": "Hormozgan was separated from the provinces of Fars and Kerman in 1976 and became a province in its own right. Its counties are:" },
+            { "ul": ["Bandar Abbas", "Qeshm", "Bandar Lengeh", "Minab", "Jask", "Rudan", "Bastak", "Parsian", "Hajjiabad", "Sirik", "Abu Musa"] }
+          ]
+        },
+        {
+          "heading": "Economy",
+          "blocks": [
+            { "p": "The province lives from the sea. Shahid Rajaee port in Bandar Abbas is Iran's largest container port and handles more than half of the country's commercial cargo.{{pmo-ports-2023}} The free zones of [[qeshm-island|Qeshm]] and [[kish-island|Kish]], steel and aluminium plants, gas-condensate refineries, fishing, and date and citrus farming around Minab and Rudan are the other pillars of the provincial economy.{{sci-yearbook-2022}}" }
+          ]
+        },
+        {
+          "heading": "People and culture",
+          "blocks": [
+            { "p": "People in Hormozgan speak several southern Persian dialects, including Bandari and Qeshmi, as well as Arabic and Balochi. Bandari music, group dances, the zar ritual and women's colourful dress with the borqa mask reflect a layered culture shaped by centuries of trade with India, Arabia and East Africa.{{potter-gulf-history}}" }
+          ]
+        }
+      ]
+    },
+    "ar": {
+      "slug": "محافظة-هرمزغان",
+      "title": "محافظة هرمزغان",
+      "summary": "محافظة ساحلية في جنوب إيران تضم مضيق هرمز وبندر عباس وأربع عشرة جزيرة في الخليج الفارسي.",
+      "lead": [
+        "**محافظة هرمزغان** إحدى محافظات جنوب إيران، تمتد على الساحل الشمالي للخليج الفارسي وبحر عُمان، وعاصمتها مدينة [[bandar-abbas|بندر عباس]]. وتستمد اسمها من جزيرة [[hormuz-island|هرمز]] ومملكتها التاريخية، وتقع ضمن مياهها [[strait-of-hormuz|مضيق هرمز]] الذي تمر عبره حصة كبيرة من نفط العالم.{{ncc-coastal-atlas}}",
+        "وبساحل يزيد على ألف كيلومتر وجزر مثل [[qeshm-island|قشم]] و[[kish-island|كيش]] و[[larak-island|لارك]] و[[hengam-island|هنگام]]، تُعدّ هرمزغان من أكثر محافظات إيران تنوعًا في الطبيعة والثقافة."
+      ],
+      "sections": [
+        {
+          "heading": "الجغرافيا",
+          "blocks": [
+            { "p": "هرمزغان شريط ضيق من السهول الساحلية تحده من الخلف سلاسل جبال زاغروس الجنوبية. ومناخها حار ورطب، إذ تتجاوز درجات الحرارة صيفًا في بندر عباس أحيانًا ٤٥ درجة مئوية، وتبقى الرطوبة مرتفعة معظم أيام السنة.{{irimo-climate}} والأمطار قليلة وغير منتظمة وتهطل غالبًا في الشتاء." },
+            { "p": "وتُعدّ غابات القرم في الأخوار بين [[qeshm-island|قشم]] والبر الرئيسي، وعلى سواحل سيريك وجاسك، من أثمن النظم البيئية في المحافظة، ويُدار جزء منها بوصفه منطقة حرا المحمية.{{doe-mangroves}}" }
+          ]
+        },
+        {
+          "heading": "التقسيمات الإدارية",
+          "blocks": [
+            { "p": "انفصلت هرمزغان عن محافظتي فارس وكرمان عام ١٩٧٦ وأصبحت محافظة مستقلة. ومقاطعاتها هي:" },
+            { "ul": ["بندر عباس", "قشم", "بندر لنجة", "ميناب", "جاسك", "رودان", "بستك", "بارسيان", "حاجي آباد", "سيريك", "أبو موسى"] }
+          ]
+        },
+        {
+          "heading": "الاقتصاد",
+          "blocks": [
+            { "p": "يقوم اقتصاد المحافظة على البحر؛ فميناء الشهيد رجائي في بندر عباس هو أكبر ميناء للحاويات في إيران، ويتولى أكثر من نصف البضائع التجارية للبلاد.{{pmo-ports-2023}} وتشكّل المنطقتان الحرتان في [[qeshm-island|قشم]] و[[kish-island|كيش]]، ومصانع الصلب والألمنيوم، ومصافي المكثفات الغازية، وصيد الأسماك، وزراعة النخيل والحمضيات في ميناب ورودان، ركائز أخرى لاقتصادها.{{sci-yearbook-2022}}" }
+          ]
+        },
+        {
+          "heading": "السكان والثقافة",
+          "blocks": [
+            { "p": "يتحدث سكان هرمزغان عدة لهجات فارسية جنوبية منها البندرية والقشمية، إلى جانب العربية والبلوشية. وتعكس الموسيقى البندرية والرقصات الجماعية وطقس الزار وأزياء النساء الملوّنة مع البرقع ثقافةً متعددة الطبقات تشكّلت عبر قرون من التجارة مع الهند وجزيرة العرب وشرق أفريقيا.{{potter-gulf-history}}" }
+          ]
+        }
+      ]
+    }
+  }
+}
