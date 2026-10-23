@@ -114,7 +114,7 @@ func db(t *testing.T) *pgxpool.Pool {
 	if testDB == nil {
 		t.Skip("SEARCH_TEST_DSN not set")
 	}
-	exec(t, `TRUNCATE subjects, labels, subject_aliases, subject_redirects, articles, article_translations, article_revisions, search_documents CASCADE`)
+	exec(t, `TRUNCATE subjects, labels, subject_aliases, subject_redirects, articles, article_translations, article_revisions, search_documents, search_terms CASCADE`)
 	return testDB
 }
 
@@ -700,5 +700,43 @@ func TestSuggestCompletesTitlesAndOtherNames(t *testing.T) {
 
 	if got := suggest(t, "  ", ""); len(got) != 0 {
 		t.Errorf("an empty prefix suggested %v", titlesOf(got))
+	}
+}
+
+func didYouMean(t *testing.T, query string) string {
+	t.Helper()
+	got, err := DidYouMean(context.Background(), testDB, query, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return got
+}
+
+func TestDidYouMeanCorrectsWordsNoArticleContains(t *testing.T) {
+	db(t)
+	publish(t, "en", "hormuz", "STRAIT", "Strait of Hormuz", "A strait between two gulfs.", text("Ships pass it."))
+	publish(t, "fa", "kish", "ISLAND", "جزیره کیش", "", text("جزیره‌ای در خلیج فارس"))
+	syncAll(t)
+
+	// Each unknown word is replaced; known words are kept as typed.
+	if got := didYouMean(t, "hormuzz strait"); got != "Hormuz strait" {
+		t.Errorf("did you mean = %q, want %q", got, "Hormuz strait")
+	}
+	// Nothing to correct.
+	for _, q := range []string{"strait of hormuz", "جزیره", ""} {
+		if got := didYouMean(t, q); got != "" {
+			t.Errorf("%q: did you mean = %q, want nothing", q, got)
+		}
+	}
+	// A spelling that folds to a known word is not a typo: Arabic yeh and kaf.
+	if got := didYouMean(t, "جزيره كيش"); got != "" {
+		t.Errorf("an Arabic-letter spelling was corrected to %q", got)
+	}
+
+	// The vocabulary follows the index: an unpublished article's words go.
+	exec(t, `UPDATE article_translations SET current_revision_id = NULL WHERE slug = 'hormuz'`)
+	syncAll(t)
+	if got := didYouMean(t, "hormuzz"); got != "" {
+		t.Errorf("a word from an unpublished article was offered: %q", got)
 	}
 }

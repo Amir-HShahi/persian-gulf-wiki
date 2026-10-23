@@ -110,5 +110,17 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	return enc.Encode(page)
+
+	// A search that found nothing gets the correction a results page would
+	// offer above an empty list.
+	out := struct {
+		search.Page
+		DidYouMean string `json:"did_you_mean,omitempty"`
+	}{Page: page}
+	if page.Total == 0 {
+		if out.DidYouMean, err = search.DidYouMean(ctx, pool, *query, *language); err != nil {
+			return err
+		}
+	}
+	return enc.Encode(out)
 }

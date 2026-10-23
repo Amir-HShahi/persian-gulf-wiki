@@ -250,6 +250,48 @@ CREATE INDEX IF NOT EXISTS idx_search_documents_names_trgm
 CREATE INDEX IF NOT EXISTS idx_search_documents_filters
     ON search_documents (language, subject_kind);
 
+-- Every distinct word in the index, per language, for "did you mean". term_key
+-- is the folded form a query word is compared with; word is one spelling of it
+-- as written, which is what a suggestion shows. Rebuilt whenever a reconcile
+-- changes the index, so it never holds a word no article has.
+CREATE TABLE IF NOT EXISTS search_terms (
+    language varchar(20) NOT NULL,
+    term_key text        NOT NULL,
+    word     text        NOT NULL,
+    PRIMARY KEY (language, term_key)
+);
+
+CREATE INDEX IF NOT EXISTS idx_search_terms_trgm
+    ON search_terms USING gin (term_key gin_trgm_ops);
+
+-- search_word_trim is a word as written with the punctuation around it removed,
+-- the display twin of search_word_key.
+CREATE OR REPLACE FUNCTION search_word_trim(word text) RETURNS text
+    LANGUAGE sql IMMUTABLE STRICT PARALLEL SAFE
+AS $$
+    SELECT regexp_replace(word, '^[[:punct:]«»“”‘’]+|[[:punct:]«»“”‘’]+$', '', 'g')
+$$;
+
+-- search_rebuild_terms refills search_terms from the index. Words under three
+-- letters and plain numbers are left out: neither can be corrected usefully.
+CREATE OR REPLACE FUNCTION search_rebuild_terms() RETURNS void
+    LANGUAGE sql
+AS $$
+    DELETE FROM search_terms;
+    INSERT INTO search_terms (language, term_key, word)
+    SELECT DISTINCT ON (language, term_key) language, term_key, word
+      FROM (SELECT d.language, u.k AS term_key, search_word_trim(u.w) AS word
+              FROM search_documents d, unnest(d.excerpt_keys, d.excerpt_words) AS u(k, w)
+            UNION ALL
+            SELECT d.language, search_word_key(w), search_word_trim(w)
+              FROM search_documents d, regexp_split_to_table(d.title || E'\n' || d.names_text, '\s+') AS w
+           ) words
+     WHERE length(term_key) >= 3
+       AND term_key !~ '^[0-9]+$'
+       AND word <> ''
+     ORDER BY language, term_key, word;
+$$;
+
 -- search_refresh brings one translation's row in line with core and reports
 -- 'indexed', 'removed' or 'unchanged'. It reads the current state rather than
 -- applying a change, so calling it twice, late or out of order is harmless.
@@ -368,6 +410,13 @@ BEGIN
             removed := removed + 1;
         END IF;
     END LOOP;
+
+    -- The vocabulary follows the index. It is also filled when it is empty
+    -- while the index is not, which is the state just after an upgrade.
+    IF indexed + removed > 0
+       OR (NOT EXISTS (SELECT 1 FROM search_terms) AND EXISTS (SELECT 1 FROM search_documents)) THEN
+        PERFORM search_rebuild_terms();
+    END IF;
 
     RETURN NEXT;
 END
@@ -533,4 +582,37 @@ AS $$
                    ELSE 2 END,
               length(d.title), d.title, d.translation_id
      LIMIT least(greatest(coalesce(p_limit, 8), 1), 20)
+$$;
+
+-- search_did_you_mean is a corrected query, or NULL when there is nothing to
+-- correct. Each word of the query that no indexed article contains is replaced
+-- by the closest one that some article does (by trigram similarity); every
+-- other word is kept as it was typed. Meant to be shown above the results when
+-- a search finds little or nothing: "Did you mean: hormuz strait?"
+CREATE OR REPLACE FUNCTION search_did_you_mean(p_query text, p_language text DEFAULT NULL)
+    RETURNS text
+    LANGUAGE sql STABLE PARALLEL SAFE
+AS $$
+    WITH w AS (
+        SELECT n, word, search_word_key(search_fold(word)) AS k
+          FROM regexp_split_to_table(btrim(coalesce(p_query, '')), '\s+') WITH ORDINALITY AS s(word, n)
+         WHERE word <> ''
+    ),
+    fixed AS (
+        SELECT w.n, w.word,
+               CASE WHEN length(w.k) < 3 OR w.k ~ '^[0-9]+$'
+                         OR EXISTS (SELECT 1 FROM search_terms t
+                                     WHERE t.term_key = w.k
+                                       AND (p_language IS NULL OR t.language = p_language))
+                    THEN NULL
+                    ELSE (SELECT t.word FROM search_terms t
+                           WHERE t.term_key % w.k
+                             AND (p_language IS NULL OR t.language = p_language)
+                           ORDER BY similarity(t.term_key, w.k) DESC, t.term_key
+                           LIMIT 1)
+               END AS fix
+          FROM w
+    )
+    SELECT CASE WHEN bool_or(fix IS NOT NULL) THEN string_agg(coalesce(fix, word), ' ' ORDER BY n) END
+      FROM fixed
 $$;

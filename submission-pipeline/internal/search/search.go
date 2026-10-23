@@ -159,6 +159,21 @@ func Suggest(ctx context.Context, db DB, prefix, language string, limit int) ([]
 	return out, nil
 }
 
+// DidYouMean returns a corrected query, or "" when every word of the query is
+// one some indexed article contains. Meant for a search that found little or
+// nothing. An empty language means every language.
+func DidYouMean(ctx context.Context, db DB, query, language string) (string, error) {
+	var fixed *string
+	if err := db.QueryRow(ctx, `SELECT search_did_you_mean($1, $2)`, query, nullIfEmpty(language)).
+		Scan(&fixed); err != nil {
+		return "", wrap("correcting the query", err)
+	}
+	if fixed == nil {
+		return "", nil
+	}
+	return *fixed, nil
+}
+
 // splitsPersianWords reports whether this database's locale lets the text
 // search parser see Persian letters as letters. Under the C locale it does not,
 // every Persian word is discarded as punctuation, and search silently finds
