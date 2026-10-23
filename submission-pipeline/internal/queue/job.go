@@ -8,6 +8,8 @@ package queue
 import (
 	"encoding/json"
 	"time"
+
+	"wikipg/internal/tabular"
 )
 
 // JobType selects which handler processes a job.
@@ -94,40 +96,15 @@ type Result struct {
 	// contain internal detail and must not be shown to contributors.
 	Error string `json:"error,omitempty"`
 
-	Tabular *TabularResult `json:"tabular,omitempty"`
-	Image   *ImageResult   `json:"image,omitempty"`
-	Geo     *GeoResult     `json:"geo,omitempty"`
+	Tabular *tabular.Report `json:"tabular,omitempty"`
+	Image   *ImageResult    `json:"image,omitempty"`
+	Geo     *GeoResult      `json:"geo,omitempty"`
 }
 
 // Reason explains a rejection in a form the frontend can localise. Code is a
 // stable identifier; Detail carries the values that vary per occurrence, for
 // interpolation into a translated message.
 type Reason struct {
-	Code   string            `json:"code"`
-	Detail map[string]string `json:"detail,omitempty"`
-}
-
-type TabularResult struct {
-	Columns   []Column   `json:"columns"`
-	RowCount  int        `json:"row_count"`
-	ValidRows int        `json:"valid_rows"`
-	RowErrors []RowError `json:"row_errors"`
-
-	// ErrorsTruncated is how many row errors were dropped from RowErrors to
-	// keep the stored result small.
-	ErrorsTruncated int `json:"errors_truncated"`
-
-	NormalizedKey string `json:"normalized_key,omitempty"`
-}
-
-type Column struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
-}
-
-type RowError struct {
-	Row    int               `json:"row"`
-	Column string            `json:"column,omitempty"`
 	Code   string            `json:"code"`
 	Detail map[string]string `json:"detail,omitempty"`
 }

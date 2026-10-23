@@ -147,6 +147,10 @@ func run() error {
 		DerivedBucket: cfg.Storage.DerivedBucket,
 		Options:       imagepipe.PanoramaOptions(),
 	})
+	runner.Register(queue.JobTypeTabular, &handler.Tabular{
+		Store:     store,
+		RawBucket: cfg.Storage.RawBucket,
+	})
 
 	log.Info("worker ready", "config", cfg, "identity", identity())
 
