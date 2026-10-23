@@ -241,6 +241,8 @@ COMMENT ON TABLE search_documents IS 'search index v2';
 
 CREATE INDEX IF NOT EXISTS idx_search_documents_document
     ON search_documents USING gin (document);
+CREATE INDEX IF NOT EXISTS idx_search_documents_suggest
+    ON search_documents USING gin (suggest_doc);
 CREATE INDEX IF NOT EXISTS idx_search_documents_title_trgm
     ON search_documents USING gin (title_key gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_search_documents_names_trgm
@@ -495,4 +497,40 @@ AS $$
      ORDER BY s.score DESC, s.indexed_at DESC, s.translation_id
      LIMIT least(greatest(coalesce(p_limit, 20), 1), 100)
     OFFSET greatest(coalesce(p_offset, 0), 0)
+$$;
+
+-- search_suggest is what a search box shows while somebody types: titles and
+-- other names that start with what has been typed so far, every word as a
+-- prefix. A title that starts with the text comes first, then an other name
+-- that does, then the rest, shorter titles before longer ones. Fast enough to
+-- call on every keystroke: it only reads suggest_doc's index and a few rows.
+CREATE OR REPLACE FUNCTION search_suggest(
+        p_prefix   text,
+        p_language text    DEFAULT NULL,
+        p_limit    integer DEFAULT 8)
+    RETURNS TABLE (
+        translation_id uuid,
+        article_id     uuid,
+        language       varchar,
+        slug           varchar,
+        title          text,
+        matched_name   text)
+    LANGUAGE sql STABLE PARALLEL SAFE
+AS $$
+    WITH tq AS (
+        SELECT search_fold(coalesce(p_prefix, '')) AS key,
+               search_prefix_query(search_fold(coalesce(p_prefix, ''))) AS words
+    )
+    SELECT d.translation_id, d.article_id, d.language, d.slug, d.title,
+           search_matched_name(d.names, d.title_key, tq.words, tq.key)
+      FROM search_documents d
+     CROSS JOIN tq
+     WHERE tq.words IS NOT NULL
+       AND d.suggest_doc @@ tq.words
+       AND (p_language IS NULL OR d.language = p_language)
+     ORDER BY CASE WHEN starts_with(d.title_key, tq.key) THEN 0
+                   WHEN EXISTS (SELECT 1 FROM unnest(d.names) n WHERE starts_with(search_fold(n), tq.key)) THEN 1
+                   ELSE 2 END,
+              length(d.title), d.title, d.translation_id
+     LIMIT least(greatest(coalesce(p_limit, 8), 1), 20)
 $$;

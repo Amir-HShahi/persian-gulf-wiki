@@ -650,3 +650,55 @@ func TestAMergedSubjectsNamesLeadToTheSubjectItWasMergedInto(t *testing.T) {
 		t.Errorf("matched_name = %v, want Ghais", hits[0].MatchedName)
 	}
 }
+
+func suggest(t *testing.T, prefix, language string) []Suggestion {
+	t.Helper()
+	got, err := Suggest(context.Background(), testDB, prefix, language, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return got
+}
+
+func titlesOf(s []Suggestion) []string {
+	out := make([]string, 0, len(s))
+	for _, x := range s {
+		out = append(out, x.Title)
+	}
+	return out
+}
+
+func TestSuggestCompletesTitlesAndOtherNames(t *testing.T) {
+	db(t)
+	kish := publish(t, "en", "kish-island", "ISLAND", "Kish Island", "", text("An island."))
+	publish(t, "en", "kharg-island", "ISLAND", "Kharg Island", "", text("An island."))
+	publish(t, "en", "island-ecology", "", "Island ecology", "", text("Reefs."))
+	publish(t, "fa", "hormoz", "STRAIT", "تنگه هرمز", "", text("آبراه"))
+	alias(t, subjectOf(t, kish), "en", "Qays")
+	syncAll(t)
+
+	// A title that starts with the text comes first, then shorter titles.
+	if got := titlesOf(suggest(t, "isl", "")); !slices.Equal(got, []string{"Island ecology", "Kish Island", "Kharg Island"}) {
+		t.Errorf("isl suggested %v", got)
+	}
+	if got := titlesOf(suggest(t, "khar", "")); !slices.Equal(got, []string{"Kharg Island"}) {
+		t.Errorf("khar suggested %v", got)
+	}
+	// Persian while typing.
+	if got := titlesOf(suggest(t, "هر", "fa")); !slices.Equal(got, []string{"تنگه هرمز"}) {
+		t.Errorf("هر suggested %v", got)
+	}
+	if got := suggest(t, "هر", "en"); len(got) != 0 {
+		t.Errorf("the language filter let %v through", titlesOf(got))
+	}
+
+	// Only an other name starts with the text: the suggestion says which.
+	got := suggest(t, "qa", "")
+	if len(got) != 1 || got[0].Title != "Kish Island" || got[0].MatchedName == nil || *got[0].MatchedName != "Qays" {
+		t.Errorf("qa suggested %+v, want Kish Island by Qays", got)
+	}
+
+	if got := suggest(t, "  ", ""); len(got) != 0 {
+		t.Errorf("an empty prefix suggested %v", titlesOf(got))
+	}
+}

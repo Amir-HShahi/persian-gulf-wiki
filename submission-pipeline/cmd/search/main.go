@@ -3,6 +3,7 @@
 // so it needs nothing but a connection string.
 //
 //	search -q "تنگه هرمز" -lang fa      run a query
+//	search -q "هرم" -suggest           what a search box would suggest
 //	search -sync                       bring the index up to date now
 //	search -schema                     print the SQL the worker applies, for psql
 package main
@@ -38,6 +39,7 @@ func run() error {
 	offset := flag.Int("offset", 0, "results to skip")
 	sync := flag.Bool("sync", false, "refresh the index before anything else")
 	schema := flag.Bool("schema", false, "print the SQL that creates the index and exit")
+	suggest := flag.Bool("suggest", false, "treat -q as text still being typed and print suggestions")
 	flag.Parse()
 
 	if *schema {
@@ -88,6 +90,14 @@ func run() error {
 			return enc.Encode(total)
 		}
 		fmt.Fprintf(os.Stderr, "synced: %d indexed, %d removed\n", total.Indexed, total.Removed)
+	}
+
+	if *suggest {
+		suggestions, err := search.Suggest(ctx, pool, *query, *language, *limit)
+		if err != nil {
+			return err
+		}
+		return enc.Encode(suggestions)
 	}
 
 	page, err := search.Search(ctx, pool, search.Query{
