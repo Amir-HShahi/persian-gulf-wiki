@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"wikipg/internal/normalize"
 	"wikipg/internal/tabular"
 )
 
@@ -16,10 +17,11 @@ import (
 type JobType string
 
 const (
-	JobTypeImage    JobType = "image"
-	JobTypePanorama JobType = "panorama"
-	JobTypeTabular  JobType = "tabular"
-	JobTypeGeo      JobType = "geo"
+	JobTypeImage     JobType = "image"
+	JobTypePanorama  JobType = "panorama"
+	JobTypeTabular   JobType = "tabular"
+	JobTypeNormalize JobType = "normalize"
+	JobTypeGeo       JobType = "geo"
 )
 
 // Status is the lifecycle state of a job row, and is distinct from the
@@ -96,9 +98,10 @@ type Result struct {
 	// contain internal detail and must not be shown to contributors.
 	Error string `json:"error,omitempty"`
 
-	Tabular *tabular.Report `json:"tabular,omitempty"`
-	Image   *ImageResult    `json:"image,omitempty"`
-	Geo     *GeoResult      `json:"geo,omitempty"`
+	Tabular   *tabular.Report  `json:"tabular,omitempty"`
+	Normalize *NormalizeResult `json:"normalize,omitempty"`
+	Image     *ImageResult     `json:"image,omitempty"`
+	Geo       *GeoResult       `json:"geo,omitempty"`
 }
 
 // Reason explains a rejection in a form the frontend can localise. Code is a
@@ -107,6 +110,17 @@ type Result struct {
 type Reason struct {
 	Code   string            `json:"code"`
 	Detail map[string]string `json:"detail,omitempty"`
+}
+
+// NormalizeResult is what a normalize job found in one revision. Count is
+// every finding; Findings holds the first of them, and FindingsTruncated says
+// how many were left out to keep the stored result small.
+type NormalizeResult struct {
+	RevisionID        string              `json:"revision_id"`
+	Locale            string              `json:"locale"`
+	Count             int                 `json:"count"`
+	Findings          []normalize.Finding `json:"findings"`
+	FindingsTruncated int                 `json:"findings_truncated,omitempty"`
 }
 
 type ImageResult struct {

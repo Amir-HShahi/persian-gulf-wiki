@@ -151,6 +151,7 @@ func run() error {
 		Store:     store,
 		RawBucket: cfg.Storage.RawBucket,
 	})
+	runner.Register(queue.JobTypeNormalize, &handler.Normalize{})
 
 	log.Info("worker ready", "config", cfg, "identity", identity())
 
