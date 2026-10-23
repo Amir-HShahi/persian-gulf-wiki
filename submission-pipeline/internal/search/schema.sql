@@ -25,8 +25,9 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 --   * Persian and Arabic-Indic digits fold to ASCII, so ۱۴۰۲ finds 1402.
 --   * Case is folded and whitespace collapses to single spaces.
 --
--- Stored rows are not rewritten when this changes. After editing it, run
--- TRUNCATE search_documents and let the worker rebuild the index.
+-- Stored rows are not rewritten when this changes. After editing it, bump the
+-- index version (search_documents' table comment, below), so every database
+-- drops its old index and the worker rebuilds it.
 CREATE OR REPLACE FUNCTION search_fold(input text) RETURNS text
     LANGUAGE sql IMMUTABLE STRICT PARALLEL SAFE
 AS $$
@@ -126,6 +127,14 @@ $$;
 -- subject_kind is the subject's kind, or NULL for an article with no subject;
 -- since core's V20 an article stores no kind of its own.
 --
+-- names are the other names the article can be found by, in every language and
+-- sorted, so two calls compare equal when nothing changed: the subject's labels
+-- (its name per language) and aliases, and the labels and aliases of every
+-- subject merged into it (subject_redirects). This is what Wikipedia's
+-- redirects do: Ormuz finds the Strait of Hormuz. Core replaces aliases as a
+-- whole on each approval, and a merge keeps the merged subject's rows, so these
+-- tables are always the live state.
+--
 -- A function rather than a view on purpose. A view would make Postgres record a
 -- dependency on every column it reads, and a later core migration that drops or
 -- retypes one of them would then fail. A function body is checked when it is
@@ -138,15 +147,41 @@ CREATE OR REPLACE FUNCTION search_published()
         language       varchar,
         slug           varchar,
         revision_id    uuid,
-        subject_kind   varchar)
+        subject_kind   varchar,
+        names          text[])
     LANGUAGE sql STABLE
 AS $$
-    SELECT t.id, t.article_id, t.language, t.slug, t.current_revision_id, s.kind
+    SELECT t.id, t.article_id, t.language, t.slug, t.current_revision_id, s.kind,
+           coalesce((
+               SELECT array_agg(DISTINCT n.value::text ORDER BY n.value::text)
+                 FROM (SELECT l.value FROM labels l
+                        WHERE l.subject_id = s.id
+                           OR l.subject_id IN (SELECT r.source_id FROM subject_redirects r WHERE r.target_id = s.id)
+                       UNION ALL
+                       SELECT sa.value FROM subject_aliases sa
+                        WHERE sa.subject_id = s.id
+                           OR sa.subject_id IN (SELECT r.source_id FROM subject_redirects r WHERE r.target_id = s.id)
+                      ) n
+           ), '{}')
       FROM article_translations t
       JOIN articles a ON a.id = t.article_id
       LEFT JOIN subjects s ON s.id = a.subject_id
      WHERE t.current_revision_id IS NOT NULL
        AND (s.id IS NULL OR s.deleted_at IS NULL)
+$$;
+
+-- The index is derived data, so a change to its shape is applied by dropping it
+-- and letting the next reconcile rebuild it from core's tables. The table's
+-- comment records which shape it has; a table without the current one is from
+-- an older version of this file. Bump the version with any change below that
+-- CREATE TABLE IF NOT EXISTS would not apply to an existing table.
+DO $$
+BEGIN
+    IF to_regclass('search_documents') IS NOT NULL
+       AND obj_description(to_regclass('search_documents'), 'pg_class') IS DISTINCT FROM 'search index v2' THEN
+        DROP TABLE search_documents;
+    END IF;
+END
 $$;
 
 -- One row per row of search_published().
@@ -162,20 +197,28 @@ CREATE TABLE IF NOT EXISTS search_documents (
     body_text      text         NOT NULL DEFAULT '',
     indexed_at     timestamptz  NOT NULL DEFAULT now(),
 
+    -- The other names, as search_published() gives them, and the same names one
+    -- per line, which is the form the generated columns below can read.
+    names          text[]       NOT NULL DEFAULT '{}',
+    names_text     text         NOT NULL DEFAULT '',
+
     -- The summary and body split into words as written, and the same words
     -- folded, entry for entry. Snippets match on the second and show the first.
     excerpt_words  text[]       NOT NULL DEFAULT '{}',
     excerpt_keys   text[]       NOT NULL DEFAULT '{}',
 
-    -- The folded title the typo matching and title boosts compare against.
+    -- The folded title and names the typo matching and boosts compare against.
     title_key      text GENERATED ALWAYS AS (search_fold(title)) STORED,
+    names_key      text GENERATED ALWAYS AS (search_fold(names_text)) STORED,
 
-    -- Title outweighs slug and summary, which outweigh the body. English
-    -- documents also carry stemmed lexemes, so islands finds island. Persian
-    -- and Arabic have no stemmer in Postgres; prefix matching covers most of
-    -- what one would, since کتاب then finds کتابها.
+    -- Title and other names outweigh slug and summary, which outweigh the body:
+    -- a search for an article's other name should rank it as if by its title.
+    -- English documents also carry stemmed lexemes, so islands finds island.
+    -- Persian and Arabic have no stemmer in Postgres; prefix matching covers
+    -- most of what one would, since کتاب then finds کتابها.
     document       tsvector GENERATED ALWAYS AS (
            setweight(to_tsvector('simple', search_fold(title)), 'A')
+        || setweight(to_tsvector('simple', search_fold(names_text)), 'A')
         || setweight(to_tsvector('simple', search_fold(translate(slug, '-_', '  '))), 'B')
         || setweight(to_tsvector('simple', search_fold(summary)), 'B')
         || setweight(to_tsvector('simple', search_fold(body_text)), 'C')
@@ -184,19 +227,24 @@ CREATE TABLE IF NOT EXISTS search_documents (
                 || setweight(to_tsvector('english', search_fold(summary)), 'B')
                 || setweight(to_tsvector('english', search_fold(body_text)), 'C')
            ELSE ''::tsvector END
+    ) STORED,
+
+    -- Only the title and the other names: what a suggestion is matched against
+    -- while somebody types.
+    suggest_doc    tsvector GENERATED ALWAYS AS (
+           to_tsvector('simple', search_fold(title))
+        || to_tsvector('simple', search_fold(names_text))
     ) STORED
 );
 
--- An index built before core's V20 has entity_type instead of subject_kind.
--- Dropping the column drops the old filter index with it, and the next
--- reconcile fills subject_kind in, because NULL then differs from the kind.
-ALTER TABLE search_documents DROP COLUMN IF EXISTS entity_type;
-ALTER TABLE search_documents ADD COLUMN IF NOT EXISTS subject_kind varchar(30);
+COMMENT ON TABLE search_documents IS 'search index v2';
 
 CREATE INDEX IF NOT EXISTS idx_search_documents_document
     ON search_documents USING gin (document);
 CREATE INDEX IF NOT EXISTS idx_search_documents_title_trgm
     ON search_documents USING gin (title_key gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_search_documents_names_trgm
+    ON search_documents USING gin (names_key gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_search_documents_filters
     ON search_documents (language, subject_kind);
 
@@ -212,7 +260,7 @@ DECLARE
     v_words   text[];
     v_keys    text[];
 BEGIN
-    SELECT p.translation_id AS id, p.article_id, p.language, p.slug, p.subject_kind,
+    SELECT p.translation_id AS id, p.article_id, p.language, p.slug, p.subject_kind, p.names,
            r.id AS revision_id, r.title, coalesce(r.summary, '') AS summary, r.body
       INTO src
       FROM search_published() p
@@ -239,9 +287,10 @@ BEGIN
 
     INSERT INTO search_documents AS d
            (translation_id, article_id, revision_id, language, subject_kind,
-            slug, title, summary, body_text, excerpt_words, excerpt_keys, indexed_at)
+            slug, title, summary, body_text, names, names_text, excerpt_words, excerpt_keys, indexed_at)
     VALUES (src.id, src.article_id, src.revision_id, src.language, src.subject_kind,
-            src.slug, src.title, src.summary, v_body, v_words, v_keys, now())
+            src.slug, src.title, src.summary, v_body, src.names, array_to_string(src.names, E'\n'),
+            v_words, v_keys, now())
     ON CONFLICT (translation_id) DO UPDATE
        SET article_id    = EXCLUDED.article_id,
            revision_id   = EXCLUDED.revision_id,
@@ -251,12 +300,15 @@ BEGIN
            title         = EXCLUDED.title,
            summary       = EXCLUDED.summary,
            body_text     = EXCLUDED.body_text,
+           names         = EXCLUDED.names,
+           names_text    = EXCLUDED.names_text,
            excerpt_words = EXCLUDED.excerpt_words,
            excerpt_keys  = EXCLUDED.excerpt_keys,
            indexed_at    = now()
-     WHERE (d.revision_id, d.slug, d.subject_kind, d.article_id, d.language)
+     WHERE (d.revision_id, d.slug, d.subject_kind, d.article_id, d.language, d.names)
            IS DISTINCT FROM
-           (EXCLUDED.revision_id, EXCLUDED.slug, EXCLUDED.subject_kind, EXCLUDED.article_id, EXCLUDED.language);
+           (EXCLUDED.revision_id, EXCLUDED.slug, EXCLUDED.subject_kind, EXCLUDED.article_id, EXCLUDED.language,
+            EXCLUDED.names);
 
     IF FOUND THEN
         RETURN 'indexed';
@@ -271,7 +323,8 @@ $$;
 -- are immutable, comparing revision ids is an exact change test: nothing has to
 -- re-read a body to find out whether it moved. A subject that is deleted or
 -- restored moves its articles out of or back into search_published(), which the
--- two halves of the query below pick up the same way.
+-- two halves of the query below pick up the same way; a new alias, label or
+-- merge changes names, which is compared too.
 CREATE OR REPLACE FUNCTION search_reconcile(p_limit integer DEFAULT 500)
     RETURNS TABLE (indexed integer, removed integer)
     LANGUAGE plpgsql
@@ -299,6 +352,7 @@ BEGIN
             OR d.slug <> p.slug
             OR d.subject_kind IS DISTINCT FROM p.subject_kind
             OR d.article_id <> p.article_id
+            OR d.names IS DISTINCT FROM p.names
         UNION ALL
         SELECT d.translation_id
           FROM search_documents d
@@ -317,16 +371,49 @@ BEGIN
 END
 $$;
 
+-- search_prefix_query is every word of a folded query as a prefix, all of them
+-- required, so a query finds its article while it is still being typed. NULL
+-- for a query with no words.
+CREATE OR REPLACE FUNCTION search_prefix_query(key text) RETURNS tsquery
+    LANGUAGE sql IMMUTABLE STRICT PARALLEL SAFE
+AS $$
+    SELECT to_tsquery('simple', string_agg(quote_literal(replace(l, '\', '')) || ':*', ' & '))
+      FROM unnest(tsvector_to_array(to_tsvector('simple', key))) AS l
+$$;
+
+-- search_matched_name is the other name a hit was found by, for a result to
+-- show "Ormuz → Strait of Hormuz". NULL when the title itself matches, or no
+-- name explains the hit. words is the query as search_prefix_query gives it,
+-- and key the folded query, used when nothing matched exactly and the hit came
+-- from typo matching instead.
+CREATE OR REPLACE FUNCTION search_matched_name(names text[], title_key text, words tsquery, key text)
+    RETURNS text
+    LANGUAGE sql STABLE PARALLEL SAFE
+AS $$
+    SELECT CASE
+        WHEN words IS NOT NULL AND to_tsvector('simple', title_key) @@ words THEN NULL
+        WHEN words IS NOT NULL AND EXISTS (SELECT 1 FROM unnest(names) n
+                                            WHERE to_tsvector('simple', search_fold(n)) @@ words) THEN
+            (SELECT n FROM unnest(names) n
+              WHERE to_tsvector('simple', search_fold(n)) @@ words
+              ORDER BY length(n), n LIMIT 1)
+        ELSE
+            (SELECT n FROM unnest(names) n
+              WHERE similarity(search_fold(n), key) > similarity(title_key, key)
+              ORDER BY similarity(search_fold(n), key) DESC, n LIMIT 1)
+    END
+$$;
+
 -- search_articles answers one query. Language and subject kind are optional
 -- filters; a kind filter leaves out articles with no subject, as core's article
 -- list does. Results are ranked, paged, and carry the total count on every row.
+-- An article is found by its title, its other names, its slug, summary and body.
 --
 -- The snippet is HTML: the excerpt is escaped first and only then wrapped in
 -- <mark>, so it is safe to render as-is. Every other column is plain text and
 -- must be escaped by whoever displays it.
 --
--- Dropped first because CREATE OR REPLACE cannot rename a parameter or a result
--- column, which the move from entity_type to subject_kind did.
+-- Dropped first because CREATE OR REPLACE cannot change the result columns.
 DROP FUNCTION IF EXISTS search_articles(text, text, text, integer, integer);
 CREATE FUNCTION search_articles(
         p_query        text,
@@ -341,6 +428,7 @@ CREATE FUNCTION search_articles(
         subject_kind   varchar,
         slug           varchar,
         title          text,
+        matched_name   text,
         snippet        text,
         score          real,
         total          bigint)
@@ -351,10 +439,7 @@ AS $$
     ),
     tq AS (
         SELECT q.key,
-               -- Every word as a prefix, all of them required, so a query finds
-               -- its article while it is still being typed.
-               (SELECT to_tsquery('simple', string_agg(quote_literal(replace(l, '\', '')) || ':*', ' & '))
-                  FROM unnest(tsvector_to_array(to_tsvector('simple', q.key))) AS l) AS words,
+               search_prefix_query(q.key) AS words,
                -- English stems. Only English documents carry stemmed lexemes.
                plainto_tsquery('english', q.key) AS stems,
                -- What a snippet highlights: each query word, plus its English
@@ -366,8 +451,8 @@ AS $$
     ),
     candidates AS (
         SELECT d.translation_id, d.article_id, d.language, d.subject_kind, d.slug, d.title,
-               d.title_key, d.excerpt_words, d.excerpt_keys, d.document, d.indexed_at,
-               tq.key, tq.words, tq.stems, tq.terms
+               d.title_key, d.names, d.names_key, d.excerpt_words, d.excerpt_keys, d.document,
+               d.indexed_at, tq.key, tq.words, tq.stems, tq.terms
           FROM search_documents d
          CROSS JOIN tq
          WHERE (p_language IS NULL OR d.language = p_language)
@@ -380,27 +465,29 @@ AS $$
             OR (numnode(c.stems) > 0 AND c.document @@ c.stems)
     ),
     fuzzy AS (
-        -- Typo tolerance on titles, used only when nothing matched exactly: a
-        -- misspelt query should still land, and a correct one should not be
-        -- diluted with near misses.
+        -- Typo tolerance on titles and other names, used only when nothing
+        -- matched exactly: a misspelt query should still land, and a correct
+        -- one should not be diluted with near misses.
         SELECT c.*
           FROM candidates c
          WHERE NOT EXISTS (SELECT 1 FROM exact)
            AND c.key <> ''
-           AND (c.title_key % c.key OR c.key <% c.title_key)
+           AND (c.title_key % c.key OR c.key <% c.title_key OR c.key <% c.names_key)
     ),
     scored AS (
         SELECT h.*,
                (  coalesce(ts_rank_cd(h.document, h.words, 32), 0)
                 + CASE WHEN numnode(h.stems) > 0 THEN ts_rank_cd(h.document, h.stems, 32) ELSE 0 END
                 + CASE WHEN h.title_key = h.key THEN 1.0
+                       WHEN EXISTS (SELECT 1 FROM unnest(h.names) n WHERE search_fold(n) = h.key) THEN 0.8
                        WHEN starts_with(h.title_key, h.key) THEN 0.5
                        ELSE 0 END
-                + 0.5 * similarity(h.title_key, h.key)
+                + 0.5 * greatest(similarity(h.title_key, h.key), word_similarity(h.key, h.names_key))
                )::real AS score
           FROM (SELECT * FROM exact UNION ALL SELECT * FROM fuzzy) h
     )
     SELECT s.translation_id, s.article_id, s.language, s.subject_kind, s.slug, s.title,
+           search_matched_name(s.names, s.title_key, s.words, s.key) AS matched_name,
            coalesce(search_snippet(s.excerpt_words, s.excerpt_keys, s.terms), '') AS snippet,
            s.score,
            count(*) OVER () AS total

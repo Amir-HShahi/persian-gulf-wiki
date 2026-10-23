@@ -62,7 +62,9 @@ const DefaultLimit = 20
 
 // Hit is one matching translation. Snippet is HTML, already escaped, with the
 // matching words wrapped in <mark>. Every other field is plain text.
-// SubjectKind is nil for an article with no subject.
+// SubjectKind is nil for an article with no subject. MatchedName is the other
+// name the article was found by, such as an alias, for showing
+// "Ormuz → Strait of Hormuz"; nil when the title itself matched.
 type Hit struct {
 	TranslationID string  `json:"translation_id"`
 	ArticleID     string  `json:"article_id"`
@@ -70,6 +72,7 @@ type Hit struct {
 	SubjectKind   *string `json:"subject_kind"`
 	Slug          string  `json:"slug"`
 	Title         string  `json:"title"`
+	MatchedName   *string `json:"matched_name"`
 	Snippet       string  `json:"snippet"`
 	Score         float32 `json:"score"`
 }
@@ -88,7 +91,7 @@ func Search(ctx context.Context, db DB, q Query) (Page, error) {
 
 	rows, err := db.Query(ctx, `
 		SELECT translation_id::text, article_id::text, language, subject_kind, slug,
-		       title, snippet, score, total
+		       title, matched_name, snippet, score, total
 		  FROM search_articles($1, $2, $3, $4, $5)`,
 		q.Text, nullIfEmpty(q.Language), nullIfEmpty(q.SubjectKind), limit, max(q.Offset, 0))
 	if err != nil {
@@ -100,7 +103,7 @@ func Search(ctx context.Context, db DB, q Query) (Page, error) {
 	for rows.Next() {
 		var h Hit
 		if err := rows.Scan(&h.TranslationID, &h.ArticleID, &h.Language, &h.SubjectKind,
-			&h.Slug, &h.Title, &h.Snippet, &h.Score, &page.Total); err != nil {
+			&h.Slug, &h.Title, &h.MatchedName, &h.Snippet, &h.Score, &page.Total); err != nil {
 			return Page{}, wrap("reading results", err)
 		}
 		page.Hits = append(page.Hits, h)

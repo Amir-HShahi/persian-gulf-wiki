@@ -43,7 +43,15 @@ CREATE TABLE article_translations (id uuid PRIMARY KEY DEFAULT gen_random_uuid()
     article_id uuid NOT NULL, language varchar(20) NOT NULL, slug varchar(200) NOT NULL,
     current_revision_id uuid);
 CREATE TABLE article_revisions (id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    translation_id uuid NOT NULL, title text NOT NULL, body jsonb NOT NULL, summary text);`
+    translation_id uuid NOT NULL, title text NOT NULL, body jsonb NOT NULL, summary text);
+CREATE TABLE labels (id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    subject_id uuid REFERENCES subjects (id) ON DELETE CASCADE,
+    language varchar(2) NOT NULL, value varchar(200) NOT NULL);
+CREATE TABLE subject_aliases (id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    subject_id uuid NOT NULL REFERENCES subjects (id) ON DELETE CASCADE,
+    language varchar(2) NOT NULL, value varchar(200) NOT NULL);
+CREATE TABLE subject_redirects (source_id uuid PRIMARY KEY REFERENCES subjects (id) ON DELETE CASCADE,
+    target_id uuid NOT NULL REFERENCES subjects (id) ON DELETE CASCADE);`
 
 func normalizePool(t *testing.T) *pgxpool.Pool {
 	t.Helper()
