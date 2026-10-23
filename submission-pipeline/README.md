@@ -281,17 +281,27 @@ subject, if it has one, is not deleted.
 
 It reads these tables and nothing else: `subjects(id, kind, deleted_at)`,
 `articles(id, subject_id)`, `article_translations(id, article_id, language, slug,
-current_revision_id)` and `article_revisions(id, title, summary, body)`. If those
-names or columns change, update `schema.sql`. It has no triggers, no foreign keys
+current_revision_id)`, `article_revisions(id, title, summary, body)`, and a
+subject's names: `labels(subject_id, value)`, `subject_aliases(subject_id, value)`
+and `subject_redirects(source_id, target_id)`. If those names or columns change,
+update `schema.sql`. It has no triggers, no foreign keys
 and no views on them, so a search problem can never fail an article write or block
 one of core's migrations: the index simply falls behind.
 
 The article body is free-form JSON, so the text is taken from the values of the
 keys `title`, `text`, `caption` and `alt` at any depth.
 
+**Other names, like Wikipedia's redirects.** An article about a subject is also
+found by the subject's name in every language (its labels), its aliases, and the
+names and aliases of any subject merged into it. They count as much as the title,
+so "Qays" finds the Kish article as if it were its title, and a hit found that way
+says so in `matched_name`, for showing "Qays → Kish Island". Typo matching covers
+them too.
+
 **Keeping it fresh:** the worker syncs every `SEARCH_SYNC_INTERVAL` (30 s), so a
 newly approved article is searchable within that. Unpublished or deleted articles
-leave the index at the same sync.
+leave the index at the same sync, and so does a change to a subject's names: a new
+alias or a merge needs no new revision.
 
 **Querying:**
 
@@ -300,8 +310,9 @@ SELECT * FROM search_articles('تنگه هرمز', 'fa', NULL, 20, 0);
 --                            query,       language, subject_kind, limit, offset
 ```
 
-Returns `translation_id, article_id, language, subject_kind, slug, title, snippet,
-score, total` (`total` is the full match count on every row, for paging).
+Returns `translation_id, article_id, language, subject_kind, slug, title,
+matched_name, snippet, score, total` (`total` is the full match count on every row,
+for paging; `matched_name` is null when the title itself matched).
 `subject_kind` is null for an article with no subject, and a kind filter leaves
 those out. `snippet`
 is HTML with matches in `<mark>`, already escaped, so it is safe to render as is.
@@ -313,8 +324,33 @@ forms for `en` articles; and misspelt titles when nothing matches exactly. Title
 rank above slug and summary, which rank above the body. Persian and Arabic have no
 stemmer in Postgres, so prefix matching stands in for one.
 
-If the folding rules in `search_fold` ever change, run `TRUNCATE search_documents`
-and the worker rebuilds the index on its next sync.
+**Suggestions while typing:**
+
+```sql
+SELECT * FROM search_suggest('هرم', 'fa', 8);   -- text so far, language, limit (max 20)
+```
+
+Returns `translation_id, article_id, language, slug, title, matched_name`: titles and
+other names that start with what was typed, every word as a prefix. A title that
+starts with the text comes first, then an other name that does, then shorter titles
+before longer ones. It reads one small index, so it can run on every keystroke.
+
+**"Did you mean":**
+
+```sql
+SELECT search_did_you_mean('hormuzz strait', NULL);   -- → 'Hormuz strait'
+```
+
+Each word of the query that no indexed article contains is replaced by the closest
+word some article does contain; known words are kept as typed. It returns null when
+there is nothing to correct, and a spelling that folds to a known word (Arabic ي for
+Persian ی) is not a typo. The vocabulary (`search_terms`) is rebuilt whenever a sync
+changes the index. Show it above the results when a search finds nothing or little.
+
+**Changing the index's shape:** `search_documents` carries a version in its table
+comment. When `schema.sql` changes the table, bump the version: the worker then
+drops the old index on start and the next sync rebuilds it. The same goes for a
+change to the folding rules in `search_fold`, since stored rows are not rewritten.
 
 ## Database setup
 
@@ -336,7 +372,7 @@ table is missing, and resume as soon as it exists.
 
 The worker's database user needs `CREATE` on the schema and the right to create
 `pg_trgm` (core's user in the compose files has both); `SELECT, UPDATE` on `jobs`;
-`SELECT` on the four tables above; and `LISTEN`. It never inserts into `jobs`, and
+`SELECT` on the seven tables above; and `LISTEN`. It never inserts into `jobs`, and
 finished rows are never deleted by the worker, so decide how long to keep them.
 
 ## Configuration

@@ -147,16 +147,21 @@ they should go too, add `originals/{mediaId}/` to that sweep and to item deletio
 | Pixel limit | about 60 MP suggested | 100 MP, and 30,000 px per side | The header is checked before any decode, so a larger limit costs no safety. Current phones shoot 48 to 200 MP. |
 | Widths | up to 2560 | 320, 640, 1280, 1920 | The original is kept, so a 2560 variant can be generated later if a layout needs one. |
 
-## 3. Search: one endpoint to add
+## 3. Search: three queries to expose
 
-The worker builds and refreshes the index on its own, every 30 s. Core only queries it:
+The worker builds and refreshes the index on its own, every 30 s. Core only queries it.
+
+**Search results:**
 
 ```sql
 SELECT * FROM search_articles(:q, :language, :subjectKind, :limit, :offset);
 ```
 
-* Returns `translation_id, article_id, language, subject_kind, slug, title, snippet, score, total`.
-  `total` is the full match count on every row.
+* Returns `translation_id, article_id, language, subject_kind, slug, title, matched_name,
+  snippet, score, total`. `total` is the full match count on every row.
+* An article is also found by its subject's other names, in every language: labels, aliases,
+  and the names of any subject merged into it, as Wikipedia's redirects work. `matched_name` is
+  the name that matched, for showing "Qays → Kish Island", and null when the title did.
 * `language` and `subjectKind` may be null. A kind filter leaves out articles with no subject,
   as `findPublishedByLanguage` does.
 * `snippet` is HTML that is already escaped, with matches in `<mark>`, and can be rendered as is.
@@ -165,9 +170,25 @@ SELECT * FROM search_articles(:q, :language, :subjectKind, :limit, :offset);
   translation with a `current_revision_id`, whose subject, if any, is not deleted. A subject
   that is deleted or restored drops out of results, or comes back, within one sync.
 
+**Suggestions while typing** (cheap enough for every keystroke):
+
+```sql
+SELECT * FROM search_suggest(:prefix, :language, :limit);   -- limit 8 by default, at most 20
+```
+
+Returns `translation_id, article_id, language, slug, title, matched_name`, matched on titles
+and other names by prefix, titles that start with the text first.
+
+**"Did you mean"**, for a search that found nothing or little:
+
+```sql
+SELECT search_did_you_mean(:q, :language);   -- 'hormuzz strait' → 'Hormuz strait', or null
+```
+
 The index reads only these columns: `subjects(id, kind, deleted_at)`, `articles(id, subject_id)`,
-`article_translations(id, article_id, language, slug, current_revision_id)` and
-`article_revisions(id, title, summary, body)`. It uses functions rather than views, so none of
+`article_translations(id, article_id, language, slug, current_revision_id)`,
+`article_revisions(id, title, summary, body)`, `labels(subject_id, value)`,
+`subject_aliases(subject_id, value)` and `subject_redirects(source_id, target_id)`. It uses functions rather than views, so none of
 your migrations is blocked by a dependency on these columns. If a migration renames or drops
 one of them, search stops updating and logs why. The site is not affected. Please tell me when
 that happens.
@@ -191,4 +212,4 @@ Both are described in the README with their result and reject codes.
 The compose files run the worker as core's database user, which is enough. If it ever gets its
 own role, that role needs `CREATE` on `public` (it applies its schema),
 `CREATE EXTENSION pg_trgm` (or have it installed once), `SELECT, UPDATE` on `jobs`, `SELECT` on
-the four tables above, and `LISTEN`.
+the seven tables above, and `LISTEN`.
