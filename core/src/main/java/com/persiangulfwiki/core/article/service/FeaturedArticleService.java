@@ -1,6 +1,5 @@
 package com.persiangulfwiki.core.article.service;
 
-import com.persiangulfwiki.core.article.dto.ArticleCardResponse;
 import com.persiangulfwiki.core.article.dto.CreateFeaturedArticleRequest;
 import com.persiangulfwiki.core.article.dto.CurrentFeaturedArticleResponse;
 import com.persiangulfwiki.core.article.dto.FeaturedArticleResponse;
@@ -33,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -55,7 +53,6 @@ public class FeaturedArticleService {
     private final ArticleRevisionRepository articleRevisionRepository;
     private final SubjectRepository subjectRepository;
     private final SubjectMainImageService subjectMainImageService;
-    private final ArticleCardService articleCardService;
 
     /** Throws FeaturedArticleNotFoundException when nothing at all is published in {@code language}. */
     @Transactional(readOnly = true)
@@ -83,25 +80,23 @@ public class FeaturedArticleService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<FeaturedArticleResponse> list(Pageable pageable, String readerLanguage) {
+    public PageResponse<FeaturedArticleResponse> list(Pageable pageable) {
         Page<FeaturedArticle> page = featuredArticleRepository.findAllByOrderByStartsAtDescIdAsc(pageable);
-        Map<UUID, ArticleCardResponse> cards = articleCardService.cards(
-                page.getContent().stream().map(FeaturedArticle::getArticleId).distinct().toList(), readerLanguage);
-        return new PageResponse<>(
-                page.getContent().stream().map(window -> toResponse(window, cards.get(window.getArticleId()))).toList(),
+        return new PageResponse<>(page.getContent().stream().map(FeaturedArticleService::toResponse).toList(),
                 page.getTotalElements());
     }
 
     // An article with nothing approved yet may be scheduled -- the window simply shows nothing
     // until it is published, so scheduling ahead of approval works.
     @Transactional
-    public FeaturedArticleResponse create(UUID adminUserId, CreateFeaturedArticleRequest request,
-            String readerLanguage) {
+    public FeaturedArticleResponse create(UUID adminUserId, CreateFeaturedArticleRequest request) {
         Instant startsAt = Objects.requireNonNullElseGet(request.startsAt(), Instant::now);
         if (request.endsAt() != null && !request.endsAt().isAfter(startsAt)) {
             throw new InvalidFeaturedArticleWindowException();
         }
-        ArticleCardResponse card = articleCardService.card(request.articleId(), readerLanguage);
+        if (!articleRepository.existsById(request.articleId())) {
+            throw new ArticleNotFoundException();
+        }
         FeaturedArticle window = featuredArticleRepository.save(FeaturedArticle.builder()
                 .articleId(request.articleId())
                 .startsAt(startsAt)
@@ -110,7 +105,7 @@ public class FeaturedArticleService {
                 .build());
         log.info("admin {} featured article {} from {} (window {})", adminUserId, request.articleId(), startsAt,
                 window.getId());
-        return toResponse(window, card);
+        return toResponse(window);
     }
 
     @Transactional
@@ -121,8 +116,8 @@ public class FeaturedArticleService {
         log.info("admin {} removed featured-article window {}", adminUserId, featuredArticleId);
     }
 
-    private static FeaturedArticleResponse toResponse(FeaturedArticle window, ArticleCardResponse article) {
-        return new FeaturedArticleResponse(window.getId(), article, window.getStartsAt(),
+    private static FeaturedArticleResponse toResponse(FeaturedArticle window) {
+        return new FeaturedArticleResponse(window.getId(), window.getArticleId(), window.getStartsAt(),
                 window.getEndsAt(), window.getFeaturedByUserId(), window.getCreatedAt());
     }
 }

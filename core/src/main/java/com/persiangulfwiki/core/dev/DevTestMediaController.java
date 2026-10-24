@@ -3,8 +3,6 @@ package com.persiangulfwiki.core.dev;
 import com.persiangulfwiki.core.article.entity.RevisionStatus;
 import com.persiangulfwiki.core.article.exception.ArticleNotFoundException;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
-import com.persiangulfwiki.core.article.service.ArticleCardService;
-import com.persiangulfwiki.core.config.SupportedLocales;
 import com.persiangulfwiki.core.dev.dto.DevTestArticleRequest;
 import com.persiangulfwiki.core.dev.dto.DevTestMediaRequest;
 import com.persiangulfwiki.core.dev.dto.DevTestMediaResponse;
@@ -34,7 +32,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.context.annotation.Profile;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -94,7 +91,6 @@ public class DevTestMediaController {
     private final PanoramaLinkRepository panoramaLinkRepository;
     private final ArticleRepository articleRepository;
     private final DevTestArticleFixtures articleFixtures;
-    private final ArticleCardService articleCardService;
     private final UserRepository userRepository;
 
     @Operation(summary = "Mint a disposable test gallery item", description = "Creates a gallery item marked as machine-minted on an existing "
@@ -126,8 +122,7 @@ public class DevTestMediaController {
             // DELETE leaves it alone because it cannot know a caller-supplied article from this
             // one, and only ever removes the media it minted.
             articleId = articleFixtures.mint(new DevTestArticleRequest(
-                    null, null, null, RevisionStatus.APPROVED, null, null, null, null, null, null, null, null, null, null))
-                    .article().id();
+                    null, null, null, RevisionStatus.APPROVED, null, null, null, null, null, null, null, null, null, null)).articleId();
         } else if (!articleRepository.existsById(articleId)) {
             throw new ArticleNotFoundException();
         }
@@ -221,8 +216,7 @@ public class DevTestMediaController {
                     .build()).getId());
         }
 
-        return new DevTestMediaResponse(media.getId(), articleCardService.card(articleId, readerLanguage()),
-                uploaderId, processingStatus, publicationStatus,
+        return new DevTestMediaResponse(media.getId(), articleId, uploaderId, processingStatus, publicationStatus,
                 first.getId(), versions.stream().skip(1).map(MediaMetadataVersion::getId).toList(),
                 current != null ? current.getId() : null, List.copyOf(linkIds));
     }
@@ -301,9 +295,5 @@ public class DevTestMediaController {
                 .emailVerified(true)
                 .build());
         return uploader.getId();
-    }
-
-    private static String readerLanguage() {
-        return SupportedLocales.normalize(LocaleContextHolder.getLocale()).getLanguage();
     }
 }

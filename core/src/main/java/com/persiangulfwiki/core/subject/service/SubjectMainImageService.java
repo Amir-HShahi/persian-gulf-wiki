@@ -20,9 +20,9 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-// A subject's main image, as cards, infoboxes and article cards show it. Kept apart from
-// MediaReadService so that a gallery response can carry an article card (which shows this image)
-// without the media and subject read services depending on each other.
+// A subject's main image, as subject cards, infoboxes and article listings show it. Kept apart
+// from MediaReadService so article and subject reads can show it without depending on the whole
+// gallery read path.
 @Service
 @RequiredArgsConstructor
 public class SubjectMainImageService {

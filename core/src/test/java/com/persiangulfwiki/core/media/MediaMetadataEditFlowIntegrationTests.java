@@ -692,7 +692,7 @@ class MediaMetadataEditFlowIntegrationTests {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.links", hasSize(2)))
                 .andExpect(jsonPath("$.data.links[0].target.mediaId").value(crossArticle.getId().toString()))
-                .andExpect(jsonPath("$.data.links[0].target.article.id").value(otherArticleId.toString()))
+                .andExpect(jsonPath("$.data.links[0].target.articleId").value(otherArticleId.toString()))
                 .andExpect(jsonPath("$.data.links[0].target.smallestVariant.size").value("640"))
                 .andExpect(jsonPath("$.data.links[0].label").value("harbour"))
                 .andExpect(jsonPath("$.data.links[1].target.mediaId").value(ownPending.getId().toString()))

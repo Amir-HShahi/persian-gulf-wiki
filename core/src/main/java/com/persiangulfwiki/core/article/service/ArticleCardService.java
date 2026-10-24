@@ -4,8 +4,6 @@ import com.persiangulfwiki.core.article.dto.ArticleCardResponse;
 import com.persiangulfwiki.core.article.entity.Article;
 import com.persiangulfwiki.core.article.entity.ArticleRevision;
 import com.persiangulfwiki.core.article.entity.ArticleTranslation;
-import com.persiangulfwiki.core.article.exception.ArticleNotFoundException;
-import com.persiangulfwiki.core.article.repository.ArticleRepository;
 import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 import com.persiangulfwiki.core.config.SupportedLocales;
@@ -27,34 +25,18 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-// The ArticleCardResponse every article-pointing response carries. Four queries for any number of
-// articles: translations, revisions, and the subjects' main images (two).
+// Builds ArticleCardResponse, the approved-text summary that ArticleResponse and SubjectArticleResponse
+// show flat. Four queries for any number of articles: translations, revisions, and the subjects'
+// main images (two).
 @Service
 @RequiredArgsConstructor
 public class ArticleCardService {
 
     private static final String FARSI = SupportedLocales.FARSI.getLanguage();
 
-    private final ArticleRepository articleRepository;
     private final ArticleTranslationRepository articleTranslationRepository;
     private final ArticleRevisionRepository articleRevisionRepository;
     private final SubjectMainImageService subjectMainImageService;
-
-    /** Throws ArticleNotFoundException when no article has this id. */
-    @Transactional(readOnly = true)
-    public ArticleCardResponse card(UUID articleId, String language) {
-        Article article = articleRepository.findById(articleId).orElseThrow(ArticleNotFoundException::new);
-        return cardsOf(List.of(article), language).get(articleId);
-    }
-
-    // Ids naming no article are absent from the result.
-    @Transactional(readOnly = true)
-    public Map<UUID, ArticleCardResponse> cards(Collection<UUID> articleIds, String language) {
-        if (articleIds.isEmpty()) {
-            return Map.of();
-        }
-        return cardsOf(articleRepository.findAllById(articleIds), language);
-    }
 
     @Transactional(readOnly = true)
     public Map<UUID, ArticleCardResponse> cardsOf(Collection<Article> articles, String language) {

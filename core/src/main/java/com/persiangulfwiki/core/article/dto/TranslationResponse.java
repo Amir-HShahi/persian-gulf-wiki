@@ -10,14 +10,10 @@ import java.util.UUID;
 
 public record TranslationResponse(
         UUID id,
-        @Schema(description = "The article this translation belongs to, shown through the reader's language -- not "
-                + "necessarily this translation.")
-        ArticleCardResponse article,
+        UUID articleId,
         String language,
         String slug,
-        @Schema(description = "This translation's most recently approved revision. Null until one is approved.",
-                nullable = true)
-        UUID revisionId,
+        UUID currentRevisionId,
         UUID sourceRevisionId,
         TranslationState translationState,
         Instant createdAt,

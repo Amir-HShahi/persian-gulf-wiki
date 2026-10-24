@@ -108,7 +108,7 @@ class DevTestFeaturedArticleEndpointIntegrationTests {
                                 .formatted(language)))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
-        return UUID.fromString(JsonPath.read(body, "$.article.id"));
+        return UUID.fromString(JsonPath.read(body, "$.articleId"));
     }
 
     private ResultActions mintWindow(String json) throws Exception {

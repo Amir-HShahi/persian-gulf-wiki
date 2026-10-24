@@ -10,8 +10,8 @@ import org.jspecify.annotations.Nullable;
 import java.time.Instant;
 import java.util.UUID;
 
-// Article-level fields, plus what any article reference shows of it (the ArticleCardResponse
-// fields, flat). The translations and revisions themselves -- including the drafts of an article
+// Article-level fields, plus the approved-text summary of the article (language, slug, title,
+// summary, revisionId, mainImage). The translations and revisions themselves -- including the drafts of an article
 // with nothing approved yet -- are fetched separately via
 // GET /api/articles/{articleId}/translations/{language}, matching the
 // article/translation/revision split the rest of this API follows.

@@ -63,7 +63,7 @@ class DevTestTopicEndpointIntegrationTests {
                                 .formatted(topicId)))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
-        return UUID.fromString(JsonPath.read(body, "$.article.id"));
+        return UUID.fromString(JsonPath.read(body, "$.articleId"));
     }
 
     private String topicJsonPath(UUID topicId, String field) {

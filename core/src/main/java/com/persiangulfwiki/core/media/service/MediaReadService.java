@@ -1,12 +1,9 @@
 package com.persiangulfwiki.core.media.service;
 
-import com.persiangulfwiki.core.article.dto.ArticleCardResponse;
 import com.persiangulfwiki.core.article.entity.Article;
 import com.persiangulfwiki.core.article.exception.ArticleNotFoundException;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
-import com.persiangulfwiki.core.article.service.ArticleCardService;
 import com.persiangulfwiki.core.article.service.ArticleVisibilityService;
-import com.persiangulfwiki.core.config.SupportedLocales;
 import com.persiangulfwiki.core.media.dto.GeoPointResponse;
 import com.persiangulfwiki.core.media.dto.MediaMetadataResponse;
 import com.persiangulfwiki.core.media.dto.MediaMetadataVersionResponse;
@@ -77,7 +74,6 @@ public class MediaReadService {
 
     private final ArticleRepository articleRepository;
     private final ArticleVisibilityService articleVisibilityService;
-    private final ArticleCardService articleCardService;
     private final ArticleMediaRepository articleMediaRepository;
     private final MediaMetadataVersionRepository mediaMetadataVersionRepository;
     private final MediaDescriptionRepository mediaDescriptionRepository;
@@ -213,8 +209,6 @@ public class MediaReadService {
                 .collect(Collectors.groupingBy(PanoramaLink::getMetadataVersionId));
         Map<UUID, PanoramaLinkTargetResponse> targets = resolveTargets(
                 linksByVersion.values().stream().flatMap(List::stream).toList(), caller, TargetScope.PUBLIC);
-        Map<UUID, ArticleCardResponse> cards = articleCardService.cards(
-                items.stream().map(ArticleMedia::getArticleId).distinct().toList(), readerLanguage());
 
         return items.stream().map(media -> {
             UUID versionId = shownVersionIdByMedia.get(media.getId());
@@ -222,7 +216,7 @@ public class MediaReadService {
             List<PanoramaLinkResponse> links = media.getType() == MediaKind.PANORAMA_360 && versionId != null
                     ? toLinkResponses(linksByVersion.getOrDefault(versionId, List.of()), targets)
                     : List.of();
-            return new MediaResponse(media.getId(), cards.get(media.getArticleId()), media.getType(),
+            return new MediaResponse(media.getId(), media.getArticleId(), media.getType(),
                     media.getProcessingStatus(), media.getPublicationStatus(), media.getFailureCode(),
                     failureMessage(media.getFailureCode()), media.getPlaceholder(),
                     mediaVariantService.toResponses(media), version != null ? toMetadata(version) : null,
@@ -265,8 +259,6 @@ public class MediaReadService {
             return Map.of();
         }
         List<ArticleMedia> targets = articleMediaRepository.findAllById(targetIds);
-        Map<UUID, ArticleCardResponse> cards = articleCardService.cards(
-                targets.stream().map(ArticleMedia::getArticleId).distinct().toList(), readerLanguage());
         Map<UUID, Boolean> readableArticles = new HashMap<>();
         Map<UUID, PanoramaLinkTargetResponse> resolved = new HashMap<>();
         for (ArticleMedia target : targets) {
@@ -274,13 +266,12 @@ public class MediaReadService {
                     && readableArticles.computeIfAbsent(target.getArticleId(),
                             articleId -> isArticleReadable(articleId, caller.userId(), caller.isModerator()));
             if (isVisible) {
-                resolved.put(target.getId(), new PanoramaLinkTargetResponse(target.getId(),
-                        cards.get(target.getArticleId()), target.getType(), target.getPlaceholder(),
-                        smallestVariant(target)));
+                resolved.put(target.getId(), new PanoramaLinkTargetResponse(target.getId(), target.getArticleId(),
+                        target.getType(), target.getPlaceholder(), smallestVariant(target)));
             } else if (scope == TargetScope.ALL
                     || (scope == TargetScope.OWN_OR_PUBLIC && target.getUploadedBy().equals(caller.userId()))) {
-                resolved.put(target.getId(), new PanoramaLinkTargetResponse(target.getId(),
-                        cards.get(target.getArticleId()), target.getType(), null, null));
+                resolved.put(target.getId(), new PanoramaLinkTargetResponse(target.getId(), target.getArticleId(),
+                        target.getType(), null, null));
             }
         }
         return resolved;
@@ -320,12 +311,6 @@ public class MediaReadService {
         }
         MediaFailureCode code = MediaFailureCode.fromCode(failureCode).orElse(MediaFailureCode.REJECTED);
         return messageSource.getMessage(code.messageKey(), null, LocaleContextHolder.getLocale());
-    }
-
-    // fa, en or ar from Accept-Language, else fa: the language each article card is shown in. Not the
-    // caption's ?language=, which has no fallback and may be absent.
-    private static String readerLanguage() {
-        return SupportedLocales.normalize(LocaleContextHolder.getLocale()).getLanguage();
     }
 
     private static <T> Map<UUID, T> byId(List<T> rows, Function<T, UUID> id) {

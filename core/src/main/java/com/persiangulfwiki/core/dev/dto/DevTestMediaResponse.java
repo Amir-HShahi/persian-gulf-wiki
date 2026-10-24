@@ -1,6 +1,5 @@
 package com.persiangulfwiki.core.dev.dto;
 
-import com.persiangulfwiki.core.article.dto.ArticleCardResponse;
 import com.persiangulfwiki.core.media.entity.ProcessingStatus;
 import com.persiangulfwiki.core.media.entity.PublicationStatus;
 
@@ -14,7 +13,7 @@ import java.util.UUID;
 // version, or null; panoramaLinkIds is empty unless links were requested.
 public record DevTestMediaResponse(
         UUID mediaId,
-        ArticleCardResponse article,
+        UUID articleId,
         UUID uploadedByUserId,
         ProcessingStatus processingStatus,
         PublicationStatus publicationStatus,

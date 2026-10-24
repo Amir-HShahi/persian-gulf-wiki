@@ -11,7 +11,7 @@ import java.util.UUID;
 // CurrentFeaturedArticleResponse).
 public record FeaturedArticleResponse(
         UUID id,
-        ArticleCardResponse article,
+        UUID articleId,
         Instant startsAt,
         @Schema(description = "Absent for a window with no end.", nullable = true) @Nullable Instant endsAt,
         @Schema(description = "The admin who scheduled it; absent once that account is deleted.", nullable = true)

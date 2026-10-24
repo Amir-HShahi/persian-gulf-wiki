@@ -236,7 +236,7 @@ public class ArticleController {
     public ApiResult<TranslationResponse> createTranslation(
             @PathVariable UUID articleId, @Valid @RequestBody CreateTranslationRequest request) {
         TranslationResponse data = articleTranslationService.addTranslation(
-                currentUserId(), isCurrentUserModerator(), articleId, request, readerLanguage());
+                currentUserId(), isCurrentUserModerator(), articleId, request);
         String message = messageSource.getMessage("success.translationCreated", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }
@@ -257,8 +257,7 @@ public class ArticleController {
     @ResponseStatus(HttpStatus.OK)
     public ApiResult<TranslationResponse> getTranslation(@PathVariable UUID articleId, @PathVariable String language) {
         TranslationResponse data =
-                articleTranslationService.get(articleId, language, currentUserIdOrNull(), isCurrentUserModerator(),
-                        readerLanguage());
+                articleTranslationService.get(articleId, language, currentUserIdOrNull(), isCurrentUserModerator());
         String message = messageSource.getMessage("success.translationFetched", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }

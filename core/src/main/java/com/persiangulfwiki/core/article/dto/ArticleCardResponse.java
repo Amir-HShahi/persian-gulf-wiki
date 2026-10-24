@@ -8,8 +8,8 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
-// What every response that points at an article shows of it, so a client never needs a second
-// call to render a link or card. Read off one approved translation only -- never a draft.
+// Internal only: no response exposes it as an object. ArticleResponse and SubjectArticleResponse copy
+// its fields flat. Read off one approved translation only -- never a draft.
 @Schema(description = "Enough of an article to show it as a link or card. The text comes from one approved "
         + "translation, picked for the reader: their language (from `Accept-Language`: fa, en or ar; anything else "
         + "gets fa), else Farsi, else the article's own language, else any other it is published in. Until the "

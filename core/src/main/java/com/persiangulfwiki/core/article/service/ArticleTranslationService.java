@@ -18,7 +18,6 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -30,7 +29,6 @@ public class ArticleTranslationService {
     private final ArticleTranslationRepository articleTranslationRepository;
     private final ArticleRevisionService articleRevisionService;
     private final ArticleVisibilityService articleVisibilityService;
-    private final ArticleCardService articleCardService;
 
     // Adds a language to an existing article, writing that language's first DRAFT revision in
     // the same transaction -- same "detail row must exist together with its parent" reasoning
@@ -41,7 +39,7 @@ public class ArticleTranslationService {
     // id could attach a language to someone else's unapproved draft.
     @Transactional
     public TranslationResponse addTranslation(UUID authorUserId, boolean isAuthorModerator, UUID articleId,
-            CreateTranslationRequest request, String readerLanguage) {
+            CreateTranslationRequest request) {
         Article article = articleRepository.findById(articleId).orElseThrow(ArticleNotFoundException::new);
         if (!articleVisibilityService.isArticleReadableBy(article, authorUserId, isAuthorModerator)) {
             throw new ArticleNotFoundException();
@@ -78,27 +76,25 @@ public class ArticleTranslationService {
         articleRevisionService.createInitialRevision(
                 translation.getId(), request.title(), request.body(), request.summary(), authorUserId, Set.of());
 
-        return toResponse(translation, article, readerLanguage);
+        return toResponse(translation, article);
     }
 
     // A translation with no approved revision yet is 404 to anyone but its authors and
     // moderators -- see ArticleVisibilityService.
     @Transactional(readOnly = true)
     public TranslationResponse get(UUID articleId, String language, @Nullable UUID callerUserId,
-            boolean isCallerModerator, String readerLanguage) {
+            boolean isCallerModerator) {
         ArticleTranslation translation = articleTranslationRepository.findByArticleIdAndLanguage(articleId, language)
                 .orElseThrow(TranslationNotFoundException::new);
         if (!articleVisibilityService.isTranslationReadableBy(translation, callerUserId, isCallerModerator)) {
             throw new TranslationNotFoundException();
         }
-        return toResponse(translation, articleRepository.findById(articleId).orElseThrow(ArticleNotFoundException::new),
-                readerLanguage);
+        return toResponse(translation,
+                articleRepository.findById(articleId).orElseThrow(ArticleNotFoundException::new));
     }
 
-    private TranslationResponse toResponse(ArticleTranslation translation, Article article, String readerLanguage) {
-        return new TranslationResponse(translation.getId(),
-                articleCardService.cardsOf(List.of(article), readerLanguage).get(article.getId()),
-                translation.getLanguage(),
+    private TranslationResponse toResponse(ArticleTranslation translation, Article article) {
+        return new TranslationResponse(translation.getId(), translation.getArticleId(), translation.getLanguage(),
                 translation.getSlug(), translation.getCurrentRevisionId(), translation.getSourceRevisionId(),
                 translation.getTranslationState(), translation.getCreatedAt(), translation.getUpdatedAt(),
                 articleRevisionService.liveTopicIds(translation.getArticleId()),

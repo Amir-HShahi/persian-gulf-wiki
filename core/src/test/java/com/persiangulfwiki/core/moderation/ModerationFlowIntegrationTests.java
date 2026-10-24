@@ -246,7 +246,7 @@ class ModerationFlowIntegrationTests {
                         .cookie(readerAccessCookie))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
-        String raw = JsonPath.read(translation, "$.data.revisionId");
+        String raw = JsonPath.read(translation, "$.data.currentRevisionId");
         return raw == null ? null : UUID.fromString(raw);
     }
 
@@ -850,7 +850,7 @@ class ModerationFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.items[0].slug").value(approvedSlug))
                 .andExpect(jsonPath("$.data.items[0].title").value("First approved title"))
                 .andExpect(jsonPath("$.data.items[0].summary").value("First approved summary"))
-                .andExpect(jsonPath("$.data.items[0].revisionId").value(approved.revisionId().toString()));
+                .andExpect(jsonPath("$.data.items[0].currentRevisionId").value(approved.revisionId().toString()));
 
         mockMvc.perform(get("/api/articles").param("language", "en").param("subjectId", subjectId.toString()))
                 .andExpect(status().isOk())
@@ -889,7 +889,7 @@ class ModerationFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.items[0].id").value(approved.articleId().toString()))
                 .andExpect(jsonPath("$.data.items[0].title").value("Second approved title"))
                 .andExpect(jsonPath("$.data.items[0].summary").value("Second approved summary"))
-                .andExpect(jsonPath("$.data.items[0].revisionId").value(secondApproved.getId().toString()));
+                .andExpect(jsonPath("$.data.items[0].currentRevisionId").value(secondApproved.getId().toString()));
 
         // Adjacent behavior: the article-level read shows the same approved text, never the newer draft.
         mockMvc.perform(get("/api/articles/" + approved.articleId()))
