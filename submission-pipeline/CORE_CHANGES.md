@@ -98,6 +98,7 @@ is well inside the 60-minute stuck-processing sweep, which can stay as it is.
 | `type` `media.image` / `media.panorama` | `type` `image` / `panorama` |
 | `media.sha256` | `image.sha256` (recomputed by the worker, standard padded base64) |
 | `media.placeholder` | `image.placeholder`: `data:image/webp;base64,...`, 24 px wide, under 16 KiB, so your `PLACEHOLDER` check passes as is. Left out (not empty) if one could not be made small enough. |
+| (nothing yet) | `image.attribution`: the author, credit, copyright, licence and date the original file states. See below. |
 | `media.width` / `media.height` | `image.width` / `image.height` (after EXIF rotation) |
 | `media.variants[].size` | `image.variants[].label` (`w320`, `w640`, ...) |
 | `media.variants[].format` | same name, always `webp` |
@@ -113,6 +114,10 @@ Example `result`:
     "width": 3000, "height": 4000, "format": "jpeg",
     "sha256": "n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=",
     "placeholder": "data:image/webp;base64,UklGRjAAAABXRUJQVlA4...",
+    "attribution": {"author": "مریم احمدی", "copyright": "© 2026 مریم احمدی",
+                    "license": "CC BY-SA 4.0",
+                    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+                    "created_at": "2024-05-01T10:20:30"},
     "variants": [
       {"label": "w320", "format": "webp", "key": "pending/9b1e7c3a/w320.webp", "width": 320, "height": 427, "bytes": 11874}
     ],
@@ -137,6 +142,23 @@ The original goes to `originals/{mediaId}/original.<ext>`, outside `pending/`, s
 or rejecting an item never deletes it. **One thing for core to decide:** your 7-day sweep of
 FAILED items does not reach `originals/`, so originals of rejected or deleted items stay. If
 they should go too, add `originals/{mediaId}/` to that sweep and to item deletion.
+
+### Author and licence: new, for you to use
+
+Wikimedia Commons requires an author and a licence on every file. Cameras and photo software
+often record them, and the variants are stripped, so the worker reads them from the original
+and returns them as `image.attribution` (`author`, `credit`, `copyright`, `license`,
+`license_url`, `created_at`, each optional; the README lists where each comes from). Nothing
+else is read: never location or the camera's serial number.
+
+Suggested use on core's side, none of it required:
+
+* Show it to the moderator next to what the uploader declared. A photo whose file names a
+  different author than the uploader is worth a second look.
+* Prefill the upload's licence and author fields from it, for the uploader to confirm.
+* Store it with the media item, so the article page can credit the photographer.
+
+It is what the file claims, not a fact: treat it as a hint, never as the licence itself.
 
 ## 2. Kept on the worker side, on purpose
 

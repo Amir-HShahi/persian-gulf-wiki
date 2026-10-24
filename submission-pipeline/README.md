@@ -67,6 +67,10 @@ The worker runs four job types: `image`, `panorama`, `tabular` (spreadsheets) an
   second matters for iPhone photos, which are Display P3: left as is, their colours come out
   wrong once the profile is removed. EXIF rotation is applied before sizing, because phones
   store portraits sideways and sizing from the stored shape makes every variant too small.
+* **The author and licence are read before the metadata is stripped.** Wikimedia Commons
+  requires both on every file. Cameras and photo editors often record them already, and once
+  the variants are stripped that record is gone, so the worker reads those few fields from the
+  original and returns them for a reviewer, and nothing else: never location or serial numbers.
 * **The header is checked before any pixel is decoded**, so a few bytes that claim to be
   40,000 x 40,000 pixels are refused instead of allocated.
 * **libvips is behind a build tag, and the worker refuses to start without it.** The queue
@@ -120,8 +124,8 @@ notification is ever missed, the worker's polling picks the job up anyway.
   over 30,000 px, before decoding a single pixel. This is what stops a tiny file
   that claims to be 40,000 x 40,000.
 * Decodes with libvips. JPEG, PNG, WebP, GIF, TIFF, HEIC and AVIF were all tested.
-* Applies the EXIF rotation, converts colours to sRGB, and strips all metadata,
-  GPS included.
+* Reads the **author and licence** the original states (see below), then applies the EXIF
+  rotation, converts colours to sRGB, and strips all metadata from the variants, GPS included.
 * Writes WebP (quality 85) at **320, 640, 1280 and 1920 px wide**. Height follows
   the image's shape. A width above the source's is skipped rather than upscaled
   (the source's own width is kept: that is a re-encode), and an image narrower
@@ -161,6 +165,10 @@ notification is ever missed, the worker's polling picks the job up anyway.
     "width": 3000, "height": 4000, "format": "jpeg",
     "sha256": "n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=",
     "placeholder": "data:image/webp;base64,UklGRjAAAABXRUJQVlA4...",
+    "attribution": {"author": "مریم احمدی", "copyright": "© 2026 مریم احمدی",
+                    "license": "CC BY-SA 4.0",
+                    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+                    "created_at": "2024-05-01T10:20:30"},
     "variants": [
       {"label": "w320", "format": "webp", "key": "pending/9b1e7c3a/w320.webp", "width": 320, "height": 427, "bytes": 11874}
     ],
@@ -185,6 +193,28 @@ a translated message for each. `reason.detail` is for the logs only; for
 | `checksum_mismatch` | The file's SHA-256 is not `declared_sha256`. |
 | `object_missing` | `object_key` is not in the raw bucket. Not about the file, so core shows its generic "rejected". |
 | `malformed_payload` | Bad JSON, an invalid `submission_id`, or a `declared_sha256` that is not base64 of 32 bytes. A bug in whoever enqueued the job; core shows its generic "rejected". |
+
+### Author and licence
+
+`image.attribution` is what the file itself says about who made it and on what terms. It is
+left out when the file says nothing. Every field is optional, one line, at most 300 characters:
+
+| Field | From XMP (preferred) | From EXIF |
+|---|---|---|
+| `author` | `dc:creator` (several are joined with `; `) | `Artist` |
+| `credit` | `photoshop:Credit` | |
+| `copyright` | `dc:rights` | `Copyright` |
+| `license` | `xmpRights:UsageTerms`, e.g. "CC BY-SA 4.0" | |
+| `license_url` | `cc:license`, else `xmpRights:WebStatement` | |
+| `created_at` | `photoshop:DateCreated`, `exif:DateTimeOriginal`, `xmp:CreateDate` | `DateTimeOriginal` (as `2024-05-01T10:20:30`, no time zone) |
+
+XMP wins because it is UTF-8: EXIF text is ASCII only, so a Persian name can only survive in
+XMP, and licences are only written there. It is read from the original, before anything is
+stripped, and no other metadata field is read at all.
+
+**It is a claim, not proof.** Anyone can type any name into a file. It is there so a reviewer
+can compare it with the licence the uploader declares, and spot a photo whose file names
+someone else, as Commons reviewers do.
 
 ### Panoramas
 
