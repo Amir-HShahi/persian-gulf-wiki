@@ -69,7 +69,13 @@ SELECT m.id AS media_id, j.status, j.result, j.last_error
 ```
 
 Once core moves an item out of `PROCESSING` the row stops matching, so nothing has to be
-acknowledged. A redelivery cannot happen. Until the worker has started once, `jobs` may not
+acknowledged. A redelivery cannot happen.
+
+**Job rows are not kept forever.** The worker deletes `done` jobs 30 days after they finish
+and `failed` ones after 90 (`JOBS_KEEP_DONE` / `JOBS_KEEP_FAILED`; `0` keeps them). Copy into
+your own tables anything you want longer than that: the variants and placeholder already go
+into yours, and the same applies to a `tabular` report or `normalize` findings you want to
+show months later. Pending and running jobs are never deleted. Until the worker has started once, `jobs` may not
 exist: treat "relation does not exist" as "nothing yet".
 
 | Row | Means | Core does what it does today for |
@@ -233,5 +239,5 @@ Both are described in the README with their result and reject codes.
 
 The compose files run the worker as core's database user, which is enough. If it ever gets its
 own role, that role needs `CREATE` on `public` (it applies its schema),
-`CREATE EXTENSION pg_trgm` (or have it installed once), `SELECT, UPDATE` on `jobs`, `SELECT` on
+`CREATE EXTENSION pg_trgm` (or have it installed once), `SELECT, UPDATE, DELETE` on `jobs`, `SELECT` on
 the seven tables above, and `LISTEN`.

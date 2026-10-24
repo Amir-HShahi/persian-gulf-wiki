@@ -244,6 +244,41 @@ VALUES ('panorama', '{"submission_id": "9b1e7c3a", "object_key": "uploads/9b1e7c
   worker in turn.
 * On shutdown the worker stops taking jobs and lets running ones finish.
 
+## Monitoring and clean-up
+
+### Metrics
+
+`GET :8080/metrics` serves the worker's numbers in Prometheus' text format, beside
+`/healthz` on the same internal port:
+
+| Metric | Kind | What it shows |
+|---|---|---|
+| `wikipg_queue_up` | gauge | 1 if the jobs table could be read. When 0, the queue numbers below are left out rather than shown as an empty queue. |
+| `wikipg_jobs{type,status}` | gauge | rows in the jobs table now |
+| `wikipg_jobs_oldest_due_seconds` | gauge | how long the longest-waiting due job has waited. The number to alert on: it rises when the queue falls behind, however long it is. |
+| `wikipg_job_attempts_total{type,outcome}` | counter | attempts this process finished: `ok`, `rejected`, `retry` or `failed` |
+| `wikipg_job_duration_seconds{type}` | histogram | how long each attempt took, 0.1 s to 5 min buckets |
+| `wikipg_jobs_deleted_total{status}` | counter | finished jobs this process's clean-up deleted |
+
+The queue's rows are counted from the database on each scrape, so every worker
+reports the same numbers; the counters are this process's own since it started.
+No client library is used: the format is a few lines of text.
+
+### Old jobs are deleted
+
+Every job leaves a row, so without a limit the table only grows. Once an hour the
+worker deletes, in batches of 1000:
+
+* `done` jobs 30 days after they finished (`JOBS_KEEP_DONE`),
+* `failed` jobs after 90 days (`JOBS_KEEP_FAILED`), longer because a person may
+  still need to look at why.
+
+Pending and running jobs are never deleted. `0` keeps a status forever. Anything
+under 24 hours is refused at start: core reads an image's result within seconds,
+but a revision's text checks wait for a moderator, and a window typed as `10m`
+instead of `10d` must not delete them first. Core copies what it needs to keep
+into its own tables.
+
 ## Spreadsheet jobs
 
 ```sql
@@ -401,9 +436,10 @@ Until then the worker idles: the queue and the search sync each log once that th
 table is missing, and resume as soon as it exists.
 
 The worker's database user needs `CREATE` on the schema and the right to create
-`pg_trgm` (core's user in the compose files has both); `SELECT, UPDATE` on `jobs`;
-`SELECT` on the seven tables above; and `LISTEN`. It never inserts into `jobs`, and
-finished rows are never deleted by the worker, so decide how long to keep them.
+`pg_trgm` (core's user in the compose files has both); `SELECT, UPDATE, DELETE` on `jobs`;
+`SELECT` on the seven tables above; and `LISTEN`. It never inserts into `jobs`; it
+deletes finished rows once they are old enough (see Monitoring and clean-up), so it
+also needs `DELETE` on `jobs`.
 
 ## Configuration
 
@@ -426,6 +462,7 @@ All environment variables. `-` means required.
 | `WORKER_MAX_ATTEMPTS` | `5` | for jobs that set none |
 | `WORKER_RETRY_BASE_DELAY` | `30s` | |
 | `SEARCH_SYNC_INTERVAL` / `SEARCH_SYNC_BATCH` | `30s` / `500` | |
+| `JOBS_KEEP_DONE` / `JOBS_KEEP_FAILED` | `720h` / `2160h` | 30 / 90 days; `0` keeps forever, otherwise at least `24h` |
 | `LOG_LEVEL` | `info` | |
 
 The worker starts only if the settings are consistent, and reports every problem
@@ -445,8 +482,9 @@ images would discard real jobs.
 
 The `Dockerfile` (build context is the repository root) builds with libvips and the
 HEIF decoders, fails the build if the HEIF loader is missing, runs as a non-root
-user, and health-checks `GET :8080/healthz`. That port is fixed in the code, so
-inside a container that publishes nothing it will not clash with the app.
+user, and health-checks `GET :8080/healthz` (`/metrics` is on the same port). That
+port is fixed in the code, so inside a container that publishes nothing it will not
+clash with the app.
 
 ## CI and deployment
 
@@ -508,7 +546,7 @@ go run ./cmd/search -q "تنگه هرمز" -lang fa -dsn "$DSN"     # query the 
 ## For the app side
 
 See [CORE_CHANGES.md](CORE_CHANGES.md): what core changes to send image jobs here
-instead of Redis, how to read results, the one search query to call, and which
+instead of Redis, how to read results, the three search queries to call, and which
 differences from `docs/MEDIA_PIPELINE.md` are deliberate.
 
 ## Not done yet
