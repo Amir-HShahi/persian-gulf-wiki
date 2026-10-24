@@ -20,6 +20,7 @@ type Config struct {
 	Storage  Storage
 	Worker   Worker
 	Search   Search
+	Jobs     Jobs
 	LogLevel slog.Level
 }
 
@@ -94,6 +95,19 @@ type Search struct {
 	SyncBatch int
 }
 
+// Jobs controls how long finished jobs are kept in the jobs table.
+type Jobs struct {
+	// KeepDone and KeepFailed are how long after finishing a job is deleted.
+	// Zero keeps it forever.
+	KeepDone   time.Duration
+	KeepFailed time.Duration
+}
+
+// minJobsKeep is the shortest retention allowed. Results are read by core
+// within seconds, but text checks wait for a moderator, and a window typed as
+// "10m" instead of "10d" must not delete them first.
+const minJobsKeep = 24 * time.Hour
+
 // Load reads configuration from the environment, reporting every problem
 // it finds at once rather than failing on the first.
 func Load() (Config, error) {
@@ -131,6 +145,10 @@ func Load() (Config, error) {
 			SyncInterval: l.optDuration("SEARCH_SYNC_INTERVAL", 30*time.Second),
 			SyncBatch:    l.optInt("SEARCH_SYNC_BATCH", 500),
 		},
+		Jobs: Jobs{
+			KeepDone:   l.optDuration("JOBS_KEEP_DONE", 30*24*time.Hour),
+			KeepFailed: l.optDuration("JOBS_KEEP_FAILED", 90*24*time.Hour),
+		},
 	}
 
 	if cfg.Worker.Concurrency < 1 {
@@ -147,6 +165,17 @@ func Load() (Config, error) {
 	}
 	if cfg.Search.SyncBatch < 1 {
 		l.errorf("SEARCH_SYNC_BATCH must be at least 1, got %d", cfg.Search.SyncBatch)
+	}
+	for _, keep := range []struct {
+		name string
+		d    time.Duration
+	}{
+		{"JOBS_KEEP_DONE", cfg.Jobs.KeepDone},
+		{"JOBS_KEEP_FAILED", cfg.Jobs.KeepFailed},
+	} {
+		if keep.d != 0 && keep.d < minJobsKeep {
+			l.errorf("%s must be 0 (keep forever) or at least %s, got %s", keep.name, minJobsKeep, keep.d)
+		}
 	}
 	if cfg.Database.MaxConns < 1 {
 		l.errorf("DB_MAX_CONNS must be at least 1, got %d", cfg.Database.MaxConns)

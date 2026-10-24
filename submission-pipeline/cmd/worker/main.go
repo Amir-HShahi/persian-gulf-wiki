@@ -103,6 +103,23 @@ func run() error {
 	}()
 	defer func() { stop(); <-searchDone }()
 
+	jobs := queue.NewStore(pool)
+
+	// Old finished jobs are deleted beside the job loop, like search sync, and
+	// nothing it hits stops the worker.
+	cleanupDone := make(chan struct{})
+	go func() {
+		defer close(cleanupDone)
+		(&queue.Cleaner{
+			Store:      jobs,
+			Log:        log.With("component", "cleanup"),
+			Interval:   time.Hour,
+			KeepDone:   cfg.Jobs.KeepDone,
+			KeepFailed: cfg.Jobs.KeepFailed,
+		}).Run(ctx)
+	}()
+	defer func() { stop(); <-cleanupDone }()
+
 	health := &Health{}
 	health.MarkPoll() // don't report stale before the first poll
 	// hardcoded fix: from HEALTH_ADDR / HEALTH_MAX_AGE
@@ -110,7 +127,7 @@ func run() error {
 	defer shutdownHealthServer(healthSrv, log)
 
 	runner := queue.NewRunner(
-		queue.NewStore(pool),
+		jobs,
 		log,
 		queue.RunnerConfig{
 			Concurrency:       cfg.Worker.Concurrency,

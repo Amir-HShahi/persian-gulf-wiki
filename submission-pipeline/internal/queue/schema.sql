@@ -6,8 +6,9 @@
 -- claims rows with FOR UPDATE SKIP LOCKED, runs them, and records the outcome
 -- on the same row.
 --
--- Rows are never deleted by the worker. How long finished and failed jobs are
--- kept is a retention decision for whoever owns the database.
+-- Finished rows are deleted by the worker once they are old enough
+-- (JOBS_KEEP_DONE and JOBS_KEEP_FAILED, 30 and 90 days by default). Nothing
+-- pending or running is ever deleted.
 CREATE TABLE IF NOT EXISTS jobs (
     id           bigserial   PRIMARY KEY,
 
@@ -74,6 +75,10 @@ CREATE INDEX IF NOT EXISTS idx_jobs_claimable
     ON jobs (run_after, id) WHERE status = 'pending';
 CREATE INDEX IF NOT EXISTS idx_jobs_stale
     ON jobs (locked_until) WHERE status = 'running';
+-- Finished jobs by when they finished, so the clean-up finds the old ones
+-- without reading the whole table.
+CREATE INDEX IF NOT EXISTS idx_jobs_finished
+    ON jobs (updated_at) WHERE status IN ('done', 'failed');
 
 -- Wake the workers when a job is enqueued. pg_notify is delivered when the
 -- inserting transaction commits, so a worker is never woken for a row it

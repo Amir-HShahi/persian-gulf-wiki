@@ -235,6 +235,37 @@ func (s *Store) DeadLetter(ctx context.Context, id int64, lastErr string) error 
 	return nil
 }
 
+// deleteFinishedSQL removes one batch of finished jobs that finished before
+// the cut-off, oldest first. Batches keep each transaction, and the locks it
+// holds, small however much has piled up. SKIP LOCKED lets two workers clean
+// at once without waiting on each other.
+const deleteFinishedSQL = `
+DELETE FROM jobs
+WHERE id IN (
+    SELECT id FROM jobs
+    WHERE status = $1 AND updated_at < now() - make_interval(secs => $2)
+    ORDER BY updated_at
+    LIMIT $3
+    FOR UPDATE SKIP LOCKED
+)`
+
+// DeleteFinished deletes up to batch jobs in the given finished status that
+// finished more than olderThan ago, and returns how many it deleted. Only done
+// and failed jobs can be deleted: a pending or running job is still owed work.
+func (s *Store) DeleteFinished(ctx context.Context, status Status, olderThan time.Duration, batch int) (int64, error) {
+	if status != StatusDone && status != StatusFailed {
+		return 0, fmt.Errorf("deleting jobs: %q is not a finished status", status)
+	}
+	tag, err := s.pool.Exec(ctx, deleteFinishedSQL, string(status), olderThan.Seconds(), batch)
+	if err != nil {
+		if err = installedError(err); errors.Is(err, ErrNotInstalled) {
+			return 0, err
+		}
+		return 0, fmt.Errorf("deleting %s jobs: %w", status, err)
+	}
+	return tag.RowsAffected(), nil
+}
+
 // Listen blocks until a NOTIFY arrives on NotifyChannel, ctx is cancelled, or
 // the connection drops. It holds a dedicated connection for its lifetime,
 // because a connection waiting on notifications cannot also serve queries.
