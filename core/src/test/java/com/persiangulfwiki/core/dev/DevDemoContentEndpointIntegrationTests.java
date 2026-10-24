@@ -2,14 +2,17 @@ package com.persiangulfwiki.core.dev;
 
 import com.persiangulfwiki.core.TestcontainersConfiguration;
 import com.persiangulfwiki.core.article.entity.Article;
+import com.persiangulfwiki.core.article.entity.ArticleRevision;
 import com.persiangulfwiki.core.article.entity.ArticleTranslation;
 import com.persiangulfwiki.core.article.entity.FeaturedArticle;
 import com.persiangulfwiki.core.article.entity.TranslationState;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
+import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 import com.persiangulfwiki.core.article.repository.FeaturedArticleRepository;
 import com.persiangulfwiki.core.dev.DevDemoDataset.DemoArticle;
 import com.persiangulfwiki.core.dev.DevDemoDataset.DemoAsset;
+import com.persiangulfwiki.core.dev.DevDemoDataset.DemoTranslation;
 import com.persiangulfwiki.core.media.storage.MediaStorage;
 import com.persiangulfwiki.core.media.storage.StorageBucket;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
@@ -88,6 +91,9 @@ class DevDemoContentEndpointIntegrationTests {
 
     @Autowired
     private ArticleTranslationRepository articleTranslationRepository;
+
+    @Autowired
+    private ArticleRevisionRepository articleRevisionRepository;
 
     @Autowired
     private FeaturedArticleRepository featuredArticleRepository;
@@ -192,6 +198,71 @@ class DevDemoContentEndpointIntegrationTests {
 
         // The V31 topics are only referenced, never created or changed.
         assertThat(topicRepository.findAll()).allSatisfy(topic -> assertThat(topic.getDevMarker()).isNull());
+    }
+
+    @Test
+    void everyRevisionCarriesTheArticleSummaryAndChangesTheBody() throws Exception {
+        seed();
+
+        for (DemoArticle article : dataset.articles()) {
+            for (String language : DevDemoDataset.LANGUAGES) {
+                DemoTranslation demoTranslation = article.translations().get(language);
+                String where = article.key() + " [" + language + "]";
+                UUID translationId = articleTranslationRepository.findBySlug(demoTranslation.slug()).orElseThrow().getId();
+                List<ArticleRevision> revisions =
+                        articleRevisionRepository.findByTranslationIdOrderByRevisionNumberAsc(translationId);
+                boolean isMachine = article.isMachineTranslated() && !language.equals(article.canonicalLanguage());
+                // A machine translation is a single revision of the whole text.
+                int approved = isMachine ? 1 : article.history().revisions();
+
+                assertThat(revisions).extracting(ArticleRevision::getSummary).as(where)
+                        .containsOnly(demoTranslation.summary());
+                assertThat(revisions.subList(0, approved)).as(where).allSatisfy(revision -> {
+                    assertThat(revision.isMachineGenerated()).isEqualTo(isMachine);
+                    assertThat(revision.getMachineModel()).isEqualTo(isMachine ? DevDemoContentSeeder.MACHINE_MODEL : null);
+                });
+                for (int i = 1; i < revisions.size(); i++) {
+                    assertThat(revisions.get(i).getBody()).as(where + " revision " + (i + 1))
+                            .isNotEqualTo(revisions.get(i - 1).getBody());
+                }
+                // Only the canonical translation can have an open revision on top, carrying the pending edit.
+                if (revisions.size() > approved) {
+                    assertThat(language).as(where).isEqualTo(article.canonicalLanguage());
+                    assertThat(revisions).as(where).hasSize(approved + 1);
+                    assertThat(revisions.getLast().getBody()).contains(article.pendingEdit().p());
+                }
+            }
+        }
+    }
+
+    @Test
+    void theReaderPageShowsTheMachineTagAndTheSourceOfAMachineTranslatedArticle() throws Exception {
+        DemoArticle machine = dataset.articles().stream().filter(DemoArticle::isMachineTranslated).findFirst().orElseThrow();
+        DemoArticle human = dataset.articles().stream().filter(article -> !article.isMachineTranslated()).findFirst()
+                .orElseThrow();
+        String otherLanguage = DevDemoDataset.LANGUAGES.stream()
+                .filter(language -> !language.equals(machine.canonicalLanguage())).findFirst().orElseThrow();
+        DemoTranslation source = machine.translations().get(machine.canonicalLanguage());
+        seed();
+
+        JsonNode translated = getData("/api/articles/by-slug/" + machine.translations().get(otherLanguage).slug(), "en");
+        assertThat(translated.get("revision").get("isMachineGenerated").asBoolean()).isTrue();
+        assertThat(translated.get("revision").get("machineModel").asString()).isEqualTo(DevDemoContentSeeder.MACHINE_MODEL);
+        assertThat(translated.get("translation").get("isSource").asBoolean()).isFalse();
+        assertThat(translated.get("source").get("language").asString()).isEqualTo(machine.canonicalLanguage());
+        assertThat(translated.get("source").get("slug").asString()).isEqualTo(source.slug());
+
+        JsonNode original = getData("/api/articles/by-slug/" + source.slug(), "en");
+        assertThat(original.get("revision").get("isMachineGenerated").asBoolean()).isFalse();
+        assertThat(original.get("revision").get("machineModel").isNull()).isTrue();
+        assertThat(original.get("translation").get("isSource").asBoolean()).isTrue();
+
+        // An all-human article has no source and no machine text.
+        JsonNode humanPage = getData("/api/articles/by-slug/"
+                + human.translations().get(human.canonicalLanguage()).slug(), "en");
+        assertThat(humanPage.get("source").isNull()).isTrue();
+        assertThat(humanPage.get("translation").get("isSource").asBoolean()).isFalse();
+        assertThat(humanPage.get("revision").get("isMachineGenerated").asBoolean()).isFalse();
     }
 
     @Test

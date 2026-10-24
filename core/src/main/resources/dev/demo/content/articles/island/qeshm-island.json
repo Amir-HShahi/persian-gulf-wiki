@@ -28,6 +28,8 @@
   "history": { "revisions": 6, "contributors": 11, "outdated": ["ar"] },
   "verification": "VERIFIED",
   
+  "pendingEdit": { "p": "در سال‌های اخیر انجمن‌های محلی با برگزاری جشنواره‌ها و آموزش هنرهای بومی به جوانان کوشیده‌اند آیین‌هایی مانند نوروز صیاد و هنر گلابتون‌دوزی را زنده نگه دارند." },
+  "machineTranslated": true,
   "translations": {
     "fa": {
       "slug": "جزیره-قشم",

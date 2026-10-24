@@ -20,5 +20,11 @@ public record PublishedRevisionResponse(
                 + "subject's entry in `subjectLinks`.")
         JsonNode body,
         @Schema(description = "When this revision was written.")
-        Instant createdAt) {
+        Instant createdAt,
+        @Schema(description = "Whether a translation model wrote this text rather than a person. Show it with an AI "
+                + "label.")
+        boolean isMachineGenerated,
+        @Schema(description = "The model that wrote the text, e.g. `qwen3.5:4b`. Null whenever `isMachineGenerated` is "
+                + "false.", nullable = true)
+        @Nullable String machineModel) {
 }

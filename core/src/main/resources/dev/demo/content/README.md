@@ -10,6 +10,7 @@ it into real content.
   so no made-up deep link looks real.
 - `articles/<group>/<key>.json` — one article per file, in fa, en and ar, with its subject (when it has
   one) and complete infobox. `DevDemoDataset` documents the format and `DevDemoDatasetTests` checks it.
+  `pendingEdit` is the block (in the canonical language) the unpublished revision some articles get adds.
 
 Inside a paragraph: `[[subject-key|shown text]]` links a subject (only articles that have a subject can be
 linked), `{{source-key}}` cites a source, `**text**` is bold.

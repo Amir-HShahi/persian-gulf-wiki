@@ -4,6 +4,8 @@
   "canonicalLanguage": "fa",
   "gallery": ["persian-gulf-modis", "iran-coast-iss"],
   "history": { "revisions": 5, "contributors": 6 },
+  "pendingEdit": { "p": "بسیاری از مدرسه‌های شهرهای ساحلی در هفتهٔ خلیج فارس برنامه‌هایی برای آشنایی دانش‌آموزان با جانوران دریایی و آسیب‌های پسماند پلاستیکی برگزار می‌کنند." },
+  "machineTranslated": true,
   "translations": {
     "fa": {
       "slug": "روز-ملی-خلیج-فارس",

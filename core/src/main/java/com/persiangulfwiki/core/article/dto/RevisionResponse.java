@@ -4,6 +4,8 @@ import com.persiangulfwiki.core.article.entity.RevisionStatus;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import org.jspecify.annotations.Nullable;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -33,5 +35,11 @@ public record RevisionResponse(
         @Schema(description = "Ids of the topics this revision says the article is about (see `GET /api/topics`). "
                 + "Always empty on a revision that is not in the article's original language: translations inherit "
                 + "the article's topics, listed on the translation.")
-        List<UUID> topicIds) {
+        List<UUID> topicIds,
+        @Schema(description = "Whether a translation model wrote this text rather than a person. Show it with an AI "
+                + "label.")
+        boolean isMachineGenerated,
+        @Schema(description = "The model that wrote the text, e.g. `qwen3.5:4b`. Null whenever `isMachineGenerated` is "
+                + "false.", nullable = true)
+        @Nullable String machineModel) {
 }

@@ -891,12 +891,13 @@ class ModerationFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.items[0].summary").value("Second approved summary"))
                 .andExpect(jsonPath("$.data.items[0].currentRevisionId").value(secondApproved.getId().toString()));
 
-        // Adjacent behavior: the article-level read is unchanged by the list's new shape.
+        // Adjacent behavior: the article-level read shows the same approved text, never the newer draft.
         mockMvc.perform(get("/api/articles/" + approved.articleId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(approved.articleId().toString()))
                 .andExpect(jsonPath("$.data.subjectKind").value("ISLAND"))
-                .andExpect(jsonPath("$.data.title").doesNotExist());
+                .andExpect(jsonPath("$.data.title").value("Second approved title"))
+                .andExpect(jsonPath("$.data.revisionId").value(secondApproved.getId().toString()));
     }
 
     // --- Media metadata tasks (V18): the second kind of target a task can judge ---

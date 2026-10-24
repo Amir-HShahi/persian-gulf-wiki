@@ -542,6 +542,123 @@ class SubjectReadSideFlowIntegrationTests {
                 .andExpect(jsonPath("$.code").value("SUBJECT_NOT_FOUND"));
     }
 
+    // ArticleResponse and the article listings gained the approved slug, title, summary, revision and
+    // subject image, in the reader's language (else Farsi), and only approved text, ever. Every other
+    // response that points at an article still carries the bare articleId and currentRevisionId it had
+    // before: the change is additive only, so an existing client keeps working unchanged.
+    @Test
+    void articleReadsGainApprovedTextWhileReferencesKeepTheirOldFields() throws Exception {
+        Session author = signIn("rsfcardauth");
+        Session moderator = signIn("rsfcardmod", Role.MODERATOR);
+        Session admin = signIn("rsfcardadmin", Role.ADMIN);
+        UUID provinceId = province(author, moderator, "بوشهر", "Bushehr");
+        UUID islandId = approvedSubject(author, moderator, "ISLAND",
+                payload("خارگ", "Kharg", reference("province", provinceId)));
+        PublishedArticle article = publishedArticle(author, moderator, islandId);
+        UUID imageId = seedMedia(article.id(), author.userId(), MediaKind.IMAGE, PublicationStatus.PUBLISHED);
+        publish(author, moderator, startEdit(author, islandId, """
+                {"names": {"fa": "خارگ", "en": "Kharg"},
+                 "facts": [%s], "mainImageMediaId": "%s"}""".formatted(reference("province", provinceId), imageId)));
+        String faRevisionId = JsonPath.read(mockMvc.perform(get("/api/articles/" + article.id() + "/translations/fa"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(), "$.data.currentRevisionId");
+        String articleId = article.id().toString();
+        String image = imageId.toString();
+
+        // Smoke: the new flat fields; English asked for but not published, so Farsi stands in.
+        mockMvc.perform(get("/api/articles/" + articleId).header(HttpHeaders.ACCEPT_LANGUAGE, "en"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.language").value("fa"))
+                .andExpect(jsonPath("$.data.slug").value(article.slug()))
+                .andExpect(jsonPath("$.data.title").value("عنوان"))
+                .andExpect(jsonPath("$.data.revisionId").value(faRevisionId))
+                .andExpect(jsonPath("$.data.mainImage.mediaId").value(image));
+        mockMvc.perform(get("/api/articles/by-slug/" + article.slug()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.revision.id").value(faRevisionId))
+                .andExpect(jsonPath("$.data.mainImage.mediaId").value(image));
+        mockMvc.perform(get("/api/subjects/" + islandId + "/articles"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].articleId").value(articleId))
+                .andExpect(jsonPath("$.data[0].revisionId").value(faRevisionId))
+                .andExpect(jsonPath("$.data[0].mainImage.mediaId").value(image));
+
+        // Regression: the fields existing clients read keep their old names and types; nothing nests an article.
+        mockMvc.perform(get("/api/articles").param("language", "fa").param("subjectId", islandId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[0].id").value(articleId))
+                .andExpect(jsonPath("$.data.items[0].currentRevisionId").value(faRevisionId))
+                .andExpect(jsonPath("$.data.items[0].revisionId").doesNotExist())
+                .andExpect(jsonPath("$.data.items[0].mainImage.mediaId").value(image));
+        mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.articleId").value(articleId))
+                .andExpect(jsonPath("$.data.currentRevisionId").value(faRevisionId))
+                .andExpect(jsonPath("$.data.isSource").value(false))
+                .andExpect(jsonPath("$.data.article").doesNotExist())
+                .andExpect(jsonPath("$.data.revisionId").doesNotExist());
+        mockMvc.perform(get("/api/articles/" + articleId + "/media"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].id").value(image))
+                .andExpect(jsonPath("$.data[0].articleId").value(articleId))
+                .andExpect(jsonPath("$.data[0].article").doesNotExist());
+        String window = send(post("/api/featured-articles"), admin, """
+                {"articleId": "%s"}""".formatted(articleId))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.articleId").value(articleId))
+                .andExpect(jsonPath("$.data.article").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+        String windowId = JsonPath.read(window, "$.data.id");
+        mockMvc.perform(get("/api/featured-articles").cookie(admin.access()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[?(@.id == '%s')].articleId".formatted(windowId)).value(articleId))
+                .andExpect(jsonPath("$.data.items[0].article").doesNotExist());
+        mockMvc.perform(get("/api/featured-articles/current").param("language", "fa"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.currentRevisionId").isNotEmpty())
+                .andExpect(jsonPath("$.data.revisionId").doesNotExist());
+        featuredArticleRepository.deleteById(UUID.fromString(windowId));
+
+        // Once English is approved, an English reader gets it; Arabic, still unpublished, falls back to Farsi.
+        String enSlug = "rsf-en-" + UUID.randomUUID();
+        send(post("/api/articles/" + articleId + "/translations"), author, """
+                {"language": "en", "slug": "%s", "title": "Title", "summary": "Summary",
+                 "body": {"text": "text"}}""".formatted(enSlug))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.articleId").value(articleId))
+                .andExpect(jsonPath("$.data.article").doesNotExist());
+        UUID enRevisionId = UUID.fromString(JsonPath.read(mockMvc.perform(
+                        get("/api/articles/" + articleId + "/translations/en/revisions").cookie(author.access()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(), "$.data[0].id"));
+        send(post("/api/articles/" + articleId + "/translations/en/revisions/" + enRevisionId + "/submit"), author,
+                null).andExpect(status().isOk());
+        approve(moderator, moderationTaskRepository.findByRevisionId(enRevisionId).orElseThrow().getId());
+        mockMvc.perform(get("/api/articles/" + articleId).header(HttpHeaders.ACCEPT_LANGUAGE, "en"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.language").value("en"))
+                .andExpect(jsonPath("$.data.slug").value(enSlug))
+                .andExpect(jsonPath("$.data.title").value("Title"))
+                .andExpect(jsonPath("$.data.summary").value("Summary"))
+                .andExpect(jsonPath("$.data.revisionId").value(enRevisionId.toString()));
+        mockMvc.perform(get("/api/articles/" + articleId).header(HttpHeaders.ACCEPT_LANGUAGE, "ar"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.language").value("fa"))
+                .andExpect(jsonPath("$.data.slug").value(article.slug()));
+
+        // A draft-only article shows no text at all, not even to its author, but still its subject's image.
+        String draftSlug = "rsf-draft-" + UUID.randomUUID();
+        send(post("/api/articles"), author, """
+                {"subjectId": "%s", "canonicalLanguage": "fa", "slug": "%s", "title": "پیش‌نویس",
+                 "summary": "خلاصه", "body": {"text": "متن"}}""".formatted(islandId, draftSlug))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.slug").doesNotExist())
+                .andExpect(jsonPath("$.data.title").doesNotExist())
+                .andExpect(jsonPath("$.data.summary").doesNotExist())
+                .andExpect(jsonPath("$.data.revisionId").doesNotExist())
+                .andExpect(jsonPath("$.data.mainImage.mediaId").value(image));
+    }
+
     // --- Smoke: the facet listing ---
 
     // OR within a field, AND across fields, and each field's counts taken with every other field's

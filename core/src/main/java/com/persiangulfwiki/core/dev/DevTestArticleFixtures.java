@@ -53,6 +53,7 @@ class DevTestArticleFixtures {
     private static final String MINIMAL_BODY_JSON = "{\"type\":\"doc\",\"content\":[]}";
 
     private static final String DEFAULT_LANGUAGE = "fa";
+    private static final String DEFAULT_MACHINE_MODEL = "e2e-model";
 
     // DevUserSeeder's stable contributor fixture. Deliberately a seeded account rather than a
     // freshly minted one -- see resolveAuthorUserId for the sweep-ordering race that choice
@@ -75,6 +76,9 @@ class DevTestArticleFixtures {
                 request.translationState() != null ? request.translationState() : TranslationState.UP_TO_DATE;
         String title = request.title() != null ? request.title() : "e2e article " + slug;
         String summary = request.summary() != null ? request.summary() : "e2e summary";
+        boolean isMachineGenerated = Boolean.TRUE.equals(request.isMachineGenerated());
+        String machineModel = !isMachineGenerated ? null
+                : request.machineModel() != null ? request.machineModel() : DEFAULT_MACHINE_MODEL;
 
         // Checked up front so an unknown subject is the documented 404, not a foreign-key
         // violation surfacing as a 409 from the insert below.
@@ -114,6 +118,8 @@ class DevTestArticleFixtures {
                 .summary(summary)
                 .status(revisionStatus)
                 .authorId(authorUserId)
+                .isMachineGenerated(isMachineGenerated)
+                .machineModel(machineModel)
                 .build();
         revision.setTopicIds(topicIds);
         revision = articleRevisionRepository.save(revision);
@@ -130,6 +136,10 @@ class DevTestArticleFixtures {
         if (revisionStatus == RevisionStatus.APPROVED) {
             translation.setCurrentRevisionId(revision.getId());
             articleTranslationRepository.save(translation);
+        }
+        if (Boolean.TRUE.equals(request.isSource())) {
+            article.setSourceTranslationId(translation.getId());
+            articleRepository.save(article);
         }
 
         return new DevTestArticleResponse(article.getId(), translation.getId(), revision.getId(), canonicalLanguage,

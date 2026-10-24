@@ -21,5 +21,7 @@ public record TranslationResponse(
         @Schema(description = "Ids of the topics the article is about (see `GET /api/topics`): those of the approved "
                 + "text in the article's original language, the same for every translation. Empty until that text "
                 + "has been approved.")
-        List<UUID> topicIds) {
+        List<UUID> topicIds,
+        @Schema(description = "Whether this is the translation the article's other translations are translated from.")
+        boolean isSource) {
 }

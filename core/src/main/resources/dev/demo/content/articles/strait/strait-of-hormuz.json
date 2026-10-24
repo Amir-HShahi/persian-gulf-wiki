@@ -16,6 +16,8 @@
   "history": { "revisions": 8, "contributors": 9 },
   "verification": "VERIFIED",
   "featured": 1,
+  "pendingEdit": { "p": "پس از بیرون رانده شدن پرتغالی‌ها، کمپانی‌های هند شرقی انگلیس و هلند برای چیرگی بر بازرگانی گذرنده از تنگه با یکدیگر رقابت کردند و بندرعباس به مرکز این رقابت تبدیل شد." },
+  "machineTranslated": true,
   "translations": {
     "fa": {
       "slug": "تنگه-هرمز",

@@ -110,12 +110,22 @@ public class ArticleRevision {
     @Column(nullable = false, columnDefinition = "jsonb")
     private String body;
 
+    // The article's summary in this language, written by its author and shown on cards and the
+    // reader page -- not an edit note describing what this revision changed.
     @Column
     private String summary;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 25)
     private RevisionStatus status;
+
+    // Written by a translation model rather than a person (V35); machineModel names the model and
+    // is null whenever this is false.
+    @Column(name = "is_machine_generated", nullable = false)
+    private boolean isMachineGenerated;
+
+    @Column(name = "machine_model", length = 100)
+    private String machineModel;
 
     // Authorization key for RevisionNotEditableException/NotRevisionAuthorException -- see
     // the author_id column comment in V16 for why this is NOT ON DELETE SET NULL like

@@ -1,13 +1,11 @@
 package com.persiangulfwiki.core.article.service;
 
+import com.persiangulfwiki.core.article.dto.ArticleCardResponse;
 import com.persiangulfwiki.core.article.dto.SubjectArticleResponse;
 import com.persiangulfwiki.core.article.entity.Article;
-import com.persiangulfwiki.core.article.entity.ArticleRevision;
-import com.persiangulfwiki.core.article.entity.ArticleTranslation;
 import com.persiangulfwiki.core.article.exception.ArticleNotFoundException;
 import com.persiangulfwiki.core.article.exception.InvalidMainArticleException;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
-import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository.MainArticleSlug;
 import com.persiangulfwiki.core.audit.service.AuditLogService;
@@ -25,13 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 // A subject's articles and which one is main. The main article's slug is the subject's page URL,
@@ -50,7 +45,7 @@ public class SubjectArticleService {
 
     private final ArticleRepository articleRepository;
     private final ArticleTranslationRepository articleTranslationRepository;
-    private final ArticleRevisionRepository articleRevisionRepository;
+    private final ArticleCardService articleCardService;
     private final SubjectRepository subjectRepository;
     private final SubjectInfoboxCacheService subjectInfoboxCacheService;
     private final AuditLogService auditLogService;
@@ -175,43 +170,16 @@ public class SubjectArticleService {
         return slugs;
     }
 
-    // Every article passed in must have an approved translation. Three queries for the whole page.
+    // Every article passed in must have an approved translation, so every card is filled in.
     private List<SubjectArticleResponse> toResponses(List<Article> articles, String language) {
-        if (articles.isEmpty()) {
-            return List.of();
-        }
-        Map<UUID, List<ArticleTranslation>> translationsByArticle = articleTranslationRepository
-                .findByArticleIdInAndCurrentRevisionIdIsNotNull(articles.stream().map(Article::getId).toList())
-                .stream()
-                .collect(Collectors.groupingBy(ArticleTranslation::getArticleId));
-        Map<UUID, ArticleTranslation> shown = articles.stream()
-                .collect(Collectors.toMap(Article::getId, article -> pick(
-                        translationsByArticle.get(article.getId()), article.getCanonicalLanguage(), language)));
-        Map<UUID, ArticleRevision> revisions = articleRevisionRepository
-                .findAllById(shown.values().stream().map(ArticleTranslation::getCurrentRevisionId).toList())
-                .stream()
-                .collect(Collectors.toMap(ArticleRevision::getId, Function.identity()));
-
+        Map<UUID, ArticleCardResponse> cards = articleCardService.cardsOf(articles, language);
         return articles.stream()
                 .map(article -> {
-                    ArticleTranslation translation = shown.get(article.getId());
-                    ArticleRevision revision = revisions.get(translation.getCurrentRevisionId());
-                    return new SubjectArticleResponse(article.getId(), article.isMain(), translation.getLanguage(),
-                            !translation.getLanguage().equals(language), translation.getSlug(), revision.getTitle(),
-                            revision.getSummary(), revision.getId());
+                    ArticleCardResponse card = cards.get(article.getId());
+                    return new SubjectArticleResponse(article.getId(), article.isMain(), card.language(),
+                            !language.equals(card.language()), card.slug(), card.title(), card.summary(),
+                            card.revisionId(), card.mainImage());
                 })
                 .toList();
-    }
-
-    // The reader's language, else Farsi, else the article's own language, else the first by code.
-    private static ArticleTranslation pick(List<ArticleTranslation> translations, String canonicalLanguage,
-            String language) {
-        // false sorts before true, so each "is not X" key puts X first.
-        Comparator<ArticleTranslation> preference = Comparator
-                .comparing((ArticleTranslation translation) -> !translation.getLanguage().equals(language))
-                .thenComparing(translation -> !translation.getLanguage().equals(FARSI))
-                .thenComparing(translation -> !translation.getLanguage().equals(canonicalLanguage))
-                .thenComparing(ArticleTranslation::getLanguage);
-        return translations.stream().min(preference).orElseThrow();
     }
 }

@@ -4,6 +4,8 @@
   "canonicalLanguage": "fa",
   "gallery": ["fishing-dhow", "barge-and-tug"],
   "history": { "revisions": 3, "contributors": 4 },
+  "pendingEdit": { "p": "در برخی کارگاه‌های قشم و هرمزگان، استادکاران پیر با همکاری نهادهای میراث فرهنگی دوره‌هایی برای آموزش جوانان برگزار کرده‌اند تا این مهارت سینه‌به‌سینه از میان نرود." },
+  "machineTranslated": true,
   "translations": {
     "fa": {
       "slug": "لنج‌سازی-سنتی",
