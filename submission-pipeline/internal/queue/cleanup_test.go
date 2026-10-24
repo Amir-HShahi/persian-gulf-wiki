@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"slices"
+	"sync"
 	"testing"
 	"time"
 
@@ -106,13 +107,111 @@ func TestDeleteFinishedRefusesUnfinishedStatuses(t *testing.T) {
 	}
 }
 
-func TestCleanSaysWhenTheTableIsMissing(t *testing.T) {
+func TestStatsCountsByTypeAndStatusAndTheOldestDueWait(t *testing.T) {
+	pool(t)
+	enqueue(t, "image", 0)
+	enqueue(t, "image", 0)
+	enqueueAfter(t, "tabular", 3600) // not due: counted, but not waiting
+	finishedJob(t, "done", 1)
+	exec(t, `UPDATE jobs SET run_after = now() - interval '90 seconds' WHERE id = 1`)
+
+	st, err := NewStore(testPool).Stats(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []Count{
+		{JobTypeImage, StatusDone, 1},
+		{JobTypeImage, StatusPending, 2},
+		{JobTypeTabular, StatusPending, 1},
+	}
+	if !slices.Equal(st.Counts, want) {
+		t.Errorf("counts %v, want %v", st.Counts, want)
+	}
+	if st.OldestDue < 89*time.Second || st.OldestDue > 120*time.Second {
+		t.Errorf("oldest due wait %s, want about 90s", st.OldestDue)
+	}
+}
+
+func TestStatsOnAnEmptyQueueWaitsZero(t *testing.T) {
+	pool(t)
+	st, err := NewStore(testPool).Stats(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(st.Counts) != 0 || st.OldestDue != 0 {
+		t.Errorf("empty queue stats %+v", st)
+	}
+}
+
+func TestStatsAndCleanSayWhenTheTableIsMissing(t *testing.T) {
 	pool(t)
 	exec(t, `ALTER TABLE jobs RENAME TO jobs_hidden`)
 	t.Cleanup(func() { exec(t, `ALTER TABLE jobs_hidden RENAME TO jobs`) })
 
 	s := NewStore(testPool)
+	if _, err := s.Stats(context.Background()); !errors.Is(err, ErrNotInstalled) {
+		t.Errorf("stats: %v", err)
+	}
 	if _, err := s.DeleteFinished(context.Background(), StatusDone, time.Hour, 10); !errors.Is(err, ErrNotInstalled) {
 		t.Errorf("delete: %v", err)
+	}
+}
+
+func TestTheRunnerReportsHowEachAttemptEnded(t *testing.T) {
+	pool(t)
+	okID := enqueue(t, "image", 0)
+	rejectedID := enqueue(t, "panorama", 0)
+	failingID := enqueue(t, "tabular", 2)
+	unknownID := enqueue(t, "mystery", 0)
+
+	var (
+		mu       sync.Mutex
+		outcomes = map[JobType][]string{}
+	)
+	r := NewRunner(NewStore(testPool), slog.New(slog.NewTextHandler(io.Discard, nil)), fast(), "w1", func() {})
+	r.OnFinish(func(f Finish) {
+		mu.Lock()
+		defer mu.Unlock()
+		outcomes[f.Type] = append(outcomes[f.Type], f.Outcome)
+		if f.Duration <= 0 {
+			t.Errorf("%s: duration %s", f.Type, f.Duration)
+		}
+	})
+	r.Register(JobTypeImage, handlerFunc(func(context.Context, *slog.Logger, pgx.Tx, Job) (Result, error) {
+		return ok(), nil
+	}))
+	r.Register(JobTypePanorama, handlerFunc(func(context.Context, *slog.Logger, pgx.Tx, Job) (Result, error) {
+		return Result{Outcome: OutcomeRejected}, nil
+	}))
+	r.Register(JobTypeTabular, handlerFunc(func(context.Context, *slog.Logger, pgx.Tx, Job) (Result, error) {
+		return Result{}, errors.New("storage down")
+	}))
+
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan error, 1)
+	go func() { done <- r.Run(ctx) }()
+	stop := sync.OnceValue(func() error { cancel(); return <-done })
+	t.Cleanup(func() { _ = stop() })
+
+	waitForStatus(t, okID, "done")
+	waitForStatus(t, rejectedID, "done")
+	waitForStatus(t, failingID, "failed")
+	waitForStatus(t, unknownID, "failed")
+	if err := stop(); err != nil && !errors.Is(err, context.Canceled) {
+		t.Fatal(err)
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+	want := map[JobType][]string{
+		JobTypeImage:    {"ok"},
+		JobTypePanorama: {"rejected"},
+		JobTypeTabular:  {"retry", "failed"},
+		"mystery":       {"failed"},
+	}
+	for jt, w := range want {
+		if !slices.Equal(outcomes[jt], w) {
+			t.Errorf("%s: outcomes %v, want %v", jt, outcomes[jt], w)
+		}
 	}
 }

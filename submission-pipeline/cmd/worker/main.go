@@ -104,6 +104,7 @@ func run() error {
 	defer func() { stop(); <-searchDone }()
 
 	jobs := queue.NewStore(pool)
+	metrics := NewMetrics()
 
 	// Old finished jobs are deleted beside the job loop, like search sync, and
 	// nothing it hits stops the worker.
@@ -116,6 +117,7 @@ func run() error {
 			Interval:   time.Hour,
 			KeepDone:   cfg.Jobs.KeepDone,
 			KeepFailed: cfg.Jobs.KeepFailed,
+			OnDelete:   metrics.JobsDeleted,
 		}).Run(ctx)
 	}()
 	defer func() { stop(); <-cleanupDone }()
@@ -123,7 +125,7 @@ func run() error {
 	health := &Health{}
 	health.MarkPoll() // don't report stale before the first poll
 	// hardcoded fix: from HEALTH_ADDR / HEALTH_MAX_AGE
-	healthSrv := startHealthServer(log, health, ":8080", 30*time.Second)
+	healthSrv := startHealthServer(log, health, metrics.Handle(log, jobs.Stats), ":8080", 30*time.Second)
 	defer shutdownHealthServer(healthSrv, log)
 
 	runner := queue.NewRunner(
@@ -141,6 +143,7 @@ func run() error {
 		identity(),
 		health.MarkPoll,
 	)
+	runner.OnFinish(metrics.JobFinished)
 
 	// The runner claims every job and dead-letters any type it has no handler
 	// for, so a binary that cannot process images must not start: it would
@@ -204,9 +207,10 @@ func newPool(ctx context.Context, dbCfg config.Database) (*pgxpool.Pool, error) 
 	return pool, nil
 }
 
-func startHealthServer(log *slog.Logger, health *Health, addr string, maxAge time.Duration) *http.Server {
+func startHealthServer(log *slog.Logger, health *Health, metrics http.HandlerFunc, addr string, maxAge time.Duration) *http.Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", health.Handle(maxAge))
+	mux.HandleFunc("/metrics", metrics)
 
 	srv := &http.Server{
 		Addr:              addr,
