@@ -328,6 +328,22 @@ spelling can be a deliberate quotation. The same letters in an Arabic article ar
                             "found": "ي", "suggest": "ی", "context": "جزيره كيش"}]}
 ```
 
+In a Persian article it also checks typography, like the bots and editing tools Persian
+Wikipedia uses. Only rules that are almost never wrong are included, because a reviewer shown
+false suggestions stops reading them:
+
+| Rule | Example | Suggests |
+|---|---|---|
+| `detached_prefix` | `می شود`, `نمی داند` | the space becomes a ZWNJ: `می‌شود` |
+| `detached_suffix` | `کتاب ها`, `بزرگ ترین` | `کتاب‌ها`, `بزرگ‌ترین` (ها, های, هایی, هایم… and ترین) |
+| `latin_quotes` | `"سلام"` | `«سلام»`; quotes around English text are left alone |
+| `space_before_punctuation` | `سلام ،` | `سلام،` (also before ؛ ؟ !) |
+| `no_space_after_punctuation` | `سلام،خوبی` | `سلام، خوبی` |
+| `thousands_separator` / `decimal_separator` | `۱,۲۰۰`, `۳.۵` | `۱٬۲۰۰`, `۳٫۵`, not the Persian comma ، |
+
+Left out on purpose: a prefix with no break at all (`میشود` looks like `میز`), and `تر` written
+apart (alone it means "wet").
+
 `count` is every finding; `findings` keeps the first 500, and `findings_truncated` says how
 many were left out. `line` and `column` count in that combined text: the title is line 1.
 

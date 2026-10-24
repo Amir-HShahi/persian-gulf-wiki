@@ -232,6 +232,9 @@ Two more job types run already. Neither needs anything from core until you use i
   from your tables and returns `normalize.findings`: suggested text fixes such as an Arabic
   ي in a Persian article. It never writes to the revision. A natural place to enqueue it is
   when a revision is submitted for review, so the moderator sees the findings with it.
+  Persian articles also get typography findings (`کتاب ها` → `کتاب‌ها`, `"…"` → `«…»`).
+  Treat `rule` as an open list: show `found`, `suggest` and `context`, and translate only
+  the rule names you want a label for, since new rules can appear.
 
 Both are described in the README with their result and reject codes.
 
