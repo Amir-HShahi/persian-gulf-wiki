@@ -137,6 +137,11 @@ type ImageResult struct {
 	// most 16 KiB, to show while a variant loads. Empty when none was made.
 	Placeholder string `json:"placeholder,omitempty"`
 
+	// Attribution is the author and licence the original file states, for a
+	// reviewer to check against what the uploader declared. Nil when the file
+	// states none. It is what the file claims, not a verified fact.
+	Attribution *Attribution `json:"attribution,omitempty"`
+
 	// Original is the untouched upload, saved beside the variants so it outlives
 	// whatever the raw bucket's own lifecycle does to the staging copy.
 	//
@@ -144,6 +149,16 @@ type ImageResult struct {
 	// the camera wrote, including any location data, and may be a format a
 	// browser cannot show.
 	Original *Original `json:"original,omitempty"`
+}
+
+// Attribution mirrors imagepipe.Attribution. Every field is optional.
+type Attribution struct {
+	Author     string `json:"author,omitempty"`
+	Credit     string `json:"credit,omitempty"`
+	Copyright  string `json:"copyright,omitempty"`
+	License    string `json:"license,omitempty"`
+	LicenseURL string `json:"license_url,omitempty"`
+	CreatedAt  string `json:"created_at,omitempty"`
 }
 
 // Original is where the saved copy of an upload lives.

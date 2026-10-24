@@ -198,6 +198,7 @@ func (h *Image) Handle(ctx context.Context, log *slog.Logger, _ pgx.Tx, job queu
 			Format:      processed.Source.Format,
 			SHA256:      sum,
 			Placeholder: processed.Placeholder,
+			Attribution: attributionOf(processed.Attribution),
 			Variants:    variants,
 			Original: &queue.Original{
 				Key:         origKey,
@@ -214,5 +215,20 @@ func reject(code string, detail map[string]string) queue.Result {
 	return queue.Result{
 		Outcome: queue.OutcomeRejected,
 		Reason:  &queue.Reason{Code: code, Detail: detail},
+	}
+}
+
+// attributionOf copies the pipeline's attribution into the result's shape.
+func attributionOf(a *imagepipe.Attribution) *queue.Attribution {
+	if a == nil {
+		return nil
+	}
+	return &queue.Attribution{
+		Author:     a.Author,
+		Credit:     a.Credit,
+		Copyright:  a.Copyright,
+		License:    a.License,
+		LicenseURL: a.LicenseURL,
+		CreatedAt:  a.CreatedAt,
 	}
 }
