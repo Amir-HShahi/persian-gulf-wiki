@@ -1,5 +1,6 @@
 package com.persiangulfwiki.core.media.dto;
 
+import com.persiangulfwiki.core.article.dto.ArticleCardResponse;
 import com.persiangulfwiki.core.media.entity.MediaKind;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,12 +10,13 @@ import org.jspecify.annotations.Nullable;
 import java.util.UUID;
 
 // Just enough of the target to draw a hotspot preview and to navigate: the viewer fetches the
-// full target item by mediaId/articleId when the hotspot is followed.
+// full target item by mediaId/article.id when the hotspot is followed.
 public record PanoramaLinkTargetResponse(
         UUID mediaId,
 
-        @Schema(description = "The article the target belongs to, which may differ from the source's.")
-        UUID articleId,
+        @Schema(description = "The article the target belongs to, which may differ from the source's, in the "
+                + "reader's language (`Accept-Language`).")
+        ArticleCardResponse article,
 
         @Schema(description = "The target's type. Normally PANORAMA_360.\n\n" + MediaKind.VALUES_DOC)
         MediaKind type,

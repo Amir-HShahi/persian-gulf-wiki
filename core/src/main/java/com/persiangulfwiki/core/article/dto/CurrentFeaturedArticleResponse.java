@@ -23,7 +23,7 @@ public record CurrentFeaturedArticleResponse(
         String title,
         @Schema(description = "May be absent: a summary is optional.", nullable = true) @Nullable String summary,
         @Schema(description = "The translation's most recently approved revision -- the one whose title and summary "
-                + "are shown here.") UUID currentRevisionId,
+                + "are shown here.") UUID revisionId,
         @Schema(description = "The main image of the article's subject. Absent when the article has no subject, "
                 + "or its subject has no public main image.", nullable = true)
         @Nullable SubjectMainImageResponse mainImage,

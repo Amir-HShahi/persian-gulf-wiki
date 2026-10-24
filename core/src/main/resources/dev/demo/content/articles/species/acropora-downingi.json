@@ -19,6 +19,7 @@
   "gallery": ["acropora-coral", "butterflyfish-coral", "reef-fish-school"],
   "history": { "revisions": 3, "contributors": 2 },
   "verification": "VERIFIED",
+  "pendingEdit": { "p": "در برخی کشورهای منطقه، غواصان داوطلب با ثبت عکس و دادهٔ آبسنگ‌ها در هر فصل به پژوهشگران کمک می‌کنند تا روند بهبود یا آسیب مرجان‌ها را دقیق‌تر دنبال کنند." },
   "translations": {
     "fa": {
       "slug": "مرجان-شاخ‌گوزنی-خلیج-فارس",

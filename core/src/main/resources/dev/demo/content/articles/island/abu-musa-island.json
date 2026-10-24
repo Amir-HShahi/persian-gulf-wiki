@@ -22,6 +22,8 @@
   "gallery": ["uae-coast-iss", "acropora-coral"],
   "history": { "revisions": 6, "contributors": 5 },
   "verification": "STALE",
+  "pendingEdit": { "p": "بیشتر کالاهای مصرفی جزیره با لنج و کشتی از بندر لنگه و بندرعباس می‌رسد و هوای توفانی گاهی رساندن خوراک و سوخت را برای چند روز به تأخیر می‌اندازد." },
+  "machineTranslated": true,
   "translations": {
     "fa": {
       "slug": "جزیره-ابوموسی",

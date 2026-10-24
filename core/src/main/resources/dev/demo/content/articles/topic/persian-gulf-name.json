@@ -4,6 +4,7 @@
   "canonicalLanguage": "fa",
   "gallery": ["persian-gulf-modis", "middle-east-modis"],
   "history": { "revisions": 7, "contributors": 9 },
+  "pendingEdit": { "p": "این تعریف در نقشه‌های دریایی و آمارهای بین‌المللی به کار می‌رود و روشن می‌کند که کدام آب‌ها، از جمله آب‌های پیرامون جزیره‌های تنگهٔ هرمز، در شمار خلیج فارس جای می‌گیرند." },
   "translations": {
     "fa": {
       "slug": "نام-خلیج-فارس",

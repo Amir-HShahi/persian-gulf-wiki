@@ -113,20 +113,28 @@ record DevDemoDataset(List<DemoUser> users, List<DemoSource> sources, List<DemoA
     record DemoSection(String heading, List<DemoBlock> blocks) {
     }
 
+    // summary is the article's own summary (ArticleRevision.summary), carried by every revision.
     record DemoTranslation(String slug, String title, String summary, List<String> lead, List<DemoSection> sections) {
     }
 
     // How the article's history looks: revisions per translation, distinct contributors across
     // them, and which non-canonical translations are left OUTDATED.
-    record DemoHistory(@Nullable Integer revisions, @Nullable Integer contributors, @Nullable List<String> outdated) {
+    record DemoHistory(int revisions, @Nullable Integer contributors, @Nullable List<String> outdated) {
     }
 
     record DemoArticle(String key, @Nullable DemoSubject subject, List<String> topics, String canonicalLanguage,
             Map<String, DemoTranslation> translations, @Nullable List<String> gallery, @Nullable String panorama,
-            @Nullable DemoHistory history, @Nullable VerificationState verification, @Nullable Integer featured) {
+            DemoHistory history, DemoBlock pendingEdit, @Nullable VerificationState verification,
+            @Nullable Integer featured, @Nullable Boolean machineTranslated) {
 
         boolean hasSubject() {
             return subject != null;
+        }
+
+        // Mock: the non-canonical translations are seeded as machine translations of the canonical
+        // one, which becomes the article's source. Nothing is actually translated.
+        boolean isMachineTranslated() {
+            return Boolean.TRUE.equals(machineTranslated);
         }
     }
 
@@ -201,6 +209,29 @@ record DevDemoDataset(List<DemoUser> users, List<DemoSource> sources, List<DemoA
         String plain = INLINE.matcher(text).replaceAll(match -> match.group(2) != null ? match.group(2)
                 : match.group(4) != null ? match.group(4) : "");
         return plain.isBlank() ? 0 : plain.trim().split("\\s+").length;
+    }
+
+    // The text as revision `number` of `revisions` left it. The lead paragraphs and then every block,
+    // in order, are the units an editor adds; each revision adds its share, so as long as there are
+    // at least as many units as revisions (problems() checks this) every revision changes the body.
+    static DemoTranslation asOfRevision(DemoTranslation text, int number, int revisions) {
+        int units = (int) Math.ceil(unitCount(text) * (double) number / revisions);
+        List<String> lead = text.lead().subList(0, Math.min(units, text.lead().size()));
+        int remaining = units - lead.size();
+        List<DemoSection> sections = new ArrayList<>();
+        for (DemoSection section : text.sections()) {
+            if (remaining <= 0) {
+                break;
+            }
+            int blocks = Math.min(remaining, section.blocks().size());
+            sections.add(new DemoSection(section.heading(), section.blocks().subList(0, blocks)));
+            remaining -= blocks;
+        }
+        return new DemoTranslation(text.slug(), text.title(), text.summary(), lead, sections);
+    }
+
+    static int unitCount(DemoTranslation text) {
+        return text.lead().size() + text.sections().stream().mapToInt(section -> section.blocks().size()).sum();
     }
 
     // Every problem found, each naming the file entry it is in; empty when the dataset is usable.
@@ -321,6 +352,13 @@ record DevDemoDataset(List<DemoUser> users, List<DemoSource> sources, List<DemoA
 
     private static void checkTranslations(List<String> problems, String where, DemoArticle article, Set<String> slugs,
             Set<String> subjectKeys, Set<String> sourceKeys) {
+        if (article.history() == null || article.history().revisions() < 1) {
+            problems.add(where + ": history with at least one revision is required");
+            return;
+        }
+        if (article.pendingEdit() == null) {
+            problems.add(where + ": a pendingEdit block is required");
+        }
         if (article.translations() == null || !article.translations().keySet().equals(Set.copyOf(LANGUAGES))) {
             problems.add(where + ": translations must be exactly fa, en and ar");
             return;
@@ -343,23 +381,23 @@ record DevDemoDataset(List<DemoUser> users, List<DemoSource> sources, List<DemoA
                 continue;
             }
             List<String> texts = new ArrayList<>(translation.lead());
+            boolean isWellFormed = true;
             for (DemoSection section : translation.sections()) {
                 if (isBlank(section.heading()) || section.blocks() == null || section.blocks().isEmpty()) {
                     problems.add(at + ": every section needs a heading and blocks");
+                    isWellFormed = false;
                     continue;
                 }
                 for (DemoBlock block : section.blocks()) {
-                    int kinds = (block.p() != null ? 1 : 0) + (block.h3() != null ? 1 : 0) + (block.ul() != null ? 1 : 0);
-                    if (kinds != 1) {
-                        problems.add(at + ": a block is exactly one of p, h3 or ul");
-                    }
-                    if (block.p() != null) {
-                        texts.add(block.p());
-                    }
-                    if (block.ul() != null) {
-                        texts.addAll(block.ul());
-                    }
+                    checkBlock(problems, at, block, texts);
                 }
+            }
+            if (language.equals(article.canonicalLanguage()) && article.pendingEdit() != null) {
+                checkBlock(problems, at + " pendingEdit", article.pendingEdit(), texts);
+            }
+            if (isWellFormed && unitCount(translation) < article.history().revisions()) {
+                problems.add(at + ": " + article.history().revisions() + " revisions but only "
+                        + unitCount(translation) + " lead paragraphs and blocks, so some revision would add nothing");
             }
             for (String text : texts) {
                 Matcher matcher = INLINE.matcher(text);
@@ -372,6 +410,19 @@ record DevDemoDataset(List<DemoUser> users, List<DemoSource> sources, List<DemoA
                     }
                 }
             }
+        }
+    }
+
+    private static void checkBlock(List<String> problems, String at, DemoBlock block, List<String> texts) {
+        int kinds = (block.p() != null ? 1 : 0) + (block.h3() != null ? 1 : 0) + (block.ul() != null ? 1 : 0);
+        if (kinds != 1) {
+            problems.add(at + ": a block is exactly one of p, h3 or ul");
+        }
+        if (block.p() != null) {
+            texts.add(block.p());
+        }
+        if (block.ul() != null) {
+            texts.addAll(block.ul());
         }
     }
 

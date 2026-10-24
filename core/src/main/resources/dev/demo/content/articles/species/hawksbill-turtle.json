@@ -19,6 +19,7 @@
   "gallery": ["hawksbill-turtle", "acropora-coral", "reef-fish-school"],
   "history": { "revisions": 6, "contributors": 5 },
   "verification": "VERIFIED",
+  "pendingEdit": { "p": "گردشگرانی که شب‌ها برای دیدن تخم‌گذاری به ساحل می‌روند باید از نور چراغ‌قوه و فلاش پرهیز کنند و فاصله بگیرند، چون آشفتگی می‌تواند ماده‌ها را پیش از تخم‌گذاری به دریا بازگرداند." },
   "translations": {
     "fa": {
       "slug": "لاک‌پشت-پوزه‌عقابی",

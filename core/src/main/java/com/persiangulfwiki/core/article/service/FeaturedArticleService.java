@@ -1,5 +1,6 @@
 package com.persiangulfwiki.core.article.service;
 
+import com.persiangulfwiki.core.article.dto.ArticleCardResponse;
 import com.persiangulfwiki.core.article.dto.CreateFeaturedArticleRequest;
 import com.persiangulfwiki.core.article.dto.CurrentFeaturedArticleResponse;
 import com.persiangulfwiki.core.article.dto.FeaturedArticleResponse;
@@ -19,7 +20,7 @@ import com.persiangulfwiki.core.article.repository.FeaturedArticleRepository.Liv
 import com.persiangulfwiki.core.common.dto.PageResponse;
 import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
-import com.persiangulfwiki.core.subject.service.SubjectListingService;
+import com.persiangulfwiki.core.subject.service.SubjectMainImageService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -52,7 +54,8 @@ public class FeaturedArticleService {
     private final ArticleTranslationRepository articleTranslationRepository;
     private final ArticleRevisionRepository articleRevisionRepository;
     private final SubjectRepository subjectRepository;
-    private final SubjectListingService subjectListingService;
+    private final SubjectMainImageService subjectMainImageService;
+    private final ArticleCardService articleCardService;
 
     /** Throws FeaturedArticleNotFoundException when nothing at all is published in {@code language}. */
     @Transactional(readOnly = true)
@@ -75,28 +78,30 @@ public class FeaturedArticleService {
                 subjectId == null ? null : subjectRepository.findById(subjectId).map(Subject::getKind).orElse(null),
                 translation.getLanguage(), translation.getSlug(), revision.getTitle(), revision.getSummary(),
                 revision.getId(),
-                subjectId == null ? null : subjectListingService.mainImages(Set.of(subjectId)).get(subjectId),
+                subjectId == null ? null : subjectMainImageService.mainImages(Set.of(subjectId)).get(subjectId),
                 featuredArticleId);
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<FeaturedArticleResponse> list(Pageable pageable) {
+    public PageResponse<FeaturedArticleResponse> list(Pageable pageable, String readerLanguage) {
         Page<FeaturedArticle> page = featuredArticleRepository.findAllByOrderByStartsAtDescIdAsc(pageable);
-        return new PageResponse<>(page.getContent().stream().map(FeaturedArticleService::toResponse).toList(),
+        Map<UUID, ArticleCardResponse> cards = articleCardService.cards(
+                page.getContent().stream().map(FeaturedArticle::getArticleId).distinct().toList(), readerLanguage);
+        return new PageResponse<>(
+                page.getContent().stream().map(window -> toResponse(window, cards.get(window.getArticleId()))).toList(),
                 page.getTotalElements());
     }
 
     // An article with nothing approved yet may be scheduled -- the window simply shows nothing
     // until it is published, so scheduling ahead of approval works.
     @Transactional
-    public FeaturedArticleResponse create(UUID adminUserId, CreateFeaturedArticleRequest request) {
+    public FeaturedArticleResponse create(UUID adminUserId, CreateFeaturedArticleRequest request,
+            String readerLanguage) {
         Instant startsAt = Objects.requireNonNullElseGet(request.startsAt(), Instant::now);
         if (request.endsAt() != null && !request.endsAt().isAfter(startsAt)) {
             throw new InvalidFeaturedArticleWindowException();
         }
-        if (!articleRepository.existsById(request.articleId())) {
-            throw new ArticleNotFoundException();
-        }
+        ArticleCardResponse card = articleCardService.card(request.articleId(), readerLanguage);
         FeaturedArticle window = featuredArticleRepository.save(FeaturedArticle.builder()
                 .articleId(request.articleId())
                 .startsAt(startsAt)
@@ -105,7 +110,7 @@ public class FeaturedArticleService {
                 .build());
         log.info("admin {} featured article {} from {} (window {})", adminUserId, request.articleId(), startsAt,
                 window.getId());
-        return toResponse(window);
+        return toResponse(window, card);
     }
 
     @Transactional
@@ -116,8 +121,8 @@ public class FeaturedArticleService {
         log.info("admin {} removed featured-article window {}", adminUserId, featuredArticleId);
     }
 
-    private static FeaturedArticleResponse toResponse(FeaturedArticle window) {
-        return new FeaturedArticleResponse(window.getId(), window.getArticleId(), window.getStartsAt(),
+    private static FeaturedArticleResponse toResponse(FeaturedArticle window, ArticleCardResponse article) {
+        return new FeaturedArticleResponse(window.getId(), article, window.getStartsAt(),
                 window.getEndsAt(), window.getFeaturedByUserId(), window.getCreatedAt());
     }
 }

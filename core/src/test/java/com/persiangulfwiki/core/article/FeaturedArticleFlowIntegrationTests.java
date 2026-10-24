@@ -106,7 +106,7 @@ class FeaturedArticleFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.slug").value(newerSlug))
                 .andExpect(jsonPath("$.data.title").value("Newer"))
                 .andExpect(jsonPath("$.data.summary").value("Newer summary"))
-                .andExpect(jsonPath("$.data.currentRevisionId").value(
+                .andExpect(jsonPath("$.data.revisionId").value(
                         articleTranslationRepository.findByArticleIdAndLanguage(newer, language).orElseThrow()
                                 .getCurrentRevisionId().toString()))
                 .andExpect(jsonPath("$.data.subjectId").doesNotExist())
@@ -235,7 +235,7 @@ class FeaturedArticleFlowIntegrationTests {
         String ends = endsAt == null ? "" : ", \"endsAt\": \"" + endsAt + "\"";
         String created = adminWrite(post(FEATURED), "{\"articleId\": \"%s\"%s%s}".formatted(articleId, starts, ends))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.articleId").value(articleId.toString()))
+                .andExpect(jsonPath("$.data.article.id").value(articleId.toString()))
                 .andExpect(jsonPath("$.data.featuredByUserId").value(admin.getId().toString()))
                 .andReturn().getResponse().getContentAsString();
         return UUID.fromString(JsonPath.read(created, "$.data.id"));

@@ -53,6 +53,11 @@ public class Article extends AuditableEntity {
     @Column(name = "is_main", nullable = false)
     private boolean isMain;
 
+    // The translation the others are translated from (V35); null until one is chosen. Not the
+    // same as canonicalLanguage, the language the article was created in.
+    @Column(name = "source_translation_id")
+    private UUID sourceTranslationId;
+
     // Set only by the dev-profile fixture endpoint; null on every row a real caller creates.
     @Column(name = "dev_marker", length = 40)
     private String devMarker;

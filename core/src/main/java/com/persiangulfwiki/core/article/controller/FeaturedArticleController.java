@@ -6,6 +6,7 @@ import com.persiangulfwiki.core.article.dto.FeaturedArticleResponse;
 import com.persiangulfwiki.core.article.service.FeaturedArticleService;
 import com.persiangulfwiki.core.common.dto.ApiResult;
 import com.persiangulfwiki.core.common.dto.PageResponse;
+import com.persiangulfwiki.core.config.SupportedLocales;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -85,7 +86,8 @@ public class FeaturedArticleController {
     }
 
     @Operation(summary = "List featured-article windows", description = "Admins only. Every scheduled window, past, "
-            + "live and upcoming, latest start first.")
+            + "live and upcoming, latest start first. Each window's `article` is shown in the reader's language "
+            + "(`Accept-Language`), with its text null while the article has nothing approved.")
     @ApiResponse(responseCode = "200", description = "One page of windows, with the total across all pages. An "
             + "out-of-range page has an empty `items` list, not an error.")
     @ApiResponse(responseCode = "400", description = "`page` or `size` is outside its allowed range.",
@@ -104,7 +106,8 @@ public class FeaturedArticleController {
     public ApiResult<PageResponse<FeaturedArticleResponse>> list(
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(MAX_PAGE_SIZE) int size) {
-        PageResponse<FeaturedArticleResponse> data = featuredArticleService.list(PageRequest.of(page, size));
+        PageResponse<FeaturedArticleResponse> data =
+                featuredArticleService.list(PageRequest.of(page, size), readerLanguage());
         String message = messageSource.getMessage("success.featuredArticlesList", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }
@@ -133,7 +136,7 @@ public class FeaturedArticleController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResult<FeaturedArticleResponse> create(@Valid @RequestBody CreateFeaturedArticleRequest request) {
-        FeaturedArticleResponse data = featuredArticleService.create(currentUserId(), request);
+        FeaturedArticleResponse data = featuredArticleService.create(currentUserId(), request, readerLanguage());
         String message = messageSource.getMessage("success.featuredArticleCreated", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }
@@ -166,5 +169,10 @@ public class FeaturedArticleController {
     private UUID currentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return UUID.fromString(authentication.getName());
+    }
+
+    // fa, en or ar from Accept-Language, else fa: the language each window's article is shown in.
+    private static String readerLanguage() {
+        return SupportedLocales.normalize(LocaleContextHolder.getLocale()).getLanguage();
     }
 }

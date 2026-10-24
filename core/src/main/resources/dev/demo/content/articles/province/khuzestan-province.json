@@ -12,6 +12,7 @@
   "gallery": ["arvand-delta-iss", "kuwait-coast-iss"],
   "history": { "revisions": 5, "contributors": 5 },
   "verification": "NONE",
+  "pendingEdit": { "p": "با همهٔ گوناگونی قومی، آیین‌ها و جشن‌هایی مانند سوگواری‌های محرم و جشن‌های برداشت خرما، مردم شهرها و روستاهای خوزستان را در کنار هم گرد می‌آورد." },
   "translations": {
     "fa": {
       "slug": "استان-خوزستان",

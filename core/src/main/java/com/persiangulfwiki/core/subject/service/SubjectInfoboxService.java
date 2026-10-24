@@ -12,8 +12,6 @@ import com.persiangulfwiki.core.config.CacheConfig;
 import com.persiangulfwiki.core.config.SupportedLocales;
 import com.persiangulfwiki.core.label.dto.LocalizedLabelResponse;
 import com.persiangulfwiki.core.label.service.LabelService;
-import com.persiangulfwiki.core.media.service.MediaReadService;
-import com.persiangulfwiki.core.media.service.MediaReadService.SubjectImage;
 import com.persiangulfwiki.core.subject.dto.InfoboxGroupResponse;
 import com.persiangulfwiki.core.subject.dto.InfoboxOptionResponse;
 import com.persiangulfwiki.core.subject.dto.InfoboxRevisionResponse;
@@ -85,7 +83,7 @@ public class SubjectInfoboxService {
     private final AttributeOptionRepository attributeOptionRepository;
     private final LabelService labelService;
     private final SubjectArticleService subjectArticleService;
-    private final MediaReadService mediaReadService;
+    private final SubjectMainImageService subjectMainImageService;
     private final ExpertVerificationService expertVerificationService;
     private final ObjectMapper objectMapper;
 
@@ -116,10 +114,7 @@ public class SubjectInfoboxService {
         if (mediaId == null) {
             return null;
         }
-        SubjectImage image = mediaReadService.publishedImagesOfSubjects(Map.of(subjectId, mediaId)).get(subjectId);
-        return image != null
-                ? new SubjectMainImageResponse(image.mediaId(), image.placeholder(), image.variants())
-                : null;
+        return subjectMainImageService.publishedImagesOfSubjects(Map.of(subjectId, mediaId)).get(subjectId);
     }
 
     private List<InfoboxGroupResponse> groups(Subject subject, String language) {

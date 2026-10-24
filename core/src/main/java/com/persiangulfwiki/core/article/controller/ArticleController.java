@@ -101,7 +101,8 @@ public class ArticleController {
             + "given. A `subjectId` of a subject that was merged into another binds the article to that other "
             + "subject (see the response's `subjectId`). `slug` must not already be in use by any translation of any article. A subject link in `body` "
             + "(`{\"type\": \"subjectLink\", \"subjectId\": \"…\"}`, anywhere in the tree) must name an existing "
-            + "subject; an article may hold at most 1000 of them.")
+            + "subject; an article may hold at most 1000 of them. The response's `slug`, `title`, `summary`, "
+            + "`revisionId` and `language` are null: they show approved text only, and nothing is approved yet.")
     @ApiResponse(responseCode = "201", description = "The created article.")
     @ApiResponse(responseCode = "400", description = "Field validation failed (see `errors`), including a subject link in `body` "
             + "that names no existing subject, reported at the link's path (e.g. `body.content[2].subjectId`), and "
@@ -121,7 +122,7 @@ public class ArticleController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResult<ArticleResponse> create(@Valid @RequestBody CreateArticleRequest request) {
-        ArticleResponse data = articleService.create(currentUserId(), request);
+        ArticleResponse data = articleService.create(currentUserId(), request, readerLanguage());
         String message = messageSource.getMessage("success.articleCreated", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }
@@ -131,7 +132,9 @@ public class ArticleController {
             + "only to the account that created it, to anyone who wrote a revision in one of its "
             + "translations, and to moderators/admins. Sending the session cookie is optional; "
             + "without it, or with one whose email is not yet verified or whose password setup is "
-            + "unfinished, the caller is treated as anonymous.")
+            + "unfinished, the caller is treated as anonymous. `slug`, `title`, `summary` and `revisionId` come from "
+            + "one approved translation picked by `Accept-Language` (see `language`), and are null while nothing is "
+            + "approved -- even for its authors, who read the drafts through the translation routes.")
     @ApiResponse(responseCode = "200", description = "The article.")
     @ApiResponse(responseCode = "400", description = "The id in the path is not a valid UUID.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "404", description = "No article with that id, or the article has nothing approved yet and the caller "
@@ -140,7 +143,8 @@ public class ArticleController {
     @GetMapping("/{articleId}")
     @ResponseStatus(HttpStatus.OK)
     public ApiResult<ArticleResponse> get(@PathVariable UUID articleId) {
-        ArticleResponse data = articleService.get(articleId, currentUserIdOrNull(), isCurrentUserModerator());
+        ArticleResponse data = articleService.get(articleId, currentUserIdOrNull(), isCurrentUserModerator(),
+                readerLanguage());
         String message = messageSource.getMessage("success.articleFetched", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }
@@ -232,7 +236,7 @@ public class ArticleController {
     public ApiResult<TranslationResponse> createTranslation(
             @PathVariable UUID articleId, @Valid @RequestBody CreateTranslationRequest request) {
         TranslationResponse data = articleTranslationService.addTranslation(
-                currentUserId(), isCurrentUserModerator(), articleId, request);
+                currentUserId(), isCurrentUserModerator(), articleId, request, readerLanguage());
         String message = messageSource.getMessage("success.translationCreated", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }
@@ -253,7 +257,8 @@ public class ArticleController {
     @ResponseStatus(HttpStatus.OK)
     public ApiResult<TranslationResponse> getTranslation(@PathVariable UUID articleId, @PathVariable String language) {
         TranslationResponse data =
-                articleTranslationService.get(articleId, language, currentUserIdOrNull(), isCurrentUserModerator());
+                articleTranslationService.get(articleId, language, currentUserIdOrNull(), isCurrentUserModerator(),
+                        readerLanguage());
         String message = messageSource.getMessage("success.translationFetched", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }

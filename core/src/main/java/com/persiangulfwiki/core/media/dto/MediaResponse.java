@@ -1,5 +1,6 @@
 package com.persiangulfwiki.core.media.dto;
 
+import com.persiangulfwiki.core.article.dto.ArticleCardResponse;
 import com.persiangulfwiki.core.media.entity.MediaFailureCode;
 import com.persiangulfwiki.core.media.entity.MediaKind;
 import com.persiangulfwiki.core.media.entity.ProcessingStatus;
@@ -22,7 +23,8 @@ import java.util.UUID;
 // public item, short-lived signed ones otherwise (see MediaVariantService).
 public record MediaResponse(
         UUID id,
-        UUID articleId,
+        @Schema(description = "The article the item belongs to, in the reader's language (`Accept-Language`).")
+        ArticleCardResponse article,
         MediaKind type,
 
         @Schema(description = ProcessingStatus.VALUES_DOC)

@@ -1,5 +1,6 @@
 package com.persiangulfwiki.core.article.dto;
 
+import com.persiangulfwiki.core.subject.dto.SubjectMainImageResponse;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,6 +28,9 @@ public record ArticleBySlugResponse(
         Instant createdAt,
         Instant updatedAt,
         PublishedTranslationResponse translation,
+        @Schema(description = "The main image of the article's subject. Absent when the article has no subject, or "
+                + "its subject has no public main image.", nullable = true)
+        @Nullable SubjectMainImageResponse mainImage,
         PublishedRevisionResponse revision,
         @Schema(description = "Subject id to what a subject link in `revision.body` shows: the subject's name in the "
                 + "reader's language (from `Accept-Language`: fa, en or ar; anything else gets fa) and its page's "
@@ -38,5 +42,8 @@ public record ArticleBySlugResponse(
         List<UUID> topicIds,
         @Schema(description = "The article's other published languages, for a language switcher. Translations with "
                 + "nothing approved yet are left out.")
-        List<TranslationSlugResponse> otherTranslations) {
+        List<TranslationSlugResponse> otherTranslations,
+        @Schema(description = "The published translation the article's other translations are translated from. Null "
+                + "when none has been chosen, or it has nothing approved.", nullable = true)
+        @Nullable ArticleSourceResponse source) {
 }

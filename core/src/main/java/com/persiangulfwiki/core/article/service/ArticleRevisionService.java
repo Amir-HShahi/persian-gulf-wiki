@@ -332,6 +332,6 @@ public class ArticleRevisionService {
         return new RevisionResponse(revision.getId(), revision.getTranslationId(), revision.getRevisionNumber(),
                 revision.getParentRevisionId(), revision.getTitle(), body, revision.getSummary(),
                 revision.getStatus(), revision.getAuthorId(), revision.getCreatedAt(), links,
-                sorted(revision.getTopicIds()));
+                sorted(revision.getTopicIds()), revision.isMachineGenerated(), revision.getMachineModel());
     }
 }

@@ -1,9 +1,12 @@
 package com.persiangulfwiki.core.media.service;
 
+import com.persiangulfwiki.core.article.dto.ArticleCardResponse;
 import com.persiangulfwiki.core.article.entity.Article;
 import com.persiangulfwiki.core.article.exception.ArticleNotFoundException;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
+import com.persiangulfwiki.core.article.service.ArticleCardService;
 import com.persiangulfwiki.core.article.service.ArticleVisibilityService;
+import com.persiangulfwiki.core.config.SupportedLocales;
 import com.persiangulfwiki.core.media.dto.GeoPointResponse;
 import com.persiangulfwiki.core.media.dto.MediaMetadataResponse;
 import com.persiangulfwiki.core.media.dto.MediaMetadataVersionResponse;
@@ -74,6 +77,7 @@ public class MediaReadService {
 
     private final ArticleRepository articleRepository;
     private final ArticleVisibilityService articleVisibilityService;
+    private final ArticleCardService articleCardService;
     private final ArticleMediaRepository articleMediaRepository;
     private final MediaMetadataVersionRepository mediaMetadataVersionRepository;
     private final MediaDescriptionRepository mediaDescriptionRepository;
@@ -120,46 +124,6 @@ public class MediaReadService {
     @Transactional(readOnly = true)
     public MediaResponse toResponse(ArticleMedia media, @Nullable UUID callerUserId, boolean isCallerModerator) {
         return toResponse(media, null, new Caller(callerUserId, isCallerModerator));
-    }
-
-    /** False for anything but a public image (processed and approved) in an article bound to the subject. */
-    @Transactional(readOnly = true)
-    public boolean isPublishedImageOfSubject(UUID mediaId, UUID subjectId) {
-        return articleMediaRepository.existsPublishedImageOfSubject(mediaId, subjectId);
-    }
-
-    // What a subject card or infobox shows of its main image.
-    public record SubjectImage(UUID mediaId, @Nullable String placeholder, List<MediaVariantResponse> variants) {
-    }
-
-    /**
-     * The entries of {@code mediaIdBySubject} (subject id to media id) that pass
-     * {@link #isPublishedImageOfSubject}, with their previews, in two queries whatever the size.
-     */
-    // The URLs are built from the same loaded row whose status is checked, so an item hidden
-    // between the two queries is dropped rather than signed (toResponses signs anything not
-    // public). Article readability is not checked, unlike for a panorama link target: it would
-    // hide nothing, since the media id is shown anyway and the public URL is derived from it.
-    @Transactional(readOnly = true)
-    public Map<UUID, SubjectImage> publishedImagesOfSubjects(Map<UUID, UUID> mediaIdBySubject) {
-        if (mediaIdBySubject.isEmpty()) {
-            return Map.of();
-        }
-        Map<UUID, UUID> subjectByMedia = new HashMap<>();
-        articleMediaRepository.findPublishedImages(mediaIdBySubject.values())
-                .forEach(image -> subjectByMedia.put(image.getMediaId(), image.getSubjectId()));
-        Map<UUID, ArticleMedia> images = articleMediaRepository.findAllById(subjectByMedia.keySet()).stream()
-                .filter(media -> media.getType() == MediaKind.IMAGE && media.isPubliclyVisible())
-                .collect(Collectors.toMap(ArticleMedia::getId, Function.identity()));
-        Map<UUID, SubjectImage> retained = new HashMap<>();
-        mediaIdBySubject.forEach((subjectId, mediaId) -> {
-            ArticleMedia image = images.get(mediaId);
-            if (image != null && subjectId.equals(subjectByMedia.get(mediaId))) {
-                retained.put(subjectId, new SubjectImage(mediaId, image.getPlaceholder(),
-                        mediaVariantService.toResponses(image)));
-            }
-        });
-        return retained;
     }
 
     // Moderators only; the caller (ModerationService, behind the moderator-only route) is the
@@ -249,6 +213,8 @@ public class MediaReadService {
                 .collect(Collectors.groupingBy(PanoramaLink::getMetadataVersionId));
         Map<UUID, PanoramaLinkTargetResponse> targets = resolveTargets(
                 linksByVersion.values().stream().flatMap(List::stream).toList(), caller, TargetScope.PUBLIC);
+        Map<UUID, ArticleCardResponse> cards = articleCardService.cards(
+                items.stream().map(ArticleMedia::getArticleId).distinct().toList(), readerLanguage());
 
         return items.stream().map(media -> {
             UUID versionId = shownVersionIdByMedia.get(media.getId());
@@ -256,7 +222,7 @@ public class MediaReadService {
             List<PanoramaLinkResponse> links = media.getType() == MediaKind.PANORAMA_360 && versionId != null
                     ? toLinkResponses(linksByVersion.getOrDefault(versionId, List.of()), targets)
                     : List.of();
-            return new MediaResponse(media.getId(), media.getArticleId(), media.getType(),
+            return new MediaResponse(media.getId(), cards.get(media.getArticleId()), media.getType(),
                     media.getProcessingStatus(), media.getPublicationStatus(), media.getFailureCode(),
                     failureMessage(media.getFailureCode()), media.getPlaceholder(),
                     mediaVariantService.toResponses(media), version != null ? toMetadata(version) : null,
@@ -299,6 +265,8 @@ public class MediaReadService {
             return Map.of();
         }
         List<ArticleMedia> targets = articleMediaRepository.findAllById(targetIds);
+        Map<UUID, ArticleCardResponse> cards = articleCardService.cards(
+                targets.stream().map(ArticleMedia::getArticleId).distinct().toList(), readerLanguage());
         Map<UUID, Boolean> readableArticles = new HashMap<>();
         Map<UUID, PanoramaLinkTargetResponse> resolved = new HashMap<>();
         for (ArticleMedia target : targets) {
@@ -306,12 +274,13 @@ public class MediaReadService {
                     && readableArticles.computeIfAbsent(target.getArticleId(),
                             articleId -> isArticleReadable(articleId, caller.userId(), caller.isModerator()));
             if (isVisible) {
-                resolved.put(target.getId(), new PanoramaLinkTargetResponse(target.getId(), target.getArticleId(),
-                        target.getType(), target.getPlaceholder(), smallestVariant(target)));
+                resolved.put(target.getId(), new PanoramaLinkTargetResponse(target.getId(),
+                        cards.get(target.getArticleId()), target.getType(), target.getPlaceholder(),
+                        smallestVariant(target)));
             } else if (scope == TargetScope.ALL
                     || (scope == TargetScope.OWN_OR_PUBLIC && target.getUploadedBy().equals(caller.userId()))) {
-                resolved.put(target.getId(), new PanoramaLinkTargetResponse(target.getId(), target.getArticleId(),
-                        target.getType(), null, null));
+                resolved.put(target.getId(), new PanoramaLinkTargetResponse(target.getId(),
+                        cards.get(target.getArticleId()), target.getType(), null, null));
             }
         }
         return resolved;
@@ -351,6 +320,12 @@ public class MediaReadService {
         }
         MediaFailureCode code = MediaFailureCode.fromCode(failureCode).orElse(MediaFailureCode.REJECTED);
         return messageSource.getMessage(code.messageKey(), null, LocaleContextHolder.getLocale());
+    }
+
+    // fa, en or ar from Accept-Language, else fa: the language each article card is shown in. Not the
+    // caption's ?language=, which has no fallback and may be absent.
+    private static String readerLanguage() {
+        return SupportedLocales.normalize(LocaleContextHolder.getLocale()).getLanguage();
     }
 
     private static <T> Map<UUID, T> byId(List<T> rows, Function<T, UUID> id) {

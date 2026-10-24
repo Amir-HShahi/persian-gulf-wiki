@@ -19,6 +19,7 @@
   "gallery": ["mudflat-sandpipers", "land-crab"],
   "history": { "revisions": 2, "contributors": 2 },
   "verification": "VERIFIED",
+  "pendingEdit": { "p": "پیشنهاد شده است که در فصل زادآوری، ورود قایق‌ها و گردشگران به جزیره‌های کوچکی که کلنی‌های این پرنده در آن‌ها لانه دارند ممنوع شود تا آرامش کلنی‌ها برهم نخورد." },
   "translations": {
     "fa": {
       "slug": "سلیم-خرچنگ‌خوار",

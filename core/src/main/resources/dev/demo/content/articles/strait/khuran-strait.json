@@ -14,6 +14,7 @@
   "gallery": ["mangrove-channel", "mangrove-forest", "grey-mangrove"],
   "history": { "revisions": 3, "contributors": 2 },
   "verification": "STALE",
+  "pendingEdit": { "p": "کارشناسان محیط زیست نگران‌اند که پایه‌های پل برنامه‌ریزی‌شده، جریان جزرومدی را در بخش‌هایی از تنگه کند کرده و الگوی رسوب‌گذاری پیرامون جنگل‌های حرا را دگرگون کند." },
   "translations": {
     "fa": {
       "slug": "تنگه-خوران",

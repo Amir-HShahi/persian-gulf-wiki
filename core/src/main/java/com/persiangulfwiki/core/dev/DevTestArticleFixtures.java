@@ -8,6 +8,8 @@ import com.persiangulfwiki.core.article.entity.TranslationState;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
 import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
+import com.persiangulfwiki.core.article.service.ArticleCardService;
+import com.persiangulfwiki.core.config.SupportedLocales;
 import com.persiangulfwiki.core.dev.dto.DevTestArticleRequest;
 import com.persiangulfwiki.core.dev.dto.DevTestArticleResponse;
 import com.persiangulfwiki.core.dev.exception.DevTestMainArticleTakenException;
@@ -21,8 +23,10 @@ import com.persiangulfwiki.core.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -53,6 +57,7 @@ class DevTestArticleFixtures {
     private static final String MINIMAL_BODY_JSON = "{\"type\":\"doc\",\"content\":[]}";
 
     private static final String DEFAULT_LANGUAGE = "fa";
+    private static final String DEFAULT_MACHINE_MODEL = "e2e-model";
 
     // DevUserSeeder's stable contributor fixture. Deliberately a seeded account rather than a
     // freshly minted one -- see resolveAuthorUserId for the sweep-ordering race that choice
@@ -66,6 +71,7 @@ class DevTestArticleFixtures {
     private final UserRepository userRepository;
     private final TopicService topicService;
     private final ObjectMapper objectMapper;
+    private final ArticleCardService articleCardService;
 
     DevTestArticleResponse mint(DevTestArticleRequest request) {
         String slug = request.slug() != null ? request.slug() : DevTestFixtures.MARKER + "-article-" + randomSlug();
@@ -75,6 +81,9 @@ class DevTestArticleFixtures {
                 request.translationState() != null ? request.translationState() : TranslationState.UP_TO_DATE;
         String title = request.title() != null ? request.title() : "e2e article " + slug;
         String summary = request.summary() != null ? request.summary() : "e2e summary";
+        boolean isMachineGenerated = Boolean.TRUE.equals(request.isMachineGenerated());
+        String machineModel = !isMachineGenerated ? null
+                : request.machineModel() != null ? request.machineModel() : DEFAULT_MACHINE_MODEL;
 
         // Checked up front so an unknown subject is the documented 404, not a foreign-key
         // violation surfacing as a 409 from the insert below.
@@ -114,6 +123,8 @@ class DevTestArticleFixtures {
                 .summary(summary)
                 .status(revisionStatus)
                 .authorId(authorUserId)
+                .isMachineGenerated(isMachineGenerated)
+                .machineModel(machineModel)
                 .build();
         revision.setTopicIds(topicIds);
         revision = articleRevisionRepository.save(revision);
@@ -131,9 +142,14 @@ class DevTestArticleFixtures {
             translation.setCurrentRevisionId(revision.getId());
             articleTranslationRepository.save(translation);
         }
+        if (Boolean.TRUE.equals(request.isSource())) {
+            article.setSourceTranslationId(translation.getId());
+            articleRepository.save(article);
+        }
 
-        return new DevTestArticleResponse(article.getId(), translation.getId(), revision.getId(), canonicalLanguage,
-                slug, revisionStatus, isMain);
+        return new DevTestArticleResponse(
+                articleCardService.cardsOf(List.of(article), readerLanguage()).get(article.getId()),
+                translation.getId(), revision.getId(), canonicalLanguage, slug, revisionStatus, isMain);
     }
 
     // Null applies the real rule (SubjectArticleService.promoteIfSubjectHasNoMain): an APPROVED
@@ -206,5 +222,9 @@ class DevTestArticleFixtures {
 
     private String randomSlug() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, SLUG_LENGTH);
+    }
+
+    private static String readerLanguage() {
+        return SupportedLocales.normalize(LocaleContextHolder.getLocale()).getLanguage();
     }
 }

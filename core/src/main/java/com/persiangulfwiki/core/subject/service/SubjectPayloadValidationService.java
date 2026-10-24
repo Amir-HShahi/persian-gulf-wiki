@@ -5,7 +5,6 @@ import com.persiangulfwiki.core.attribute.entity.AttributeOption;
 import com.persiangulfwiki.core.attribute.entity.AttributeValueType;
 import com.persiangulfwiki.core.attribute.repository.AttributeDefinitionRepository;
 import com.persiangulfwiki.core.attribute.repository.AttributeOptionRepository;
-import com.persiangulfwiki.core.media.service.MediaReadService;
 import com.persiangulfwiki.core.source.service.SourceService;
 import com.persiangulfwiki.core.subject.dto.LocalizedTextRequest;
 import com.persiangulfwiki.core.subject.dto.SubjectAliasesRequest;
@@ -82,7 +81,7 @@ public class SubjectPayloadValidationService {
     private final AttributeOptionRepository attributeOptionRepository;
     private final SubjectRepository subjectRepository;
     private final SourceService sourceService;
-    private final MediaReadService mediaReadService;
+    private final SubjectMainImageService subjectMainImageService;
     private final SubjectService subjectService;
 
     /**
@@ -427,7 +426,7 @@ public class SubjectPayloadValidationService {
             return;
         }
         // A proposal has no articles yet, so nothing can qualify.
-        if (subjectId == null || !mediaReadService.isPublishedImageOfSubject(mediaId, subjectId)) {
+        if (subjectId == null || !subjectMainImageService.isPublishedImageOfSubject(mediaId, subjectId)) {
             violations.add(violation(ROOT + ".mainImageMediaId", "mainImageInvalid"));
         }
     }

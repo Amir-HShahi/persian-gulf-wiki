@@ -10,10 +10,14 @@ import java.util.UUID;
 
 public record TranslationResponse(
         UUID id,
-        UUID articleId,
+        @Schema(description = "The article this translation belongs to, shown through the reader's language -- not "
+                + "necessarily this translation.")
+        ArticleCardResponse article,
         String language,
         String slug,
-        UUID currentRevisionId,
+        @Schema(description = "This translation's most recently approved revision. Null until one is approved.",
+                nullable = true)
+        UUID revisionId,
         UUID sourceRevisionId,
         TranslationState translationState,
         Instant createdAt,
@@ -21,5 +25,7 @@ public record TranslationResponse(
         @Schema(description = "Ids of the topics the article is about (see `GET /api/topics`): those of the approved "
                 + "text in the article's original language, the same for every translation. Empty until that text "
                 + "has been approved.")
-        List<UUID> topicIds) {
+        List<UUID> topicIds,
+        @Schema(description = "Whether this is the translation the article's other translations are translated from.")
+        boolean isSource) {
 }

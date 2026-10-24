@@ -19,6 +19,8 @@
   "gallery": ["reef-fish-school", "fishing-dhow"],
   "history": { "revisions": 2, "contributors": 2, "outdated": ["en"] },
   "verification": "NONE",
+  "pendingEdit": { "p": "برخی پژوهشگران پیشنهاد می‌کنند که خریداران از خرید حلوا سفید کوچک و نابالغ پرهیز کنند تا فشار بازار بر صید ماهیانی که هنوز تخم‌ریزی نکرده‌اند کاهش یابد." },
+  "machineTranslated": true,
   "translations": {
     "fa": {
       "slug": "حلوا-سفید",

@@ -4,6 +4,8 @@
   "canonicalLanguage": "fa",
   "gallery": ["persian-gulf-modis-autumn", "bahrain-fort"],
   "history": { "revisions": 5, "contributors": 4, "outdated": ["ar"] },
+  "pendingEdit": { "p": "گسترش ساخت‌وساز در بندر طاهری و پیرامون آن، بخش‌هایی از محوطهٔ باستانی سیراف را تهدید می‌کند و باستان‌شناسان خواستار تعیین دقیق حریم و نظارت بیشتر بر آن شده‌اند." },
+  "machineTranslated": true,
   "translations": {
     "fa": {
       "slug": "تاریخ-سیراف",

@@ -19,6 +19,8 @@
   "gallery": ["reef-fish-school", "fishing-dhow"],
   "history": { "revisions": 3, "contributors": 3 },
   "verification": "NONE",
+  "pendingEdit": { "p": "رسیدن نخستین ماهی‌های شیر در آغاز فصل صید در بسیاری از خانواده‌های بندری بهانه‌ای برای مهمانی و پختن قلیه‌ماهی است و قیمت این ماهی در بازار در همین روزها به بالاترین حد می‌رسد." },
+  "machineTranslated": true,
   "translations": {
     "fa": {
       "slug": "شیر-ماهی",

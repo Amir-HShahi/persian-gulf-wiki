@@ -567,7 +567,7 @@ class MediaGalleryFlowIntegrationTests {
                 .andExpect(jsonPath("$.data[0].links[0].yawDeg").value(90))
                 .andExpect(jsonPath("$.data[0].links[0].label").value("to 90"))
                 .andExpect(jsonPath("$.data[0].links[0].target.mediaId").value(elsewhere.getId().toString()))
-                .andExpect(jsonPath("$.data[0].links[0].target.articleId").value(otherPublicArticleId.toString()))
+                .andExpect(jsonPath("$.data[0].links[0].target.article.id").value(otherPublicArticleId.toString()))
                 .andExpect(jsonPath("$.data[0].links[0].target.type").value("PANORAMA_360"))
                 .andExpect(jsonPath("$.data[0].links[0].target.placeholder").value(PLACEHOLDER))
                 .andExpect(jsonPath("$.data[0].links[0].target.smallestVariant.size").value("2k"))

@@ -379,7 +379,7 @@ class ArticleFlowIntegrationTests {
                 // served, and only a moderator's approval may point it at one. A brand-new
                 // article has nothing approved, so it is null -- the draft below is reachable
                 // through the revision history instead.
-                .andExpect(jsonPath("$.data.currentRevisionId").value(nullValue()));
+                .andExpect(jsonPath("$.data.revisionId").value(nullValue()));
 
         UUID revisionId = firstRevisionId(articleId, accessCookie);
 
@@ -897,7 +897,7 @@ class ArticleFlowIntegrationTests {
         mockMvc.perform(get("/api/articles/" + articleId)).andExpect(status().isOk());
         mockMvc.perform(get("/api/articles/" + articleId + "/translations/fa"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.currentRevisionId").value(approvedId.toString()));
+                .andExpect(jsonPath("$.data.revisionId").value(approvedId.toString()));
     }
 
     // --- Unpublished articles and translations: hidden like unapproved revisions ---
@@ -980,7 +980,7 @@ class ArticleFlowIntegrationTests {
                     .andExpect(jsonPath("$.data.id").value(articleId.toString()));
             read(faPath, allowed)
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.currentRevisionId").value(nullValue()));
+                    .andExpect(jsonPath("$.data.revisionId").value(nullValue()));
             expectVisible(enPath, allowed);
             expectVisible(faPath + "/revisions", allowed);
         }
@@ -1030,7 +1030,7 @@ class ArticleFlowIntegrationTests {
         expectVisible("/api/articles/" + articleId, null);
         read("/api/articles/" + articleId + "/translations/fa", null)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.currentRevisionId").value(ids[1].toString()));
+                .andExpect(jsonPath("$.data.revisionId").value(ids[1].toString()));
         read("/api/articles/" + articleId + "/translations/fa/revisions", null)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[*].id").value(contains(ids[1].toString())));

@@ -4,6 +4,7 @@
   "canonicalLanguage": "fa",
   "gallery": ["oil-spill-shore", "basrah-tankers", "gulf-night-iss"],
   "history": { "revisions": 5, "contributors": 5 },
+  "pendingEdit": { "p": "در سال‌های اخیر تصاویر ماهواره‌ای به ابزاری مهم برای شناسایی لکه‌های نفتی و ردیابی کشتی‌هایی تبدیل شده است که آب توازن آلوده را در دریا تخلیه می‌کنند." },
   "translations": {
     "fa": {
       "slug": "آلودگی-نفتی-خلیج-فارس",

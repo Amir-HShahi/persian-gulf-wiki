@@ -24,6 +24,8 @@
   "panorama": "pano-sandy-beach",
   "history": { "revisions": 7, "contributors": 6 },
   "verification": "VERIFIED",
+  "pendingEdit": { "p": "افزایش شمار گردشگران فشار تازه‌ای بر خاک‌های رنگی و ساحل سرخ آورده است و اهالی و نهادهای محلی با تابلوها و راهنمایان بومی از بازدیدکنندگان می‌خواهند خاک جزیره را با خود نبرند." },
+  "machineTranslated": true,
   "translations": {
     "fa": {
       "slug": "جزیره-هرمز",

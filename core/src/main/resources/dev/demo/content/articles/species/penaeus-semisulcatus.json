@@ -19,6 +19,7 @@
   "gallery": ["penaeid-shrimp", "scorpionfish-seagrass", "fishing-dhow"],
   "history": { "revisions": 5, "contributors": 4 },
   "verification": "VERIFIED",
+  "pendingEdit": { "p": "چون میگوهای جوان ماه‌های نخست زندگی را در خورها و میان علفزارهای دریایی می‌گذرانند، حفاظت از این زیستگاه‌های ساحلی به اندازهٔ محدودیت صید برای آیندهٔ ذخایر اهمیت دارد." },
   "translations": {
     "fa": {
       "slug": "میگوی-ببری-سبز",

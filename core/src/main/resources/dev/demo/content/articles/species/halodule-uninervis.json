@@ -18,6 +18,8 @@
   "gallery": ["scorpionfish-seagrass", "dugong"],
   "history": { "revisions": 2, "contributors": 2 },
   "verification": "STALE",
+  "pendingEdit": { "p": "گسترهٔ علفزارهای دریایی در آب‌های ایران هنوز به‌طور کامل نقشه‌برداری نشده است و پژوهشگران می‌گویند بدون این نقشه‌ها نمی‌توان پیامد طرح‌های ساحلی را پیش از اجرا سنجید." },
+  "machineTranslated": true,
   "translations": {
     "fa": {
       "slug": "علف-دریایی-هالودول",
