@@ -45,6 +45,9 @@ func run() error {
 	}))
 	slog.SetDefault(log)
 
+	// The background loops below stop only when ctx is cancelled, so each wait
+	// for one calls stop first. Otherwise a startup error after they begin would
+	// hang the process instead of exiting.
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -82,7 +85,7 @@ func run() error {
 			},
 		}).Run(ctx)
 	}()
-	defer func() { <-installDone }()
+	defer func() { stop(); <-installDone }()
 
 	// Search sync runs beside the job loop and shares its pool. Nothing it hits
 	// can stop the worker: a database without the search schema, or a failed
@@ -98,7 +101,7 @@ func run() error {
 			Batch:    cfg.Search.SyncBatch,
 		}).Run(ctx)
 	}()
-	defer func() { <-searchDone }()
+	defer func() { stop(); <-searchDone }()
 
 	health := &Health{}
 	health.MarkPoll() // don't report stale before the first poll
