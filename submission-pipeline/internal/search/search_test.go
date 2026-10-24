@@ -23,9 +23,10 @@ import (
 var testDB *pgxpool.Pool
 
 // coreArticleTables mirrors the tables search reads, as core's migrations
-// leave them: subjects (V15, deleted_at from V29), and the article tables (V16,
-// with articles.entity_type dropped by V20). Only the columns search reads, or
-// that an insert needs, are here.
+// leave them: subjects (V15, deleted_at from V29), the article tables (V16,
+// with articles.entity_type dropped by V20), and a subject's names: labels
+// (V22), subject_aliases (V24) and subject_redirects (V29). Only the columns
+// search reads, or that an insert needs, are here.
 const coreArticleTables = `
 CREATE TABLE subjects (
     id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -48,6 +49,22 @@ CREATE TABLE article_translations (
     translation_state   varchar(20) NOT NULL DEFAULT 'INDEPENDENT',
     created_at          timestamptz NOT NULL DEFAULT now(),
     updated_at          timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE labels (
+    id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    subject_id uuid REFERENCES subjects (id) ON DELETE CASCADE,
+    language   varchar(2) NOT NULL,
+    value      varchar(200) NOT NULL
+);
+CREATE TABLE subject_aliases (
+    id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    subject_id uuid NOT NULL REFERENCES subjects (id) ON DELETE CASCADE,
+    language   varchar(2) NOT NULL,
+    value      varchar(200) NOT NULL
+);
+CREATE TABLE subject_redirects (
+    source_id uuid PRIMARY KEY REFERENCES subjects (id) ON DELETE CASCADE,
+    target_id uuid NOT NULL REFERENCES subjects (id) ON DELETE CASCADE
 );
 CREATE TABLE article_revisions (
     id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -72,7 +89,7 @@ func TestMain(m *testing.M) {
 		// Start from nothing, so the schema in this branch is what gets tested
 		// rather than whatever an earlier run left behind.
 		for _, stmt := range []string{
-			`DROP TABLE IF EXISTS search_documents, article_revisions, article_translations, articles, subjects CASCADE`,
+			`DROP TABLE IF EXISTS search_documents, search_terms, article_revisions, article_translations, articles, subject_redirects, subject_aliases, labels, subjects CASCADE`,
 			coreArticleTables,
 			Schema,
 		} {
@@ -97,7 +114,7 @@ func db(t *testing.T) *pgxpool.Pool {
 	if testDB == nil {
 		t.Skip("SEARCH_TEST_DSN not set")
 	}
-	exec(t, `TRUNCATE subjects, articles, article_translations, article_revisions, search_documents CASCADE`)
+	exec(t, `TRUNCATE subjects, labels, subject_aliases, subject_redirects, articles, article_translations, article_revisions, search_documents, search_terms CASCADE`)
 	return testDB
 }
 
@@ -389,22 +406,31 @@ func TestArticlesOfADeletedSubjectLeaveTheIndexUntilItIsRestored(t *testing.T) {
 	}
 }
 
-func TestAnIndexBuiltBeforeSubjectKindsIsUpgradedInPlace(t *testing.T) {
+func TestAnIndexFromAnOlderSchemaIsRebuilt(t *testing.T) {
 	db(t)
 	publish(t, "fa", "old", "ISLAND", "قدیمی", "", text("متن"))
 	syncAll(t)
 
-	// The table as an earlier version of this schema created it.
-	exec(t, `ALTER TABLE search_documents DROP COLUMN subject_kind`)
-	exec(t, `ALTER TABLE search_documents ADD COLUMN entity_type varchar(20) NOT NULL DEFAULT 'ISLAND'`)
+	// An index without the current version on it, as every earlier version of
+	// this file left it. Applying the schema drops it, and a reconcile fills it
+	// again from core's tables.
+	exec(t, `COMMENT ON TABLE search_documents IS NULL`)
 	exec(t, Schema)
+	if got := scalar[int](t, `SELECT count(*) FROM search_documents`); got != 0 {
+		t.Fatalf("the old index was kept: %d rows", got)
+	}
 
 	if indexed, _ := syncAll(t); indexed != 1 {
-		t.Errorf("indexed = %d after the upgrade, want 1", indexed)
+		t.Errorf("indexed = %d after the rebuild, want 1", indexed)
 	}
-	hits := find(t, Query{Text: "قدیمی", SubjectKind: "ISLAND"}).Hits
-	if len(hits) != 1 || hits[0].SubjectKind == nil || *hits[0].SubjectKind != "ISLAND" {
-		t.Errorf("the upgraded row has no kind: %+v", hits)
+	if got := find(t, Query{Text: "قدیمی", SubjectKind: "ISLAND"}); got.Total != 1 {
+		t.Errorf("the rebuilt index does not find the article")
+	}
+
+	// Applying the same schema again, as every worker start does, keeps it.
+	exec(t, Schema)
+	if got := scalar[int](t, `SELECT count(*) FROM search_documents`); got != 1 {
+		t.Errorf("a current index was dropped on re-apply: %d rows", got)
 	}
 }
 
@@ -534,5 +560,183 @@ func TestTestDatabaseSplitsPersianWords(t *testing.T) {
 	}
 	if !ok {
 		t.Fatal("this database cannot split Persian words; every Persian test would be meaningless")
+	}
+}
+
+// subjectOf returns the subject of the article a translation belongs to.
+func subjectOf(t *testing.T, translationID string) string {
+	t.Helper()
+	return scalar[string](t, `
+		SELECT a.subject_id::text FROM articles a
+		  JOIN article_translations t ON t.article_id = a.id WHERE t.id = $1`, translationID)
+}
+
+func alias(t *testing.T, subjectID, language, value string) {
+	t.Helper()
+	exec(t, `INSERT INTO subject_aliases (subject_id, language, value) VALUES ($1, $2, $3)`,
+		subjectID, language, value)
+}
+
+func TestAnotherNameFindsTheArticleAndSaysWhichName(t *testing.T) {
+	db(t)
+	kish := publish(t, "fa", "kish", "ISLAND", "کیش", "", text("جزیره‌ای در خلیج فارس"))
+	subject := subjectOf(t, kish)
+	exec(t, `INSERT INTO labels (subject_id, language, value) VALUES ($1, 'en', 'Kish Island')`, subject)
+	alias(t, subject, "en", "Qays")
+	syncAll(t)
+
+	for _, c := range []struct{ query, matched string }{
+		{"Qays", "Qays"},
+		{"kish island", "Kish Island"},
+		{"Qayss", "Qays"}, // a typo in the other name still lands
+	} {
+		hits := find(t, Query{Text: c.query}).Hits
+		if len(hits) != 1 || hits[0].Slug != "kish" {
+			t.Errorf("%q found %v, want [kish]", c.query, slugsOf(Page{Hits: hits}))
+			continue
+		}
+		if hits[0].MatchedName == nil || *hits[0].MatchedName != c.matched {
+			t.Errorf("%q: matched_name = %v, want %q", c.query, hits[0].MatchedName, c.matched)
+		}
+	}
+
+	// Found by its own title: nothing to explain.
+	hits := find(t, Query{Text: "کیش"}).Hits
+	if len(hits) != 1 || hits[0].MatchedName != nil {
+		t.Errorf("a title match carries matched_name: %+v", hits)
+	}
+}
+
+func TestANewNameIsIndexedWithoutANewRevision(t *testing.T) {
+	db(t)
+	kish := publish(t, "fa", "kish", "ISLAND", "کیش", "", text("جزیره"))
+	syncAll(t)
+	subject := subjectOf(t, kish)
+
+	alias(t, subject, "en", "Qays")
+	if indexed, _ := syncAll(t); indexed != 1 {
+		t.Errorf("indexed = %d after an alias was added, want 1", indexed)
+	}
+	if got := find(t, Query{Text: "Qays"}); got.Total != 1 {
+		t.Errorf("a new alias does not find the article")
+	}
+
+	// Core replaces aliases as a whole on approval: a removed one stops matching.
+	exec(t, `DELETE FROM subject_aliases WHERE subject_id = $1`, subject)
+	if indexed, _ := syncAll(t); indexed != 1 {
+		t.Errorf("indexed = %d after the alias was removed, want 1", indexed)
+	}
+	if got := find(t, Query{Text: "Qays"}); got.Total != 0 {
+		t.Errorf("a removed alias still finds the article")
+	}
+}
+
+func TestAMergedSubjectsNamesLeadToTheSubjectItWasMergedInto(t *testing.T) {
+	db(t)
+	kish := publish(t, "en", "kish-island", "ISLAND", "Kish Island", "", text("An island."))
+	survivor := subjectOf(t, kish)
+
+	// A duplicate subject, merged into Kish: soft-deleted, with a redirect.
+	merged := scalar[string](t, `INSERT INTO subjects (kind, deleted_at) VALUES ('ISLAND', now()) RETURNING id::text`)
+	alias(t, merged, "en", "Ghais")
+	exec(t, `INSERT INTO subject_redirects (source_id, target_id) VALUES ($1, $2)`, merged, survivor)
+	syncAll(t)
+
+	hits := find(t, Query{Text: "Ghais"}).Hits
+	if len(hits) != 1 || hits[0].Slug != "kish-island" {
+		t.Fatalf("the merged subject's alias found %v, want [kish-island]", slugsOf(Page{Hits: hits}))
+	}
+	if hits[0].MatchedName == nil || *hits[0].MatchedName != "Ghais" {
+		t.Errorf("matched_name = %v, want Ghais", hits[0].MatchedName)
+	}
+}
+
+func suggest(t *testing.T, prefix, language string) []Suggestion {
+	t.Helper()
+	got, err := Suggest(context.Background(), testDB, prefix, language, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return got
+}
+
+func titlesOf(s []Suggestion) []string {
+	out := make([]string, 0, len(s))
+	for _, x := range s {
+		out = append(out, x.Title)
+	}
+	return out
+}
+
+func TestSuggestCompletesTitlesAndOtherNames(t *testing.T) {
+	db(t)
+	kish := publish(t, "en", "kish-island", "ISLAND", "Kish Island", "", text("An island."))
+	publish(t, "en", "kharg-island", "ISLAND", "Kharg Island", "", text("An island."))
+	publish(t, "en", "island-ecology", "", "Island ecology", "", text("Reefs."))
+	publish(t, "fa", "hormoz", "STRAIT", "تنگه هرمز", "", text("آبراه"))
+	alias(t, subjectOf(t, kish), "en", "Qays")
+	syncAll(t)
+
+	// A title that starts with the text comes first, then shorter titles.
+	if got := titlesOf(suggest(t, "isl", "")); !slices.Equal(got, []string{"Island ecology", "Kish Island", "Kharg Island"}) {
+		t.Errorf("isl suggested %v", got)
+	}
+	if got := titlesOf(suggest(t, "khar", "")); !slices.Equal(got, []string{"Kharg Island"}) {
+		t.Errorf("khar suggested %v", got)
+	}
+	// Persian while typing.
+	if got := titlesOf(suggest(t, "هر", "fa")); !slices.Equal(got, []string{"تنگه هرمز"}) {
+		t.Errorf("هر suggested %v", got)
+	}
+	if got := suggest(t, "هر", "en"); len(got) != 0 {
+		t.Errorf("the language filter let %v through", titlesOf(got))
+	}
+
+	// Only an other name starts with the text: the suggestion says which.
+	got := suggest(t, "qa", "")
+	if len(got) != 1 || got[0].Title != "Kish Island" || got[0].MatchedName == nil || *got[0].MatchedName != "Qays" {
+		t.Errorf("qa suggested %+v, want Kish Island by Qays", got)
+	}
+
+	if got := suggest(t, "  ", ""); len(got) != 0 {
+		t.Errorf("an empty prefix suggested %v", titlesOf(got))
+	}
+}
+
+func didYouMean(t *testing.T, query string) string {
+	t.Helper()
+	got, err := DidYouMean(context.Background(), testDB, query, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return got
+}
+
+func TestDidYouMeanCorrectsWordsNoArticleContains(t *testing.T) {
+	db(t)
+	publish(t, "en", "hormuz", "STRAIT", "Strait of Hormuz", "A strait between two gulfs.", text("Ships pass it."))
+	publish(t, "fa", "kish", "ISLAND", "جزیره کیش", "", text("جزیره‌ای در خلیج فارس"))
+	syncAll(t)
+
+	// Each unknown word is replaced; known words are kept as typed.
+	if got := didYouMean(t, "hormuzz strait"); got != "Hormuz strait" {
+		t.Errorf("did you mean = %q, want %q", got, "Hormuz strait")
+	}
+	// Nothing to correct.
+	for _, q := range []string{"strait of hormuz", "جزیره", ""} {
+		if got := didYouMean(t, q); got != "" {
+			t.Errorf("%q: did you mean = %q, want nothing", q, got)
+		}
+	}
+	// A spelling that folds to a known word is not a typo: Arabic yeh and kaf.
+	if got := didYouMean(t, "جزيره كيش"); got != "" {
+		t.Errorf("an Arabic-letter spelling was corrected to %q", got)
+	}
+
+	// The vocabulary follows the index: an unpublished article's words go.
+	exec(t, `UPDATE article_translations SET current_revision_id = NULL WHERE slug = 'hormuz'`)
+	syncAll(t)
+	if got := didYouMean(t, "hormuzz"); got != "" {
+		t.Errorf("a word from an unpublished article was offered: %q", got)
 	}
 }

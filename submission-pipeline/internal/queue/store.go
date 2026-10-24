@@ -235,6 +235,97 @@ func (s *Store) DeadLetter(ctx context.Context, id int64, lastErr string) error 
 	return nil
 }
 
+// deleteFinishedSQL removes one batch of finished jobs that finished before
+// the cut-off, oldest first. Batches keep each transaction, and the locks it
+// holds, small however much has piled up. SKIP LOCKED lets two workers clean
+// at once without waiting on each other.
+const deleteFinishedSQL = `
+DELETE FROM jobs
+WHERE id IN (
+    SELECT id FROM jobs
+    WHERE status = $1 AND updated_at < now() - make_interval(secs => $2)
+    ORDER BY updated_at
+    LIMIT $3
+    FOR UPDATE SKIP LOCKED
+)`
+
+// DeleteFinished deletes up to batch jobs in the given finished status that
+// finished more than olderThan ago, and returns how many it deleted. Only done
+// and failed jobs can be deleted: a pending or running job is still owed work.
+func (s *Store) DeleteFinished(ctx context.Context, status Status, olderThan time.Duration, batch int) (int64, error) {
+	if status != StatusDone && status != StatusFailed {
+		return 0, fmt.Errorf("deleting jobs: %q is not a finished status", status)
+	}
+	tag, err := s.pool.Exec(ctx, deleteFinishedSQL, string(status), olderThan.Seconds(), batch)
+	if err != nil {
+		if err = installedError(err); errors.Is(err, ErrNotInstalled) {
+			return 0, err
+		}
+		return 0, fmt.Errorf("deleting %s jobs: %w", status, err)
+	}
+	return tag.RowsAffected(), nil
+}
+
+// Stats is the state of the queue at one moment, for metrics.
+type Stats struct {
+	// Counts is how many rows there are of each type in each status.
+	Counts []Count
+
+	// OldestDue is how long the longest-waiting due job has waited to be
+	// claimed, or zero when nothing is waiting. It is the number that shows a
+	// queue falling behind, whatever its length.
+	OldestDue time.Duration
+}
+
+type Count struct {
+	Type   JobType
+	Status Status
+	Jobs   int64
+}
+
+const countsSQL = `SELECT type, status, count(*) FROM jobs GROUP BY type, status ORDER BY type, status`
+
+const oldestDueSQL = `
+SELECT coalesce(extract(epoch FROM now() - min(run_after)), 0)::float8
+FROM jobs
+WHERE status = 'pending' AND run_after <= now()`
+
+// Stats counts the queue's rows. Finished rows are bounded by the clean-up, so
+// a count of the whole table stays cheap.
+func (s *Store) Stats(ctx context.Context) (Stats, error) {
+	fail := func(err error) error {
+		if err = installedError(err); errors.Is(err, ErrNotInstalled) {
+			return err
+		}
+		return fmt.Errorf("reading queue stats: %w", err)
+	}
+
+	rows, err := s.pool.Query(ctx, countsSQL)
+	if err != nil {
+		return Stats{}, fail(err)
+	}
+	defer rows.Close()
+
+	var st Stats
+	for rows.Next() {
+		var c Count
+		if err := rows.Scan(&c.Type, &c.Status, &c.Jobs); err != nil {
+			return Stats{}, fail(err)
+		}
+		st.Counts = append(st.Counts, c)
+	}
+	if err := rows.Err(); err != nil {
+		return Stats{}, fail(err)
+	}
+
+	var seconds float64
+	if err := s.pool.QueryRow(ctx, oldestDueSQL).Scan(&seconds); err != nil {
+		return Stats{}, fail(err)
+	}
+	st.OldestDue = time.Duration(seconds * float64(time.Second))
+	return st, nil
+}
+
 // Listen blocks until a NOTIFY arrives on NotifyChannel, ctx is cancelled, or
 // the connection drops. It holds a dedicated connection for its lifetime,
 // because a connection waiting on notifications cannot also serve queries.

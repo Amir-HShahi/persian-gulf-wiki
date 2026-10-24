@@ -31,6 +31,7 @@ type Runner struct {
 	cfg      RunnerConfig
 	identity string
 	onPoll   func()
+	onFinish func(Finish)
 
 	// notInstalled remembers that the jobs table was missing on the last check, so the
 	// warning is said once and not on every poll. Only drain touches it, and drain runs
@@ -60,6 +61,30 @@ func NewRunner(store *Store, log *slog.Logger, cfg RunnerConfig, identity string
 		cfg:      cfg,
 		identity: identity,
 		onPoll:   onPoll,
+	}
+}
+
+// Finish is how one attempt at a job ended, for metrics.
+type Finish struct {
+	Type JobType
+
+	// Outcome is "ok" or "rejected" for a completed job, "retry" for a failed
+	// attempt that will run again, and "failed" for a job given up on.
+	Outcome string
+
+	// Duration is the whole attempt, including recording how it ended.
+	Duration time.Duration
+}
+
+// OnFinish sets a function told about every attempt this runner finishes. Not
+// safe for concurrent use: call it during startup, before Run.
+func (r *Runner) OnFinish(fn func(Finish)) {
+	r.onFinish = fn
+}
+
+func (r *Runner) finished(t JobType, outcome string, start time.Time) {
+	if r.onFinish != nil {
+		r.onFinish(Finish{Type: t, Outcome: outcome, Duration: time.Since(start)})
 	}
 }
 
@@ -192,6 +217,7 @@ func (r *Runner) process(ctx context.Context, job Job) {
 	ctx = context.WithoutCancel(ctx)
 
 	jobLog := r.log.With(job.LogAttrs()...)
+	start := time.Now()
 
 	h, ok := r.handlers[job.Type]
 	if !ok {
@@ -199,6 +225,7 @@ func (r *Runner) process(ctx context.Context, job Job) {
 		// deployed ahead of the worker. Retrying can never help.
 		jobLog.Error("unknown job type, dead-lettering")
 		r.deadLetter(ctx, jobLog, job, fmt.Sprintf("unknown job type %q", job.Type))
+		r.finished(job.Type, "failed", start)
 		return
 	}
 
@@ -208,19 +235,22 @@ func (r *Runner) process(ctx context.Context, job Job) {
 	stopHeartbeat := r.startHeartbeat(jobCtx, jobLog, job.ID)
 	defer stopHeartbeat()
 
-	if err := r.runOnce(jobCtx, jobLog, h, job); err != nil {
-		r.recordFailure(ctx, jobLog, job, err)
+	outcome, err := r.runOnce(jobCtx, jobLog, h, job)
+	if err != nil {
+		outcome = r.recordFailure(ctx, jobLog, job, err)
 	}
+	r.finished(job.Type, outcome, start)
 }
 
 // recordFailure either schedules a retry or dead-letters a job whose attempts
-// are exhausted. Note the parent ctx is used rather than the job's: the job's
-// context may already be cancelled, and the failure still has to be written.
-func (r *Runner) recordFailure(ctx context.Context, log *slog.Logger, job Job, cause error) {
+// are exhausted, and returns which: "retry" or "failed". Note the parent ctx is
+// used rather than the job's: the job's context may already be cancelled, and
+// the failure still has to be written.
+func (r *Runner) recordFailure(ctx context.Context, log *slog.Logger, job Job, cause error) string {
 	if job.Attempts >= r.maxAttempts(job) {
 		log.Error("attempts exhausted, dead-lettering", "err", cause)
 		r.deadLetter(ctx, log, job, cause.Error())
-		return
+		return "failed"
 	}
 
 	delay := r.backoff(job.Attempts)
@@ -228,30 +258,32 @@ func (r *Runner) recordFailure(ctx context.Context, log *slog.Logger, job Job, c
 	if err := r.store.Retry(ctx, job.ID, delay, cause.Error()); err != nil {
 		log.Error("scheduling retry", "err", err)
 	}
+	return "retry"
 }
 
 // runOnce executes the handler and commits its work together with the job's
-// completion. A returned error means the job should be retried or dead-lettered.
-func (r *Runner) runOnce(ctx context.Context, log *slog.Logger, h Handler, job Job) error {
+// completion, and returns the result's outcome. A returned error means the job
+// should be retried or dead-lettered.
+func (r *Runner) runOnce(ctx context.Context, log *slog.Logger, h Handler, job Job) (string, error) {
 	tx, err := r.store.Begin(ctx)
 	if err != nil {
-		return fmt.Errorf("beginning transaction: %w", err)
+		return "", fmt.Errorf("beginning transaction: %w", err)
 	}
 	// Rollback is a no-op once the transaction has committed.
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	res, err := dispatch(ctx, log, h, tx, job)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if err := r.store.Complete(ctx, tx, job.ID, res); err != nil {
-		return err
+		return "", err
 	}
 	if err := tx.Commit(ctx); err != nil {
-		return fmt.Errorf("committing job %d: %w", job.ID, err)
+		return "", fmt.Errorf("committing job %d: %w", job.ID, err)
 	}
-	return nil
+	return string(res.Outcome), nil
 }
 
 // startHeartbeat keeps this worker's lock alive while a job runs, and returns

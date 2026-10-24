@@ -69,7 +69,13 @@ SELECT m.id AS media_id, j.status, j.result, j.last_error
 ```
 
 Once core moves an item out of `PROCESSING` the row stops matching, so nothing has to be
-acknowledged. A redelivery cannot happen. Until the worker has started once, `jobs` may not
+acknowledged. A redelivery cannot happen.
+
+**Job rows are not kept forever.** The worker deletes `done` jobs 30 days after they finish
+and `failed` ones after 90 (`JOBS_KEEP_DONE` / `JOBS_KEEP_FAILED`; `0` keeps them). Copy into
+your own tables anything you want longer than that: the variants and placeholder already go
+into yours, and the same applies to a `tabular` report or `normalize` findings you want to
+show months later. Pending and running jobs are never deleted. Until the worker has started once, `jobs` may not
 exist: treat "relation does not exist" as "nothing yet".
 
 | Row | Means | Core does what it does today for |
@@ -98,6 +104,7 @@ is well inside the 60-minute stuck-processing sweep, which can stay as it is.
 | `type` `media.image` / `media.panorama` | `type` `image` / `panorama` |
 | `media.sha256` | `image.sha256` (recomputed by the worker, standard padded base64) |
 | `media.placeholder` | `image.placeholder`: `data:image/webp;base64,...`, 24 px wide, under 16 KiB, so your `PLACEHOLDER` check passes as is. Left out (not empty) if one could not be made small enough. |
+| (nothing yet) | `image.attribution`: the author, credit, copyright, licence and date the original file states. See below. |
 | `media.width` / `media.height` | `image.width` / `image.height` (after EXIF rotation) |
 | `media.variants[].size` | `image.variants[].label` (`w320`, `w640`, ...) |
 | `media.variants[].format` | same name, always `webp` |
@@ -113,6 +120,10 @@ Example `result`:
     "width": 3000, "height": 4000, "format": "jpeg",
     "sha256": "n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=",
     "placeholder": "data:image/webp;base64,UklGRjAAAABXRUJQVlA4...",
+    "attribution": {"author": "مریم احمدی", "copyright": "© 2026 مریم احمدی",
+                    "license": "CC BY-SA 4.0",
+                    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+                    "created_at": "2024-05-01T10:20:30"},
     "variants": [
       {"label": "w320", "format": "webp", "key": "pending/9b1e7c3a/w320.webp", "width": 320, "height": 427, "bytes": 11874}
     ],
@@ -138,6 +149,23 @@ or rejecting an item never deletes it. **One thing for core to decide:** your 7-
 FAILED items does not reach `originals/`, so originals of rejected or deleted items stay. If
 they should go too, add `originals/{mediaId}/` to that sweep and to item deletion.
 
+### Author and licence: new, for you to use
+
+Wikimedia Commons requires an author and a licence on every file. Cameras and photo software
+often record them, and the variants are stripped, so the worker reads them from the original
+and returns them as `image.attribution` (`author`, `credit`, `copyright`, `license`,
+`license_url`, `created_at`, each optional; the README lists where each comes from). Nothing
+else is read: never location or the camera's serial number.
+
+Suggested use on core's side, none of it required:
+
+* Show it to the moderator next to what the uploader declared. A photo whose file names a
+  different author than the uploader is worth a second look.
+* Prefill the upload's licence and author fields from it, for the uploader to confirm.
+* Store it with the media item, so the article page can credit the photographer.
+
+It is what the file claims, not a fact: treat it as a hint, never as the licence itself.
+
 ## 2. Kept on the worker side, on purpose
 
 | | Core's contract | Worker | Why the worker's way |
@@ -147,16 +175,21 @@ they should go too, add `originals/{mediaId}/` to that sweep and to item deletio
 | Pixel limit | about 60 MP suggested | 100 MP, and 30,000 px per side | The header is checked before any decode, so a larger limit costs no safety. Current phones shoot 48 to 200 MP. |
 | Widths | up to 2560 | 320, 640, 1280, 1920 | The original is kept, so a 2560 variant can be generated later if a layout needs one. |
 
-## 3. Search: one endpoint to add
+## 3. Search: three queries to expose
 
-The worker builds and refreshes the index on its own, every 30 s. Core only queries it:
+The worker builds and refreshes the index on its own, every 30 s. Core only queries it.
+
+**Search results:**
 
 ```sql
 SELECT * FROM search_articles(:q, :language, :subjectKind, :limit, :offset);
 ```
 
-* Returns `translation_id, article_id, language, subject_kind, slug, title, snippet, score, total`.
-  `total` is the full match count on every row.
+* Returns `translation_id, article_id, language, subject_kind, slug, title, matched_name,
+  snippet, score, total`. `total` is the full match count on every row.
+* An article is also found by its subject's other names, in every language: labels, aliases,
+  and the names of any subject merged into it, as Wikipedia's redirects work. `matched_name` is
+  the name that matched, for showing "Qays → Kish Island", and null when the title did.
 * `language` and `subjectKind` may be null. A kind filter leaves out articles with no subject,
   as `findPublishedByLanguage` does.
 * `snippet` is HTML that is already escaped, with matches in `<mark>`, and can be rendered as is.
@@ -165,16 +198,49 @@ SELECT * FROM search_articles(:q, :language, :subjectKind, :limit, :offset);
   translation with a `current_revision_id`, whose subject, if any, is not deleted. A subject
   that is deleted or restored drops out of results, or comes back, within one sync.
 
+**Suggestions while typing** (cheap enough for every keystroke):
+
+```sql
+SELECT * FROM search_suggest(:prefix, :language, :limit);   -- limit 8 by default, at most 20
+```
+
+Returns `translation_id, article_id, language, slug, title, matched_name`, matched on titles
+and other names by prefix, titles that start with the text first.
+
+**"Did you mean"**, for a search that found nothing or little:
+
+```sql
+SELECT search_did_you_mean(:q, :language);   -- 'hormuzz strait' → 'Hormuz strait', or null
+```
+
 The index reads only these columns: `subjects(id, kind, deleted_at)`, `articles(id, subject_id)`,
-`article_translations(id, article_id, language, slug, current_revision_id)` and
-`article_revisions(id, title, summary, body)`. It uses functions rather than views, so none of
+`article_translations(id, article_id, language, slug, current_revision_id)`,
+`article_revisions(id, title, summary, body)`, `labels(subject_id, value)`,
+`subject_aliases(subject_id, value)` and `subject_redirects(source_id, target_id)`. It uses functions rather than views, so none of
 your migrations is blocked by a dependency on these columns. If a migration renames or drops
 one of them, search stops updating and logs why. The site is not affected. Please tell me when
 that happens.
 
-## 4. Database role
+## 4. Spreadsheets and text checks: ready when you want them
+
+Two more job types run already. Neither needs anything from core until you use it:
+
+* **`tabular`**: `{"submission_id", "object_key"}` for a CSV or XLSX in the staging bucket.
+  The result's `tabular` block is the file's shape and its structural problems, for a
+  reviewer. A file with problems is `ok`, not rejected.
+* **`normalize`**: `{"revision_id"}` for an article revision, any status. The worker reads it
+  from your tables and returns `normalize.findings`: suggested text fixes such as an Arabic
+  ي in a Persian article. It never writes to the revision. A natural place to enqueue it is
+  when a revision is submitted for review, so the moderator sees the findings with it.
+  Persian articles also get typography findings (`کتاب ها` → `کتاب‌ها`, `"…"` → `«…»`).
+  Treat `rule` as an open list: show `found`, `suggest` and `context`, and translate only
+  the rule names you want a label for, since new rules can appear.
+
+Both are described in the README with their result and reject codes.
+
+## 5. Database role
 
 The compose files run the worker as core's database user, which is enough. If it ever gets its
 own role, that role needs `CREATE` on `public` (it applies its schema),
-`CREATE EXTENSION pg_trgm` (or have it installed once), `SELECT, UPDATE` on `jobs`, `SELECT` on
-the four tables above, and `LISTEN`.
+`CREATE EXTENSION pg_trgm` (or have it installed once), `SELECT, UPDATE, DELETE` on `jobs`, `SELECT` on
+the seven tables above, and `LISTEN`.

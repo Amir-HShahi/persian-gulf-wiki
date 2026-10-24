@@ -383,3 +383,66 @@ func TestProcessRejectsAPanoramaThatIsNotTwoToOne(t *testing.T) {
 		t.Fatalf("err = %v, want a %q rejection", err, RejectAspect)
 	}
 }
+
+func TestProcessReadsTheAuthorAndLicenceBeforeStripping(t *testing.T) {
+	dir := t.TempDir()
+
+	// A photo as a camera and an editor leave it: EXIF from the camera, XMP
+	// with a Persian name and a Creative Commons licence from the editor, and a
+	// location, which must not come out anywhere.
+	img, err := vips.Black(800, 600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer img.Close()
+	img.SetString("exif-ifd0-Artist", "Camera Owner")
+	img.SetString("exif-ifd2-DateTimeOriginal", "2024:05:01 10:20:30")
+	img.SetString("exif-ifd3-GPSLatitudeRef", "N")
+	img.SetBlob("xmp-data", []byte(xmpPacket))
+	params := vips.NewJpegExportParams()
+	params.StripMetadata = false
+	buf, _, err := img.ExportJpeg(params)
+	if err != nil {
+		t.Fatal(err)
+	}
+	src := filepath.Join(dir, "tagged.jpg")
+	if err := os.WriteFile(src, buf, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	res, err := Process(context.Background(), src, outDir(t, dir), quick(320))
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := res.Attribution
+	if a == nil {
+		t.Fatal("no attribution read from a tagged photo")
+	}
+	if a.Author != "مریم احمدی; Jane Doe" || a.License != "CC BY-SA 4.0" ||
+		a.LicenseURL != "https://creativecommons.org/licenses/by-sa/4.0/" {
+		t.Errorf("attribution = %+v", *a)
+	}
+
+	// Read from the original only: the variant still carries nothing.
+	v, err := vips.NewImageFromFile(res.Variants[0].Path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer v.Close()
+	for _, f := range v.ImageFields() {
+		if f == "xmp-data" || f == "exif-data" {
+			t.Errorf("variant keeps %s", f)
+		}
+	}
+}
+
+func TestProcessGivesAnUntaggedPhotoNoAttribution(t *testing.T) {
+	dir := t.TempDir()
+	res, err := Process(context.Background(), writeJPEG(t, dir, "plain.jpg", 400, 300, 0), outDir(t, dir), quick(320))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Attribution != nil {
+		t.Errorf("attribution = %+v, want nil", *res.Attribution)
+	}
+}
