@@ -182,11 +182,10 @@ public class ArticleService {
     // subject it was merged into, which now holds its articles. An unknown or archived topic slug
     // matches nothing -- an empty page, like an unknown subjectId -- rather than a 400.
     @Transactional(readOnly = true)
-    public PageResponse<ArticleListItemResponse> list(String language, UUID subjectId, String subjectKindFilter,
+    public PageResponse<ArticleListItemResponse> list(String language, List<UUID> subjectIds, String subjectKindFilter,
             @Nullable String topicSlug, Pageable pageable) {
         SubjectKind subjectKind = subjectKindFilter == null ? null : parseSubjectKind(subjectKindFilter);
-        UUID subjectFilter = subjectId == null ? null
-                : subjectService.redirectTargets(List.of(subjectId)).getOrDefault(subjectId, subjectId);
+        List<UUID> subjectFilter = resolveSubjectFilter(subjectIds);
         UUID topicId = null;
         if (topicSlug != null) {
             Optional<UUID> found = topicService.findFilterableId(topicSlug);
@@ -197,7 +196,8 @@ public class ArticleService {
         }
 
         Page<ArticleTranslation> page = articleTranslationRepository
-                .findPublishedByLanguage(language, subjectFilter, subjectKind, topicId, pageable);
+                .findPublishedByLanguage(language, !subjectFilter.isEmpty(),
+                        subjectFilter.isEmpty() ? ArticleTranslationRepository.NO_SUBJECT_FILTER : subjectFilter, subjectKind, topicId, pageable);
         List<ArticleTranslation> translations = page.getContent();
 
         Map<UUID, Article> articlesById = articleRepository
@@ -224,6 +224,22 @@ public class ArticleService {
                 })
                 .toList();
         return new PageResponse<>(items, page.getTotalElements());
+    }
+
+    // The subjects a list filter matches: each given id, or the subject it was merged into, once
+    // each. Throws SubjectNotFoundException if any names no subject or a deleted, unmerged one.
+    private List<UUID> resolveSubjectFilter(List<UUID> subjectIds) {
+        List<UUID> requested = subjectIds.stream().filter(Objects::nonNull).distinct().toList();
+        if (requested.isEmpty()) {
+            return List.of();
+        }
+        Map<UUID, UUID> redirects = subjectService.redirectTargets(requested);
+        List<UUID> resolved = requested.stream().map(id -> redirects.getOrDefault(id, id)).distinct().toList();
+        long live = subjectRepository.findAllById(resolved).stream().filter(subject -> !subject.isDeleted()).count();
+        if (live != resolved.size()) {
+            throw new SubjectNotFoundException();
+        }
+        return resolved;
     }
 
     // Same reasoning as SubjectService.parseKind, and the same INVALID_SUBJECT_KIND 400, so a

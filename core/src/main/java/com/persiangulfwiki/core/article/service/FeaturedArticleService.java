@@ -60,7 +60,8 @@ public class FeaturedArticleService {
         List<LiveFeature> live = featuredArticleRepository.findLive(language, Instant.now(), FIRST);
         UUID featuredArticleId = live.isEmpty() ? null : live.getFirst().getFeaturedArticleId();
         ArticleTranslation translation = live.isEmpty()
-                ? articleTranslationRepository.findPublishedByLanguage(language, null, null, null, FIRST).stream()
+                ? articleTranslationRepository.findPublishedByLanguage(language, false,
+                        ArticleTranslationRepository.NO_SUBJECT_FILTER, null, null, FIRST).stream()
                         .findFirst()
                         .orElseThrow(FeaturedArticleNotFoundException::new)
                 : articleTranslationRepository.findById(live.getFirst().getTranslationId())

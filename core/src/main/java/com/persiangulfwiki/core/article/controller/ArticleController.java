@@ -86,6 +86,7 @@ import java.util.UUID;
 public class ArticleController {
 
     private static final int MAX_PAGE_SIZE = 100;
+    private static final int MAX_SUBJECT_FILTERS = 20;
     private static final String MODERATOR_AUTHORITY = "ROLE_MODERATOR";
 
     private final ArticleService articleService;
@@ -181,11 +182,15 @@ public class ArticleController {
             + "pages. An out-of-range page has an empty `items` list, not an error.")
     @ApiResponse(responseCode = "400", description = "`language` is missing, blank or longer than 20 characters; `subjectKind` is not "
             + "one of ISLAND, PORT, OIL_FIELD, SPECIES, STRAIT, FISHING_GROUND, PROVINCE "
-            + "(case-insensitive); or `page`/`size` is outside "
-            + "its allowed range.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+            + "(case-insensitive); more than 20 `subjectId`s are given, or one is not a valid id; or `page`/`size` "
+            + "is outside its allowed range.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "404", description = "A `subjectId` names no subject, or a deleted subject that was "
+            + "not merged into another.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @Parameter(name = "language", required = true, description = "BCP-47 language tag of the translation to list, e.g. \"fa\", \"en\", \"ar\". Matched exactly.")
-    @Parameter(name = "subjectId", description = "Optional filter: only articles bound to this subject. A subject that "
-            + "was merged into another filters on that other subject, which now holds its articles.")
+    @Parameter(name = "subjectId", description = "Optional filter, repeatable up to 20 times "
+            + "(`?subjectId=a&subjectId=b`): only articles bound to any of these subjects. A subject that was merged "
+            + "into another filters on that other subject, which now holds its articles; an article is listed once "
+            + "even when several given ids lead to its subject.")
     @Parameter(name = "subjectKind", description = "Optional filter: only articles whose subject is of this kind "
             + "(case-insensitive). Articles with no subject never match it.\n\n" + SubjectKind.VALUES_DOC)
     @Parameter(name = "topic", description = "Optional filter: only articles about this topic, by its `slug` from "
@@ -200,12 +205,14 @@ public class ArticleController {
     public ApiResult<PageResponse<ArticleListItemResponse>> list(
             @RequestParam @NotBlank(message = "{validation.language.required}")
                     @Size(max = 20, message = "{validation.language.tooLong}") String language,
-            @RequestParam(required = false) UUID subjectId,
+            @RequestParam(name = "subjectId", required = false)
+                    @Size(max = MAX_SUBJECT_FILTERS, message = "{validation.subjectIds.tooMany}") @Nullable List<UUID> subjectIds,
             @RequestParam(required = false) String subjectKind,
             @RequestParam(required = false) String topic,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(MAX_PAGE_SIZE) int size) {
-        PageResponse<ArticleListItemResponse> data = articleService.list(language, subjectId, subjectKind, topic, PageRequest.of(page, size));
+        PageResponse<ArticleListItemResponse> data = articleService.list(language,
+                subjectIds == null ? List.of() : subjectIds, subjectKind, topic, PageRequest.of(page, size));
         String message = messageSource.getMessage("success.articlesList", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
     }

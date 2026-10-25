@@ -27,10 +27,15 @@ public interface ArticleTranslationRepository extends JpaRepository<ArticleTrans
     boolean existsByArticleIdAndCurrentRevisionIdIsNotNull(UUID articleId);
 
     // Translations in one language that have an approved revision, filtered by their article's
-    // subject, that subject's kind and/or a live topic (any filter null = not applied). The left join
+    // subjects (any of subjectIds, if filterBySubject), that subject's kind and/or a live topic
+    // (kind/topic null = not applied). The left join
     // keeps subject-less articles when no kind is asked for; a kind filter drops them, since they have
     // no kind to match. Articles about a deleted subject are left out, as from the per-topic counts
     // (TopicRepository.countPublishedArticlesByTopic), which also read topics from the same
+    // Passed as subjectIds when filterBySubject is false: an empty collection in `in` fails on some
+    // Hibernate versions, and the flag already short-circuits the clause.
+    List<UUID> NO_SUBJECT_FILTER = List.of(new UUID(0, 0));
+
     // ArticleLiveTopic view -- so a topic's filtered total equals its count. Ordered newest article
     // first, with id as tiebreak so paging is stable.
     @Query(value = """
@@ -38,7 +43,7 @@ public interface ArticleTranslationRepository extends JpaRepository<ArticleTrans
               left join Subject s on s.id = a.subjectId
             where t.language = :language and t.currentRevisionId is not null
               and (s.id is null or s.deletedAt is null)
-              and (:subjectId is null or a.subjectId = :subjectId)
+              and (:filterBySubject = false or a.subjectId in :subjectIds)
               and (:subjectKind is null or s.kind = :subjectKind)
               and (:topicId is null or exists (select 1 from ArticleLiveTopic lt
                     where lt.articleId = a.id and lt.topicId = :topicId))
@@ -48,12 +53,13 @@ public interface ArticleTranslationRepository extends JpaRepository<ArticleTrans
               left join Subject s on s.id = a.subjectId
             where t.language = :language and t.currentRevisionId is not null
               and (s.id is null or s.deletedAt is null)
-              and (:subjectId is null or a.subjectId = :subjectId)
+              and (:filterBySubject = false or a.subjectId in :subjectIds)
               and (:subjectKind is null or s.kind = :subjectKind)
               and (:topicId is null or exists (select 1 from ArticleLiveTopic lt
                     where lt.articleId = a.id and lt.topicId = :topicId))""")
     Page<ArticleTranslation> findPublishedByLanguage(@Param("language") String language,
-            @Param("subjectId") UUID subjectId, @Param("subjectKind") SubjectKind subjectKind,
+            @Param("filterBySubject") boolean filterBySubject, @Param("subjectIds") Collection<UUID> subjectIds,
+            @Param("subjectKind") SubjectKind subjectKind,
             @Param("topicId") UUID topicId, Pageable pageable);
 
     List<ArticleTranslation> findByArticleIdInAndCurrentRevisionIdIsNotNull(Collection<UUID> articleIds);
