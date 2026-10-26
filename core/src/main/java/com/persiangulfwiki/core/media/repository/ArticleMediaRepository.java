@@ -68,9 +68,9 @@ public interface ArticleMediaRepository extends JpaRepository<ArticleMedia, UUID
             """)
     boolean existsLiveDuplicate(@Param("articleId") UUID articleId, @Param("sha256") String sha256);
 
-    // Serializes everything that moves an item out of PROCESSING: two deliveries of one result
-    // (the main read and a reclaim), and a result racing the stuck-processing sweep. Whoever
-    // takes the lock second sees the item already moved on and leaves it alone.
+    // Serializes everything that moves an item out of PROCESSING: two core instances polling the
+    // same finished job, and a result racing the stuck-processing sweep. Whoever takes the lock
+    // second sees the item already moved on and leaves it alone.
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select m from ArticleMedia m where m.id = :id")
     Optional<ArticleMedia> findByIdForUpdate(@Param("id") UUID id);
@@ -86,6 +86,37 @@ public interface ArticleMediaRepository extends JpaRepository<ArticleMedia, UUID
             """)
     boolean existsVerifiedDuplicate(@Param("articleId") UUID articleId, @Param("sha256") String sha256,
             @Param("excludedId") UUID excludedId);
+
+    // Items in PROCESSING whose job has finished (CORE_CHANGES.md §1), oldest finish first. Once
+    // the result is applied the item leaves PROCESSING and stops matching, so nothing has to be
+    // acknowledged and a result is never read as new twice. Native because `jobs` has no
+    // association from ArticleMedia; result is cast to text so it arrives as the JSON String
+    // MediaProcessingService parses.
+    @Query(value = """
+            select m.id as mediaId, j.id as jobId, j.status as jobStatus,
+                   cast(j.result as text) as result, j.last_error as lastError
+            from article_media m
+            join jobs j on j.id = m.processing_queue_job_id
+            where m.processing_status = 'PROCESSING'
+              and j.status in ('done', 'failed')
+            order by j.updated_at, j.id
+            limit :limit
+            """, nativeQuery = true)
+    List<FinishedProcessingJob> findFinishedProcessingJobs(@Param("limit") int limit);
+
+    interface FinishedProcessingJob {
+
+        UUID getMediaId();
+
+        Long getJobId();
+
+        // The row's lifecycle status, "done" or "failed" -- not the result's outcome.
+        String getJobStatus();
+
+        @Nullable String getResult();
+
+        @Nullable String getLastError();
+    }
 
     // A conditional bulk update rather than load-then-save, so it cannot overwrite a result
     // applied between the two: the WHERE is re-checked against the row as it is when the update

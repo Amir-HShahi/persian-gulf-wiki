@@ -202,7 +202,8 @@ public class MediaController {
     @ApiResponse(responseCode = "200", description = "The item. Once processing finishes it is READY (and then waits for a "
             + "moderator), or FAILED with a `failureCode` and a `failureMessage` to show the uploader. "
             + "Processing normally takes seconds to minutes; an item that stays PROCESSING past the "
-            + "server's timeout (an hour or two) is failed with `processing_timeout`.")
+            + "server's timeout (an hour or two) is failed with `processing_timeout`. Videos are not processed "
+            + "yet: a VIDEO stays PROCESSING until that timeout fails it.")
     @ApiResponse(responseCode = "400", description = "An id in the path is not a valid UUID, or `language` is longer than 20 characters.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "404", description = "The article has no gallery item with that id, or the caller may not see it yet. "
             + "The two look the same on purpose, and neither is ever a 401 or 403.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))

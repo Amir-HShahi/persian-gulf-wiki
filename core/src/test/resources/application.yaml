@@ -43,12 +43,11 @@ app:
     media-bucket: test-media
     public-base-url: http://localhost/test-media/public
     path-style: true
+  # Short, so a test that writes a finished job can simply wait for it to be applied; tests may
+  # also call MediaResultPollJob.poll directly.
+  job-queue:
+    result-poll-interval-seconds: 1
   media:
-    job-stream: test-submissions
-    result-stream: test-submission-results
-    result-consumer-group: core
-    result-reclaim-idle-minutes: 5
-    result-max-deliveries: 5
     processing-timeout-minutes: 60
     upload-url-ttl-minutes: 10
     signed-get-ttl-minutes: 10

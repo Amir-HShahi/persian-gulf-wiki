@@ -3,8 +3,8 @@ package com.persiangulfwiki.core.media.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record MediaVariantResponse(
-        @Schema(description = "The rendition's label, e.g. \"640\", \"1280\", \"2k\", \"4k\", \"8k\". Pick by `width`, not by "
-                + "parsing this.", example = "1280")
+        @Schema(description = "The rendition's label, e.g. \"w640\", \"w1280\" for an image, \"2k\", \"4k\", \"8k\" "
+                + "for a 360° panorama. Pick by `width`, not by parsing this.", example = "w1280")
         String size,
 
         @Schema(description = "Encoding: \"jpeg\", \"webp\", \"ktx2\", or (later) \"hls\".", example = "webp")

@@ -107,19 +107,14 @@ app:
     public-base-url: ${STORAGE_PUBLIC_BASE_URL}
     # true for MinIO (bucket in the path); false for AWS S3's virtual-hosted style.
     path-style: ${STORAGE_PATH_STYLE}
+  # The submission-pipeline worker's Postgres jobs table (V37). Core inserts gallery jobs into it
+  # and polls it this often for finished ones (MediaResultPollJob); see docs/MEDIA_PIPELINE.md.
+  job-queue:
+    result-poll-interval-seconds: 5
   media:
-    # The Redis stream the Go submission-pipeline consumes; shared with its REDIS_JOB_STREAM.
-    job-stream: ${REDIS_JOB_STREAM:submissions}
-    # The Redis stream the worker writes its results to, and core's consumer group on it. The
-    # stream name is shared with the worker (docs/MEDIA_PIPELINE.md); the group is core's own.
-    result-stream: ${REDIS_RESULT_STREAM:submission-results}
-    result-consumer-group: core
-    # A result entry left unacknowledged this long (its consumer died or applying it failed) is
-    # claimed again; after this many deliveries it is dropped and the item left to time out.
-    result-reclaim-idle-minutes: 5
-    result-max-deliveries: 5
     # An item still PROCESSING this long after its job was queued is failed as timed out.
-    # Checked hourly, so an item can wait up to this plus an hour.
+    # Checked hourly, so an item can wait up to this plus an hour. A VIDEO is queued nowhere
+    # (the worker has no video handler), so this is how every video upload ends for now.
     processing-timeout-minutes: 60
     upload-url-ttl-minutes: 10
     # Lifetime of the signed GET URLs handed to an uploader or moderator for an item that is not
