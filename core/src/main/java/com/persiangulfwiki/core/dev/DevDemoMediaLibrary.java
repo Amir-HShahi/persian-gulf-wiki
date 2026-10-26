@@ -78,6 +78,7 @@ class DevDemoMediaLibrary {
         // Never written by the seeder, but a demo item someone later re-processed or hid could
         // have files here too.
         mediaStorage.deletePrefix(StorageBucket.MEDIA, MediaProcessingService.pendingVariantPrefix(mediaId));
+        mediaStorage.deletePrefix(StorageBucket.MEDIA, MediaProcessingService.originalPrefix(mediaId));
     }
 
     void deleteLibrary() {

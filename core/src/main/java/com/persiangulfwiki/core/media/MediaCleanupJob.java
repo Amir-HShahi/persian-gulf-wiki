@@ -34,9 +34,10 @@ import java.util.List;
 //   - rejected items: REJECTED for longer than the grace period. The grace period is what lets
 //     a moderator reverse a mistaken rejection before the file is gone for good.
 //   - failed items: FAILED for longer than the grace period, which is how long the uploader can
-//     still read the failure reason. Their objects are whatever the failure left behind: a
-//     staging original the worker never got to delete, and variants the worker wrote for a
-//     duplicate or after the item had already timed out.
+//     still read the failure reason. Their objects are whatever the failure left behind: the
+//     staging upload (the worker never deletes from staging), the worker's private copy under
+//     originals/{mediaId}/, and variants it wrote for a duplicate or after the item had already
+//     timed out.
 //
 // Scheduling is enabled globally by OAuth2CleanupConfig.
 //
@@ -106,6 +107,10 @@ public class MediaCleanupJob {
                 // Normally empty for every item swept here (none was ever published), but an
                 // approval whose commit failed after the copy leaves objects behind.
                 mediaStorage.deletePrefix(StorageBucket.MEDIA, MediaVariantService.publicVariantPrefix(media.getId()));
+                // The worker's private copy of the upload (EXIF and GPS included). Owner's call
+                // (2026-11-07): it goes wherever the item's pending/ prefix goes, so nothing of a
+                // rejected or failed upload outlives the item.
+                mediaStorage.deletePrefix(StorageBucket.MEDIA, MediaProcessingService.originalPrefix(media.getId()));
                 for (MediaVariant variant : media.getVariants()) {
                     mediaStorage.delete(StorageBucket.MEDIA, variant.key());
                 }
