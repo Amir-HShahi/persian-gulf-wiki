@@ -39,8 +39,9 @@ import java.util.function.LongFunction;
 public class MediaUploadLimitService {
 
     private static final Map<MediaKind, Set<String>> ALLOWED_CONTENT_TYPES = Map.of(
-            MediaKind.IMAGE, Set.of("image/jpeg", "image/png", "image/webp"),
-            MediaKind.PANORAMA_360, Set.of("image/jpeg", "image/png", "image/webp"),
+            // HEIC is what iPhones upload by default; the worker decodes both it and AVIF.
+            MediaKind.IMAGE, Set.of("image/jpeg", "image/png", "image/webp", "image/heic", "image/avif"),
+            MediaKind.PANORAMA_360, Set.of("image/jpeg", "image/png", "image/webp", "image/heic", "image/avif"),
             MediaKind.VIDEO, Set.of("video/mp4", "video/quicktime", "video/webm"));
 
     private static final String RATE_KEY_PREFIX = "media:reservations:";
