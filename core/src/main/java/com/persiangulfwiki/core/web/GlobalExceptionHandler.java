@@ -18,6 +18,7 @@ import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeOptionCode
 import com.persiangulfwiki.core.dev.exception.DevTestAttributeGroupInUseException;
 import com.persiangulfwiki.core.dev.exception.DevDemoContentBusyException;
 import com.persiangulfwiki.core.dev.exception.DevTestMainArticleTakenException;
+import com.persiangulfwiki.core.dev.exception.DevTestMediaJobNotPendingException;
 import com.persiangulfwiki.core.dev.exception.DevTestSubjectRevisionLiveException;
 import com.persiangulfwiki.core.dev.exception.DevTestTopicInUseException;
 import com.persiangulfwiki.core.label.exception.InvalidLabelReferentException;
@@ -760,6 +761,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DevTestSubjectRevisionLiveException.class)
     public ProblemDetail handleDevTestSubjectRevisionLive(DevTestSubjectRevisionLiveException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestSubjectRevisionLive"), "DEV_TEST_SUBJECT_REVISION_LIVE", request);
+    }
+
+    @ExceptionHandler(DevTestMediaJobNotPendingException.class)
+    public ProblemDetail handleDevTestMediaJobNotPending(DevTestMediaJobNotPendingException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestMediaJobNotPending"), "DEV_TEST_MEDIA_JOB_NOT_PENDING", request);
     }
 
     @ExceptionHandler(InvalidDevTestMarineRequestException.class)

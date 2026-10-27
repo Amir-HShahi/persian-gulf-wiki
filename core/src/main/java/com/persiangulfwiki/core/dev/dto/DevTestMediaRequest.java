@@ -31,6 +31,10 @@ import java.util.UUID;
 // the newest), and deliberately skip the service's rules (both ends PANORAMA_360, no self-link,
 // at most 20, target visibility) so a suite can assert how a renderer copes with a link the real
 // flow would have refused.
+//
+// withQueueJob (PROCESSING only, IMAGE or PANORAMA_360 only) also inserts the item's jobs row, as
+// /complete would, but parked so the worker never claims it; POST /api/dev/test-media/{id}/job-result
+// then writes the worker's answer onto it, and the real result poll applies that answer.
 public record DevTestMediaRequest(
         UUID articleId,
         MediaKind type,
@@ -39,5 +43,6 @@ public record DevTestMediaRequest(
         UUID uploadedByUserId,
         @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY) List<MetadataVersionStatus> laterVersionStatuses,
         @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY) List<UUID> panoramaLinkTargetIds,
-        Integer panoramaLinkVersionNumber) {
+        Integer panoramaLinkVersionNumber,
+        Boolean withQueueJob) {
 }
