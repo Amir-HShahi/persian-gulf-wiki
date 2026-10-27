@@ -204,6 +204,24 @@ public class ArticleRevisionService {
                 .getStatus();
     }
 
+    // Who may read a revision's advisory checks (the revisioncheck package): its author and
+    // moderators. A revision the caller may not read at all is a 404, exactly as in get(); one
+    // they can read (an approved one) but did not write is a 403, since its existence is no
+    // secret. Returns the revision's id, scoped through the URL's article and language like
+    // every other revision route.
+    @Transactional(readOnly = true)
+    public UUID requireChecksReadableBy(UUID articleId, String language, UUID revisionId, UUID callerUserId,
+            boolean isCallerModerator) {
+        ArticleRevision revision = getRevisionScoped(articleId, language, revisionId);
+        if (!isReadableBy(revision, callerUserId, isCallerModerator)) {
+            throw new RevisionNotFoundException();
+        }
+        if (!isCallerModerator) {
+            requireAuthor(revision, callerUserId);
+        }
+        return revision.getId();
+    }
+
     // The write half of the same boundary: moderation decides the outcome, this package
     // applies it. Called only from ModerationService, and only with APPROVED, REJECTED or
     // CHANGES_REQUESTED -- a decision can never produce DRAFT or PENDING.

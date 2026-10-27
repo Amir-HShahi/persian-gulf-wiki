@@ -20,6 +20,10 @@ import java.util.UUID;
 // @TransactionalEventListener(AFTER_COMMIT): that would let a revision go PENDING with no
 // task, permanently invisible to the moderator queue, if the listener then failed.
 //
+// A second listener, RevisionCheckService, queues the revision's advisory text and dead-link
+// checks the same way and for the same reason: the jobs commit with the PENDING status or not
+// at all.
+//
 // Spring's event publishing is used only for this and MediaVersionAwaitingReviewEvent, which
 // solves the same problem for media. It is a deliberate exception for a cross-feature
 // notification, not a pattern to reach for inside a single feature -- a direct method call is

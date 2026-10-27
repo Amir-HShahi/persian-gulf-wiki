@@ -44,7 +44,7 @@ app:
     public-base-url: http://localhost/test-media/public
     path-style: true
   # Short, so a test that writes a finished job can simply wait for it to be applied; tests may
-  # also call MediaResultPollJob.poll directly.
+  # also call MediaResultPollJob.poll / RevisionCheckPollJob.poll directly.
   job-queue:
     result-poll-interval-seconds: 1
   media:

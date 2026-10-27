@@ -107,8 +107,9 @@ app:
     public-base-url: ${STORAGE_PUBLIC_BASE_URL}
     # true for MinIO (bucket in the path); false for AWS S3's virtual-hosted style.
     path-style: ${STORAGE_PATH_STYLE}
-  # The submission-pipeline worker's Postgres jobs table (V37). Core inserts gallery jobs into it
-  # and polls it this often for finished ones (MediaResultPollJob); see docs/MEDIA_PIPELINE.md.
+  # The submission-pipeline worker's Postgres jobs table (V37). Core inserts gallery and revision
+  # check jobs into it and polls it this often for finished ones (MediaResultPollJob,
+  # RevisionCheckPollJob); see docs/MEDIA_PIPELINE.md.
   job-queue:
     result-poll-interval-seconds: 5
   media:
