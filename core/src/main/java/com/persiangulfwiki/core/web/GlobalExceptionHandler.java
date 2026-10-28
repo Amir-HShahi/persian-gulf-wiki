@@ -19,6 +19,7 @@ import com.persiangulfwiki.core.dev.exception.DevTestAttributeGroupInUseExceptio
 import com.persiangulfwiki.core.dev.exception.DevDemoContentBusyException;
 import com.persiangulfwiki.core.dev.exception.DevTestMainArticleTakenException;
 import com.persiangulfwiki.core.dev.exception.DevTestMediaJobNotPendingException;
+import com.persiangulfwiki.core.dev.exception.DevTestRevisionCheckExistsException;
 import com.persiangulfwiki.core.dev.exception.DevTestSubjectRevisionLiveException;
 import com.persiangulfwiki.core.dev.exception.DevTestTopicInUseException;
 import com.persiangulfwiki.core.label.exception.InvalidLabelReferentException;
@@ -43,6 +44,7 @@ import com.persiangulfwiki.core.common.exception.TooManyRequestsException;
 import com.persiangulfwiki.core.dev.exception.InvalidDevTestArticleRequestException;
 import com.persiangulfwiki.core.dev.exception.InvalidDevTestMarineRequestException;
 import com.persiangulfwiki.core.dev.exception.InvalidDevTestMediaRequestException;
+import com.persiangulfwiki.core.dev.exception.InvalidDevTestRevisionCheckRequestException;
 import com.persiangulfwiki.core.marinedata.exception.InvalidMarineSeriesRangeException;
 import com.persiangulfwiki.core.marinedata.exception.MarineMetricNotFoundException;
 import com.persiangulfwiki.core.marinedata.exception.MarineStationNotFoundException;
@@ -85,6 +87,7 @@ import com.persiangulfwiki.core.expertreviewer.exception.DuplicatePendingApplica
 import com.persiangulfwiki.core.expertreviewer.exception.InvalidApplicationStatusException;
 import com.persiangulfwiki.core.oauth2.exception.PasswordAlreadySetException;
 import com.persiangulfwiki.core.password.exception.InvalidPasswordResetTokenException;
+import com.persiangulfwiki.core.revisioncheck.exception.RevisionCheckNotFoundException;
 import com.persiangulfwiki.core.source.exception.SourceNotFoundException;
 import com.persiangulfwiki.core.subject.exception.ExpertVerificationNotFoundException;
 import com.persiangulfwiki.core.subject.exception.InvalidMergeTargetException;
@@ -766,6 +769,26 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DevTestMediaJobNotPendingException.class)
     public ProblemDetail handleDevTestMediaJobNotPending(DevTestMediaJobNotPendingException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestMediaJobNotPending"), "DEV_TEST_MEDIA_JOB_NOT_PENDING", request);
+    }
+
+    @ExceptionHandler(InvalidDevTestRevisionCheckRequestException.class)
+    public ProblemDetail handleInvalidDevTestRevisionCheckRequest(InvalidDevTestRevisionCheckRequestException ex,
+            HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidDevTestRevisionCheckRequest"),
+                "INVALID_DEV_TEST_REVISION_CHECK_REQUEST", request);
+    }
+
+    @ExceptionHandler(DevTestRevisionCheckExistsException.class)
+    public ProblemDetail handleDevTestRevisionCheckExists(DevTestRevisionCheckExistsException ex,
+            HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestRevisionCheckExists"),
+                "DEV_TEST_REVISION_CHECK_EXISTS", request);
+    }
+
+    @ExceptionHandler(RevisionCheckNotFoundException.class)
+    public ProblemDetail handleRevisionCheckNotFound(RevisionCheckNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.revisionCheckNotFound"), "REVISION_CHECK_NOT_FOUND",
+                request);
     }
 
     @ExceptionHandler(InvalidDevTestMarineRequestException.class)
