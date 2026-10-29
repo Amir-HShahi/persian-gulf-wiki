@@ -45,6 +45,8 @@ class OpenApiDevDocsIntegrationTests {
                 "Labels", "Dev Test Labels",
                 "Sources", "Dev Test Sources",
                 "Articles", "Dev Test Articles",
+                "Revision Checks", "Dev Test Revision Checks",
+                "Search",
                 "Featured Articles", "Dev Test Featured Articles",
                 "Article Media", "Dev Test Media",
                 "Topics", "Dev Test Topics",

@@ -135,7 +135,8 @@ class OpenApiDocsIntegrationTests {
                 "User", "Profiles", "Admin", "Expert Reviewer", "Subjects", "Subject Revisions",
                 "Expert Verifications", "Attributes",
                 "Labels",
-                "Sources", "Articles", "Featured Articles", "Article Media", "Topics", "Moderation",
+                "Sources", "Articles", "Revision Checks", "Search", "Featured Articles", "Article Media", "Topics",
+                "Moderation",
                 "Marine Data");
     }
 
