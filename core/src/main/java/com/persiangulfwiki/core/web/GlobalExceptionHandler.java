@@ -88,6 +88,7 @@ import com.persiangulfwiki.core.expertreviewer.exception.InvalidApplicationStatu
 import com.persiangulfwiki.core.oauth2.exception.PasswordAlreadySetException;
 import com.persiangulfwiki.core.password.exception.InvalidPasswordResetTokenException;
 import com.persiangulfwiki.core.revisioncheck.exception.RevisionCheckNotFoundException;
+import com.persiangulfwiki.core.search.exception.SearchRateLimitedException;
 import com.persiangulfwiki.core.source.exception.SourceNotFoundException;
 import com.persiangulfwiki.core.subject.exception.ExpertVerificationNotFoundException;
 import com.persiangulfwiki.core.subject.exception.InvalidMergeTargetException;
@@ -867,6 +868,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ProblemDetail> handleMetadataEditRateLimited(MetadataEditRateLimitedException ex, HttpServletRequest request) {
         return retryAfter(ex, ProblemDetails.of(
                 HttpStatus.TOO_MANY_REQUESTS, resolve("error.metadataEditRateLimited"), "METADATA_EDIT_RATE_LIMITED", request));
+    }
+
+    @ExceptionHandler(SearchRateLimitedException.class)
+    public ResponseEntity<ProblemDetail> handleSearchRateLimited(SearchRateLimitedException ex, HttpServletRequest request) {
+        return retryAfter(ex, ProblemDetails.of(
+                HttpStatus.TOO_MANY_REQUESTS, resolve("error.searchRateLimited"), "SEARCH_RATE_LIMITED", request));
     }
 
     private static ResponseEntity<ProblemDetail> retryAfter(TooManyRequestsException ex, ProblemDetail body) {

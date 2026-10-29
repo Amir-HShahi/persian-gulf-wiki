@@ -47,6 +47,10 @@ app:
   # also call MediaResultPollJob.poll / RevisionCheckPollJob.poll directly.
   job-queue:
     result-poll-interval-seconds: 1
+  search:
+    searches-per-window: 120
+    suggestions-per-window: 600
+    rate-window-seconds: 60
   media:
     processing-timeout-minutes: 60
     upload-url-ttl-minutes: 10

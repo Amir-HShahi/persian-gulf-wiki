@@ -145,6 +145,14 @@ app:
     # How long a FAILED item (and anything it left in storage) survives, so its uploader can
     # still read why it failed.
     failed-grace-days: 7
+  # Public article search (search.SearchService). Anyone may call it, so each client address
+  # (CF-Connecting-IP behind the Cloudflare Tunnel; an IPv6 address counts by its /64) gets a
+  # fixed-window budget per route. Suggestions run on every keystroke, hence the larger budget.
+  # Set with shared addresses in mind: a whole office or carrier-grade NAT can sit behind one.
+  search:
+    searches-per-window: 120
+    suggestions-per-window: 600
+    rate-window-seconds: 60
   # Profile avatars (user.service.AvatarService). Uploaded to the staging bucket like gallery
   # media, then re-encoded in-process and published under the media bucket's public/avatars/.
   avatar:

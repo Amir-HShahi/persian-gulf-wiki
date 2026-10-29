@@ -59,6 +59,7 @@ public class OpenApiConfig {
             "Dev Test Articles",
             "Revision Checks",
             "Dev Test Revision Checks",
+            "Search",
             "Featured Articles",
             "Dev Test Featured Articles",
             "Article Media",

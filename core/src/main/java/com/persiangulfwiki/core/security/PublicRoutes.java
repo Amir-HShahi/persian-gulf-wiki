@@ -51,7 +51,11 @@ public final class PublicRoutes {
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/profiles/**"),
             // Homepage data cards: public provider data with nothing per-user in it.
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/marine-metrics"),
-            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/marine-metrics/**"))));
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/marine-metrics/**"),
+            // Article search: published articles only, the same for every caller, and rate-limited
+            // per client address (SearchRateLimitService) since anyone can call it.
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/search"),
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/search/suggestions"))));
 
     public static final RequestMatcher API_DOCS = new OrRequestMatcher(List.of(
             PathPatternRequestMatcher.withDefaults().matcher("/docs/**"),
