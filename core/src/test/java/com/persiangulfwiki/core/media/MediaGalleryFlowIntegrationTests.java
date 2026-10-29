@@ -9,6 +9,8 @@ import com.persiangulfwiki.core.article.entity.RevisionStatus;
 import com.persiangulfwiki.core.article.service.ArticleRevisionService;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
 import com.persiangulfwiki.core.auth.dto.RegisterRequest;
+import com.persiangulfwiki.core.jobqueue.JobQueueTestSupport;
+import com.persiangulfwiki.core.jobqueue.entity.QueueJob;
 import com.persiangulfwiki.core.media.entity.ArticleMedia;
 import com.persiangulfwiki.core.media.entity.MediaKind;
 import com.persiangulfwiki.core.media.entity.MediaMetadataVersion;
@@ -17,7 +19,6 @@ import com.persiangulfwiki.core.media.entity.MetadataVersionStatus;
 import com.persiangulfwiki.core.media.entity.PanoramaLink;
 import com.persiangulfwiki.core.media.entity.ProcessingStatus;
 import com.persiangulfwiki.core.media.entity.PublicationStatus;
-import com.persiangulfwiki.core.media.pipeline.MediaResultConsumer;
 import com.persiangulfwiki.core.media.repository.ArticleMediaRepository;
 import com.persiangulfwiki.core.media.repository.MediaMetadataVersionRepository;
 import com.persiangulfwiki.core.media.repository.PanoramaLinkRepository;
@@ -41,11 +42,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.redis.connection.stream.MapRecord;
-import org.springframework.data.redis.connection.stream.StreamOffset;
-import org.springframework.data.redis.connection.stream.StreamRecords;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -88,8 +86,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 // public list, the single-item read with signed URLs for a not-yet-public item, the moderator's
 // task detail, and approval copying the files to their public keys.
 //
-// The headline flow drives a real upload to READY (the worker's result written onto the results
-// stream by hand, as in MediaProcessingFlowIntegrationTests) with real variant objects in the
+// The headline flow drives a real upload to READY (the worker's result written onto its jobs row
+// by hand, as in MediaProcessingFlowIntegrationTests) with real variant objects in the
 // media bucket, so both the signed and the public URLs point at bytes that exist. The link and
 // paging cases seed rows directly: they are about which rows are shown, not about bytes.
 @Import(TestcontainersConfiguration.class)
@@ -132,7 +130,10 @@ class MediaGalleryFlowIntegrationTests {
     private ArticleRevisionService articleRevisionService;
 
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private MediaResultPollJob mediaResultPollJob;
 
     @Autowired
     private S3Client s3Client;
@@ -142,12 +143,6 @@ class MediaGalleryFlowIntegrationTests {
 
     @Value("${app.storage.public-base-url}")
     private String publicBaseUrl;
-
-    @Value("${app.media.job-stream}")
-    private String jobStream;
-
-    @Value("${app.media.result-stream}")
-    private String resultStream;
 
     // --- Account / article helpers ---
 
@@ -254,17 +249,8 @@ class MediaGalleryFlowIntegrationTests {
         return mediaId;
     }
 
-    private String jobIdFor(UUID mediaId) {
-        // read(...) takes generic varargs and is not @SafeVarargs; the array holds one offset.
-        @SuppressWarnings("unchecked")
-        List<MapRecord<String, Object, Object>> jobs = redisTemplate.opsForStream().read(StreamOffset.fromStart(jobStream));
-        return jobs.stream()
-                .filter(record -> mediaId.toString().equals(record.getValue().get("submission_id")))
-                .map(record -> (String) record.getValue().get("job_id"))
-                .findFirst().orElseThrow();
-    }
-
-    // Plays the worker: writes the variant object (unless told not to) and reports it.
+    // Plays the worker: writes the variant object (unless told not to), finishes the item's jobs
+    // row with the result, and runs the result poll.
     private void processToReady(UUID mediaId, byte[] file, byte[] variantBytes, boolean isVariantStored)
             throws Exception {
         String key = MediaProcessingService.pendingVariantPrefix(mediaId) + "640.webp";
@@ -272,22 +258,20 @@ class MediaGalleryFlowIntegrationTests {
             s3Client.putObject(PutObjectRequest.builder().bucket(mediaBucket).key(key).contentType("image/webp").build(),
                     RequestBody.fromBytes(variantBytes));
         }
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("version", 1);
-        result.put("job_id", jobIdFor(mediaId));
-        result.put("submission_id", mediaId.toString());
-        result.put("type", "media.image");
-        result.put("status", "ok");
-        result.put("attempt", 1);
-        result.put("media", Map.of(
+        Long jobId = JobQueueTestSupport.processingJobIdOf(jdbcTemplate, mediaId);
+        assertThat(jobId).isNotNull();
+        Map<String, Object> result = JobQueueTestSupport.envelope(jobId, "image", "ok");
+        result.put("image", Map.of(
                 "sha256", sha256(file),
                 "width", 4000,
                 "height", 3000,
+                "format", "jpeg",
                 "placeholder", PLACEHOLDER,
-                "variants", List.of(Map.of("size", "640", "format", "webp", "key", key,
+                "variants", List.of(Map.of("label", "640", "format", "webp", "key", key,
                         "bytes", variantBytes.length, "width", 640, "height", 480))));
-        redisTemplate.opsForStream().add(StreamRecords.string(
-                Map.of(MediaResultConsumer.RESULT_FIELD, objectMapper.writeValueAsString(result))).withStreamKey(resultStream));
+        JobQueueTestSupport.finish(jdbcTemplate, jobId, QueueJob.STATUS_DONE, objectMapper.writeValueAsString(result),
+                null);
+        mediaResultPollJob.poll();
         await().atMost(APPLIED_WITHIN).until(() ->
                 articleMediaRepository.findById(mediaId).orElseThrow().getProcessingStatus() == ProcessingStatus.READY);
     }
@@ -443,7 +427,10 @@ class MediaGalleryFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.mediaReview.descriptions.fa").value("طلوع بر فراز تنگه"))
                 .andExpect(jsonPath("$.data.mediaReview.links", hasSize(0)))
                 // Never approved: nothing current to compare against.
-                .andExpect(jsonPath("$.data.mediaReview.current").value(nullValue()));
+                .andExpect(jsonPath("$.data.mediaReview.current").value(nullValue()))
+                // The file claimed nothing about its author, and a media task has no revision checks.
+                .andExpect(jsonPath("$.data.mediaReview.fileAttribution").value(nullValue()))
+                .andExpect(jsonPath("$.data.revisionChecks").value(nullValue()));
 
         claim(moderator, task.getId());
         mockMvc.perform(post("/api/moderation/tasks/" + task.getId() + "/decide")

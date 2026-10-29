@@ -7,6 +7,8 @@ import com.persiangulfwiki.core.TestcontainersConfiguration;
 import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
 import com.persiangulfwiki.core.auth.dto.RegisterRequest;
+import com.persiangulfwiki.core.jobqueue.JobQueueTestSupport;
+import com.persiangulfwiki.core.jobqueue.JobQueueTestSupport.QueuedJob;
 import com.persiangulfwiki.core.media.entity.ArticleMedia;
 import com.persiangulfwiki.core.media.entity.HeadingReference;
 import com.persiangulfwiki.core.media.entity.MediaKind;
@@ -18,6 +20,8 @@ import com.persiangulfwiki.core.media.entity.PublicationStatus;
 import com.persiangulfwiki.core.media.repository.ArticleMediaRepository;
 import com.persiangulfwiki.core.media.repository.MediaDescriptionRepository;
 import com.persiangulfwiki.core.media.repository.MediaMetadataVersionRepository;
+import com.persiangulfwiki.core.media.service.MediaProcessingService;
+import com.persiangulfwiki.core.media.service.MediaUploadService;
 import com.persiangulfwiki.core.user.entity.User;
 import com.persiangulfwiki.core.user.repository.UserRepository;
 
@@ -28,12 +32,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.redis.connection.stream.MapRecord;
-import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -106,6 +110,21 @@ class MediaUploadFlowIntegrationTests {
     private StringRedisTemplate redisTemplate;
 
     @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
+    @Autowired
+    private MediaUploadService mediaUploadService;
+
+    @Autowired
+    private MediaProcessingService mediaProcessingService;
+
+    @Autowired
+    private MediaResultPollJob mediaResultPollJob;
+
+    @Autowired
     private S3Client s3Client;
 
     @Autowired
@@ -113,9 +132,6 @@ class MediaUploadFlowIntegrationTests {
 
     @Value("${app.storage.staging-bucket}")
     private String stagingBucket;
-
-    @Value("${app.media.job-stream}")
-    private String jobStream;
 
     @Value("${app.media.reservations-per-window}")
     private long reservationsPerWindow;
@@ -233,13 +249,8 @@ class MediaUploadFlowIntegrationTests {
         }
     }
 
-    private List<MapRecord<String, Object, Object>> jobsFor(UUID mediaId) {
-        // read(...) takes generic varargs and is not @SafeVarargs; the array holds one offset.
-        @SuppressWarnings("unchecked")
-        List<MapRecord<String, Object, Object>> all = redisTemplate.opsForStream().read(StreamOffset.fromStart(jobStream));
-        return all == null ? List.of() : all.stream()
-                .filter(record -> mediaId.toString().equals(record.getValue().get("submission_id")))
-                .toList();
+    private List<QueuedJob> jobsFor(UUID mediaId) {
+        return JobQueueTestSupport.jobsForMedia(jdbcTemplate, mediaId);
     }
 
     // Seeds an item straight into the table for the limit tests, which need an account that is
@@ -323,20 +334,22 @@ class MediaUploadFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.publicationStatus").value("PENDING"))
                 .andExpect(jsonPath("$.data.failureCode").value(nullValue()));
 
-        // One job, carrying the contract fields the worker reads.
-        List<MapRecord<String, Object, Object>> jobs = jobsFor(reservation.mediaId());
+        // One pending jobs row, carrying the payload fields the worker reads, and nothing parked:
+        // the worker may claim it as soon as the transaction commits.
+        List<QueuedJob> jobs = jobsFor(reservation.mediaId());
         assertThat(jobs).hasSize(1);
-        assertThat(jobs.getFirst().getValue())
-                .containsEntry("version", "1")
-                .containsEntry("type", "media.image")
-                .containsEntry("object_key", reservation.mediaId().toString())
-                .containsEntry("content_type", "image/jpeg")
-                .containsEntry("declared_bytes", String.valueOf(file.length))
-                .containsEntry("declared_sha256", sha256(file))
-                .containsKey("job_id");
-        // The item holds the job it now waits on; results are matched against it.
-        assertThat(articleMediaRepository.findById(reservation.mediaId()).orElseThrow().getProcessingJobId())
-                .hasToString((String) jobs.getFirst().getValue().get("job_id"));
+        QueuedJob job = jobs.getFirst();
+        assertThat(job.type()).isEqualTo("image");
+        assertThat(job.status()).isEqualTo("pending");
+        assertThat((String) JsonPath.read(job.payload(), "$.object_key")).isEqualTo(reservation.mediaId().toString());
+        assertThat((String) JsonPath.read(job.payload(), "$.content_type")).isEqualTo("image/jpeg");
+        assertThat((Integer) JsonPath.read(job.payload(), "$.declared_bytes")).isEqualTo(file.length);
+        assertThat((String) JsonPath.read(job.payload(), "$.declared_sha256")).isEqualTo(sha256(file));
+        assertThat(jdbcTemplate.queryForObject("select run_after <= now() from jobs where id = ?", Boolean.class,
+                job.id())).isTrue();
+        // The item holds the job it now waits on; the result poll joins on it.
+        assertThat(articleMediaRepository.findById(reservation.mediaId()).orElseThrow().getProcessingQueueJobId())
+                .isEqualTo(job.id());
 
         // The uploader can poll it; a second /complete is refused rather than re-queued.
         mockMvc.perform(get("/api/articles/" + articleId + "/media/" + reservation.mediaId())
@@ -347,6 +360,114 @@ class MediaUploadFlowIntegrationTests {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("MEDIA_NOT_AWAITING_UPLOAD"));
         assertThat(jobsFor(reservation.mediaId())).hasSize(1);
+    }
+
+    // The job row is the queue: it must commit with the item's move to PROCESSING or not at all,
+    // or the worker could process an item core still thinks is UPLOADING (or never hear of one
+    // that is PROCESSING). Driven inside an outer transaction that is then rolled back, which
+    // complete joins.
+    @Test
+    void completeQueuesItsJobInTheSameTransactionSoARollbackLeavesNoJob() throws Exception {
+        Account uploader = verifiedAccount();
+        UUID articleId = createArticle(uploader);
+        byte[] file = randomFile(1024);
+        Reservation reservation = reserve(uploader, articleId, file);
+        assertThat(putToStorage(reservation, file).statusCode()).isEqualTo(200);
+
+        transactionTemplate.executeWithoutResult(transaction -> {
+            mediaUploadService.complete(uploader.userId(), articleId, reservation.mediaId());
+            assertThat(jobsFor(reservation.mediaId())).hasSize(1);
+            transaction.setRollbackOnly();
+        });
+        assertThat(jobsFor(reservation.mediaId())).isEmpty();
+        ArticleMedia untouched = articleMediaRepository.findById(reservation.mediaId()).orElseThrow();
+        assertThat(untouched.getProcessingStatus()).isEqualTo(ProcessingStatus.UPLOADING);
+        assertThat(untouched.getProcessingQueueJobId()).isNull();
+
+        // Nothing was lost: the real call still works, once.
+        complete(uploader, articleId, reservation.mediaId())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.processingStatus").value("PROCESSING"));
+        assertThat(jobsFor(reservation.mediaId())).singleElement()
+                .satisfies(job -> assertThat(job.id())
+                        .isEqualTo(articleMediaRepository.findById(reservation.mediaId()).orElseThrow()
+                                .getProcessingQueueJobId()));
+    }
+
+    // HEIC (what an iPhone uploads by default) and AVIF are accepted for both image kinds now
+    // that the worker decodes them; a panorama is queued as a panorama job.
+    @Test
+    void heicAndAvifAreAcceptedForImagesAndPanoramasAndAPanoramaQueuesAPanoramaJob() throws Exception {
+        Account uploader = verifiedAccount();
+        UUID articleId = createArticle(uploader);
+        byte[] avif = randomFile(512);
+        reserveRaw(uploader, articleId, reserveBody("IMAGE", "image/avif", avif.length, sha256(avif), null))
+                .andExpect(status().isCreated());
+        byte[] heicImage = randomFile(640);
+        reserveRaw(uploader, articleId, reserveBody("IMAGE", "IMAGE/HEIC", heicImage.length, sha256(heicImage), null))
+                .andExpect(status().isCreated());
+
+        byte[] panorama = randomFile(2048);
+        String response = reserveRaw(uploader, articleId,
+                        reserveBody("PANORAMA_360", "image/heic", panorama.length, sha256(panorama), null))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        Reservation reservation = new Reservation(UUID.fromString(JsonPath.read(response, "$.data.mediaId")),
+                JsonPath.read(response, "$.data.uploadUrl"), JsonPath.read(response, "$.data.requiredHeaders"));
+        assertThat(reservation.requiredHeaders()).containsEntry("content-type", "image/heic");
+        assertThat(putToStorage(reservation, panorama).statusCode()).isEqualTo(200);
+        complete(uploader, articleId, reservation.mediaId())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.processingStatus").value("PROCESSING"));
+        assertThat(jobsFor(reservation.mediaId())).singleElement().satisfies(job -> {
+            assertThat(job.type()).isEqualTo("panorama");
+            assertThat((String) JsonPath.read(job.payload(), "$.content_type")).isEqualTo("image/heic");
+        });
+
+        // The lists are per kind, and still closed.
+        String sha = sha256(randomFile(8));
+        for (String refused : List.of("image/tiff", "image/svg+xml", "image/heif")) {
+            reserveRaw(uploader, articleId, reserveBody("IMAGE", refused, 100, sha, null))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("UNSUPPORTED_MEDIA_CONTENT_TYPE"));
+        }
+        reserveRaw(uploader, articleId, reserveBody("VIDEO", "image/heic", 100, sha, null))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("UNSUPPORTED_MEDIA_CONTENT_TYPE"));
+    }
+
+    // The worker has no video handler, so a video is queued nowhere (a job it cannot run would be
+    // parked as failed and read as a broken file). It stays PROCESSING, untouched by the result
+    // poll, until the stuck-processing sweep times it out.
+    @Test
+    void videoCompleteQueuesNothingAndStaysProcessingUntilTheStuckSweepTimesItOut() throws Exception {
+        Account uploader = verifiedAccount();
+        UUID articleId = createArticle(uploader);
+        byte[] video = randomFile(4096);
+        String response = reserveRaw(uploader, articleId,
+                        reserveBody("VIDEO", "video/mp4", video.length, sha256(video), null))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        Reservation reservation = new Reservation(UUID.fromString(JsonPath.read(response, "$.data.mediaId")),
+                JsonPath.read(response, "$.data.uploadUrl"), JsonPath.read(response, "$.data.requiredHeaders"));
+        assertThat(putToStorage(reservation, video).statusCode()).isEqualTo(200);
+
+        complete(uploader, articleId, reservation.mediaId())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.processingStatus").value("PROCESSING"));
+        assertThat(jobsFor(reservation.mediaId())).isEmpty();
+        assertThat(articleMediaRepository.findById(reservation.mediaId()).orElseThrow().getProcessingQueueJobId())
+                .isNull();
+        mediaResultPollJob.poll();
+        assertThat(articleMediaRepository.findById(reservation.mediaId()).orElseThrow().getProcessingStatus())
+                .isEqualTo(ProcessingStatus.PROCESSING);
+
+        assertThat(mediaProcessingService.failStuckProcessing(Instant.now().plusSeconds(1))).isPositive();
+        mockMvc.perform(get("/api/articles/" + articleId + "/media/" + reservation.mediaId())
+                        .cookie(uploader.accessCookie()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.processingStatus").value("FAILED"))
+                .andExpect(jsonPath("$.data.failureCode").value("processing_timeout"));
     }
 
     // The store, not the API, is what refuses a different file: the checksum is signed into the
@@ -384,7 +505,7 @@ class MediaUploadFlowIntegrationTests {
                         .value("فایلی برای این رسانه دریافت نشد. لطفاً فایل را مجدداً بارگذاری فرمایید"));
         assertThat(jobsFor(reservation.mediaId())).isEmpty();
         // Never queued, so no job for a result to be matched against.
-        assertThat(articleMediaRepository.findById(reservation.mediaId()).orElseThrow().getProcessingJobId()).isNull();
+        assertThat(articleMediaRepository.findById(reservation.mediaId()).orElseThrow().getProcessingQueueJobId()).isNull();
     }
 
     // A size mismatch cannot get past the presigned PUT, so the object is planted directly -- the

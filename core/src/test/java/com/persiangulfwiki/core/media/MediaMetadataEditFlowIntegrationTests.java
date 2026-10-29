@@ -9,6 +9,8 @@ import com.persiangulfwiki.core.article.entity.RevisionStatus;
 import com.persiangulfwiki.core.article.service.ArticleRevisionService;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
 import com.persiangulfwiki.core.auth.dto.RegisterRequest;
+import com.persiangulfwiki.core.jobqueue.JobQueueTestSupport;
+import com.persiangulfwiki.core.jobqueue.entity.QueueJob;
 import com.persiangulfwiki.core.media.entity.ArticleMedia;
 import com.persiangulfwiki.core.media.entity.MediaDescription;
 import com.persiangulfwiki.core.media.entity.MediaKind;
@@ -17,7 +19,6 @@ import com.persiangulfwiki.core.media.entity.MediaVariant;
 import com.persiangulfwiki.core.media.entity.MetadataVersionStatus;
 import com.persiangulfwiki.core.media.entity.ProcessingStatus;
 import com.persiangulfwiki.core.media.entity.PublicationStatus;
-import com.persiangulfwiki.core.media.pipeline.MediaResultConsumer;
 import com.persiangulfwiki.core.media.repository.ArticleMediaRepository;
 import com.persiangulfwiki.core.media.repository.MediaDescriptionRepository;
 import com.persiangulfwiki.core.media.repository.MediaMetadataVersionRepository;
@@ -44,11 +45,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.redis.connection.stream.MapRecord;
-import org.springframework.data.redis.connection.stream.StreamOffset;
-import org.springframework.data.redis.connection.stream.StreamRecords;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -143,19 +141,16 @@ class MediaMetadataEditFlowIntegrationTests {
     private ArticleRevisionService articleRevisionService;
 
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private MediaResultPollJob mediaResultPollJob;
 
     @Autowired
     private S3Client s3Client;
 
     @Value("${app.storage.media-bucket}")
     private String mediaBucket;
-
-    @Value("${app.media.job-stream}")
-    private String jobStream;
-
-    @Value("${app.media.result-stream}")
-    private String resultStream;
 
     @Value("${app.media.max-pending-edits-per-user}")
     private int maxPendingEdits;
@@ -397,38 +392,27 @@ class MediaMetadataEditFlowIntegrationTests {
         return mediaId;
     }
 
-    private String jobIdFor(UUID mediaId) {
-        // read(...) takes generic varargs and is not @SafeVarargs; the array holds one offset.
-        @SuppressWarnings("unchecked")
-        List<MapRecord<String, Object, Object>> jobs = redisTemplate.opsForStream().read(StreamOffset.fromStart(jobStream));
-        return jobs.stream()
-                .filter(record -> mediaId.toString().equals(record.getValue().get("submission_id")))
-                .map(record -> (String) record.getValue().get("job_id"))
-                .findFirst().orElseThrow();
-    }
-
-    // Plays the worker: stores the variant and reports it on the results stream.
+    // Plays the worker: stores the variant, finishes the item's jobs row with the result, and runs
+    // the result poll.
     private void processToReady(UUID mediaId, byte[] file) throws Exception {
         byte[] variant = randomBytes(256);
         String key = MediaProcessingService.pendingVariantPrefix(mediaId) + "640.webp";
         s3Client.putObject(PutObjectRequest.builder().bucket(mediaBucket).key(key).contentType("image/webp").build(),
                 RequestBody.fromBytes(variant));
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("version", 1);
-        result.put("job_id", jobIdFor(mediaId));
-        result.put("submission_id", mediaId.toString());
-        result.put("type", "media.image");
-        result.put("status", "ok");
-        result.put("attempt", 1);
-        result.put("media", Map.of(
+        Long jobId = JobQueueTestSupport.processingJobIdOf(jdbcTemplate, mediaId);
+        assertThat(jobId).isNotNull();
+        Map<String, Object> result = JobQueueTestSupport.envelope(jobId, "image", "ok");
+        result.put("image", Map.of(
                 "sha256", sha256(file),
                 "width", 4000,
                 "height", 3000,
+                "format", "jpeg",
                 "placeholder", PLACEHOLDER,
-                "variants", List.of(Map.of("size", "640", "format", "webp", "key", key,
+                "variants", List.of(Map.of("label", "640", "format", "webp", "key", key,
                         "bytes", variant.length, "width", 640, "height", 480))));
-        redisTemplate.opsForStream().add(StreamRecords.string(
-                Map.of(MediaResultConsumer.RESULT_FIELD, objectMapper.writeValueAsString(result))).withStreamKey(resultStream));
+        JobQueueTestSupport.finish(jdbcTemplate, jobId, QueueJob.STATUS_DONE, objectMapper.writeValueAsString(result),
+                null);
+        mediaResultPollJob.poll();
         await().atMost(APPLIED_WITHIN).until(() ->
                 articleMediaRepository.findById(mediaId).orElseThrow().getProcessingStatus() == ProcessingStatus.READY);
     }
