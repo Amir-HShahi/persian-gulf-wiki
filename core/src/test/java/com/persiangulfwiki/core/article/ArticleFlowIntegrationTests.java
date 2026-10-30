@@ -19,6 +19,8 @@ import com.persiangulfwiki.core.auth.dto.RegisterRequest;
 import com.persiangulfwiki.core.security.JwtService;
 import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
+import com.persiangulfwiki.core.subject.entity.SubjectRedirect;
+import com.persiangulfwiki.core.subject.repository.SubjectRedirectRepository;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 import com.persiangulfwiki.core.user.entity.Role;
 import com.persiangulfwiki.core.user.entity.User;
@@ -48,6 +50,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.nullValue;
 import static com.persiangulfwiki.core.CsrfTestSupport.xsrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -99,6 +102,9 @@ class ArticleFlowIntegrationTests {
 
     @Autowired
     private SubjectRepository subjectRepository;
+
+    @Autowired
+    private SubjectRedirectRepository subjectRedirectRepository;
 
     private void registerContributor(String username, String email) throws Exception {
         RegisterRequest register = new RegisterRequest(username, email, PASSWORD);
@@ -330,6 +336,101 @@ class ArticleFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.items.length()").value(1))
                 .andExpect(jsonPath("$.data.items[0].id").value(islandArticle.toString()))
                 .andExpect(jsonPath("$.data.total").value(3));
+    }
+
+    // Repeated subjectId params match any of them, and still AND with subjectKind; a single id, the
+    // shape every existing client sends, keeps filtering on just that subject.
+    @Test
+    void listFilterBySeveralSubjectsMatchesAnyOfThemAndStillNarrowsByKind() throws Exception {
+        UUID islandId = createSubject(SubjectKind.ISLAND);
+        UUID portId = createSubject(SubjectKind.PORT);
+        UUID otherIslandId = createSubject(SubjectKind.ISLAND);
+
+        registerVerifiedContributor("afmulti1", "af-multi1@example.com");
+        Cookie accessCookie = loginAccessCookie("af-multi1@example.com");
+        Cookie csrfCookie = fetchCsrfCookie();
+        String language = "zz-" + UUID.randomUUID().toString().substring(0, 8);
+
+        UUID islandArticle = createApprovedArticle(islandId, language, accessCookie, csrfCookie);
+        UUID portArticle = createApprovedArticle(portId, language, accessCookie, csrfCookie);
+        createApprovedArticle(otherIslandId, language, accessCookie, csrfCookie);
+        createApprovedArticle(null, language, accessCookie, csrfCookie);
+
+        mockMvc.perform(get("/api/articles").param("language", language)
+                        .param("subjectId", islandId.toString(), portId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(2))
+                .andExpect(jsonPath("$.data.items[*].id")
+                        .value(containsInAnyOrder(islandArticle.toString(), portArticle.toString())));
+
+        mockMvc.perform(get("/api/articles").param("language", language)
+                        .param("subjectId", islandId.toString(), portId.toString()).param("subjectKind", "PORT"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(1))
+                .andExpect(jsonPath("$.data.items[0].id").value(portArticle.toString()));
+
+        // Regression: one id still means just that subject; no id still means every article.
+        mockMvc.perform(get("/api/articles").param("language", language).param("subjectId", islandId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(1))
+                .andExpect(jsonPath("$.data.items[0].id").value(islandArticle.toString()));
+        mockMvc.perform(get("/api/articles").param("language", language))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(4));
+    }
+
+    // A merged-away id and its target both lead to the target's articles, which are listed once.
+    @Test
+    void listFilterByMergedSubjectAndItsTargetListsEachArticleOnce() throws Exception {
+        UUID targetId = createIslandSubject();
+        Subject source = subjectRepository.save(Subject.builder().kind(SubjectKind.ISLAND).build());
+        source.setDeletedAt(Instant.now());
+        subjectRepository.save(source);
+        subjectRedirectRepository.save(SubjectRedirect.builder().sourceId(source.getId()).targetId(targetId).build());
+
+        registerVerifiedContributor("afmulti2", "af-multi2@example.com");
+        Cookie accessCookie = loginAccessCookie("af-multi2@example.com");
+        Cookie csrfCookie = fetchCsrfCookie();
+        String language = "zz-" + UUID.randomUUID().toString().substring(0, 8);
+        UUID article = createApprovedArticle(targetId, language, accessCookie, csrfCookie);
+
+        mockMvc.perform(get("/api/articles").param("language", language)
+                        .param("subjectId", source.getId().toString(), targetId.toString(), targetId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.total").value(1))
+                .andExpect(jsonPath("$.data.items.length()").value(1))
+                .andExpect(jsonPath("$.data.items[0].id").value(article.toString()));
+        mockMvc.perform(get("/api/articles").param("language", language).param("subjectId", source.getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items[0].id").value(article.toString()));
+    }
+
+    // Any id naming no subject, or a deleted one nothing was merged into, fails the whole request.
+    @Test
+    void listFilterWithUnknownOrDeletedSubjectIsNotFound() throws Exception {
+        UUID liveId = createIslandSubject();
+        Subject deleted = subjectRepository.save(Subject.builder().kind(SubjectKind.ISLAND).build());
+        deleted.setDeletedAt(Instant.now());
+        subjectRepository.save(deleted);
+
+        for (UUID bad : List.of(UUID.randomUUID(), deleted.getId())) {
+            mockMvc.perform(get("/api/articles").param("language", "fa")
+                            .param("subjectId", liveId.toString(), bad.toString()))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value("SUBJECT_NOT_FOUND"));
+        }
+    }
+
+    @Test
+    void listFilterWithTooManyOrMalformedSubjectIdsIsRejected() throws Exception {
+        String[] tooMany = new String[21];
+        Arrays.setAll(tooMany, _ -> UUID.randomUUID().toString());
+        mockMvc.perform(get("/api/articles").param("language", "fa").param("subjectId", tooMany))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"));
+
+        mockMvc.perform(get("/api/articles").param("language", "fa").param("subjectId", "not-a-uuid"))
+                .andExpect(status().isBadRequest());
     }
 
     private UUID createApprovedArticle(@Nullable UUID subjectId, String language, Cookie accessCookie,
