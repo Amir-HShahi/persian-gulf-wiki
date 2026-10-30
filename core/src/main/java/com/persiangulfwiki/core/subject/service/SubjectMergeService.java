@@ -4,7 +4,6 @@ import com.persiangulfwiki.core.article.service.SubjectArticleService;
 import com.persiangulfwiki.core.attribute.entity.AttributeDefinition;
 import com.persiangulfwiki.core.attribute.repository.AttributeDefinitionRepository;
 import com.persiangulfwiki.core.audit.service.AuditLogService;
-import com.persiangulfwiki.core.media.service.MediaReadService;
 import com.persiangulfwiki.core.subject.dto.SubjectMergeResponse;
 import com.persiangulfwiki.core.subject.dto.SubjectPayloadRequest;
 import com.persiangulfwiki.core.subject.entity.Subject;
@@ -58,7 +57,7 @@ public class SubjectMergeService {
     private final AttributeDefinitionRepository attributeDefinitionRepository;
     private final SubjectRevisionService subjectRevisionService;
     private final SubjectArticleService subjectArticleService;
-    private final MediaReadService mediaReadService;
+    private final SubjectMainImageService subjectMainImageService;
     private final SubjectInfoboxCacheService subjectInfoboxCacheService;
     private final AuditLogService auditLogService;
 
@@ -142,7 +141,7 @@ public class SubjectMergeService {
             SubjectPayloadRequest sourcePayload) {
         return Stream.of(targetPayload.mainImageMediaId(), sourcePayload.mainImageMediaId())
                 .filter(Objects::nonNull)
-                .filter(mediaId -> mediaReadService.isPublishedImageOfSubject(mediaId, targetId))
+                .filter(mediaId -> subjectMainImageService.isPublishedImageOfSubject(mediaId, targetId))
                 .findFirst()
                 .orElse(null);
     }

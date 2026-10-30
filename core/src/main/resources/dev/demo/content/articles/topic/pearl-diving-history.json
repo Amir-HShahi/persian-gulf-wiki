@@ -4,6 +4,8 @@
   "canonicalLanguage": "fa",
   "gallery": ["fishing-dhow", "acropora-coral"],
   "history": { "revisions": 4, "contributors": 3 },
+  "pendingEdit": { "p": "آوازهایی که روزگاری روی لنج‌های غواصی خوانده می‌شد هنوز در جشن‌ها و جشنواره‌های بندری اجرا می‌شود و یاد زندگی سخت غواصان را برای نسل‌های تازه زنده نگه می‌دارد." },
+  "machineTranslated": true,
   "translations": {
     "fa": {
       "slug": "غواصی-مروارید-در-خلیج-فارس",

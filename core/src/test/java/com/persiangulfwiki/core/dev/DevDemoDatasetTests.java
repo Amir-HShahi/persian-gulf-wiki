@@ -119,20 +119,41 @@ class DevDemoDatasetTests {
     void aLinkToAnUnknownSubjectIsReported() {
         DemoArticle original = dataset.articles().getFirst();
         DemoTranslation fa = original.translations().get("fa");
-        DemoTranslation broken = new DemoTranslation(fa.slug(), fa.title(), fa.summary(),
-                List.of("[[no-such-subject|nowhere]]"), fa.sections());
-        Map<String, DemoTranslation> translations = new HashMap<>(original.translations());
-        translations.put("fa", broken);
-        DemoArticle withBrokenLink = new DemoArticle(original.key(), original.subject(), original.topics(),
-                original.canonicalLanguage(), translations, original.gallery(), original.panorama(),
-                original.history(), original.verification(), original.featured());
-        List<DemoArticle> articles = new ArrayList<>(dataset.articles());
-        articles.set(0, withBrokenLink);
+        List<String> lead = new ArrayList<>(fa.lead());
+        lead.set(0, "[[no-such-subject|nowhere]]");
+        DemoTranslation broken = new DemoTranslation(fa.slug(), fa.title(), fa.summary(), lead, fa.sections());
 
-        DevDemoDataset tampered = new DevDemoDataset(dataset.users(), dataset.sources(), dataset.assets(), articles);
-
-        assertThat(tampered.problems(new PathMatchingResourcePatternResolver()))
+        assertThat(problemsWithFa(original, broken))
                 .anySatisfy(problem -> assertThat(problem).contains("unknown subject no-such-subject"));
+    }
+
+    @Test
+    void everyRevisionAddsToTheText() {
+        for (DemoArticle article : dataset.articles()) {
+            int revisions = article.history().revisions();
+            for (String language : DevDemoDataset.LANGUAGES) {
+                DemoTranslation translation = article.translations().get(language);
+                int previous = 0;
+                for (int number = 1; number <= revisions; number++) {
+                    int units = DevDemoDataset.unitCount(DevDemoDataset.asOfRevision(translation, number, revisions));
+                    assertThat(units).as(article.key() + " [" + language + "] revision " + number).isGreaterThan(previous);
+                    previous = units;
+                }
+                assertThat(DevDemoDataset.asOfRevision(translation, revisions, revisions)).isEqualTo(translation);
+            }
+        }
+    }
+
+    @Test
+    void moreRevisionsThanTheTextCanFillAreReported() {
+        DemoArticle original = dataset.articles().getFirst();
+        DemoTranslation fa = original.translations().get("fa");
+        DemoSection first = fa.sections().getFirst();
+        DemoTranslation tiny = new DemoTranslation(fa.slug(), fa.title(), fa.summary(), List.of(),
+                List.of(new DemoSection(first.heading(), first.blocks().subList(0, 1))));
+
+        assertThat(problemsWithFa(original, tiny))
+                .anySatisfy(problem -> assertThat(problem).contains("so some revision would add nothing"));
     }
 
     @Test
@@ -156,5 +177,19 @@ class DevDemoDatasetTests {
                 }
             }
         }
+    }
+
+    // The problems found once the first article's fa translation is replaced with `fa`.
+    private static List<String> problemsWithFa(DemoArticle original, DemoTranslation fa) {
+        Map<String, DemoTranslation> translations = new HashMap<>(original.translations());
+        translations.put("fa", fa);
+        DemoArticle tampered = new DemoArticle(original.key(), original.subject(), original.topics(),
+                original.canonicalLanguage(), translations, original.gallery(), original.panorama(),
+                original.history(), original.pendingEdit(), original.verification(), original.featured(),
+                original.machineTranslated());
+        List<DemoArticle> articles = new ArrayList<>(dataset.articles());
+        articles.set(0, tampered);
+        return new DevDemoDataset(dataset.users(), dataset.sources(), dataset.assets(), articles)
+                .problems(new PathMatchingResourcePatternResolver());
     }
 }

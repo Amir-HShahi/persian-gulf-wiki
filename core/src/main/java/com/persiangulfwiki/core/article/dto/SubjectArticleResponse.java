@@ -1,5 +1,7 @@
 package com.persiangulfwiki.core.article.dto;
 
+import com.persiangulfwiki.core.subject.dto.SubjectMainImageResponse;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import org.jspecify.annotations.Nullable;
@@ -21,5 +23,8 @@ public record SubjectArticleResponse(
         @Schema(description = "May be absent: a summary is optional on a revision.", nullable = true)
         @Nullable String summary,
         @Schema(description = "The translation's most recently approved revision, whose title and summary are shown.")
-        UUID revisionId) {
+        UUID revisionId,
+        @Schema(description = "The main image of the article's subject. Absent when the subject has no public main "
+                + "image.", nullable = true)
+        @Nullable SubjectMainImageResponse mainImage) {
 }

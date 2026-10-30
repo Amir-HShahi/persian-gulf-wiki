@@ -4,6 +4,8 @@
   "canonicalLanguage": "en",
   "gallery": ["acropora-coral", "butterflyfish-coral", "reef-fish-school"],
   "history": { "revisions": 3, "contributors": 3, "outdated": ["fa"] },
+  "pendingEdit": { "p": "Researchers stress that regular, long-term monitoring of reefs in Iranian waters is the only way to tell whether surviving colonies are truly recovering between bleaching events or slowly losing ground." },
+  "machineTranslated": true,
   "translations": {
     "fa": {
       "slug": "سفیدشدگی-مرجان‌ها-در-خلیج-فارس",

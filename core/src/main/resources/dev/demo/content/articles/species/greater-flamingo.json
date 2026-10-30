@@ -19,6 +19,8 @@
   "gallery": ["greater-flamingos", "mudflat-sandpipers"],
   "history": { "revisions": 3, "contributors": 3 },
   "verification": "NONE",
+  "pendingEdit": { "p": "با خشک شدن بخش بزرگی از دریاچهٔ ارومیه، جزیره‌های زادآوری به خشکی پیوسته‌اند و شکارگران به لانه‌ها راه یافته‌اند، از این رو زادآوری فلامینگوها در ایران به سطح آب این دریاچه وابسته شده است." },
+  "machineTranslated": true,
   "translations": {
     "fa": {
       "slug": "فلامینگوی-بزرگ",

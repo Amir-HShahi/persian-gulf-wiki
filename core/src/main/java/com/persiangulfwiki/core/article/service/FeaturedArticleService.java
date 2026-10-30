@@ -19,7 +19,7 @@ import com.persiangulfwiki.core.article.repository.FeaturedArticleRepository.Liv
 import com.persiangulfwiki.core.common.dto.PageResponse;
 import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
-import com.persiangulfwiki.core.subject.service.SubjectListingService;
+import com.persiangulfwiki.core.subject.service.SubjectMainImageService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +52,7 @@ public class FeaturedArticleService {
     private final ArticleTranslationRepository articleTranslationRepository;
     private final ArticleRevisionRepository articleRevisionRepository;
     private final SubjectRepository subjectRepository;
-    private final SubjectListingService subjectListingService;
+    private final SubjectMainImageService subjectMainImageService;
 
     /** Throws FeaturedArticleNotFoundException when nothing at all is published in {@code language}. */
     @Transactional(readOnly = true)
@@ -75,7 +75,7 @@ public class FeaturedArticleService {
                 subjectId == null ? null : subjectRepository.findById(subjectId).map(Subject::getKind).orElse(null),
                 translation.getLanguage(), translation.getSlug(), revision.getTitle(), revision.getSummary(),
                 revision.getId(),
-                subjectId == null ? null : subjectListingService.mainImages(Set.of(subjectId)).get(subjectId),
+                subjectId == null ? null : subjectMainImageService.mainImages(Set.of(subjectId)).get(subjectId),
                 featuredArticleId);
     }
 

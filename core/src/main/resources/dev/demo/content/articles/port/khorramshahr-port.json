@@ -21,6 +21,8 @@
   "gallery": ["arvand-delta-iss", "barge-and-tug"],
   "history": { "revisions": 4, "contributors": 4 },
   "verification": "VERIFIED",
+  "pendingEdit": { "p": "در سال‌های اخیر طرح‌هایی برای رساندن آب شیرین به نخلستان‌های کنار اروند و کاشت نهال‌های تازه آغاز شده است، ولی کشاورزان می‌گویند بدون مهار شوری آب این تلاش‌ها پایدار نمی‌ماند." },
+  "machineTranslated": true,
   "translations": {
     "fa": {
       "slug": "بندر-خرمشهر",

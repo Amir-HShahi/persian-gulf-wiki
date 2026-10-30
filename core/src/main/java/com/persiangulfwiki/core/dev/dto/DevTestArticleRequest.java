@@ -3,6 +3,8 @@ package com.persiangulfwiki.core.dev.dto;
 import com.persiangulfwiki.core.article.entity.RevisionStatus;
 import com.persiangulfwiki.core.article.entity.TranslationState;
 
+import jakarta.validation.constraints.Size;
+
 import java.util.Set;
 import java.util.UUID;
 
@@ -26,6 +28,10 @@ import tools.jackson.databind.JsonNode;
 // false never makes it main, so "published but not main" is reachable on a subject with no main.
 // body is stored as given, unvalidated, so a subject link to a missing subject is reachable too.
 //
+// isMachineGenerated marks the minted revision as a translation model's output, machineModel
+// naming the model (defaults to "e2e-model"; ignored unless isMachineGenerated). isSource makes the
+// minted translation the article's source translation.
+//
 // topicIds tags the minted revision. Always allowed: the minted translation is the canonical one,
 // the only kind the real path lets carry topics. Each must name an existing, unarchived topic.
 public record DevTestArticleRequest(
@@ -39,5 +45,8 @@ public record DevTestArticleRequest(
         TranslationState translationState,
         Boolean isMain,
         JsonNode body,
-        Set<UUID> topicIds) {
+        Set<UUID> topicIds,
+        Boolean isMachineGenerated,
+        @Size(max = 100) String machineModel,
+        Boolean isSource) {
 }

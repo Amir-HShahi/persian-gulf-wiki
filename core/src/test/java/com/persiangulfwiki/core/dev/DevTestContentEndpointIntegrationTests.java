@@ -153,7 +153,7 @@ class DevTestContentEndpointIntegrationTests {
     }
 
     private static DevTestArticleRequest articleOf(UUID subjectId, RevisionStatus status, Boolean isMain) {
-        return new DevTestArticleRequest(subjectId, null, null, status, null, null, null, null, isMain, null, null);
+        return new DevTestArticleRequest(subjectId, null, null, status, null, null, null, null, isMain, null, null, null, null, null);
     }
 
     private Optional<UUID> mainArticleOf(UUID subjectId) {
@@ -171,7 +171,7 @@ class DevTestContentEndpointIntegrationTests {
     // At most one task can ever exist per revision (uq_moderation_tasks_revision), so every
     // moderation case below needs a revision of its own rather than a shared fixture.
     private UUID mintRevisionId() throws Exception {
-        return mintArticle(new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null))
+        return mintArticle(new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null, null, null, null))
                 .revisionId();
     }
 
@@ -325,7 +325,7 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void mintsAMarkedArticleWithItsTranslationAndFirstRevision() throws Exception {
         DevTestArticleResponse minted = mintArticle(
-                new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null));
+                new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null, null, null, null));
 
         Article article = articleRepository.findById(minted.articleId()).orElseThrow();
         assertThat(article.getDevMarker()).isNotNull();
@@ -351,10 +351,52 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void mintsARevisionAtApprovedWithNoModerationHistory() throws Exception {
         DevTestArticleResponse minted = mintArticle(new DevTestArticleRequest(
-                null, null, null, RevisionStatus.APPROVED, null, null, null, null, null, null, null));
+                null, null, null, RevisionStatus.APPROVED, null, null, null, null, null, null, null, null, null, null));
 
         ArticleRevision revision = articleRevisionRepository.findById(minted.revisionId()).orElseThrow();
         assertThat(revision.getStatus()).isEqualTo(RevisionStatus.APPROVED);
+    }
+
+    // Machine translation has no real writer yet, so this fixture is the only way to reach a machine
+    // revision on a source translation; the reader page must report both.
+    @Test
+    void mintsAMachineGeneratedRevisionOnTheArticlesSourceTranslation() throws Exception {
+        DevTestArticleResponse minted = mintArticle(new DevTestArticleRequest(
+                null, null, null, RevisionStatus.APPROVED, null, null, null, null, null, null, null, true, "m1", true));
+
+        ArticleRevision revision = articleRevisionRepository.findById(minted.revisionId()).orElseThrow();
+        assertThat(revision.isMachineGenerated()).isTrue();
+        assertThat(revision.getMachineModel()).isEqualTo("m1");
+        Article article = articleRepository.findById(minted.articleId()).orElseThrow();
+        assertThat(article.getSourceTranslationId()).isEqualTo(minted.translationId());
+        mockMvc.perform(get("/api/articles/by-slug/" + minted.slug()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.revision.isMachineGenerated").value(true))
+                .andExpect(jsonPath("$.data.revision.machineModel").value("m1"))
+                .andExpect(jsonPath("$.data.translation.isSource").value(true))
+                .andExpect(jsonPath("$.data.source.translationId").value(minted.translationId().toString()));
+    }
+
+    @Test
+    void mintsAHumanRevisionWithNoSourceByDefault() throws Exception {
+        DevTestArticleResponse minted = mintArticle(new DevTestArticleRequest(
+                null, null, null, RevisionStatus.APPROVED, null, null, null, null, null, null, null, null, "m1", null));
+
+        ArticleRevision revision = articleRevisionRepository.findById(minted.revisionId()).orElseThrow();
+        assertThat(revision.isMachineGenerated()).isFalse();
+        assertThat(revision.getMachineModel()).isNull();
+        assertThat(articleRepository.findById(minted.articleId()).orElseThrow().getSourceTranslationId()).isNull();
+    }
+
+    @Test
+    void aMachineModelLongerThanTheColumnIsRejected() throws Exception {
+        mockMvc.perform(post("/api/dev/test-articles")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new DevTestArticleRequest(
+                                null, null, null, null, null, null, null, null, null, null, null, true, "m".repeat(101),
+                                null))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"));
     }
 
     // With no kind field on the request any more, binding a minted subject is the only way to
@@ -364,7 +406,7 @@ class DevTestContentEndpointIntegrationTests {
         UUID subjectId = mintSubject(new DevTestSubjectRequest(SubjectKind.SPECIES, null, null));
 
         DevTestArticleResponse minted = mintArticle(new DevTestArticleRequest(
-                subjectId, null, null, RevisionStatus.APPROVED, null, null, null, null, null, null, null));
+                subjectId, null, null, RevisionStatus.APPROVED, null, null, null, null, null, null, null, null, null, null));
 
         // Deleted before returning: articles.subject_id has no ON DELETE action, so a leftover
         // would make the subject sweep in sweeperReclaimsMintedRowsAndSparesHandMadeOnes fail.
@@ -387,7 +429,7 @@ class DevTestContentEndpointIntegrationTests {
         mockMvc.perform(post("/api/dev/test-articles")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new DevTestArticleRequest(
-                                UUID.randomUUID(), null, null, null, null, null, null, null, null, null, null))))
+                                UUID.randomUUID(), null, null, null, null, null, null, null, null, null, null, null, null, null))))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("SUBJECT_NOT_FOUND"));
     }
@@ -470,9 +512,10 @@ class DevTestContentEndpointIntegrationTests {
                 {"type": "doc", "content": [{"type": "subjectLink", "subjectId": "%s"}]}"""
                 .formatted(missingSubjectId));
         DevTestArticleResponse minted = mintArticle(new DevTestArticleRequest(
-                null, null, null, RevisionStatus.APPROVED, null, null, null, null, null, body, null));
+                null, null, null, RevisionStatus.APPROVED, null, null, null, null, null, body, null, null, null, null));
 
-        String revision = "/api/articles/" + minted.articleId() + "/translations/fa/revisions/" + minted.revisionId();
+        String revision =
+                "/api/articles/" + minted.articleId() + "/translations/fa/revisions/" + minted.revisionId();
         mockMvc.perform(get(revision))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.body.content[0].subjectId").value(missingSubjectId.toString()))
@@ -482,7 +525,7 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void deletesAMintedArticleAndCascadesToItsTranslationAndRevision() throws Exception {
         DevTestArticleResponse minted = mintArticle(
-                new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null));
+                new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null, null, null, null));
 
         mockMvc.perform(delete("/api/dev/test-articles/" + minted.articleId()))
                 .andExpect(status().isNoContent());
@@ -511,7 +554,7 @@ class DevTestContentEndpointIntegrationTests {
     @Test
     void sweeperReclaimsAgedMintedArticlesButSparesHandMadeOnes() throws Exception {
         DevTestArticleResponse minted = mintArticle(
-                new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null));
+                new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null, null, null, null));
         Article handMade = articleRepository.save(
                 Article.builder().canonicalLanguage("fa").build());
 
@@ -663,7 +706,7 @@ class DevTestContentEndpointIntegrationTests {
         UUID subjectId = mintSubject(new DevTestSubjectRequest(SubjectKind.ISLAND, null, null));
         UUID sourceId = mintSource(new DevTestSourceRequest(null, null));
         DevTestArticleResponse article = mintArticle(
-                new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null));
+                new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null, null, null, null));
 
         assertThat(subjectRepository.findById(subjectId)).isPresent();
         assertThat(sourceRepository.findById(sourceId)).isPresent();
@@ -686,7 +729,7 @@ class DevTestContentEndpointIntegrationTests {
     }
 
     private UUID mintArticleId() throws Exception {
-        return mintArticle(new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null))
+        return mintArticle(new DevTestArticleRequest(null, null, null, null, null, null, null, null, null, null, null, null, null, null))
                 .articleId();
     }
 

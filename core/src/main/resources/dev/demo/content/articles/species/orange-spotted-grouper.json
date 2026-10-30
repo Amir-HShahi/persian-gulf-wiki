@@ -19,6 +19,7 @@
   "gallery": ["gag-grouper", "reef-fish-school", "fishing-dhow"],
   "history": { "revisions": 4, "contributors": 4 },
   "verification": "VERIFIED",
+  "pendingEdit": { "p": "بیشتر مزرعه‌های قفسی هنوز به بچه‌ماهیانی وابسته‌اند که از طبیعت گرفته می‌شوند، از این رو گسترش تکثیر در کارگاه‌ها برای کاهش فشار بر ذخایر وحشی ضروری دانسته می‌شود." },
   "translations": {
     "fa": {
       "slug": "هامور-معمولی",

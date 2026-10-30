@@ -76,7 +76,7 @@ public class ArticleTranslationService {
         articleRevisionService.createInitialRevision(
                 translation.getId(), request.title(), request.body(), request.summary(), authorUserId, Set.of());
 
-        return toResponse(translation);
+        return toResponse(translation, article);
     }
 
     // A translation with no approved revision yet is 404 to anyone but its authors and
@@ -89,13 +89,15 @@ public class ArticleTranslationService {
         if (!articleVisibilityService.isTranslationReadableBy(translation, callerUserId, isCallerModerator)) {
             throw new TranslationNotFoundException();
         }
-        return toResponse(translation);
+        return toResponse(translation,
+                articleRepository.findById(articleId).orElseThrow(ArticleNotFoundException::new));
     }
 
-    private TranslationResponse toResponse(ArticleTranslation translation) {
+    private TranslationResponse toResponse(ArticleTranslation translation, Article article) {
         return new TranslationResponse(translation.getId(), translation.getArticleId(), translation.getLanguage(),
                 translation.getSlug(), translation.getCurrentRevisionId(), translation.getSourceRevisionId(),
                 translation.getTranslationState(), translation.getCreatedAt(), translation.getUpdatedAt(),
-                articleRevisionService.liveTopicIds(translation.getArticleId()));
+                articleRevisionService.liveTopicIds(translation.getArticleId()),
+                translation.getId().equals(article.getSourceTranslationId()));
     }
 }

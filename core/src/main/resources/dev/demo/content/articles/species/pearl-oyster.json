@@ -19,6 +19,7 @@
   "gallery": ["acropora-coral", "butterflyfish-coral"],
   "history": { "revisions": 4, "contributors": 4 },
   "verification": "VERIFIED",
+  "pendingEdit": { "p": "صدف مروارید با صاف کردن آب برای تغذیه، ذره‌های معلق را از آب جدا می‌کند و بسترهای انبوه آن به زلالی آب و سلامت علفزارهای دریایی پیرامون کمک می‌کنند." },
   "translations": {
     "fa": {
       "slug": "صدف-مروارید-خلیج-فارس",

@@ -18,6 +18,7 @@
   "gallery": ["grey-mangrove", "mangrove-forest", "mangrove-channel"],
   "history": { "revisions": 6, "contributors": 7 },
   "verification": "VERIFIED",
+  "pendingEdit": { "p": "در سال‌های اخیر طرح‌های نهال‌کاری حرا با مشارکت روستاییان کرانهٔ هرمزگان و بوشهر اجرا شده است و پرورش نهال در خزانه‌های ساحلی برای برخی خانواده‌ها درآمد تازه‌ای فراهم کرده است." },
   "translations": {
     "fa": {
       "slug": "درخت-حرا",

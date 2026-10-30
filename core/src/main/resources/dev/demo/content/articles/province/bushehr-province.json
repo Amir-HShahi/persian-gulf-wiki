@@ -12,6 +12,8 @@
   "gallery": ["gulf-night-iss", "persian-gulf-modis-autumn"],
   "history": { "revisions": 3, "contributors": 3 },
   "verification": "NONE",
+  "pendingEdit": { "p": "بوشهر سرزمین شاعران و نویسندگان نامداری بوده است و ترانه‌های محلی، به‌ویژه شروه‌های فایز دشتستانی، هنوز در محفل‌ها و آیین‌های مردم استان خوانده می‌شود." },
+  "machineTranslated": true,
   "translations": {
     "fa": {
       "slug": "استان-بوشهر",

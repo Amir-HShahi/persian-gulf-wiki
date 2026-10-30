@@ -12,6 +12,7 @@
   "gallery": ["iran-coast-iss", "strait-hormuz-modis"],
   "history": { "revisions": 4, "contributors": 4 },
   "verification": "NONE",
+  "pendingEdit": { "p": "خوراک‌های هرمزگانی مانند قلیه‌ماهی، میگو پلو و نان‌های محلی با ادویه‌های تند و ترش، بازتاب پیوند دیرینهٔ این سرزمین با هند و کرانه‌های عربی است." },
   "translations": {
     "fa": {
       "slug": "استان-هرمزگان",

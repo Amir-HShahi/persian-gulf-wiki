@@ -13,8 +13,10 @@ import com.persiangulfwiki.core.article.repository.FeaturedArticleRepository;
 import com.persiangulfwiki.core.article.service.ArticleRevisionService;
 import com.persiangulfwiki.core.dev.DevDemoDataset.DemoArticle;
 import com.persiangulfwiki.core.dev.DevDemoDataset.DemoAsset;
+import com.persiangulfwiki.core.dev.DevDemoDataset.DemoBlock;
 import com.persiangulfwiki.core.dev.DevDemoDataset.DemoFact;
 import com.persiangulfwiki.core.dev.DevDemoDataset.DemoFactValue;
+import com.persiangulfwiki.core.dev.DevDemoDataset.DemoSection;
 import com.persiangulfwiki.core.dev.DevDemoDataset.DemoSource;
 import com.persiangulfwiki.core.dev.DevDemoDataset.DemoSubject;
 import com.persiangulfwiki.core.dev.DevDemoDataset.DemoTranslation;
@@ -124,8 +126,9 @@ class DevDemoContentSeeder {
 
     private static final GeometryFactory WGS84 = new GeometryFactory(new PrecisionModel(), 4326);
     private static final Duration HISTORY_SPAN = Duration.ofDays(730);
-    private static final int MAX_REVISIONS = 8;
     private static final int MAX_CONTRIBUTORS = 11;
+    // Mock only: no translation model runs yet, the demo just marks the text as one's output.
+    static final String MACHINE_MODEL = "qwen3.5:4b";
     private static final String SLUG_CLASH_SUFFIX = "-demo";
     // Share of articles that get a pending fa revision (with an open moderation task), and of the
     // rest that get one sent back with changes requested, so the moderator screens are not empty.
@@ -467,15 +470,13 @@ class DevDemoContentSeeder {
         Instant createdAt = run.articleCreatedAt(demoArticle.key());
         Instant lastEditedAt = createdAt.plus(Duration.ofMillis(
                 (long) (run.random.nextDouble() * Duration.between(createdAt, run.now).toMillis())));
-        int revisions = demoArticle.history() != null && demoArticle.history().revisions() != null
-                ? demoArticle.history().revisions()
-                : 1 + run.random.nextInt(MAX_REVISIONS);
-        int contributors = demoArticle.history() != null && demoArticle.history().contributors() != null
+        int revisions = demoArticle.history().revisions();
+        int contributors = demoArticle.history().contributors() != null
                 ? demoArticle.history().contributors()
                 : 1 + run.random.nextInt(Math.min(MAX_CONTRIBUTORS, revisions * 3));
         List<UUID> authors = run.pickDistinct(run.contributors, contributors);
         Set<UUID> topicIds = topicIds(run, demoArticle);
-        List<String> outdated = demoArticle.history() != null && demoArticle.history().outdated() != null
+        List<String> outdated = demoArticle.history().outdated() != null
                 ? demoArticle.history().outdated()
                 : List.of();
 
@@ -503,21 +504,31 @@ class DevDemoContentSeeder {
                     .slug(freeSlug(demoTranslation.slug()))
                     .translationState(outdated.contains(language) ? TranslationState.OUTDATED : TranslationState.UP_TO_DATE)
                     .build());
+            if (isCanonical && demoArticle.isMachineTranslated()) {
+                article.setSourceTranslationId(translation.getId());
+                articleRepository.save(article);
+            }
+            // A machine translation is one revision of the whole source text, written by the model.
+            boolean isMachine = demoArticle.isMachineTranslated() && !isCanonical;
+            int count = isMachine ? 1 : revisions;
             UUID parentId = null;
-            for (int number = 1; number <= revisions; number++) {
+            for (int number = 1; number <= count; number++) {
                 ArticleRevision revision = ArticleRevision.builder()
                         .translationId(translation.getId())
                         .revisionNumber(number)
                         .parentRevisionId(parentId)
                         .title(demoTranslation.title())
-                        // Earlier revisions carry fewer sections, so the history reads as an
-                        // article that grew rather than the same text saved eight times.
+                        // Each revision adds to the text, so the history reads as an article that
+                        // grew rather than the same text saved eight times.
                         .body(objectMapper.writeValueAsString(DevDemoBodyBuilder.build(
-                                partial(demoTranslation, number, revisions), run.subjectIds, run.sourceIds)))
-                        .summary(number == 1 ? "First version" : "Expanded and sourced")
+                                DevDemoDataset.asOfRevision(demoTranslation, number, count), run.subjectIds,
+                                run.sourceIds)))
+                        .summary(demoTranslation.summary())
                         .status(RevisionStatus.PENDING)
                         .authorId(authors.get(authorSlot++ % authors.size()))
-                        .createdAt(between(createdAt, lastEditedAt, number, revisions))
+                        .createdAt(between(createdAt, lastEditedAt, number, count))
+                        .isMachineGenerated(isMachine)
+                        .machineModel(isMachine ? MACHINE_MODEL : null)
                         .build();
                 revision.setTopicIds(topicIds);
                 revision = articleRevisionRepository.save(revision);
@@ -533,7 +544,8 @@ class DevDemoContentSeeder {
             }
             run.translations++;
             if (isCanonical) {
-                seedOpenRevision(run, translation.getId(), parentId, revisions + 1, demoTranslation, topicIds);
+                seedOpenRevision(run, translation.getId(), parentId, revisions + 1, demoTranslation,
+                        demoArticle.pendingEdit(), topicIds);
             }
         }
         articleRepository.backdate(article.getId(), createdAt, lastEditedAt);
@@ -542,7 +554,7 @@ class DevDemoContentSeeder {
     // A few articles also have an unpublished canonical revision on top: one awaiting a moderator
     // (with its open task) or one sent back to its author.
     private void seedOpenRevision(Run run, UUID translationId, UUID parentId, int number, DemoTranslation text,
-            Set<UUID> topicIds) {
+            DemoBlock pendingEdit, Set<UUID> topicIds) {
         double roll = run.random.nextDouble();
         RevisionStatus status = roll < PENDING_SHARE ? RevisionStatus.PENDING
                 : roll < PENDING_SHARE + CHANGES_REQUESTED_SHARE ? RevisionStatus.CHANGES_REQUESTED
@@ -555,8 +567,9 @@ class DevDemoContentSeeder {
                 .revisionNumber(number)
                 .parentRevisionId(parentId)
                 .title(text.title())
-                .body(objectMapper.writeValueAsString(DevDemoBodyBuilder.build(text, run.subjectIds, run.sourceIds)))
-                .summary("Copy edit")
+                .body(objectMapper.writeValueAsString(DevDemoBodyBuilder.build(withPendingEdit(text, pendingEdit),
+                        run.subjectIds, run.sourceIds)))
+                .summary(text.summary())
                 .status(status)
                 .authorId(run.pick(run.contributors))
                 .build();
@@ -593,13 +606,13 @@ class DevDemoContentSeeder {
         return candidate;
     }
 
-    private static DemoTranslation partial(DemoTranslation text, int number, int revisions) {
-        if (number == revisions) {
-            return text;
-        }
-        int sections = Math.max(1, (int) Math.ceil(text.sections().size() * (double) number / revisions));
-        return new DemoTranslation(text.slug(), text.title(), text.summary(), text.lead(),
-                text.sections().subList(0, sections));
+    private static DemoTranslation withPendingEdit(DemoTranslation text, DemoBlock pendingEdit) {
+        List<DemoSection> sections = new ArrayList<>(text.sections());
+        DemoSection last = sections.removeLast();
+        List<DemoBlock> blocks = new ArrayList<>(last.blocks());
+        blocks.add(pendingEdit);
+        sections.add(new DemoSection(last.heading(), blocks));
+        return new DemoTranslation(text.slug(), text.title(), text.summary(), text.lead(), sections);
     }
 
     private static Instant between(Instant from, Instant to, int number, int count) {

@@ -4,6 +4,7 @@
   "canonicalLanguage": "fa",
   "gallery": ["fishing-dhow", "reef-fish-school", "penaeid-shrimp"],
   "history": { "revisions": 3, "contributors": 4 },
+  "pendingEdit": { "p": "تعاونی‌های صیادی، که بیشتر صیادان خرده‌پا عضو آن‌ها هستند، می‌توانند با آگاهی‌رسانی و نظارت بر اعضا، پایبندی به فصل‌های ممنوعه و اندازهٔ چشمهٔ تور را بهبود بخشند." },
   "translations": {
     "fa": {
       "slug": "شیلات-خلیج-فارس",

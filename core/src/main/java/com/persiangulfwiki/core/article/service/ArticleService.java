@@ -1,8 +1,10 @@
 package com.persiangulfwiki.core.article.service;
 
 import com.persiangulfwiki.core.article.dto.ArticleBySlugResponse;
+import com.persiangulfwiki.core.article.dto.ArticleCardResponse;
 import com.persiangulfwiki.core.article.dto.ArticleListItemResponse;
 import com.persiangulfwiki.core.article.dto.ArticleResponse;
+import com.persiangulfwiki.core.article.dto.ArticleSourceResponse;
 import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
 import com.persiangulfwiki.core.article.dto.PublishedRevisionResponse;
 import com.persiangulfwiki.core.article.dto.PublishedTranslationResponse;
@@ -17,11 +19,13 @@ import com.persiangulfwiki.core.article.repository.ArticleRepository;
 import com.persiangulfwiki.core.article.repository.ArticleRevisionRepository;
 import com.persiangulfwiki.core.article.repository.ArticleTranslationRepository;
 import com.persiangulfwiki.core.common.dto.PageResponse;
+import com.persiangulfwiki.core.subject.dto.SubjectMainImageResponse;
 import com.persiangulfwiki.core.subject.entity.Subject;
 import com.persiangulfwiki.core.subject.entity.SubjectKind;
 import com.persiangulfwiki.core.subject.exception.InvalidSubjectKindException;
 import com.persiangulfwiki.core.subject.exception.SubjectNotFoundException;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
+import com.persiangulfwiki.core.subject.service.SubjectMainImageService;
 import com.persiangulfwiki.core.subject.service.SubjectService;
 import com.persiangulfwiki.core.topic.service.TopicService;
 
@@ -59,6 +63,8 @@ public class ArticleService {
     private final SubjectService subjectService;
     private final TopicService topicService;
     private final SubjectLinkService subjectLinkService;
+    private final ArticleCardService articleCardService;
+    private final SubjectMainImageService subjectMainImageService;
     private final ObjectMapper objectMapper;
 
     // Article + its canonical translation + that translation's first DRAFT revision, written
@@ -70,7 +76,7 @@ public class ArticleService {
     // A subject that was merged away binds the article to the subject it was merged into; any other
     // deleted subject is a 404, so no article lands on a subject hidden from readers.
     @Transactional
-    public ArticleResponse create(UUID creatorUserId, CreateArticleRequest request) {
+    public ArticleResponse create(UUID creatorUserId, CreateArticleRequest request, String readerLanguage) {
         Subject subject = request.subjectId() == null ? null : subjectService.lockForBinding(request.subjectId());
         SubjectKind subjectKind = subject == null ? null : subject.getKind();
 
@@ -103,18 +109,20 @@ public class ArticleService {
                 translation.getId(), request.title(), request.body(), request.summary(), creatorUserId,
                 request.topicIds() == null ? Set.of() : request.topicIds());
 
-        return toResponse(article, subjectKind);
+        return toResponse(article, subjectKind, readerLanguage);
     }
 
     // An article nothing has been approved in yet is 404 to anyone but its authors and
     // moderators -- see ArticleVisibilityService.
     @Transactional(readOnly = true)
-    public ArticleResponse get(UUID articleId, @Nullable UUID callerUserId, boolean isCallerModerator) {
+    public ArticleResponse get(UUID articleId, @Nullable UUID callerUserId, boolean isCallerModerator,
+            String readerLanguage) {
         Article article = articleRepository.findById(articleId).orElseThrow(ArticleNotFoundException::new);
         if (!articleVisibilityService.isArticleReadableBy(article, callerUserId, isCallerModerator)) {
             throw new ArticleNotFoundException();
         }
-        return toResponse(article, article.getSubjectId() == null ? null : findSubjectKind(article.getSubjectId()));
+        return toResponse(article, article.getSubjectId() == null ? null : findSubjectKind(article.getSubjectId()),
+                readerLanguage);
     }
 
     // The reader page, by a translation's slug. Approved content only, whoever asks: a translation
@@ -144,12 +152,27 @@ public class ArticleService {
         return new ArticleBySlugResponse(article.getId(), article.getSubjectId(), subjectKind, article.isMain(),
                 article.getCanonicalLanguage(), article.getCreatedAt(), article.getUpdatedAt(),
                 new PublishedTranslationResponse(translation.getId(), translation.getLanguage(), translation.getSlug(),
-                        translation.getTranslationState(), translation.getUpdatedAt()),
+                        translation.getTranslationState(), translation.getUpdatedAt(),
+                        translation.getId().equals(article.getSourceTranslationId())),
+                mainImage(article),
                 new PublishedRevisionResponse(revision.getId(), revision.getRevisionNumber(), revision.getTitle(),
-                        revision.getSummary(), body, revision.getCreatedAt()),
+                        revision.getSummary(), body, revision.getCreatedAt(), revision.isMachineGenerated(),
+                        revision.getMachineModel()),
                 subjectLinkService.resolve(List.of(body), readerLanguage),
                 articleRevisionService.liveTopicIds(article.getId()),
-                otherTranslations);
+                otherTranslations, source(article, translation));
+    }
+
+    // Only a published source is named: an unpublished one has no page to link to.
+    private @Nullable ArticleSourceResponse source(Article article, ArticleTranslation shown) {
+        UUID sourceId = article.getSourceTranslationId();
+        if (sourceId == null) {
+            return null;
+        }
+        ArticleTranslation source = sourceId.equals(shown.getId()) ? shown
+                : articleTranslationRepository.findById(sourceId).orElse(null);
+        return source == null || source.getCurrentRevisionId() == null ? null
+                : new ArticleSourceResponse(source.getId(), source.getLanguage(), source.getSlug());
     }
 
     // Only translations with an approved revision are listed: title/summary come from
@@ -189,12 +212,15 @@ public class ArticleService {
                 .findAllById(articlesById.values().stream().map(Article::getSubjectId).filter(Objects::nonNull).toList())
                 .stream()
                 .collect(Collectors.toMap(Subject::getId, Subject::getKind));
+        Map<UUID, SubjectMainImageResponse> imagesBySubjectId = subjectMainImageService.mainImages(
+                articlesById.values().stream().map(Article::getSubjectId).filter(Objects::nonNull).distinct().toList());
 
         List<ArticleListItemResponse> items = translations.stream()
                 .map(translation -> {
                     Article article = articlesById.get(translation.getArticleId());
                     return toListItemResponse(article, kindsBySubjectId.get(article.getSubjectId()), translation,
-                            revisionsById.get(translation.getCurrentRevisionId()));
+                            revisionsById.get(translation.getCurrentRevisionId()),
+                            article.getSubjectId() == null ? null : imagesBySubjectId.get(article.getSubjectId()));
                 })
                 .toList();
         return new PageResponse<>(items, page.getTotalElements());
@@ -210,21 +236,29 @@ public class ArticleService {
         }
     }
 
+    private @Nullable SubjectMainImageResponse mainImage(Article article) {
+        UUID subjectId = article.getSubjectId();
+        return subjectId == null ? null : subjectMainImageService.mainImages(List.of(subjectId)).get(subjectId);
+    }
+
     private SubjectKind findSubjectKind(UUID subjectId) {
         return subjectRepository.findById(subjectId).map(Subject::getKind).orElseThrow(SubjectNotFoundException::new);
     }
 
-    private ArticleResponse toResponse(Article article, @Nullable SubjectKind subjectKind) {
+    private ArticleResponse toResponse(Article article, @Nullable SubjectKind subjectKind, String readerLanguage) {
+        ArticleCardResponse card = articleCardService.cardsOf(List.of(article), readerLanguage).get(article.getId());
         return new ArticleResponse(article.getId(), article.getSubjectId(), subjectKind,
                 article.getCanonicalLanguage(), article.getCreatedByUserId(), article.getCreatedAt(),
-                article.getUpdatedAt());
+                article.getUpdatedAt(), card.language(), card.slug(), card.title(), card.summary(), card.revisionId(),
+                card.mainImage());
     }
 
     private ArticleListItemResponse toListItemResponse(
-            Article article, @Nullable SubjectKind subjectKind, ArticleTranslation translation, ArticleRevision revision) {
+            Article article, @Nullable SubjectKind subjectKind, ArticleTranslation translation,
+            ArticleRevision revision, @Nullable SubjectMainImageResponse mainImage) {
         return new ArticleListItemResponse(article.getId(), article.getSubjectId(), subjectKind,
                 article.getCanonicalLanguage(), article.getCreatedByUserId(), article.getCreatedAt(),
                 article.getUpdatedAt(), translation.getLanguage(), translation.getSlug(), revision.getTitle(),
-                revision.getSummary(), revision.getId());
+                revision.getSummary(), revision.getId(), mainImage);
     }
 }

@@ -10,8 +10,6 @@ import com.persiangulfwiki.core.attribute.repository.AttributeGroupRepository;
 import com.persiangulfwiki.core.attribute.repository.AttributeOptionRepository;
 import com.persiangulfwiki.core.label.dto.LocalizedLabelResponse;
 import com.persiangulfwiki.core.label.service.LabelService;
-import com.persiangulfwiki.core.media.service.MediaReadService;
-import com.persiangulfwiki.core.media.service.MediaReadService.SubjectImage;
 import com.persiangulfwiki.core.subject.dto.SubjectFacetOptionResponse;
 import com.persiangulfwiki.core.subject.dto.SubjectFacetResponse;
 import com.persiangulfwiki.core.subject.dto.SubjectKindCountResponse;
@@ -32,8 +30,6 @@ import com.persiangulfwiki.core.subject.repository.SubjectFacetFilter.ReferenceC
 import com.persiangulfwiki.core.subject.repository.SubjectFacetFilter.TrueCondition;
 import com.persiangulfwiki.core.subject.repository.SubjectFactRepository;
 import com.persiangulfwiki.core.subject.repository.SubjectFactRepository.Badge;
-import com.persiangulfwiki.core.subject.repository.SubjectLiveRevisionRepository;
-import com.persiangulfwiki.core.subject.repository.SubjectLiveRevisionRepository.MainImage;
 import com.persiangulfwiki.core.subject.repository.SubjectRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -48,7 +44,6 @@ import org.springframework.util.MultiValueMap;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -88,13 +83,12 @@ public class SubjectListingService {
     private final SubjectRepository subjectRepository;
     private final SubjectService subjectService;
     private final SubjectFactRepository subjectFactRepository;
-    private final SubjectLiveRevisionRepository subjectLiveRevisionRepository;
     private final AttributeDefinitionRepository attributeDefinitionRepository;
     private final AttributeGroupRepository attributeGroupRepository;
     private final AttributeOptionRepository attributeOptionRepository;
     private final LabelService labelService;
     private final SubjectArticleService subjectArticleService;
-    private final MediaReadService mediaReadService;
+    private final SubjectMainImageService subjectMainImageService;
 
     /**
      * Only the {@code attr.*} entries of {@code parameters} are read. An unknown kind throws
@@ -285,7 +279,7 @@ public class SubjectListingService {
                 .collect(Collectors.toMap(Subject::getId, Function.identity()));
         Map<UUID, LocalizedLabelResponse> names = labelService.resolveSubjects(ids, language);
         Map<UUID, String> slugs = subjectArticleService.mainArticleSlugs(ids, language);
-        Map<UUID, SubjectMainImageResponse> images = mainImages(ids);
+        Map<UUID, SubjectMainImageResponse> images = subjectMainImageService.mainImages(ids);
         Map<UUID, Map<String, String>> badges = new HashMap<>();
         for (Badge badge : subjectFactRepository.findBadges(ids)) {
             badges.computeIfAbsent(badge.getSubjectId(), _ -> new LinkedHashMap<>())
@@ -400,21 +394,6 @@ public class SubjectListingService {
         return enumIds.isEmpty() ? Map.of()
                 : attributeOptionRepository.findByAttributeIdIn(enumIds).stream()
                         .collect(Collectors.groupingBy(AttributeOption::getAttributeId));
-    }
-
-    // Subjects whose live revision picks no main image, or one no longer public, are absent.
-    @Transactional(readOnly = true)
-    public Map<UUID, SubjectMainImageResponse> mainImages(Collection<UUID> subjectIds) {
-        if (subjectIds.isEmpty()) {
-            return Map.of();
-        }
-        Map<UUID, SubjectImage> images = mediaReadService.publishedImagesOfSubjects(
-                subjectLiveRevisionRepository.findMainImages(subjectIds).stream()
-                        .collect(Collectors.toMap(MainImage::getSubjectId, MainImage::getMediaId)));
-        Map<UUID, SubjectMainImageResponse> responses = new HashMap<>();
-        images.forEach((subjectId, image) -> responses.put(subjectId,
-                new SubjectMainImageResponse(image.mediaId(), image.placeholder(), image.variants())));
-        return Map.copyOf(responses);
     }
 
     // Comma-separated and/or repeated; blanks dropped, duplicates collapsed, order kept.
