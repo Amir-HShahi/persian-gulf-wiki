@@ -16,6 +16,8 @@ package tabular
 import (
 	"bytes"
 	"fmt"
+	"net/http"
+	"strings"
 )
 
 // Format is the file container, decided from the bytes rather than the name.
@@ -62,7 +64,13 @@ type Report struct {
 }
 
 // Sniff identifies the container from the first few bytes. XLSX files are zip
-// archives and begin with "PK"; anything else is treated as delimited text.
+// archives and begin with "PK"; text is treated as CSV; anything else, a photo
+// or a PDF uploaded by mistake, is FormatUnknown. Without that last rule a JPEG
+// was read as a CSV of thirteen thousand rows of noise.
+//
+// Text is decided by the absence of binary bytes (http.DetectContentType), not
+// by valid UTF-8: Persian CSVs exported from Excel are often Windows-1256, which
+// is not UTF-8 and is still a spreadsheet someone means to submit.
 //
 // The filename is never consulted: a file named .csv containing XLSX is routine
 // once somebody renames an export.
@@ -72,8 +80,10 @@ func Sniff(head []byte) Format {
 		return FormatXLSX
 	case len(head) == 0:
 		return FormatUnknown
-	default:
+	case strings.HasPrefix(http.DetectContentType(head), "text/"):
 		return FormatCSV
+	default:
+		return FormatUnknown
 	}
 }
 

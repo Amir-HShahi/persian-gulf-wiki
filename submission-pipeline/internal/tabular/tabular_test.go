@@ -161,7 +161,13 @@ func TestSniff(t *testing.T) {
 	}{
 		{"xlsx zip magic", []byte{'P', 'K', 0x03, 0x04}, FormatXLSX},
 		{"plain text", []byte("name,depth"), FormatCSV},
+		// "جزیره,مساحت" in Windows-1256, as Excel exports it: not UTF-8, still text.
+		{"windows-1256 text", []byte{0xDA, 0xD2, 0xED, 0xD1, 0xE5, ',', 0xE3, 0xD3, 0xC7, 0xCD, 0xCA}, FormatCSV},
 		{"empty", nil, FormatUnknown},
+		{"jpeg", []byte{0xFF, 0xD8, 0xFF, 0xE0, 0, 0x10, 'J', 'F', 'I', 'F', 0}, FormatUnknown},
+		{"png", []byte("\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"), FormatUnknown},
+		{"pdf", []byte("%PDF-1.7\n"), FormatUnknown},
+		{"binary noise", []byte{0x01, 0x02, 0x00, 0x7F, 0x03}, FormatUnknown},
 	}
 	for _, c := range cases {
 		if got := Sniff(c.head); got != c.want {

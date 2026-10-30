@@ -12,6 +12,8 @@
 package normalize
 
 import (
+	"cmp"
+	"slices"
 	"strings"
 	"unicode/utf8"
 
@@ -61,7 +63,7 @@ func Report(text string, loc Locale, protected []Range) []Finding {
 
 	for _, line := range strings.SplitAfter(text, "\n") {
 		lineNo := 1 + strings.Count(text[:base], "\n")
-		findings = append(findings, reportLine(line, lineNo, base, subs, protected)...)
+		findings = append(findings, reportLine(line, lineNo, base, loc, subs, protected)...)
 		base += len(line)
 	}
 
@@ -79,7 +81,7 @@ func Report(text string, loc Locale, protected []Range) []Finding {
 	return findings
 }
 
-func reportLine(line string, lineNo, base int, subs map[rune]sub, protected []Range) []Finding {
+func reportLine(line string, lineNo, base int, loc Locale, subs map[rune]sub, protected []Range) []Finding {
 	var findings []Finding
 	runes := []rune(line)
 
@@ -91,7 +93,13 @@ func reportLine(line string, lineNo, base int, subs map[rune]sub, protected []Ra
 			continue
 		}
 
-		s, ok := lookup(r, subs)
+		s, ok := sub{}, false
+		if loc == LocaleFA {
+			s, ok = numberSeparator(runes, col-1)
+		}
+		if !ok {
+			s, ok = lookup(r, subs)
+		}
 		if !ok {
 			continue
 		}
@@ -107,6 +115,12 @@ func reportLine(line string, lineNo, base int, subs map[rune]sub, protected []Ra
 	}
 
 	findings = append(findings, reportZWNJ(line, lineNo, base, protected)...)
+	if loc == LocaleFA {
+		findings = append(findings, reportPersian(line, lineNo, base, protected)...)
+	}
+	// Each pass above walks the line on its own, so they are merged back into
+	// the order they appear in.
+	slices.SortStableFunc(findings, func(a, b Finding) int { return cmp.Compare(a.Offset, b.Offset) })
 	return findings
 }
 

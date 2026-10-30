@@ -62,7 +62,9 @@ const DefaultLimit = 20
 
 // Hit is one matching translation. Snippet is HTML, already escaped, with the
 // matching words wrapped in <mark>. Every other field is plain text.
-// SubjectKind is nil for an article with no subject.
+// SubjectKind is nil for an article with no subject. MatchedName is the other
+// name the article was found by, such as an alias, for showing
+// "Ormuz → Strait of Hormuz"; nil when the title itself matched.
 type Hit struct {
 	TranslationID string  `json:"translation_id"`
 	ArticleID     string  `json:"article_id"`
@@ -70,6 +72,7 @@ type Hit struct {
 	SubjectKind   *string `json:"subject_kind"`
 	Slug          string  `json:"slug"`
 	Title         string  `json:"title"`
+	MatchedName   *string `json:"matched_name"`
 	Snippet       string  `json:"snippet"`
 	Score         float32 `json:"score"`
 }
@@ -88,7 +91,7 @@ func Search(ctx context.Context, db DB, q Query) (Page, error) {
 
 	rows, err := db.Query(ctx, `
 		SELECT translation_id::text, article_id::text, language, subject_kind, slug,
-		       title, snippet, score, total
+		       title, matched_name, snippet, score, total
 		  FROM search_articles($1, $2, $3, $4, $5)`,
 		q.Text, nullIfEmpty(q.Language), nullIfEmpty(q.SubjectKind), limit, max(q.Offset, 0))
 	if err != nil {
@@ -100,7 +103,7 @@ func Search(ctx context.Context, db DB, q Query) (Page, error) {
 	for rows.Next() {
 		var h Hit
 		if err := rows.Scan(&h.TranslationID, &h.ArticleID, &h.Language, &h.SubjectKind,
-			&h.Slug, &h.Title, &h.Snippet, &h.Score, &page.Total); err != nil {
+			&h.Slug, &h.Title, &h.MatchedName, &h.Snippet, &h.Score, &page.Total); err != nil {
 			return Page{}, wrap("reading results", err)
 		}
 		page.Hits = append(page.Hits, h)
@@ -109,6 +112,66 @@ func Search(ctx context.Context, db DB, q Query) (Page, error) {
 		return Page{}, wrap("reading results", err)
 	}
 	return page, nil
+}
+
+// Suggestion is one entry of a search box's drop-down, as somebody types.
+// MatchedName is as on Hit.
+type Suggestion struct {
+	TranslationID string  `json:"translation_id"`
+	ArticleID     string  `json:"article_id"`
+	Language      string  `json:"language"`
+	Slug          string  `json:"slug"`
+	Title         string  `json:"title"`
+	MatchedName   *string `json:"matched_name"`
+}
+
+// DefaultSuggestLimit is how many suggestions Suggest returns when limit is not
+// set. The database caps it at 20.
+const DefaultSuggestLimit = 8
+
+// Suggest completes what has been typed so far into titles and other names.
+// An empty language means every language. It returns an empty slice, never
+// nil, when nothing matches.
+func Suggest(ctx context.Context, db DB, prefix, language string, limit int) ([]Suggestion, error) {
+	if limit <= 0 {
+		limit = DefaultSuggestLimit
+	}
+	rows, err := db.Query(ctx, `
+		SELECT translation_id::text, article_id::text, language, slug, title, matched_name
+		  FROM search_suggest($1, $2, $3)`,
+		prefix, nullIfEmpty(language), limit)
+	if err != nil {
+		return nil, wrap("suggesting", err)
+	}
+	defer rows.Close()
+
+	out := []Suggestion{}
+	for rows.Next() {
+		var s Suggestion
+		if err := rows.Scan(&s.TranslationID, &s.ArticleID, &s.Language, &s.Slug, &s.Title, &s.MatchedName); err != nil {
+			return nil, wrap("reading suggestions", err)
+		}
+		out = append(out, s)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, wrap("reading suggestions", err)
+	}
+	return out, nil
+}
+
+// DidYouMean returns a corrected query, or "" when every word of the query is
+// one some indexed article contains. Meant for a search that found little or
+// nothing. An empty language means every language.
+func DidYouMean(ctx context.Context, db DB, query, language string) (string, error) {
+	var fixed *string
+	if err := db.QueryRow(ctx, `SELECT search_did_you_mean($1, $2)`, query, nullIfEmpty(language)).
+		Scan(&fixed); err != nil {
+		return "", wrap("correcting the query", err)
+	}
+	if fixed == nil {
+		return "", nil
+	}
+	return *fixed, nil
 }
 
 // splitsPersianWords reports whether this database's locale lets the text

@@ -152,10 +152,14 @@ type Variant struct {
 // Placeholder is a tiny WebP of the whole image as a data URI, for the
 // frontend to show stretched while the real variant loads. It is empty when
 // Options.PlaceholderWidth is zero or the URI would exceed MaxPlaceholderBytes.
+//
+// Attribution is the author and licence the original file states, or nil when
+// it states none; see Attribution.
 type Result struct {
-	Source      Info      `json:"source"`
-	Variants    []Variant `json:"variants"`
-	Placeholder string    `json:"placeholder,omitempty"`
+	Source      Info         `json:"source"`
+	Variants    []Variant    `json:"variants"`
+	Placeholder string       `json:"placeholder,omitempty"`
+	Attribution *Attribution `json:"attribution,omitempty"`
 }
 
 // check applies the size limits to an already-read header. Returns nil when the

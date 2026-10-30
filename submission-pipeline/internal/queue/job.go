@@ -8,16 +8,20 @@ package queue
 import (
 	"encoding/json"
 	"time"
+
+	"wikipg/internal/normalize"
+	"wikipg/internal/tabular"
 )
 
 // JobType selects which handler processes a job.
 type JobType string
 
 const (
-	JobTypeImage    JobType = "image"
-	JobTypePanorama JobType = "panorama"
-	JobTypeTabular  JobType = "tabular"
-	JobTypeGeo      JobType = "geo"
+	JobTypeImage     JobType = "image"
+	JobTypePanorama  JobType = "panorama"
+	JobTypeTabular   JobType = "tabular"
+	JobTypeNormalize JobType = "normalize"
+	JobTypeGeo       JobType = "geo"
 )
 
 // Status is the lifecycle state of a job row, and is distinct from the
@@ -94,9 +98,10 @@ type Result struct {
 	// contain internal detail and must not be shown to contributors.
 	Error string `json:"error,omitempty"`
 
-	Tabular *TabularResult `json:"tabular,omitempty"`
-	Image   *ImageResult   `json:"image,omitempty"`
-	Geo     *GeoResult     `json:"geo,omitempty"`
+	Tabular   *tabular.Report  `json:"tabular,omitempty"`
+	Normalize *NormalizeResult `json:"normalize,omitempty"`
+	Image     *ImageResult     `json:"image,omitempty"`
+	Geo       *GeoResult       `json:"geo,omitempty"`
 }
 
 // Reason explains a rejection in a form the frontend can localise. Code is a
@@ -107,29 +112,15 @@ type Reason struct {
 	Detail map[string]string `json:"detail,omitempty"`
 }
 
-type TabularResult struct {
-	Columns   []Column   `json:"columns"`
-	RowCount  int        `json:"row_count"`
-	ValidRows int        `json:"valid_rows"`
-	RowErrors []RowError `json:"row_errors"`
-
-	// ErrorsTruncated is how many row errors were dropped from RowErrors to
-	// keep the stored result small.
-	ErrorsTruncated int `json:"errors_truncated"`
-
-	NormalizedKey string `json:"normalized_key,omitempty"`
-}
-
-type Column struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
-}
-
-type RowError struct {
-	Row    int               `json:"row"`
-	Column string            `json:"column,omitempty"`
-	Code   string            `json:"code"`
-	Detail map[string]string `json:"detail,omitempty"`
+// NormalizeResult is what a normalize job found in one revision. Count is
+// every finding; Findings holds the first of them, and FindingsTruncated says
+// how many were left out to keep the stored result small.
+type NormalizeResult struct {
+	RevisionID        string              `json:"revision_id"`
+	Locale            string              `json:"locale"`
+	Count             int                 `json:"count"`
+	Findings          []normalize.Finding `json:"findings"`
+	FindingsTruncated int                 `json:"findings_truncated,omitempty"`
 }
 
 type ImageResult struct {
@@ -146,6 +137,11 @@ type ImageResult struct {
 	// most 16 KiB, to show while a variant loads. Empty when none was made.
 	Placeholder string `json:"placeholder,omitempty"`
 
+	// Attribution is the author and licence the original file states, for a
+	// reviewer to check against what the uploader declared. Nil when the file
+	// states none. It is what the file claims, not a verified fact.
+	Attribution *Attribution `json:"attribution,omitempty"`
+
 	// Original is the untouched upload, saved beside the variants so it outlives
 	// whatever the raw bucket's own lifecycle does to the staging copy.
 	//
@@ -153,6 +149,16 @@ type ImageResult struct {
 	// the camera wrote, including any location data, and may be a format a
 	// browser cannot show.
 	Original *Original `json:"original,omitempty"`
+}
+
+// Attribution mirrors imagepipe.Attribution. Every field is optional.
+type Attribution struct {
+	Author     string `json:"author,omitempty"`
+	Credit     string `json:"credit,omitempty"`
+	Copyright  string `json:"copyright,omitempty"`
+	License    string `json:"license,omitempty"`
+	LicenseURL string `json:"license_url,omitempty"`
+	CreatedAt  string `json:"created_at,omitempty"`
 }
 
 // Original is where the saved copy of an upload lives.

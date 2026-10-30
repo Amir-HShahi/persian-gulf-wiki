@@ -22,7 +22,7 @@ app ──SELECT search_articles(...)──▶ ranked hits + snippets
 | Path | What it does |
 |---|---|
 | `internal/queue` | The job queue on Postgres: claiming, heartbeats, retries, dead-lettering. `schema.sql` creates the table. |
-| `internal/handler` | The image job handler. |
+| `internal/handler` | The job handlers: image and panorama, spreadsheet, text check. |
 | `internal/imagepipe` | The image engine, built on libvips. |
 | `internal/storage` | MinIO/S3 client. |
 | `internal/search` | Article search index. `schema.sql` holds all of it. |
@@ -33,8 +33,8 @@ app ──SELECT search_articles(...)──▶ ranked hits + snippets
 | `cmd/worker` | The service. |
 | `cmd/imgpipe`, `cmd/normalize`, `cmd/tabular`, `cmd/search` | Small command-line tools over the packages above. |
 
-Only **image** and **panorama** jobs are wired into the worker today. `normalize` and `tabular`
-work as packages and CLIs but have no job type yet.
+The worker runs four job types: `image`, `panorama`, `tabular` (spreadsheets) and
+`normalize` (text checks on an article revision). `geo` is not built yet.
 
 ## Why it is built this way
 
@@ -67,6 +67,10 @@ work as packages and CLIs but have no job type yet.
   second matters for iPhone photos, which are Display P3: left as is, their colours come out
   wrong once the profile is removed. EXIF rotation is applied before sizing, because phones
   store portraits sideways and sizing from the stored shape makes every variant too small.
+* **The author and licence are read before the metadata is stripped.** Wikimedia Commons
+  requires both on every file. Cameras and photo editors often record them already, and once
+  the variants are stripped that record is gone, so the worker reads those few fields from the
+  original and returns them for a reviewer, and nothing else: never location or serial numbers.
 * **The header is checked before any pixel is decoded**, so a few bytes that claim to be
   40,000 x 40,000 pixels are refused instead of allocated.
 * **libvips is behind a build tag, and the worker refuses to start without it.** The queue
@@ -120,8 +124,8 @@ notification is ever missed, the worker's polling picks the job up anyway.
   over 30,000 px, before decoding a single pixel. This is what stops a tiny file
   that claims to be 40,000 x 40,000.
 * Decodes with libvips. JPEG, PNG, WebP, GIF, TIFF, HEIC and AVIF were all tested.
-* Applies the EXIF rotation, converts colours to sRGB, and strips all metadata,
-  GPS included.
+* Reads the **author and licence** the original states (see below), then applies the EXIF
+  rotation, converts colours to sRGB, and strips all metadata from the variants, GPS included.
 * Writes WebP (quality 85) at **320, 640, 1280 and 1920 px wide**. Height follows
   the image's shape. A width above the source's is skipped rather than upscaled
   (the source's own width is kept: that is a re-encode), and an image narrower
@@ -161,6 +165,10 @@ notification is ever missed, the worker's polling picks the job up anyway.
     "width": 3000, "height": 4000, "format": "jpeg",
     "sha256": "n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=",
     "placeholder": "data:image/webp;base64,UklGRjAAAABXRUJQVlA4...",
+    "attribution": {"author": "مریم احمدی", "copyright": "© 2026 مریم احمدی",
+                    "license": "CC BY-SA 4.0",
+                    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+                    "created_at": "2024-05-01T10:20:30"},
     "variants": [
       {"label": "w320", "format": "webp", "key": "pending/9b1e7c3a/w320.webp", "width": 320, "height": 427, "bytes": 11874}
     ],
@@ -185,6 +193,28 @@ a translated message for each. `reason.detail` is for the logs only; for
 | `checksum_mismatch` | The file's SHA-256 is not `declared_sha256`. |
 | `object_missing` | `object_key` is not in the raw bucket. Not about the file, so core shows its generic "rejected". |
 | `malformed_payload` | Bad JSON, an invalid `submission_id`, or a `declared_sha256` that is not base64 of 32 bytes. A bug in whoever enqueued the job; core shows its generic "rejected". |
+
+### Author and licence
+
+`image.attribution` is what the file itself says about who made it and on what terms. It is
+left out when the file says nothing. Every field is optional, one line, at most 300 characters:
+
+| Field | From XMP (preferred) | From EXIF |
+|---|---|---|
+| `author` | `dc:creator` (several are joined with `; `) | `Artist` |
+| `credit` | `photoshop:Credit` | |
+| `copyright` | `dc:rights` | `Copyright` |
+| `license` | `xmpRights:UsageTerms`, e.g. "CC BY-SA 4.0" | |
+| `license_url` | `cc:license`, else `xmpRights:WebStatement` | |
+| `created_at` | `photoshop:DateCreated`, `exif:DateTimeOriginal`, `xmp:CreateDate` | `DateTimeOriginal` (as `2024-05-01T10:20:30`, no time zone) |
+
+XMP wins because it is UTF-8: EXIF text is ASCII only, so a Persian name can only survive in
+XMP, and licences are only written there. It is read from the original, before anything is
+stripped, and no other metadata field is read at all.
+
+**It is a claim, not proof.** Anyone can type any name into a file. It is there so a reviewer
+can compare it with the licence the uploader declares, and spot a photo whose file names
+someone else, as Commons reviewers do.
 
 ### Panoramas
 
@@ -214,6 +244,115 @@ VALUES ('panorama', '{"submission_id": "9b1e7c3a", "object_key": "uploads/9b1e7c
   worker in turn.
 * On shutdown the worker stops taking jobs and lets running ones finish.
 
+## Monitoring and clean-up
+
+### Metrics
+
+`GET :8080/metrics` serves the worker's numbers in Prometheus' text format, beside
+`/healthz` on the same internal port:
+
+| Metric | Kind | What it shows |
+|---|---|---|
+| `wikipg_queue_up` | gauge | 1 if the jobs table could be read. When 0, the queue numbers below are left out rather than shown as an empty queue. |
+| `wikipg_jobs{type,status}` | gauge | rows in the jobs table now |
+| `wikipg_jobs_oldest_due_seconds` | gauge | how long the longest-waiting due job has waited. The number to alert on: it rises when the queue falls behind, however long it is. |
+| `wikipg_job_attempts_total{type,outcome}` | counter | attempts this process finished: `ok`, `rejected`, `retry` or `failed` |
+| `wikipg_job_duration_seconds{type}` | histogram | how long each attempt took, 0.1 s to 5 min buckets |
+| `wikipg_jobs_deleted_total{status}` | counter | finished jobs this process's clean-up deleted |
+
+The queue's rows are counted from the database on each scrape, so every worker
+reports the same numbers; the counters are this process's own since it started.
+No client library is used: the format is a few lines of text.
+
+### Old jobs are deleted
+
+Every job leaves a row, so without a limit the table only grows. Once an hour the
+worker deletes, in batches of 1000:
+
+* `done` jobs 30 days after they finished (`JOBS_KEEP_DONE`),
+* `failed` jobs after 90 days (`JOBS_KEEP_FAILED`), longer because a person may
+  still need to look at why.
+
+Pending and running jobs are never deleted. `0` keeps a status forever. Anything
+under 24 hours is refused at start: core reads an image's result within seconds,
+but a revision's text checks wait for a moderator, and a window typed as `10m`
+instead of `10d` must not delete them first. Core copies what it needs to keep
+into its own tables.
+
+## Spreadsheet jobs
+
+```sql
+INSERT INTO jobs (type, payload)
+VALUES ('tabular', '{"submission_id": "9b1e7c3a", "object_key": "uploads/9b1e7c3a"}');
+```
+
+The worker downloads the file from the raw bucket and decides from its bytes whether it is
+CSV or XLSX (never from a name). It reports the file's shape: `format`, `rows` (data rows,
+header excluded), `columns`, and `problems`, grouped by kind with a count and up to ten
+sample row numbers each. The problem codes are `no_rows`, `no_header`, `duplicate_column`,
+`blank_column_name`, `empty_row`, `row_longer_than_header` and `unreadable_rows`.
+
+**A file with problems is not rejected.** The outcome is `ok` with the report, for a reviewer
+to decide on. The values themselves are never judged. Only these are refused:
+
+| Reason code | When |
+|---|---|
+| `unsupported_format` | Not CSV or XLSX (an empty file included). |
+| `corrupt_file` | Starts like one of them but cannot be read through. |
+| `file_too_large` | Over `WORKER_MAX_FILE_BYTES`. |
+| `object_missing`, `malformed_payload` | As for images. |
+
+```json
+"tabular": {"format": "csv", "rows": 3, "columns": 3,
+            "problems": [{"code": "empty_row", "count": 1, "sample_rows": [2]}]}
+```
+
+## Text check jobs (normalize)
+
+```sql
+INSERT INTO jobs (type, payload)
+VALUES ('normalize', '{"revision_id": "<article_revisions.id>"}');
+```
+
+The worker reads that revision from core's tables, and checks its title, summary and the
+prose of its body (the same text `search_body_text` gives search) against the rules for the
+translation's language: `fa`, `ar` or `en`, region ignored (`fa-IR` is `fa`).
+
+It **never changes the revision**. Each finding is a suggestion: an Arabic ي or ك in a Persian
+article, an invisible character, mixed digits. A reviewer accepts or rejects it, because a
+spelling can be a deliberate quotation. The same letters in an Arabic article are not findings.
+
+```json
+"normalize": {"revision_id": "…", "locale": "fa", "count": 2,
+              "findings": [{"rule": "…", "line": 2, "column": 4, "offset": 21,
+                            "found": "ي", "suggest": "ی", "context": "جزيره كيش"}]}
+```
+
+In a Persian article it also checks typography, like the bots and editing tools Persian
+Wikipedia uses. Only rules that are almost never wrong are included, because a reviewer shown
+false suggestions stops reading them:
+
+| Rule | Example | Suggests |
+|---|---|---|
+| `detached_prefix` | `می شود`, `نمی داند` | the space becomes a ZWNJ: `می‌شود` |
+| `detached_suffix` | `کتاب ها`, `بزرگ ترین` | `کتاب‌ها`, `بزرگ‌ترین` (ها, های, هایی, هایم… and ترین) |
+| `latin_quotes` | `"سلام"` | `«سلام»`; quotes around English text are left alone |
+| `space_before_punctuation` | `سلام ،` | `سلام،` (also before ؛ ؟ !) |
+| `no_space_after_punctuation` | `سلام،خوبی` | `سلام، خوبی` |
+| `thousands_separator` / `decimal_separator` | `۱,۲۰۰`, `۳.۵` | `۱٬۲۰۰`, `۳٫۵`, not the Persian comma ، |
+
+Left out on purpose: a prefix with no break at all (`میشود` looks like `میز`), and `تر` written
+apart (alone it means "wet").
+
+`count` is every finding; `findings` keeps the first 500, and `findings_truncated` says how
+many were left out. `line` and `column` count in that combined text: the title is line 1.
+
+| Reason code | When |
+|---|---|
+| `revision_missing` | No revision has that id. |
+| `unsupported_locale` | There are no rules for the translation's language. |
+| `malformed_payload` | Bad JSON, or `revision_id` is not a UUID. |
+
 ## Search
 
 `internal/search/schema.sql` creates a `search_documents` table and the functions
@@ -223,17 +362,27 @@ subject, if it has one, is not deleted.
 
 It reads these tables and nothing else: `subjects(id, kind, deleted_at)`,
 `articles(id, subject_id)`, `article_translations(id, article_id, language, slug,
-current_revision_id)` and `article_revisions(id, title, summary, body)`. If those
-names or columns change, update `schema.sql`. It has no triggers, no foreign keys
+current_revision_id)`, `article_revisions(id, title, summary, body)`, and a
+subject's names: `labels(subject_id, value)`, `subject_aliases(subject_id, value)`
+and `subject_redirects(source_id, target_id)`. If those names or columns change,
+update `schema.sql`. It has no triggers, no foreign keys
 and no views on them, so a search problem can never fail an article write or block
 one of core's migrations: the index simply falls behind.
 
 The article body is free-form JSON, so the text is taken from the values of the
 keys `title`, `text`, `caption` and `alt` at any depth.
 
+**Other names, like Wikipedia's redirects.** An article about a subject is also
+found by the subject's name in every language (its labels), its aliases, and the
+names and aliases of any subject merged into it. They count as much as the title,
+so "Qays" finds the Kish article as if it were its title, and a hit found that way
+says so in `matched_name`, for showing "Qays → Kish Island". Typo matching covers
+them too.
+
 **Keeping it fresh:** the worker syncs every `SEARCH_SYNC_INTERVAL` (30 s), so a
 newly approved article is searchable within that. Unpublished or deleted articles
-leave the index at the same sync.
+leave the index at the same sync, and so does a change to a subject's names: a new
+alias or a merge needs no new revision.
 
 **Querying:**
 
@@ -242,8 +391,9 @@ SELECT * FROM search_articles('تنگه هرمز', 'fa', NULL, 20, 0);
 --                            query,       language, subject_kind, limit, offset
 ```
 
-Returns `translation_id, article_id, language, subject_kind, slug, title, snippet,
-score, total` (`total` is the full match count on every row, for paging).
+Returns `translation_id, article_id, language, subject_kind, slug, title,
+matched_name, snippet, score, total` (`total` is the full match count on every row,
+for paging; `matched_name` is null when the title itself matched).
 `subject_kind` is null for an article with no subject, and a kind filter leaves
 those out. `snippet`
 is HTML with matches in `<mark>`, already escaped, so it is safe to render as is.
@@ -255,8 +405,33 @@ forms for `en` articles; and misspelt titles when nothing matches exactly. Title
 rank above slug and summary, which rank above the body. Persian and Arabic have no
 stemmer in Postgres, so prefix matching stands in for one.
 
-If the folding rules in `search_fold` ever change, run `TRUNCATE search_documents`
-and the worker rebuilds the index on its next sync.
+**Suggestions while typing:**
+
+```sql
+SELECT * FROM search_suggest('هرم', 'fa', 8);   -- text so far, language, limit (max 20)
+```
+
+Returns `translation_id, article_id, language, slug, title, matched_name`: titles and
+other names that start with what was typed, every word as a prefix. A title that
+starts with the text comes first, then an other name that does, then shorter titles
+before longer ones. It reads one small index, so it can run on every keystroke.
+
+**"Did you mean":**
+
+```sql
+SELECT search_did_you_mean('hormuzz strait', NULL);   -- → 'Hormuz strait'
+```
+
+Each word of the query that no indexed article contains is replaced by the closest
+word some article does contain; known words are kept as typed. It returns null when
+there is nothing to correct, and a spelling that folds to a known word (Arabic ي for
+Persian ی) is not a typo. The vocabulary (`search_terms`) is rebuilt whenever a sync
+changes the index. Show it above the results when a search finds nothing or little.
+
+**Changing the index's shape:** `search_documents` carries a version in its table
+comment. When `schema.sql` changes the table, bump the version: the worker then
+drops the old index on start and the next sync rebuilds it. The same goes for a
+change to the folding rules in `search_fold`, since stored rows are not rewritten.
 
 ## Database setup
 
@@ -277,9 +452,10 @@ Until then the worker idles: the queue and the search sync each log once that th
 table is missing, and resume as soon as it exists.
 
 The worker's database user needs `CREATE` on the schema and the right to create
-`pg_trgm` (core's user in the compose files has both); `SELECT, UPDATE` on `jobs`;
-`SELECT` on the four tables above; and `LISTEN`. It never inserts into `jobs`, and
-finished rows are never deleted by the worker, so decide how long to keep them.
+`pg_trgm` (core's user in the compose files has both); `SELECT, UPDATE, DELETE` on `jobs`;
+`SELECT` on the seven tables above; and `LISTEN`. It never inserts into `jobs`; it
+deletes finished rows once they are old enough (see Monitoring and clean-up), so it
+also needs `DELETE` on `jobs`.
 
 ## Configuration
 
@@ -302,6 +478,7 @@ All environment variables. `-` means required.
 | `WORKER_MAX_ATTEMPTS` | `5` | for jobs that set none |
 | `WORKER_RETRY_BASE_DELAY` | `30s` | |
 | `SEARCH_SYNC_INTERVAL` / `SEARCH_SYNC_BATCH` | `30s` / `500` | |
+| `JOBS_KEEP_DONE` / `JOBS_KEEP_FAILED` | `720h` / `2160h` | 30 / 90 days; `0` keeps forever, otherwise at least `24h` |
 | `LOG_LEVEL` | `info` | |
 
 The worker starts only if the settings are consistent, and reports every problem
@@ -321,8 +498,9 @@ images would discard real jobs.
 
 The `Dockerfile` (build context is the repository root) builds with libvips and the
 HEIF decoders, fails the build if the HEIF loader is missing, runs as a non-root
-user, and health-checks `GET :8080/healthz`. That port is fixed in the code, so
-inside a container that publishes nothing it will not clash with the app.
+user, and health-checks `GET :8080/healthz` (`/metrics` is on the same port). That
+port is fixed in the code, so inside a container that publishes nothing it will not
+clash with the app.
 
 ## CI and deployment
 
@@ -384,13 +562,13 @@ go run ./cmd/search -q "تنگه هرمز" -lang fa -dsn "$DSN"     # query the 
 ## For the app side
 
 See [CORE_CHANGES.md](CORE_CHANGES.md): what core changes to send image jobs here
-instead of Redis, how to read results, the one search query to call, and which
+instead of Redis, how to read results, the three search queries to call, and which
 differences from `docs/MEDIA_PIPELINE.md` are deliberate.
 
 ## Not done yet
 
 * **The contract with core**: see [CORE_CHANGES.md](CORE_CHANGES.md).
-* **Other job types.** Spreadsheet, normalize and geo jobs are not wired in.
+* **Geo jobs.** Not wired in, because `internal/geo` is not built.
 * **Geo.** `internal/geo` (shapefile to GeoJSON) is unimplemented, so there is no
   `shp2geojson` command.
 * **Format allowlist.** Anything libvips can read is accepted today. Limiting it to a list of

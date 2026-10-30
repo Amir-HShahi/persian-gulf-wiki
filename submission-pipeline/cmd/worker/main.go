@@ -45,6 +45,9 @@ func run() error {
 	}))
 	slog.SetDefault(log)
 
+	// The background loops below stop only when ctx is cancelled, so each wait
+	// for one calls stop first. Otherwise a startup error after they begin would
+	// hang the process instead of exiting.
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -82,7 +85,7 @@ func run() error {
 			},
 		}).Run(ctx)
 	}()
-	defer func() { <-installDone }()
+	defer func() { stop(); <-installDone }()
 
 	// Search sync runs beside the job loop and shares its pool. Nothing it hits
 	// can stop the worker: a database without the search schema, or a failed
@@ -98,16 +101,35 @@ func run() error {
 			Batch:    cfg.Search.SyncBatch,
 		}).Run(ctx)
 	}()
-	defer func() { <-searchDone }()
+	defer func() { stop(); <-searchDone }()
+
+	jobs := queue.NewStore(pool)
+	metrics := NewMetrics()
+
+	// Old finished jobs are deleted beside the job loop, like search sync, and
+	// nothing it hits stops the worker.
+	cleanupDone := make(chan struct{})
+	go func() {
+		defer close(cleanupDone)
+		(&queue.Cleaner{
+			Store:      jobs,
+			Log:        log.With("component", "cleanup"),
+			Interval:   time.Hour,
+			KeepDone:   cfg.Jobs.KeepDone,
+			KeepFailed: cfg.Jobs.KeepFailed,
+			OnDelete:   metrics.JobsDeleted,
+		}).Run(ctx)
+	}()
+	defer func() { stop(); <-cleanupDone }()
 
 	health := &Health{}
 	health.MarkPoll() // don't report stale before the first poll
 	// hardcoded fix: from HEALTH_ADDR / HEALTH_MAX_AGE
-	healthSrv := startHealthServer(log, health, ":8080", 30*time.Second)
+	healthSrv := startHealthServer(log, health, metrics.Handle(log, jobs.Stats), ":8080", 30*time.Second)
 	defer shutdownHealthServer(healthSrv, log)
 
 	runner := queue.NewRunner(
-		queue.NewStore(pool),
+		jobs,
 		log,
 		queue.RunnerConfig{
 			Concurrency:       cfg.Worker.Concurrency,
@@ -121,6 +143,7 @@ func run() error {
 		identity(),
 		health.MarkPoll,
 	)
+	runner.OnFinish(metrics.JobFinished)
 
 	// The runner claims every job and dead-letters any type it has no handler
 	// for, so a binary that cannot process images must not start: it would
@@ -147,6 +170,11 @@ func run() error {
 		DerivedBucket: cfg.Storage.DerivedBucket,
 		Options:       imagepipe.PanoramaOptions(),
 	})
+	runner.Register(queue.JobTypeTabular, &handler.Tabular{
+		Store:     store,
+		RawBucket: cfg.Storage.RawBucket,
+	})
+	runner.Register(queue.JobTypeNormalize, &handler.Normalize{})
 
 	log.Info("worker ready", "config", cfg, "identity", identity())
 
@@ -179,9 +207,10 @@ func newPool(ctx context.Context, dbCfg config.Database) (*pgxpool.Pool, error) 
 	return pool, nil
 }
 
-func startHealthServer(log *slog.Logger, health *Health, addr string, maxAge time.Duration) *http.Server {
+func startHealthServer(log *slog.Logger, health *Health, metrics http.HandlerFunc, addr string, maxAge time.Duration) *http.Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", health.Handle(maxAge))
+	mux.HandleFunc("/metrics", metrics)
 
 	srv := &http.Server{
 		Addr:              addr,

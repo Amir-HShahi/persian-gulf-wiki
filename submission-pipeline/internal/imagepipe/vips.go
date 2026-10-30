@@ -64,6 +64,25 @@ func Inspect(srcPath string, opt Options) (Info, *Rejection, error) {
 	return info, check(info, opt), nil
 }
 
+// readAttribution opens the file's header, which is where its metadata is, and
+// reads the author and licence fields from EXIF and XMP. Nothing else is read.
+func readAttribution(srcPath string) (*Attribution, error) {
+	img, err := vips.NewImageFromFile(srcPath)
+	if err != nil {
+		return nil, err
+	}
+	defer img.Close()
+
+	var xmp []byte
+	for _, f := range img.ImageFields() {
+		if f == "xmp-data" {
+			xmp = img.GetBlob("xmp-data")
+			break
+		}
+	}
+	return attributionFrom(img.GetExif(), xmp), nil
+}
+
 // unreadableCode is RejectUnsupported when the file's leading bytes match no
 // image format libvips knows, and RejectCorrupt when they do.
 func unreadableCode(srcPath string) string {
@@ -98,6 +117,14 @@ func Process(ctx context.Context, srcPath, outDir string, opt Options) (Result, 
 
 	widths := plan(opt.Widths, info.Width)
 	result := Result{Source: info, Variants: make([]Variant, 0, len(widths))}
+
+	// Read from the original, before any variant is made: the variants are
+	// stripped of all metadata, so this is the only point it can be read.
+	attribution, err := readAttribution(srcPath)
+	if err != nil {
+		return Result{}, fmt.Errorf("reading attribution: %w", err)
+	}
+	result.Attribution = attribution
 
 	for _, w := range widths {
 		if err := ctx.Err(); err != nil {
