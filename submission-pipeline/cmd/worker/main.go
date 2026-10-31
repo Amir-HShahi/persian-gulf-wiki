@@ -17,6 +17,7 @@ import (
 	"wikipg/internal/handler"
 	"wikipg/internal/imagepipe"
 	"wikipg/internal/install"
+	"wikipg/internal/links"
 	"wikipg/internal/queue"
 	"wikipg/internal/search"
 	"wikipg/internal/storage"
@@ -175,6 +176,7 @@ func run() error {
 		RawBucket: cfg.Storage.RawBucket,
 	})
 	runner.Register(queue.JobTypeNormalize, &handler.Normalize{})
+	runner.Register(queue.JobTypeLinks, &handler.Links{Checker: links.NewChecker(cfg.Links.ArchiveURL)})
 
 	log.Info("worker ready", "config", cfg, "identity", identity())
 

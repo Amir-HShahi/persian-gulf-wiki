@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"wikipg/internal/links"
 	"wikipg/internal/normalize"
 	"wikipg/internal/tabular"
 )
@@ -21,6 +22,7 @@ const (
 	JobTypePanorama  JobType = "panorama"
 	JobTypeTabular   JobType = "tabular"
 	JobTypeNormalize JobType = "normalize"
+	JobTypeLinks     JobType = "links"
 	JobTypeGeo       JobType = "geo"
 )
 
@@ -100,6 +102,7 @@ type Result struct {
 
 	Tabular   *tabular.Report  `json:"tabular,omitempty"`
 	Normalize *NormalizeResult `json:"normalize,omitempty"`
+	Links     *LinksResult     `json:"links,omitempty"`
 	Image     *ImageResult     `json:"image,omitempty"`
 	Geo       *GeoResult       `json:"geo,omitempty"`
 }
@@ -121,6 +124,18 @@ type NormalizeResult struct {
 	Count             int                 `json:"count"`
 	Findings          []normalize.Finding `json:"findings"`
 	FindingsTruncated int                 `json:"findings_truncated,omitempty"`
+}
+
+// LinksResult is what a links job found in one revision: every external link
+// in it, in the order they appear, and what checking each one found. Broken
+// counts the links a reviewer should look at: broken, plus unreachable, which
+// may only be down for now.
+type LinksResult struct {
+	RevisionID     string       `json:"revision_id"`
+	Count          int          `json:"count"`
+	Broken         int          `json:"broken"`
+	Links          []links.Link `json:"links"`
+	LinksTruncated int          `json:"links_truncated,omitempty"`
 }
 
 type ImageResult struct {
