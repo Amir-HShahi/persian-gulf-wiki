@@ -267,6 +267,10 @@ func isTimeout(err error) bool {
 // redirect to one, is refused as surely as a link to 127.0.0.1. Article links
 // are typed by contributors, and without this a link could make the worker
 // request the database, object storage or a cloud metadata service.
+//
+// Only ports 80 and 443 are allowed, on purpose, even though a few real
+// sources use others: any port would let links turn the worker into a port
+// scanner of public hosts. Such a link shows as blocked for a reviewer.
 func publicOnly(_, address string, _ syscall.RawConn) error {
 	host, port, err := net.SplitHostPort(address)
 	if err != nil {
