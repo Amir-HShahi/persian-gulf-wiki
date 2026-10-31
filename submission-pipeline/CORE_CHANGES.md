@@ -223,7 +223,7 @@ that happens.
 
 ## 4. Spreadsheets and text checks: ready when you want them
 
-Two more job types run already. Neither needs anything from core until you use it:
+Three more job types run already. None needs anything from core until you use it:
 
 * **`tabular`**: `{"submission_id", "object_key"}` for a CSV or XLSX in the staging bucket.
   The result's `tabular` block is the file's shape and its structural problems, for a
@@ -236,7 +236,15 @@ Two more job types run already. Neither needs anything from core until you use i
   Treat `rule` as an open list: show `found`, `suggest` and `context`, and translate only
   the rule names you want a label for, since new rules can appear.
 
-Both are described in the README with their result and reject codes.
+* **`links`**: `{"revision_id"}`, like `normalize`. The worker checks every external link in
+  the body and returns `links.links`, one entry per link with a `status` (`ok`,
+  `redirected`, `broken`, `unreachable`, `restricted`, `blocked`, `unchecked`) and, for a
+  dead one, an `archive_url` from the Wayback Machine to offer instead. `links.broken` is
+  the number worth a moderator's look. Enqueue it beside `normalize` when a revision is
+  submitted; it can take a minute, so don't wait for it before showing the revision.
+  `restricted` only means the site refuses robots, so please don't show it as broken.
+
+All three are described in the README with their result and reject codes.
 
 ## 5. Database role
 
