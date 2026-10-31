@@ -51,3 +51,26 @@ func TestJobRetentionIsZeroOrAtLeastADay(t *testing.T) {
 		})
 	}
 }
+
+func TestTheArchiveLookupDefaultsToWaybackAndCanBeTurnedOff(t *testing.T) {
+	setRequired(t)
+	cfg, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Links.ArchiveURL != "https://archive.org/wayback/available" {
+		t.Errorf("default archive url %q", cfg.Links.ArchiveURL)
+	}
+
+	t.Setenv("LINKS_ARCHIVE_URL", "off")
+	if cfg, err = Load(); err != nil || cfg.Links.ArchiveURL != "" {
+		t.Errorf("off: %q, %v", cfg.Links.ArchiveURL, err)
+	}
+
+	for _, bad := range []string{"archive.org", "ftp://archive.org/x", "https://"} {
+		t.Setenv("LINKS_ARCHIVE_URL", bad)
+		if _, err := Load(); err == nil || !strings.Contains(err.Error(), "LINKS_ARCHIVE_URL") {
+			t.Errorf("%q: %v", bad, err)
+		}
+	}
+}

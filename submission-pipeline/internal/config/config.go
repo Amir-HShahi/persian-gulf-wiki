@@ -21,6 +21,7 @@ type Config struct {
 	Worker   Worker
 	Search   Search
 	Jobs     Jobs
+	Links    Links
 	LogLevel slog.Level
 }
 
@@ -103,6 +104,18 @@ type Jobs struct {
 	KeepFailed time.Duration
 }
 
+// Links controls the dead-link check.
+type Links struct {
+	// ArchiveURL is the Wayback Machine availability API, asked for an archived
+	// copy of each broken link. Empty means do not ask: each broken link's
+	// address is otherwise sent to archive.org.
+	ArchiveURL string
+}
+
+// linksArchiveOff turns the archive lookup off, since an empty variable means
+// "use the default" for every setting.
+const linksArchiveOff = "off"
+
 // minJobsKeep is the shortest retention allowed. Results are read by core
 // within seconds, but text checks wait for a moderator, and a window typed as
 // "10m" instead of "10d" must not delete them first.
@@ -149,6 +162,9 @@ func Load() (Config, error) {
 			KeepDone:   l.optDuration("JOBS_KEEP_DONE", 30*24*time.Hour),
 			KeepFailed: l.optDuration("JOBS_KEEP_FAILED", 90*24*time.Hour),
 		},
+		Links: Links{
+			ArchiveURL: l.optText("LINKS_ARCHIVE_URL", "https://archive.org/wayback/available"),
+		},
 	}
 
 	if cfg.Worker.Concurrency < 1 {
@@ -176,6 +192,11 @@ func Load() (Config, error) {
 		if keep.d != 0 && keep.d < minJobsKeep {
 			l.errorf("%s must be 0 (keep forever) or at least %s, got %s", keep.name, minJobsKeep, keep.d)
 		}
+	}
+	if cfg.Links.ArchiveURL == linksArchiveOff {
+		cfg.Links.ArchiveURL = ""
+	} else if u, err := url.Parse(cfg.Links.ArchiveURL); err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" {
+		l.errorf("LINKS_ARCHIVE_URL must be an http(s) URL or %q, got %q", linksArchiveOff, cfg.Links.ArchiveURL)
 	}
 	if cfg.Database.MaxConns < 1 {
 		l.errorf("DB_MAX_CONNS must be at least 1, got %d", cfg.Database.MaxConns)

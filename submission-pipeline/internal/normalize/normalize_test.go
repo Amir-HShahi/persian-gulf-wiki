@@ -40,13 +40,12 @@ func TestPersianLetterAndDigitRules(t *testing.T) {
 	}
 }
 
-func TestAlefMaddaIsLeftAlone(t *testing.T) {
-	// آ is part of the word; only أ and إ are reported.
-	if fs := Report("آب", LocaleFA, nil); len(fs) != 0 {
-		t.Errorf("alef madda should not be reported, got %v", rulesOf(fs))
-	}
-	if fs := Report("أب", LocaleFA, nil); !hasRule(fs, "alef_hamza") {
-		t.Errorf("alef hamza should be reported, got %v", rulesOf(fs))
+func TestAlefFormsAreLeftAlone(t *testing.T) {
+	// Each is how Persian spells the word, not a slip for a bare alef.
+	for _, word := range []string{"آب", "تأثیر", "تأسیس", "إسلام"} {
+		if fs := Report(word, LocaleFA, nil); len(fs) != 0 {
+			t.Errorf("%s should not be reported, got %v", word, rulesOf(fs))
+		}
 	}
 }
 

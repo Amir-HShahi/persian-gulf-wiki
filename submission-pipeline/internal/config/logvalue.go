@@ -12,6 +12,7 @@ func (c Config) LogValue() slog.Value {
 		slog.Any("worker", c.Worker),
 		slog.Any("search", c.Search),
 		slog.Any("jobs", c.Jobs),
+		slog.Any("links", c.Links),
 	)
 }
 
@@ -62,6 +63,10 @@ func (j Jobs) LogValue() slog.Value {
 		slog.Duration("keep_done", j.KeepDone),
 		slog.Duration("keep_failed", j.KeepFailed),
 	)
+}
+
+func (l Links) LogValue() slog.Value {
+	return slog.GroupValue(slog.String("archive_url", l.ArchiveURL))
 }
 
 // redacted reports whether a secret is set without revealing it.

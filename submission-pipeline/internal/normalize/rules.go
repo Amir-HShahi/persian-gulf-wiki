@@ -67,10 +67,8 @@ func persianRules() map[rune]sub {
 		arabicKaf:      {rule: "arabic_kaf", suggest: string(persianKeheh)},
 		arabicYeh:      {rule: "arabic_yeh", suggest: string(persianYeh)},
 		alefMaksura:    {rule: "alef_maksura", suggest: string(persianYeh)},
-		alefHamzaAbove: {rule: "alef_hamza", suggest: string(bareAlef)},
-		alefHamzaBelow: {rule: "alef_hamza", suggest: string(bareAlef)},
-		// alefMadda (آ) is absent on purpose: the madda is part of the word,
-		// not a typing artifact.
+		// أ, إ and آ are absent on purpose: Persian spells words with them,
+		// تأثیر, تأسیس, آب, so none is a typing slip. Search still folds them.
 		'?': {rule: "latin_question_mark", suggest: string(arabicQuestion)},
 		',': {rule: "latin_comma", suggest: string(arabicComma)},
 		';': {rule: "latin_semicolon", suggest: string(arabicSemicolon)},
