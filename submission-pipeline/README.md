@@ -22,19 +22,21 @@ app ──SELECT search_articles(...)──▶ ranked hits + snippets
 | Path | What it does |
 |---|---|
 | `internal/queue` | The job queue on Postgres: claiming, heartbeats, retries, dead-lettering. `schema.sql` creates the table. |
-| `internal/handler` | The job handlers: image and panorama, spreadsheet, text check. |
+| `internal/handler` | The job handlers: image and panorama, spreadsheet, text check, links. |
 | `internal/imagepipe` | The image engine, built on libvips. |
 | `internal/storage` | MinIO/S3 client. |
 | `internal/search` | Article search index. `schema.sql` holds all of it. |
 | `internal/install` | Applies both `schema.sql` files once core's migrations have run. |
 | `internal/normalize` | Finds Persian/Arabic text problems (reports only, never rewrites). |
+| `internal/links` | Finds the external links in an article body and checks each one. |
 | `internal/tabular` | Inspects CSV/XLSX files for structural faults. |
 | `internal/config` | Settings from environment variables. |
 | `cmd/worker` | The service. |
 | `cmd/imgpipe`, `cmd/normalize`, `cmd/tabular`, `cmd/search` | Small command-line tools over the packages above. |
 
-The worker runs four job types: `image`, `panorama`, `tabular` (spreadsheets) and
-`normalize` (text checks on an article revision). `geo` is not built yet.
+The worker runs five job types: `image`, `panorama`, `tabular` (spreadsheets),
+`normalize` (text checks on an article revision) and `links` (dead links in one).
+`geo` is not built yet.
 
 ## Why it is built this way
 
@@ -353,6 +355,60 @@ many were left out. `line` and `column` count in that combined text: the title i
 | `unsupported_locale` | There are no rules for the translation's language. |
 | `malformed_payload` | Bad JSON, or `revision_id` is not a UUID. |
 
+## Dead-link jobs (links)
+
+```sql
+INSERT INTO jobs (type, payload)
+VALUES ('links', '{"revision_id": "<article_revisions.id>"}');
+```
+
+The worker reads every `href` in the revision's body, at any depth, and checks each
+`http`/`https` one, as Wikipedia's link bots do for citations. Links inside the site
+(`/articles/…`), `mailto:` and the like are skipped, and two links that differ only by
+`#fragment` are checked once. It never changes the revision.
+
+```json
+"links": {"revision_id": "…", "count": 3, "broken": 1,
+          "links": [{"url": "https://example.org/report", "status": "broken", "http_status": 404,
+                     "archive_url": "https://web.archive.org/web/2019…/https://example.org/report"},
+                    {"url": "http://old.example/", "status": "redirected", "http_status": 200,
+                     "final_url": "https://new.example/"},
+                    {"url": "https://news.example/a", "status": "ok", "http_status": 200}]}
+```
+
+| `status` | Meaning |
+|---|---|
+| `ok` | The page answered with a success. Temporary redirects are followed. |
+| `redirected` | The page has moved for good (301/308 on every hop); `final_url` is the better link. |
+| `broken` | 404, 410 or another 4xx, a domain that no longer exists, or a redirect loop. |
+| `unreachable` | No answer, a timeout, a TLS error or a 5xx. Often temporary. |
+| `restricted` | 401, 403 or 429: the site refuses robots. Says nothing about readers. |
+| `blocked` | A private address or a port other than 80/443. Not requested. |
+| `unchecked` | The job ran out of time before reaching it. |
+
+`broken` in the summary counts `broken` and `unreachable`. For each of those the worker asks
+the Wayback Machine for its closest copy that was a working page, and puts it in
+`archive_url`; set `LINKS_ARCHIVE_URL=off` to never send link addresses to archive.org.
+`error` names why a link with no usable answer failed (`dns_not_found`, `timeout`,
+`connection_refused`, `tls`, `too_many_redirects`, `private_address`, `port_not_allowed`,
+`time_limit`, `request_failed`); treat it as an open list.
+
+How it is careful:
+
+* **Only public addresses.** The address is checked after DNS, on every connection,
+  redirects included, so a link to `localhost`, a private network or a cloud metadata
+  address, or a public name that resolves to one, is never requested. Environment proxies
+  are ignored for the same reason.
+* **Polite.** `HEAD` first, `GET` only if the site answers `HEAD` with an error, and the body
+  is never downloaded. At most 8 links at once and 2 per site, with a user agent that says
+  what it is.
+* **Bounded.** 10 seconds a link, 5 redirects, the first 100 links of a revision
+  (`links_truncated` says how many more there were), and it stops 15 seconds before the job
+  timeout so the result is still recorded.
+
+Reason codes are the same as for `normalize`, without `unsupported_locale`, plus
+`malformed_body` for a body that is not JSON.
+
 ## Search
 
 `internal/search/schema.sql` creates a `search_documents` table and the functions
@@ -479,6 +535,7 @@ All environment variables. `-` means required.
 | `WORKER_RETRY_BASE_DELAY` | `30s` | |
 | `SEARCH_SYNC_INTERVAL` / `SEARCH_SYNC_BATCH` | `30s` / `500` | |
 | `JOBS_KEEP_DONE` / `JOBS_KEEP_FAILED` | `720h` / `2160h` | 30 / 90 days; `0` keeps forever, otherwise at least `24h` |
+| `LINKS_ARCHIVE_URL` | `https://archive.org/wayback/available` | where broken links are looked up; `off` skips it |
 | `LOG_LEVEL` | `info` | |
 
 The worker starts only if the settings are consistent, and reports every problem
