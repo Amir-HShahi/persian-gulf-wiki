@@ -3,6 +3,8 @@ package com.persiangulfwiki.core.dev.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.persiangulfwiki.core.user.entity.Role;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.List;
 
 // Every field is optional so the common case is a bare `{}` (or no body at all): a verified,
@@ -13,5 +15,13 @@ import java.util.List;
 // user holding MODERATOR and nothing else, even though DevUserSeeder pairs every seeded role
 // with CONTRIBUTOR. The point of this endpoint is reaching arbitrary states, including ones
 // the seeder and the registration flow cannot produce.
-public record DevTestUserRequest(@JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY) List<Role> roles, Boolean emailVerified, Boolean enabled) {
+//
+// fullName and hasAvatar reach every profile state: neither (the state every new account starts
+// in), either one alone (still not public), or both (a public profile).
+public record DevTestUserRequest(
+        @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY) List<Role> roles,
+        Boolean emailVerified,
+        Boolean enabled,
+        @Nullable String fullName,
+        @Nullable Boolean hasAvatar) {
 }

@@ -113,6 +113,28 @@ public class S3MediaStorage implements MediaStorage {
                 .build(), RequestBody.fromBytes(bytes));
     }
 
+    @Override
+    public void put(StorageBucket bucket, String key, byte[] bytes, String contentType, String cacheControl) {
+        s3Client.putObject(PutObjectRequest.builder()
+                .bucket(bucketName(bucket))
+                .key(key)
+                .contentType(contentType)
+                .cacheControl(cacheControl)
+                .build(), RequestBody.fromBytes(bytes));
+    }
+
+    @Override
+    public Optional<byte[]> read(StorageBucket bucket, String key) {
+        try {
+            return Optional.of(s3Client.getObjectAsBytes(GetObjectRequest.builder()
+                    .bucket(bucketName(bucket))
+                    .key(key)
+                    .build()).asByteArray());
+        } catch (NoSuchKeyException ex) {
+            return Optional.empty();
+        }
+    }
+
     // Cache-Control can only be set on a copy by replacing the object's metadata wholesale, and
     // REPLACE also drops the Content-Type unless it is sent again -- the copy would then be
     // served as binary/octet-stream and a browser would refuse to render it. Hence the HEAD

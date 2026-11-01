@@ -33,6 +33,8 @@ public final class PublicRoutes {
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/topics/**"),
             // Only the home-page card; the schedule list at /api/featured-articles stays admin-only.
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/featured-articles/current"),
+            // Public user profiles. Not /api/users/**, which also holds /api/users/me.
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/profiles/**"),
             // Homepage data cards: public provider data with nothing per-user in it.
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/marine-metrics"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/marine-metrics/**")));

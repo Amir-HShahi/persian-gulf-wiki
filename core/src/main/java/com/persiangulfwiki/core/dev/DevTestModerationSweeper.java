@@ -84,8 +84,12 @@ public class DevTestModerationSweeper {
         // this job no matter how old it gets -- its marker is null. Its decision rows cascade
         // with the task (ON DELETE CASCADE, see V17), so no separate repository call is needed
         // for them.
+        //
+        // Aged by updated_at, not created_at: the mint endpoint can backdate created_at (its
+        // submittedAt field) to place a task on an earlier dashboard day, and a TTL on that
+        // column would sweep such a fixture at the very next run, mid-suite.
         long deleted =
-                moderationTaskRepository.deleteByDevMarkerAndCreatedAtBefore(DevTestFixtures.MARKER, threshold);
+                moderationTaskRepository.deleteByDevMarkerAndUpdatedAtBefore(DevTestFixtures.MARKER, threshold);
         if (deleted > 0) {
             log.info("swept {} minted test moderation task(s) older than the {}h TTL", deleted, testModerationTtlHours);
         }

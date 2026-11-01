@@ -2,17 +2,13 @@ package com.persiangulfwiki.core.user.service;
 
 import com.persiangulfwiki.core.mail.EmailService;
 import com.persiangulfwiki.core.user.dto.SessionResponse;
-import com.persiangulfwiki.core.user.dto.UserProfile;
 import com.persiangulfwiki.core.user.exception.SessionAlreadyRevokedException;
 import com.persiangulfwiki.core.user.exception.SessionNotFoundException;
 import com.persiangulfwiki.core.user.exception.UserNotFoundException;
-import com.persiangulfwiki.core.user.entity.Role;
 import com.persiangulfwiki.core.user.entity.User;
-import com.persiangulfwiki.core.user.entity.UserRole;
 import com.persiangulfwiki.core.user.model.RefreshToken;
 import com.persiangulfwiki.core.user.repository.RefreshTokenRepository;
 import com.persiangulfwiki.core.user.repository.UserRepository;
-import com.persiangulfwiki.core.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
@@ -27,19 +23,8 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final UserRoleRepository userRoleRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final EmailService emailService;
-
-    public UserProfile getProfile(UUID userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("user not found: " + userId));
-        var roles = userRoleRepository.findByUserId(userId).stream()
-                .map(UserRole::getRole)
-                .map(Role::name)
-                .toList();
-        return new UserProfile(user, roles);
-    }
 
     public List<SessionResponse> listActiveSessions(UUID userId) {
         return refreshTokenRepository

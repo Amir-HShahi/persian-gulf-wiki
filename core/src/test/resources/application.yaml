@@ -66,6 +66,12 @@ app:
     abandoned-upload-ttl-hours: 24
     rejected-grace-days: 7
     failed-grace-days: 7
+  avatar:
+    max-bytes: 5242880
+    upload-url-ttl-minutes: 10
+    reservations-per-window: 20
+    reservation-window-minutes: 60
+    abandoned-upload-grace-hours: 1
   admin:
     bootstrap-email: ${ADMIN_BOOTSTRAP_EMAIL:}
     bootstrap-username: ${ADMIN_BOOTSTRAP_USERNAME:}

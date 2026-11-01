@@ -88,7 +88,10 @@ public class DevTestModerationController {
             + "otherwise the revision id (or, instead, mediaMetadataVersionId or subjectRevisionId) must name one that exists. state defaults to open but accepts "
             + "claimed or decided directly, and a decision can be seeded onto the task's "
             + "history in the same call -- states the normal claim/decide endpoints can only "
-            + "reach through a full review round performed by a real moderator account.")
+            + "reach through a full review round performed by a real moderator account. submittedAt "
+            + "and decidedAt optionally move the task's first-submission time and the seeded "
+            + "decision's time into the past, e.g. to place it on an earlier day of the moderation "
+            + "dashboard.")
     @ApiResponse(responseCode = "201", description = "The created task, and the id of the seeded decision if one was requested.")
     @ApiResponse(responseCode = "404", description = "The revision id, metadata version id or subject revision id sent does not "
             + "name an existing revision / metadata version / subject revision.")
@@ -152,6 +155,14 @@ public class DevTestModerationController {
         UUID decisionId = safeRequest.decision() != null
                 ? seedDecision(task.getId(), claimantUserId, safeRequest.decision(), safeRequest.reason())
                 : null;
+
+        if (safeRequest.submittedAt() != null) {
+            moderationTaskRepository.backdateDevTask(task.getId(), DevTestFixtures.MARKER, safeRequest.submittedAt());
+        }
+        if (decisionId != null && safeRequest.decidedAt() != null) {
+            moderationDecisionRepository.backdateDevDecision(decisionId, DevTestFixtures.MARKER,
+                    safeRequest.decidedAt());
+        }
 
         return new DevTestModerationResponse(task.getId(), revisionId, state, claimantUserId, decisionId,
                 mediaMetadataVersionId, subjectRevisionId);

@@ -1,6 +1,7 @@
 package com.persiangulfwiki.core.web;
 
 import com.persiangulfwiki.core.admin.exception.InvalidPagingParametersException;
+import com.persiangulfwiki.core.admin.exception.InvalidUserRoleFilterException;
 import com.persiangulfwiki.core.admin.exception.LastAdminException;
 import com.persiangulfwiki.core.admin.exception.RoleAlreadyGrantedException;
 import com.persiangulfwiki.core.admin.exception.RoleNotGrantedException;
@@ -33,6 +34,7 @@ import com.persiangulfwiki.core.article.exception.NotRevisionAuthorException;
 import com.persiangulfwiki.core.article.exception.RevisionNotEditableException;
 import com.persiangulfwiki.core.article.exception.RevisionNotFoundException;
 import com.persiangulfwiki.core.article.exception.TranslationNotFoundException;
+import com.persiangulfwiki.core.moderation.exception.InvalidDashboardRangeException;
 import com.persiangulfwiki.core.moderation.exception.InvalidModerationTaskStateException;
 import com.persiangulfwiki.core.moderation.exception.MissingDecisionReasonException;
 import com.persiangulfwiki.core.moderation.exception.ModerationTaskNotFoundException;
@@ -109,6 +111,12 @@ import com.persiangulfwiki.core.topic.exception.InvalidTopicIdsException;
 import com.persiangulfwiki.core.topic.exception.TopicNotFoundException;
 import com.persiangulfwiki.core.user.exception.SessionAlreadyRevokedException;
 import com.persiangulfwiki.core.user.exception.SessionNotFoundException;
+import com.persiangulfwiki.core.user.exception.AvatarNotFoundException;
+import com.persiangulfwiki.core.user.exception.AvatarTooLargeException;
+import com.persiangulfwiki.core.user.exception.AvatarUploadMissingException;
+import com.persiangulfwiki.core.user.exception.AvatarUploadRateLimitedException;
+import com.persiangulfwiki.core.user.exception.InvalidAvatarImageException;
+import com.persiangulfwiki.core.user.exception.UnsupportedAvatarContentTypeException;
 import com.persiangulfwiki.core.user.exception.UserNotFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -248,6 +256,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(InvalidPagingParametersException.class)
     public ProblemDetail handleInvalidPagingParameters(InvalidPagingParametersException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidPagingParameters"), "INVALID_PAGING_PARAMETERS", request);
+    }
+
+    @ExceptionHandler(InvalidUserRoleFilterException.class)
+    public ProblemDetail handleInvalidUserRoleFilter(InvalidUserRoleFilterException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidUserRoleFilter"), "INVALID_USER_ROLE_FILTER", request);
     }
 
     @ExceptionHandler(InvalidApplicationStatusException.class)
@@ -596,6 +609,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidModerationTaskState"), "INVALID_MODERATION_TASK_STATE", request);
     }
 
+    @ExceptionHandler(InvalidDashboardRangeException.class)
+    public ProblemDetail handleInvalidDashboardRange(InvalidDashboardRangeException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidDashboardRange"), "INVALID_DASHBOARD_RANGE", request);
+    }
+
     @ExceptionHandler(MissingDecisionReasonException.class)
     public ProblemDetail handleMissingDecisionReason(MissingDecisionReasonException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.missingDecisionReason"), "MISSING_DECISION_REASON", request);
@@ -773,6 +791,43 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     // should tell the client when to come back, and Retry-After is a header, not a body field.
     // Typed to the leaf exception like every other handler here, so the code stays specific;
     // a second rate-limited feature adds its own handler through retryAfter() below.
+    @ExceptionHandler(AvatarNotFoundException.class)
+    public ProblemDetail handleAvatarNotFound(AvatarNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.avatarNotFound"), "AVATAR_NOT_FOUND", request);
+    }
+
+    @ExceptionHandler(UnsupportedAvatarContentTypeException.class)
+    public ProblemDetail handleUnsupportedAvatarContentType(UnsupportedAvatarContentTypeException ex,
+            HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.unsupportedAvatarContentType"),
+                "UNSUPPORTED_AVATAR_CONTENT_TYPE", request);
+    }
+
+    @ExceptionHandler(AvatarTooLargeException.class)
+    public ProblemDetail handleAvatarTooLarge(AvatarTooLargeException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.avatarTooLarge"), "AVATAR_TOO_LARGE", request);
+    }
+
+    @ExceptionHandler(InvalidAvatarImageException.class)
+    public ProblemDetail handleInvalidAvatarImage(InvalidAvatarImageException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidAvatarImage"), "INVALID_AVATAR_IMAGE",
+                request);
+    }
+
+    @ExceptionHandler(AvatarUploadMissingException.class)
+    public ProblemDetail handleAvatarUploadMissing(AvatarUploadMissingException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.avatarUploadMissing"), "AVATAR_UPLOAD_MISSING",
+                request);
+    }
+
+    @ExceptionHandler(AvatarUploadRateLimitedException.class)
+    public ResponseEntity<ProblemDetail> handleAvatarUploadRateLimited(AvatarUploadRateLimitedException ex,
+            HttpServletRequest request) {
+        return retryAfter(ex, ProblemDetails.of(
+                HttpStatus.TOO_MANY_REQUESTS, resolve("error.avatarUploadRateLimited"), "AVATAR_UPLOAD_RATE_LIMITED",
+                request));
+    }
+
     @ExceptionHandler(MediaUploadRateLimitedException.class)
     public ResponseEntity<ProblemDetail> handleMediaUploadRateLimited(MediaUploadRateLimitedException ex, HttpServletRequest request) {
         return retryAfter(ex, ProblemDetails.of(

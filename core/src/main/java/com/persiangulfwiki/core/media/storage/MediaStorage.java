@@ -23,6 +23,14 @@ public interface MediaStorage {
     // goes through presignPut instead; this is for files the app ships itself (the dev demo library).
     void put(StorageBucket bucket, String key, byte[] bytes, String contentType);
 
+    // As put, served with the given Cache-Control. Also for bytes the app produced itself (an
+    // avatar re-encoded from the user's upload), never for a user's file as uploaded.
+    void put(StorageBucket bucket, String key, byte[] bytes, String contentType, String cacheControl);
+
+    // The whole object in memory, so only for objects whose size the caller has already bounded
+    // (via head). Empty when no such object exists.
+    Optional<byte[]> read(StorageBucket bucket, String key);
+
     // Server-side copy within one bucket; the bytes never pass through this app. The copy keeps
     // the source's Content-Type and is served with the given Cache-Control. Overwrites an
     // existing target, so repeating a copy is harmless. False, with nothing written, when the
