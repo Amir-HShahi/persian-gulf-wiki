@@ -79,6 +79,13 @@ public class ArticleTranslationService {
         return toResponse(translation, article);
     }
 
+    // Exact match, the same check create and addTranslation make, so they never disagree. Counts
+    // unapproved translations too: their slug is just as taken.
+    @Transactional(readOnly = true)
+    public boolean isSlugAvailable(String slug) {
+        return !articleTranslationRepository.existsBySlug(slug);
+    }
+
     // A translation with no approved revision yet is 404 to anyone but its authors and
     // moderators -- see ArticleVisibilityService.
     @Transactional(readOnly = true)

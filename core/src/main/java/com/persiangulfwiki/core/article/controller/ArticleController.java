@@ -6,6 +6,7 @@ import com.persiangulfwiki.core.article.dto.ArticleResponse;
 import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
 import com.persiangulfwiki.core.article.dto.CreateTranslationRequest;
 import com.persiangulfwiki.core.article.dto.RevisionResponse;
+import com.persiangulfwiki.core.article.dto.SlugAvailabilityResponse;
 import com.persiangulfwiki.core.article.dto.TranslationResponse;
 import com.persiangulfwiki.core.article.dto.UpdateRevisionRequest;
 import com.persiangulfwiki.core.article.service.ArticleRevisionService;
@@ -168,6 +169,32 @@ public class ArticleController {
         ArticleBySlugResponse data = articleService.getBySlug(slug, readerLanguage());
         String message = messageSource.getMessage("success.articleFetched", null, LocaleContextHolder.getLocale());
         return ApiResult.of(data, message);
+    }
+
+    @Operation(summary = "Check whether a slug is free", description = "For the article and translation forms, to show "
+            + "while the user types whether the slug they entered can be used. A slug is taken when any translation of any "
+            + "article uses it, in any language, approved or not. The match is exact, as on submit. The answer is a hint "
+            + "only: the slug may be taken before the form is submitted, which then fails with 409. Requires a signed-in, "
+            + "verified account. `reason` follows `Accept-Language`.")
+    @ApiResponse(responseCode = "200", description = "Whether the slug is free, and why not when it is taken.")
+    @ApiResponse(responseCode = "400", description = "`slug` is missing, blank or longer than 200 characters (see `errors`).", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "403", description = "The account's email address is not yet verified, or its password setup is "
+            + "unfinished.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @Parameter(name = "slug", description = "The slug to check, at most 200 characters.")
+    @SecurityRequirement(name = "cookieAuth")
+    @GetMapping("/slug-availability")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResult<SlugAvailabilityResponse> checkSlugAvailability(
+            @RequestParam @NotBlank(message = "{validation.slug.required}")
+                    @Size(max = 200, message = "{validation.slug.tooLong}") String slug) {
+        boolean isAvailable = articleTranslationService.isSlugAvailable(slug);
+        @Nullable String reason = isAvailable
+                ? null
+                : messageSource.getMessage("slugAvailability.taken", null, LocaleContextHolder.getLocale());
+        String message = messageSource.getMessage("success.slugAvailabilityChecked", null,
+                LocaleContextHolder.getLocale());
+        return ApiResult.of(new SlugAvailabilityResponse(slug, isAvailable, reason), message);
     }
 
     @Operation(summary = "List articles in a language", description = "Open to everyone; no account is required, and the result is the "

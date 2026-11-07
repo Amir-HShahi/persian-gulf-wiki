@@ -1368,4 +1368,87 @@ class ArticleFlowIntegrationTests {
                 .andExpect(jsonPath("$.data.id").value(articleId.toString()))
                 .andExpect(jsonPath("$.data.subjectKind").value("ISLAND"));
     }
+
+    // --- Slug availability: the inline check on the article and translation forms ---
+
+    private ResultActions checkSlug(String slug, Cookie accessCookie, String language) throws Exception {
+        return mockMvc.perform(get("/api/articles/slug-availability")
+                .param("slug", slug)
+                .cookie(accessCookie)
+                .header("Accept-Language", language));
+    }
+
+    // A slug held only by an unapproved draft or a second translation counts as taken, exactly
+    // as the 409 on submit does; the match is exact, so another casing is still free.
+    @Test
+    void slugAvailabilityReportsFreeThenTakenWithLocalizedReason() throws Exception {
+        registerVerifiedContributor("afavail1", "af-avail1@example.com");
+        Cookie accessCookie = loginAccessCookie("af-avail1@example.com");
+        Cookie csrfCookie = fetchCsrfCookie();
+        String slug = uniqueSlug("availability");
+
+        checkSlug(slug, accessCookie, "en")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.slug").value(slug))
+                .andExpect(jsonPath("$.data.isAvailable").value(true))
+                .andExpect(jsonPath("$.data.reason").value(nullValue()))
+                .andExpect(jsonPath("$.message").value("Slug availability has been checked."));
+
+        UUID articleId = createArticleWithSlug(null, slug, accessCookie, csrfCookie);
+
+        checkSlug(slug, accessCookie, "en")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.isAvailable").value(false))
+                .andExpect(jsonPath("$.data.reason").value("This slug is already in use. Please choose another one."));
+        checkSlug(slug, accessCookie, "fa")
+                .andExpect(jsonPath("$.data.reason")
+                        .value("این نامک (اسلاگ) پیش‌تر استفاده شده است؛ لطفاً نامک دیگری انتخاب فرمایید"));
+        checkSlug(slug.toUpperCase(), accessCookie, "en")
+                .andExpect(jsonPath("$.data.isAvailable").value(true));
+
+        String translationSlug = uniqueSlug("availability-en");
+        addTranslation(articleId, "en", translationSlug, accessCookie, csrfCookie);
+        checkSlug(translationSlug, accessCookie, "en")
+                .andExpect(jsonPath("$.data.isAvailable").value(false));
+    }
+
+    // GET /api/articles/** is otherwise public; this one route was carved out so it cannot be
+    // used anonymously to find out which slugs unapproved drafts hold.
+    @Test
+    void slugAvailabilityNeedsAVerifiedAccountWhileOtherArticleReadsStayPublic() throws Exception {
+        String slug = uniqueSlug("availability-auth");
+        mockMvc.perform(get("/api/articles/slug-availability").param("slug", slug))
+                .andExpect(status().isUnauthorized());
+
+        User unverified = registerVerifiedContributor("afavail2", "af-avail2@example.com");
+        unverified.setEmailVerified(false);
+        userRepository.save(unverified);
+        checkSlug(slug, loginAccessCookie("af-avail2@example.com"), "en")
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("EMAIL_NOT_VERIFIED"));
+
+        Cookie pending = new Cookie("access_token", jwtService.generatePendingPasswordSetupToken(unverified.getId()));
+        checkSlug(slug, pending, "en")
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("PASSWORD_SETUP_REQUIRED"));
+
+        mockMvc.perform(get("/api/articles").param("language", "fa")).andExpect(status().isOk());
+        mockMvc.perform(get("/api/articles/by-slug/" + slug))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("ARTICLE_NOT_FOUND"));
+    }
+
+    @Test
+    void slugAvailabilityRejectsMissingBlankOrOverlongSlug() throws Exception {
+        registerVerifiedContributor("afavail3", "af-avail3@example.com");
+        Cookie accessCookie = loginAccessCookie("af-avail3@example.com");
+
+        mockMvc.perform(get("/api/articles/slug-availability").cookie(accessCookie))
+                .andExpect(status().isBadRequest());
+        checkSlug(" ", accessCookie, "en").andExpect(status().isBadRequest());
+        checkSlug("a".repeat(201), accessCookie, "en").andExpect(status().isBadRequest());
+        checkSlug("a".repeat(200), accessCookie, "en")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.isAvailable").value(true));
+    }
 }
