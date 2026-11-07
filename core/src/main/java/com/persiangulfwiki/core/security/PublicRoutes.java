@@ -2,6 +2,8 @@ package com.persiangulfwiki.core.security;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -17,10 +19,18 @@ import java.util.List;
 // session cookies, so each filter's own ALLOWLIST decides them as the caller, not as anonymous.
 public final class PublicRoutes {
 
+    // GETs under the public paths below that still need a verified account: the slug check tells
+    // whether an unapproved draft holds a slug, which GET /api/articles/by-slug hides. Carved out
+    // of CONTENT_READS rather than matched ahead of it in SecurityConfig, so the two filters also
+    // stop downgrading an unverified session to anonymous here and answer 403, not 401.
+    private static final RequestMatcher AUTHENTICATED_READS = PathPatternRequestMatcher.withDefaults()
+            .matcher(HttpMethod.GET, "/api/articles/slug-availability");
+
     // Anonymous GET only -- every other method on these paths requires an account (see
     // SecurityConfig). Scoped by method on purpose: widening to all methods would make the
     // POST routes under the same paths anonymously writable.
-    public static final RequestMatcher CONTENT_READS = new OrRequestMatcher(List.of(
+    public static final RequestMatcher CONTENT_READS = new AndRequestMatcher(
+            new NegatedRequestMatcher(AUTHENTICATED_READS), new OrRequestMatcher(List.of(
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/subjects"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/subjects/**"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/subject-revisions/**"),
@@ -37,7 +47,7 @@ public final class PublicRoutes {
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/profiles/**"),
             // Homepage data cards: public provider data with nothing per-user in it.
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/marine-metrics"),
-            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/marine-metrics/**")));
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/marine-metrics/**"))));
 
     public static final RequestMatcher API_DOCS = new OrRequestMatcher(List.of(
             PathPatternRequestMatcher.withDefaults().matcher("/docs/**"),
