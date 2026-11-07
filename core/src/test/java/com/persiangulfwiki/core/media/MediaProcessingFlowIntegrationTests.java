@@ -7,12 +7,14 @@ import com.persiangulfwiki.core.TestcontainersConfiguration;
 import com.persiangulfwiki.core.article.dto.CreateArticleRequest;
 import com.persiangulfwiki.core.auth.dto.LoginRequest;
 import com.persiangulfwiki.core.auth.dto.RegisterRequest;
+import com.persiangulfwiki.core.jobqueue.JobQueueTestSupport;
+import com.persiangulfwiki.core.jobqueue.entity.QueueJob;
 import com.persiangulfwiki.core.media.entity.ArticleMedia;
+import com.persiangulfwiki.core.media.entity.MediaAttribution;
 import com.persiangulfwiki.core.media.entity.MediaMetadataVersion;
 import com.persiangulfwiki.core.media.entity.MetadataVersionStatus;
 import com.persiangulfwiki.core.media.entity.ProcessingStatus;
 import com.persiangulfwiki.core.media.entity.PublicationStatus;
-import com.persiangulfwiki.core.media.pipeline.MediaResultConsumer;
 import com.persiangulfwiki.core.media.repository.ArticleMediaRepository;
 import com.persiangulfwiki.core.media.repository.MediaMetadataVersionRepository;
 import com.persiangulfwiki.core.media.service.MediaProcessingService;
@@ -28,23 +30,15 @@ import com.persiangulfwiki.core.user.repository.UserRepository;
 import com.persiangulfwiki.core.user.repository.UserRoleRepository;
 
 import jakarta.servlet.http.Cookie;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Range;
-import org.springframework.data.redis.connection.stream.Consumer;
-import org.springframework.data.redis.connection.stream.MapRecord;
-import org.springframework.data.redis.connection.stream.ReadOffset;
-import org.springframework.data.redis.connection.stream.RecordId;
-import org.springframework.data.redis.connection.stream.StreamInfo;
-import org.springframework.data.redis.connection.stream.StreamOffset;
-import org.springframework.data.redis.connection.stream.StreamReadOptions;
-import org.springframework.data.redis.connection.stream.StreamRecords;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -76,13 +70,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 // Pipeline results coming back into core, against real Postgres, Redis and MinIO. Every item
-// gets to PROCESSING through the real reserve -> PUT -> complete flow, so it holds a real job id;
-// the test then plays the Go worker by writing results onto the results stream by hand, and
-// waits for the live consumer to apply them. Nothing here runs or depends on the worker.
+// gets to PROCESSING through the real reserve -> PUT -> complete flow, so it holds a real jobs
+// row; the test then plays the Go worker by finishing that row by hand (JobQueueTestSupport) and
+// runs the real result poll. Nothing here runs or depends on the worker.
+//
+// The scheduled poll runs every second here too, beside the direct poll() calls; applying is
+// serialized by the item's row lock, so the tests assert on the final state, whichever got there.
 //
 // Structured like the other flow tests: helpers, then the headline flow (smoke), then each
-// outcome and each way a result is refused or ignored, then delivery-level failure handling,
-// then the sweeps.
+// outcome and each way a result is refused or ignored, then the sweeps.
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -116,13 +112,13 @@ class MediaProcessingFlowIntegrationTests {
     private ModerationTaskRepository moderationTaskRepository;
 
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private S3Client s3Client;
 
     @Autowired
-    private MediaResultConsumer mediaResultConsumer;
+    private MediaResultPollJob mediaResultPollJob;
 
     @Autowired
     private MediaProcessingService mediaProcessingService;
@@ -136,25 +132,13 @@ class MediaProcessingFlowIntegrationTests {
     @Value("${app.storage.media-bucket}")
     private String mediaBucket;
 
-    @Value("${app.media.job-stream}")
-    private String jobStream;
-
-    @Value("${app.media.result-stream}")
-    private String resultStream;
-
-    @Value("${app.media.result-consumer-group}")
-    private String consumerGroup;
-
-    @Value("${app.media.result-max-deliveries}")
-    private long maxDeliveries;
-
     // --- Account / article helpers ---
 
     private record Account(UUID userId, Cookie accessCookie) {
     }
 
-    // An item the real flow has moved to PROCESSING, with the job core queued for it.
-    private record Processing(UUID articleId, UUID mediaId, String jobId, byte[] file) {
+    // An item the real flow has moved to PROCESSING, with the jobs row core queued for it.
+    private record Processing(UUID articleId, UUID mediaId, long jobId, byte[] file) {
     }
 
     private Account verifiedAccount(boolean isModerator) throws Exception {
@@ -235,83 +219,57 @@ class MediaProcessingFlowIntegrationTests {
                         .with(xsrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.processingStatus").value("PROCESSING"));
-        return new Processing(articleId, mediaId, jobIdFor(mediaId), file);
-    }
-
-    private String jobIdFor(UUID mediaId) {
-        // read(...) takes generic varargs and is not @SafeVarargs; the array holds one offset.
-        @SuppressWarnings("unchecked")
-        List<MapRecord<String, Object, Object>> jobs = redisTemplate.opsForStream().read(StreamOffset.fromStart(jobStream));
-        return jobs.stream()
-                .filter(record -> mediaId.toString().equals(record.getValue().get("submission_id")))
-                .map(record -> (String) record.getValue().get("job_id"))
-                .findFirst().orElseThrow();
+        Long jobId = JobQueueTestSupport.processingJobIdOf(jdbcTemplate, mediaId);
+        assertThat(jobId).isNotNull();
+        return new Processing(articleId, mediaId, jobId, file);
     }
 
     // --- Worker-side helpers: results as the Go worker writes them ---
 
-    private Map<String, Object> result(Processing item, String type, String status) {
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("version", 1);
-        result.put("job_id", item.jobId());
-        result.put("submission_id", item.mediaId().toString());
-        result.put("type", type);
-        result.put("status", status);
-        result.put("attempt", 1);
-        result.put("duration_ms", 1234);
-        result.put("finished_at", "2026-09-28T12:00:00Z");
-        return result;
+    private static Map<String, Object> result(Processing item, String type, String outcome) {
+        return JobQueueTestSupport.envelope(item.jobId(), type, outcome);
     }
 
-    private Map<String, Object> okResult(Processing item, String verifiedSha256) {
+    private static Map<String, Object> okResult(Processing item, String verifiedSha256) {
+        return okResult(item, verifiedSha256, null);
+    }
+
+    private static Map<String, Object> okResult(Processing item, String verifiedSha256,
+            @Nullable Map<String, Object> attribution) {
         String prefix = MediaProcessingService.pendingVariantPrefix(item.mediaId());
-        Map<String, Object> result = result(item, "media.image", "ok");
-        result.put("media", Map.of(
-                "sha256", verifiedSha256,
-                "width", 4000,
-                "height", 3000,
-                "placeholder", PLACEHOLDER,
-                "variants", List.of(
-                        variant("640", "webp", prefix + "640.webp", 640, 480),
-                        variant("1280", "webp", prefix + "1280.webp", 1280, 960))));
+        Map<String, Object> image = new LinkedHashMap<>();
+        image.put("width", 4000);
+        image.put("height", 3000);
+        image.put("format", "jpeg");
+        image.put("sha256", verifiedSha256);
+        image.put("placeholder", PLACEHOLDER);
+        if (attribution != null) {
+            image.put("attribution", attribution);
+        }
+        image.put("variants", List.of(
+                variant("w640", prefix + "w640.webp", 640, 480),
+                variant("w1280", prefix + "w1280.webp", 1280, 960)));
+        image.put("original", Map.of("key", MediaProcessingService.originalPrefix(item.mediaId()) + "original.jpg",
+                "bytes", 2048, "content_type", "image/jpeg"));
+        Map<String, Object> result = result(item, "image", "ok");
+        result.put("image", image);
         return result;
     }
 
-    private static Map<String, Object> variant(String size, String format, String key, int width, int height) {
-        return Map.of("size", size, "format", format, "key", key, "bytes", 20480, "width", width, "height", height);
+    private static Map<String, Object> variant(String label, String key, int width, int height) {
+        return Map.of("label", label, "format", "webp", "key", key, "bytes", 20480, "width", width, "height", height);
     }
 
-    private RecordId publishResult(Map<String, Object> result) throws Exception {
-        return publishRaw(Map.of(MediaResultConsumer.RESULT_FIELD, objectMapper.writeValueAsString(result)));
+    private void finishDone(Processing item, Map<String, Object> result) throws Exception {
+        JobQueueTestSupport.finish(jdbcTemplate, item.jobId(), QueueJob.STATUS_DONE,
+                objectMapper.writeValueAsString(result), null);
     }
 
-    private RecordId publishRaw(Map<String, String> fields) {
-        return redisTemplate.opsForStream().add(StreamRecords.string(fields).withStreamKey(resultStream));
-    }
-
-    private ArticleMedia awaitProcessingStatus(UUID mediaId, ProcessingStatus expected) {
+    private ArticleMedia pollUntil(UUID mediaId, ProcessingStatus expected) {
+        mediaResultPollJob.poll();
         await().atMost(APPLIED_WITHIN).until(() ->
                 articleMediaRepository.findById(mediaId).orElseThrow().getProcessingStatus() == expected);
         return articleMediaRepository.findById(mediaId).orElseThrow();
-    }
-
-    // "Ignored" has no state change to wait for, so this waits for what ignoring ends in: the
-    // entry delivered to core's group and acknowledged.
-    private void awaitAcknowledged(RecordId id) {
-        await().atMost(APPLIED_WITHIN).until(() -> isDelivered(id)
-                && redisTemplate.opsForStream().pending(resultStream, consumerGroup, Range.closed(id.getValue(), id.getValue()), 1).isEmpty());
-    }
-
-    private boolean isDelivered(RecordId id) {
-        StreamInfo.XInfoGroups groups = redisTemplate.opsForStream().groups(resultStream);
-        return groups.stream()
-                .filter(group -> consumerGroup.equals(group.groupName()))
-                .anyMatch(group -> compare(RecordId.of(group.lastDeliveredId()), id) >= 0);
-    }
-
-    private static int compare(RecordId a, RecordId b) {
-        int byTime = Long.compare(a.getTimestamp(), b.getTimestamp());
-        return byTime != 0 ? byTime : Long.compare(a.getSequence(), b.getSequence());
     }
 
     private List<ModerationTask> tasksFor(UUID mediaId) {
@@ -342,6 +300,26 @@ class MediaProcessingFlowIntegrationTests {
         }
     }
 
+    private void putMediaObject(String key) {
+        s3Client.putObject(PutObjectRequest.builder().bucket(mediaBucket).key(key).contentType("image/webp").build(),
+                RequestBody.fromBytes(new byte[] {1, 2, 3}));
+    }
+
+    private void claimAndDecide(Account moderator, UUID taskId, Decision decision, @Nullable String reason)
+            throws Exception {
+        mockMvc.perform(post("/api/moderation/tasks/" + taskId + "/claim")
+                        .cookie(moderator.accessCookie())
+                        .with(xsrf()))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/api/moderation/tasks/" + taskId + "/decide")
+                        .cookie(moderator.accessCookie())
+                        .with(xsrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new DecideRequest(decision, reason))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("DECIDED"));
+    }
+
     // --- Smoke: the headline flow ---
 
     @Test
@@ -349,23 +327,32 @@ class MediaProcessingFlowIntegrationTests {
         Account uploader = verifiedAccount(false);
         UUID articleId = createArticle(uploader);
         Processing item = uploadToProcessing(uploader, articleId, "IMAGE");
-        assertThat(articleMediaRepository.findById(item.mediaId()).orElseThrow().getProcessingJobId())
-                .hasToString(item.jobId());
-        // No task while the file is unprocessed.
+        // No task while the file is unprocessed, and nothing to apply while the job is pending.
         assertThat(tasksFor(item.mediaId())).isEmpty();
+        mediaResultPollJob.poll();
+        assertThat(articleMediaRepository.findById(item.mediaId()).orElseThrow().getProcessingStatus())
+                .isEqualTo(ProcessingStatus.PROCESSING);
+        assertThat(stagingObjectExists(item.mediaId())).isTrue();
 
+        // The worker keeps its private copy of the upload and writes the variants.
+        String original = MediaProcessingService.originalPrefix(item.mediaId()) + "original.jpg";
+        putMediaObject(original);
         String verified = sha256(item.file());
-        RecordId entry = publishResult(okResult(item, verified));
+        finishDone(item, okResult(item, verified));
 
-        ArticleMedia ready = awaitProcessingStatus(item.mediaId(), ProcessingStatus.READY);
+        ArticleMedia ready = pollUntil(item.mediaId(), ProcessingStatus.READY);
         assertThat(ready.getSha256()).isEqualTo(verified);
         assertThat(ready.getPlaceholder()).isEqualTo(PLACEHOLDER);
         assertThat(ready.getFailureCode()).isNull();
         assertThat(ready.getPublicationStatus()).isEqualTo(PublicationStatus.PENDING);
-        assertThat(ready.getVariants()).extracting("size").containsExactly("640", "1280");
+        assertThat(ready.getAttribution()).isNull();
+        assertThat(ready.getVariants()).extracting("size").containsExactly("w640", "w1280");
         assertThat(ready.getVariants().getFirst().key())
-                .isEqualTo(MediaProcessingService.pendingVariantPrefix(item.mediaId()) + "640.webp");
-        awaitAcknowledged(entry);
+                .isEqualTo(MediaProcessingService.pendingVariantPrefix(item.mediaId()) + "w640.webp");
+        // The staging upload is a second copy once READY, so it goes after the commit; the
+        // worker's private original stays.
+        await().atMost(APPLIED_WITHIN).until(() -> !stagingObjectExists(item.mediaId()));
+        assertThat(mediaObjectExists(original)).isTrue();
 
         // Exactly one task, on the first metadata version, waiting in the queue.
         List<ModerationTask> tasks = tasksFor(item.mediaId());
@@ -384,28 +371,58 @@ class MediaProcessingFlowIntegrationTests {
         // The task opened here is an ordinary queue task: a moderator claims and approves it,
         // which publishes the item. Approval moves the variants to their public keys, so the
         // objects the worker would have written must exist; this test plays the worker.
-        ready.getVariants().forEach(variant -> s3Client.putObject(
-                PutObjectRequest.builder().bucket(mediaBucket).key(variant.key()).contentType("image/webp").build(),
-                RequestBody.fromBytes(new byte[] {1, 2, 3})));
+        ready.getVariants().forEach(variant -> putMediaObject(variant.key()));
         Account moderator = verifiedAccount(true);
-        mockMvc.perform(post("/api/moderation/tasks/" + task.getId() + "/claim")
-                        .cookie(moderator.accessCookie())
-                        .with(xsrf()))
-                .andExpect(status().isOk());
-        mockMvc.perform(post("/api/moderation/tasks/" + task.getId() + "/decide")
-                        .cookie(moderator.accessCookie())
-                        .with(xsrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new DecideRequest(Decision.APPROVE, null))))
+        mockMvc.perform(get("/api/moderation/tasks/" + task.getId()).cookie(moderator.accessCookie()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.state").value("DECIDED"));
+                .andExpect(jsonPath("$.data.mediaReview.fileAttribution").value(nullValue()))
+                .andExpect(jsonPath("$.data.revisionChecks").value(nullValue()));
+        claimAndDecide(moderator, task.getId(), Decision.APPROVE, null);
         ArticleMedia published = articleMediaRepository.findById(item.mediaId()).orElseThrow();
         assertThat(published.getPublicationStatus()).isEqualTo(PublicationStatus.PUBLISHED);
         assertThat(published.isPubliclyVisible()).isTrue();
-        assertThat(mediaObjectExists("public/" + item.mediaId() + "/1280.webp")).isTrue();
-        assertThat(mediaObjectExists(MediaProcessingService.pendingVariantPrefix(item.mediaId()) + "1280.webp")).isFalse();
+        assertThat(mediaObjectExists("public/" + item.mediaId() + "/w1280.webp")).isTrue();
+        assertThat(mediaObjectExists(MediaProcessingService.pendingVariantPrefix(item.mediaId()) + "w1280.webp"))
+                .isFalse();
         assertThat(mediaMetadataVersionRepository.findById(task.getMediaMetadataVersionId()).orElseThrow().getStatus())
                 .isEqualTo(MetadataVersionStatus.APPROVED);
+    }
+
+    // What the file claims about its author reaches the moderator's review, cleaned: a bidi
+    // override is dropped, a line break becomes a space, and a licence URL that is not a web
+    // link is left out.
+    @Test
+    void okResultStoresTheFilesCleanedAttributionAndTheModeratorSeesIt() throws Exception {
+        Account uploader = verifiedAccount(false);
+        UUID articleId = createArticle(uploader);
+        Processing item = uploadToProcessing(uploader, articleId, "PANORAMA_360");
+
+        Map<String, Object> attribution = new LinkedHashMap<>();
+        attribution.put("author", "مریم‮ احمدی");
+        attribution.put("copyright", "© 2026\nمریم احمدی");
+        attribution.put("license", "CC BY-SA 4.0");
+        attribution.put("license_url", "javascript:alert(1)");
+        attribution.put("created_at", "2024-05-01T10:20:30");
+        Map<String, Object> ok = okResult(item, sha256(item.file()), attribution);
+        ok.put("type", "panorama");
+        finishDone(item, ok);
+
+        ArticleMedia ready = pollUntil(item.mediaId(), ProcessingStatus.READY);
+        assertThat(ready.getAttribution()).isEqualTo(new MediaAttribution("مریم احمدی", null, "© 2026 مریم احمدی",
+                "CC BY-SA 4.0", null, "2024-05-01T10:20:30"));
+
+        ModerationTask task = tasksFor(item.mediaId()).getFirst();
+        Account moderator = verifiedAccount(true);
+        mockMvc.perform(get("/api/moderation/tasks/" + task.getId()).cookie(moderator.accessCookie()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.mediaReview.fileAttribution.author").value("مریم احمدی"))
+                .andExpect(jsonPath("$.data.mediaReview.fileAttribution.credit").value(nullValue()))
+                .andExpect(jsonPath("$.data.mediaReview.fileAttribution.copyright").value("© 2026 مریم احمدی"))
+                .andExpect(jsonPath("$.data.mediaReview.fileAttribution.license").value("CC BY-SA 4.0"))
+                .andExpect(jsonPath("$.data.mediaReview.fileAttribution.licenseUrl").value(nullValue()))
+                .andExpect(jsonPath("$.data.mediaReview.fileAttribution.createdAt").value("2024-05-01T10:20:30"))
+                .andExpect(jsonPath("$.data.subjectReview").value(nullValue()))
+                .andExpect(jsonPath("$.data.revisionChecks").value(nullValue()));
     }
 
     // --- The other outcomes ---
@@ -416,13 +433,15 @@ class MediaProcessingFlowIntegrationTests {
         UUID articleId = createArticle(uploader);
         Processing item = uploadToProcessing(uploader, articleId, "PANORAMA_360");
 
-        Map<String, Object> rejected = result(item, "media.panorama", "rejected");
-        rejected.put("reason", Map.of("code", "panorama_aspect_ratio", "detail", Map.of("width", "4000", "height", "3000")));
-        publishResult(rejected);
+        Map<String, Object> rejected = result(item, "panorama", "rejected");
+        rejected.put("reason", Map.of("code", "panorama_aspect_ratio", "detail", Map.of("width", 4000, "height", 3000)));
+        finishDone(item, rejected);
 
-        ArticleMedia failed = awaitProcessingStatus(item.mediaId(), ProcessingStatus.FAILED);
+        ArticleMedia failed = pollUntil(item.mediaId(), ProcessingStatus.FAILED);
         assertThat(failed.getFailureCode()).isEqualTo("panorama_aspect_ratio");
         assertThat(tasksFor(item.mediaId())).isEmpty();
+        // Only READY lets go of the staging upload.
+        assertThat(stagingObjectExists(item.mediaId())).isTrue();
 
         mockMvc.perform(get("/api/articles/" + articleId + "/media/" + item.mediaId())
                         .cookie(uploader.accessCookie())
@@ -438,8 +457,9 @@ class MediaProcessingFlowIntegrationTests {
                         .value("عرض تصویر ۳۶۰ درجه باید دقیقاً دو برابر ارتفاع آن باشد. لطفاً یک تصویر پانورامای کامل بارگذاری فرمایید"));
     }
 
-    // failure_code only ever holds codes core can translate: an unagreed pipeline code, or one
-    // of core's own codes claimed by the worker, is stored as the generic "rejected".
+    // failure_code only ever holds codes core can translate: an unagreed pipeline code (such as
+    // the worker's object_missing), or one of core's own codes claimed by the worker, is stored as
+    // the generic "rejected".
     @Test
     void rejectionWithAnUnknownOrCoreOwnedCodeIsStoredAsGenericRejected() throws Exception {
         Account uploader = verifiedAccount(false);
@@ -447,15 +467,15 @@ class MediaProcessingFlowIntegrationTests {
         Processing unknown = uploadToProcessing(uploader, articleId, "IMAGE");
         Processing coreOwned = uploadToProcessing(uploader, articleId, "IMAGE");
 
-        Map<String, Object> unknownResult = result(unknown, "media.image", "rejected");
-        unknownResult.put("reason", Map.of("code", "too_blurry"));
-        publishResult(unknownResult);
-        Map<String, Object> coreOwnedResult = result(coreOwned, "media.image", "rejected");
+        Map<String, Object> unknownResult = result(unknown, "image", "rejected");
+        unknownResult.put("reason", Map.of("code", "object_missing"));
+        finishDone(unknown, unknownResult);
+        Map<String, Object> coreOwnedResult = result(coreOwned, "image", "rejected");
         coreOwnedResult.put("reason", Map.of("code", "duplicate"));
-        publishResult(coreOwnedResult);
+        finishDone(coreOwned, coreOwnedResult);
 
-        assertThat(awaitProcessingStatus(unknown.mediaId(), ProcessingStatus.FAILED).getFailureCode()).isEqualTo("rejected");
-        assertThat(awaitProcessingStatus(coreOwned.mediaId(), ProcessingStatus.FAILED).getFailureCode()).isEqualTo("rejected");
+        assertThat(pollUntil(unknown.mediaId(), ProcessingStatus.FAILED).getFailureCode()).isEqualTo("rejected");
+        assertThat(pollUntil(coreOwned.mediaId(), ProcessingStatus.FAILED).getFailureCode()).isEqualTo("rejected");
         mockMvc.perform(get("/api/articles/" + articleId + "/media/" + unknown.mediaId())
                         .cookie(uploader.accessCookie())
                         .header("Accept-Language", "en"))
@@ -463,19 +483,17 @@ class MediaProcessingFlowIntegrationTests {
                         .value("This file was not accepted during processing. Please upload a different file."));
     }
 
+    // A failed row is the worker having given up after its retries; it carries no result.
     @Test
-    void failedResultFailsTheItemAsProcessingError() throws Exception {
+    void failedJobFailsTheItemAsProcessingError() throws Exception {
         Account uploader = verifiedAccount(false);
         UUID articleId = createArticle(uploader);
         Processing item = uploadToProcessing(uploader, articleId, "IMAGE");
 
-        Map<String, Object> failed = result(item, "media.image", "failed");
-        failed.put("attempt", 3);
-        failed.put("error", "minio: connection refused");
-        publishResult(failed);
+        JobQueueTestSupport.finish(jdbcTemplate, item.jobId(), QueueJob.STATUS_FAILED, null,
+                "minio: connection refused");
 
-        assertThat(awaitProcessingStatus(item.mediaId(), ProcessingStatus.FAILED).getFailureCode())
-                .isEqualTo("processing_error");
+        assertThat(pollUntil(item.mediaId(), ProcessingStatus.FAILED).getFailureCode()).isEqualTo("processing_error");
         assertThat(tasksFor(item.mediaId())).isEmpty();
     }
 
@@ -489,11 +507,11 @@ class MediaProcessingFlowIntegrationTests {
         Processing second = uploadToProcessing(uploader, articleId, "IMAGE");
         String sameFile = sha256(first.file());
 
-        publishResult(okResult(first, sameFile));
-        awaitProcessingStatus(first.mediaId(), ProcessingStatus.READY);
-        publishResult(okResult(second, sameFile));
+        finishDone(first, okResult(first, sameFile));
+        pollUntil(first.mediaId(), ProcessingStatus.READY);
+        finishDone(second, okResult(second, sameFile));
 
-        ArticleMedia duplicate = awaitProcessingStatus(second.mediaId(), ProcessingStatus.FAILED);
+        ArticleMedia duplicate = pollUntil(second.mediaId(), ProcessingStatus.FAILED);
         assertThat(duplicate.getFailureCode()).isEqualTo("duplicate");
         assertThat(duplicate.getSha256()).isNull();
         assertThat(duplicate.getVariants()).isEmpty();
@@ -503,8 +521,8 @@ class MediaProcessingFlowIntegrationTests {
         // The same file in a *different* article is not a duplicate.
         UUID otherArticle = createArticle(uploader);
         Processing elsewhere = uploadToProcessing(uploader, otherArticle, "IMAGE");
-        publishResult(okResult(elsewhere, sameFile));
-        assertThat(awaitProcessingStatus(elsewhere.mediaId(), ProcessingStatus.READY).getSha256()).isEqualTo(sameFile);
+        finishDone(elsewhere, okResult(elsewhere, sameFile));
+        assertThat(pollUntil(elsewhere.mediaId(), ProcessingStatus.READY).getSha256()).isEqualTo(sameFile);
     }
 
     // --- Results core refuses or ignores ---
@@ -512,137 +530,118 @@ class MediaProcessingFlowIntegrationTests {
     // The variant-key rule is the security-relevant one: core later copies and deletes these
     // keys, so one outside the item's own prefix must never be stored.
     @Test
-    void okResultWithAnInvalidPayloadOrMismatchedTypeFailsAsProcessingErrorAndStoresNothing() throws Exception {
+    void okResultWithAnInvalidPayloadOrMismatchedEnvelopeFailsAsProcessingErrorAndStoresNothing() throws Exception {
         Account uploader = verifiedAccount(false);
         UUID articleId = createArticle(uploader);
         Processing foreignKey = uploadToProcessing(uploader, articleId, "IMAGE");
         Processing badSha = uploadToProcessing(uploader, articleId, "IMAGE");
         Processing svgPlaceholder = uploadToProcessing(uploader, articleId, "IMAGE");
         Processing wrongType = uploadToProcessing(uploader, articleId, "IMAGE");
+        Processing wrongJob = uploadToProcessing(uploader, articleId, "IMAGE");
+        Processing unknownOutcome = uploadToProcessing(uploader, articleId, "IMAGE");
 
         Map<String, Object> foreign = okResult(foreignKey, sha256(foreignKey.file()));
-        foreign.put("media", Map.of("sha256", sha256(foreignKey.file()), "placeholder", PLACEHOLDER,
-                "variants", List.of(variant("640", "webp", "public/" + UUID.randomUUID() + "/640.webp", 640, 480))));
-        publishResult(foreign);
+        foreign.put("image", Map.of("sha256", sha256(foreignKey.file()), "placeholder", PLACEHOLDER,
+                "variants", List.of(variant("w640", "public/" + UUID.randomUUID() + "/w640.webp", 640, 480))));
+        finishDone(foreignKey, foreign);
 
-        Map<String, Object> shortSha = okResult(badSha, "not-a-hash");
-        publishResult(shortSha);
+        finishDone(badSha, okResult(badSha, "not-a-hash"));
 
         Map<String, Object> svg = okResult(svgPlaceholder, sha256(svgPlaceholder.file()));
         String prefix = MediaProcessingService.pendingVariantPrefix(svgPlaceholder.mediaId());
-        svg.put("media", Map.of("sha256", sha256(svgPlaceholder.file()),
+        svg.put("image", Map.of("sha256", sha256(svgPlaceholder.file()),
                 "placeholder", "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=",
-                "variants", List.of(variant("640", "webp", prefix + "640.webp", 640, 480))));
-        publishResult(svg);
+                "variants", List.of(variant("w640", prefix + "w640.webp", 640, 480))));
+        finishDone(svgPlaceholder, svg);
 
         Map<String, Object> panoramaForAnImage = okResult(wrongType, sha256(wrongType.file()));
-        panoramaForAnImage.put("type", "media.panorama");
-        publishResult(panoramaForAnImage);
+        panoramaForAnImage.put("type", "panorama");
+        finishDone(wrongType, panoramaForAnImage);
 
-        for (Processing item : List.of(foreignKey, badSha, svgPlaceholder, wrongType)) {
-            ArticleMedia failed = awaitProcessingStatus(item.mediaId(), ProcessingStatus.FAILED);
+        Map<String, Object> otherJobsResult = okResult(wrongJob, sha256(wrongJob.file()));
+        otherJobsResult.put("job_id", wrongJob.jobId() + 1_000_000);
+        finishDone(wrongJob, otherJobsResult);
+
+        finishDone(unknownOutcome, result(unknownOutcome, "image", "deferred"));
+
+        mediaResultPollJob.poll();
+        for (Processing item : List.of(foreignKey, badSha, svgPlaceholder, wrongType, wrongJob, unknownOutcome)) {
+            ArticleMedia failed = pollUntil(item.mediaId(), ProcessingStatus.FAILED);
             assertThat(failed.getFailureCode()).isEqualTo("processing_error");
             assertThat(failed.getVariants()).isEmpty();
             assertThat(failed.getSha256()).isNull();
             assertThat(failed.getPlaceholder()).isNull();
+            assertThat(failed.getAttribution()).isNull();
             assertThat(tasksFor(item.mediaId())).isEmpty();
         }
     }
 
-    // Delivery is at-least-once, and a stale job's result can arrive after a newer job was
-    // queued: only a result naming the job the item is waiting on, while it is still waiting,
-    // is applied.
+    // jsonb guarantees the column is JSON, not that it is a result: a done row with no result,
+    // with JSON of another shape, or from a contract version this core does not know fails its
+    // item -- left PROCESSING it would be read again on every poll -- without holding up a good
+    // row applied in the same run.
     @Test
-    void resultsForAnotherJobOrAnAlreadySettledItemAreIgnored() throws Exception {
+    void unreadableOrUnknownVersionResultsFailTheirItemWithoutHoldingUpOthers() throws Exception {
+        Account uploader = verifiedAccount(false);
+        UUID articleId = createArticle(uploader);
+        Processing noResult = uploadToProcessing(uploader, articleId, "IMAGE");
+        Processing notAnObject = uploadToProcessing(uploader, articleId, "IMAGE");
+        Processing mistyped = uploadToProcessing(uploader, articleId, "IMAGE");
+        Processing futureVersion = uploadToProcessing(uploader, articleId, "IMAGE");
+        Processing good = uploadToProcessing(uploader, articleId, "IMAGE");
+
+        JobQueueTestSupport.finish(jdbcTemplate, noResult.jobId(), QueueJob.STATUS_DONE, null, null);
+        JobQueueTestSupport.finish(jdbcTemplate, notAnObject.jobId(), QueueJob.STATUS_DONE, "[1, 2, 3]", null);
+        JobQueueTestSupport.finish(jdbcTemplate, mistyped.jobId(), QueueJob.STATUS_DONE,
+                "{\"version\": \"one\", \"job_id\": " + mistyped.jobId() + "}", null);
+        Map<String, Object> v2 = okResult(futureVersion, sha256(futureVersion.file()));
+        v2.put("version", 2);
+        finishDone(futureVersion, v2);
+        finishDone(good, okResult(good, sha256(good.file())));
+
+        mediaResultPollJob.poll();
+        for (Processing item : List.of(noResult, notAnObject, mistyped, futureVersion)) {
+            assertThat(pollUntil(item.mediaId(), ProcessingStatus.FAILED).getFailureCode()).isEqualTo("processing_error");
+        }
+        assertThat(pollUntil(good.mediaId(), ProcessingStatus.READY).getFailureCode()).isNull();
+    }
+
+    // A result is applied only to an item that is still PROCESSING and still waiting on that
+    // job: a second apply of the same row (another core instance, a retry), a contradicting one
+    // for the same job, one naming another job, and one for a deleted item all change nothing.
+    @Test
+    void resultsForAnotherJobOrAnAlreadySettledOrDeletedItemAreIgnored() throws Exception {
         Account uploader = verifiedAccount(false);
         UUID articleId = createArticle(uploader);
         Processing item = uploadToProcessing(uploader, articleId, "IMAGE");
 
-        Map<String, Object> staleJob = result(item, "media.image", "failed");
-        staleJob.put("job_id", UUID.randomUUID().toString());
-        awaitAcknowledged(publishResult(staleJob));
+        mediaProcessingService.applyResult(item.mediaId(), item.jobId() + 1_000_000, QueueJob.STATUS_FAILED, null,
+                "a job this item never waited on");
         assertThat(articleMediaRepository.findById(item.mediaId()).orElseThrow().getProcessingStatus())
                 .isEqualTo(ProcessingStatus.PROCESSING);
 
-        Map<String, Object> ok = okResult(item, sha256(item.file()));
-        publishResult(ok);
-        awaitProcessingStatus(item.mediaId(), ProcessingStatus.READY);
+        Map<String, Object> okResult = okResult(item, sha256(item.file()));
+        finishDone(item, okResult);
+        pollUntil(item.mediaId(), ProcessingStatus.READY);
 
-        // A redelivery of the same result, and a contradicting one for the same job.
-        awaitAcknowledged(publishResult(ok));
-        awaitAcknowledged(publishResult(result(item, "media.image", "failed")));
+        mediaProcessingService.applyResult(item.mediaId(), item.jobId(), QueueJob.STATUS_DONE,
+                objectMapper.writeValueAsString(okResult), null);
+        mediaProcessingService.applyResult(item.mediaId(), item.jobId(), QueueJob.STATUS_FAILED, null, "late");
+        mediaResultPollJob.poll();
         ArticleMedia settled = articleMediaRepository.findById(item.mediaId()).orElseThrow();
         assertThat(settled.getProcessingStatus()).isEqualTo(ProcessingStatus.READY);
         assertThat(settled.getFailureCode()).isNull();
         assertThat(tasksFor(item.mediaId())).hasSize(1);
 
-        // A result for an item that no longer exists is acknowledged and dropped.
+        // A finished row whose item no longer exists is never selected again, and applying it
+        // anyway is a no-op.
         Processing deleted = uploadToProcessing(uploader, articleId, "IMAGE");
         articleMediaRepository.deleteById(deleted.mediaId());
-        awaitAcknowledged(publishResult(okResult(deleted, sha256(deleted.file()))));
-    }
-
-    // --- Delivery-level failures ---
-
-    @Test
-    void unreadableEntriesAreDroppedWithoutHoldingUpLaterResults() throws Exception {
-        Account uploader = verifiedAccount(false);
-        UUID articleId = createArticle(uploader);
-        Processing item = uploadToProcessing(uploader, articleId, "IMAGE");
-
-        RecordId notJson = publishRaw(Map.of(MediaResultConsumer.RESULT_FIELD, "{not json"));
-        RecordId noField = publishRaw(Map.of("payload", "{}"));
-        Map<String, Object> futureVersion = okResult(item, sha256(item.file()));
-        futureVersion.put("version", 2);
-        RecordId unsupported = publishResult(futureVersion);
-        publishResult(okResult(item, sha256(item.file())));
-
-        awaitProcessingStatus(item.mediaId(), ProcessingStatus.READY);
-        awaitAcknowledged(notJson);
-        awaitAcknowledged(noField);
-        awaitAcknowledged(unsupported);
-    }
-
-    // An entry a consumer took and never acknowledged -- it crashed, or applying failed -- is
-    // claimed again once idle and applied. One that keeps failing is given up on after the
-    // configured deliveries, leaving its item for the stuck-processing sweep.
-    //
-    // The live consumer is paused so the entries go to a "crashed" consumer instead; it would
-    // otherwise take them first.
-    @Test
-    void entriesLeftPendingByACrashedConsumerAreReclaimedAndPoisonEntriesGivenUpOn() throws Exception {
-        Account uploader = verifiedAccount(false);
-        UUID articleId = createArticle(uploader);
-        Processing reclaimable = uploadToProcessing(uploader, articleId, "IMAGE");
-        Processing poisoned = uploadToProcessing(uploader, articleId, "IMAGE");
-
-        mediaResultConsumer.stop();
-        try {
-            RecordId first = publishResult(okResult(reclaimable, sha256(reclaimable.file())));
-            RecordId second = publishResult(okResult(poisoned, sha256(poisoned.file())));
-            Consumer crashed = Consumer.from(consumerGroup, "crashed-" + UUID.randomUUID());
-            // read(...) takes generic varargs and is not @SafeVarargs; the array holds one offset.
-            @SuppressWarnings("unchecked")
-            List<MapRecord<String, Object, Object>> taken = redisTemplate.opsForStream().read(crashed,
-                    StreamReadOptions.empty().count(100), StreamOffset.create(resultStream, ReadOffset.lastConsumed()));
-            assertThat(taken).extracting(MapRecord::getId).contains(first, second);
-            // Redelivered to the crashed consumer until it has used up its deliveries.
-            for (long delivery = 1; delivery < maxDeliveries; delivery++) {
-                redisTemplate.opsForStream().claim(resultStream, consumerGroup, crashed.getName(), Duration.ZERO, second);
-            }
-
-            // Both idle past a zero threshold: the first is claimed and applied, the second
-            // dropped.
-            assertThat(mediaResultConsumer.reclaimStale(Duration.ZERO)).isPositive();
-            assertThat(articleMediaRepository.findById(reclaimable.mediaId()).orElseThrow().getProcessingStatus())
-                    .isEqualTo(ProcessingStatus.READY);
-            assertThat(articleMediaRepository.findById(poisoned.mediaId()).orElseThrow().getProcessingStatus())
-                    .isEqualTo(ProcessingStatus.PROCESSING);
-            assertThat(redisTemplate.opsForStream().pending(resultStream, consumerGroup, Range.unbounded(), 100))
-                    .extracting("id").doesNotContain(first, second);
-        } finally {
-            mediaResultConsumer.start();
-        }
+        finishDone(deleted, okResult(deleted, sha256(deleted.file())));
+        mediaResultPollJob.poll();
+        mediaProcessingService.applyResult(deleted.mediaId(), deleted.jobId(), QueueJob.STATUS_DONE,
+                objectMapper.writeValueAsString(okResult(deleted, sha256(deleted.file()))), null);
+        assertThat(articleMediaRepository.existsById(deleted.mediaId())).isFalse();
     }
 
     // --- Sweeps ---
@@ -658,13 +657,15 @@ class MediaProcessingFlowIntegrationTests {
         assertThat(timedOut.getProcessingStatus()).isEqualTo(ProcessingStatus.FAILED);
         assertThat(timedOut.getFailureCode()).isEqualTo("processing_timeout");
 
-        // The worker finishes after all: it writes its variants and reports, and core ignores
-        // the report. The staging original is still there too (the worker deletes it only after
-        // reporting, and this one pretends to have crashed first).
+        // The worker finishes after all: it writes its variants and its private original and
+        // records the result, and core ignores the result. The staging upload is still there too
+        // (the worker never deletes from staging).
         String prefix = MediaProcessingService.pendingVariantPrefix(stuck.mediaId());
-        s3Client.putObject(PutObjectRequest.builder().bucket(mediaBucket).key(prefix + "640.webp").build(),
-                RequestBody.fromBytes(randomFile(64)));
-        awaitAcknowledged(publishResult(okResult(stuck, sha256(stuck.file()))));
+        String original = MediaProcessingService.originalPrefix(stuck.mediaId()) + "original.jpg";
+        putMediaObject(prefix + "w640.webp");
+        putMediaObject(original);
+        finishDone(stuck, okResult(stuck, sha256(stuck.file())));
+        mediaResultPollJob.poll();
         assertThat(articleMediaRepository.findById(stuck.mediaId()).orElseThrow().getProcessingStatus())
                 .isEqualTo(ProcessingStatus.FAILED);
         assertThat(stagingObjectExists(stuck.mediaId())).isTrue();
@@ -674,7 +675,33 @@ class MediaProcessingFlowIntegrationTests {
         assertThat(articleMediaRepository.existsById(stuck.mediaId())).isTrue();
         assertThat(mediaCleanupJob.sweepFailed(Instant.now().plusSeconds(1))).isPositive();
         assertThat(articleMediaRepository.existsById(stuck.mediaId())).isFalse();
-        assertThat(mediaObjectExists(prefix + "640.webp")).isFalse();
+        assertThat(mediaObjectExists(prefix + "w640.webp")).isFalse();
+        assertThat(mediaObjectExists(original)).isFalse();
         assertThat(stagingObjectExists(stuck.mediaId())).isFalse();
+    }
+
+    // The worker's private copy of an upload goes with a rejected item as it does with a failed
+    // one: nothing of an upload a moderator turned down outlives the item.
+    @Test
+    void rejectedSweepDeletesTheWorkersPrivateOriginal() throws Exception {
+        Account uploader = verifiedAccount(false);
+        UUID articleId = createArticle(uploader);
+        Processing item = uploadToProcessing(uploader, articleId, "IMAGE");
+        String original = MediaProcessingService.originalPrefix(item.mediaId()) + "original.jpg";
+        putMediaObject(original);
+        finishDone(item, okResult(item, sha256(item.file())));
+        ArticleMedia ready = pollUntil(item.mediaId(), ProcessingStatus.READY);
+        ready.getVariants().forEach(variant -> putMediaObject(variant.key()));
+
+        Account moderator = verifiedAccount(true);
+        claimAndDecide(moderator, tasksFor(item.mediaId()).getFirst().getId(), Decision.REJECT, "Not this one.");
+        assertThat(articleMediaRepository.findById(item.mediaId()).orElseThrow().getPublicationStatus())
+                .isEqualTo(PublicationStatus.REJECTED);
+        assertThat(mediaObjectExists(original)).isTrue();
+
+        assertThat(mediaCleanupJob.sweepRejected(Instant.now().plusSeconds(1))).isPositive();
+        assertThat(articleMediaRepository.existsById(item.mediaId())).isFalse();
+        assertThat(mediaObjectExists(original)).isFalse();
+        assertThat(mediaObjectExists(ready.getVariants().getFirst().key())).isFalse();
     }
 }

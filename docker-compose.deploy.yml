@@ -3,7 +3,11 @@ services:
     image: ${IMAGE}
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      # Loopback only: the app is reached from outside through the Cloudflare Tunnel alone, which
+      # is what lets it trust the CF-Connecting-IP header for its per-client rate limits (search).
+      # Published on the VPS's IP, anyone could send that header and spread their requests over
+      # made-up addresses. deploy.sh's health check calls localhost, so it is unaffected.
+      - "127.0.0.1:8080:8080"
     environment:
       DB_HOST: postgres
       DB_PORT: 5432

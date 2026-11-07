@@ -18,6 +18,8 @@ import com.persiangulfwiki.core.attribute.exception.DuplicateAttributeOptionCode
 import com.persiangulfwiki.core.dev.exception.DevTestAttributeGroupInUseException;
 import com.persiangulfwiki.core.dev.exception.DevDemoContentBusyException;
 import com.persiangulfwiki.core.dev.exception.DevTestMainArticleTakenException;
+import com.persiangulfwiki.core.dev.exception.DevTestMediaJobNotPendingException;
+import com.persiangulfwiki.core.dev.exception.DevTestRevisionCheckExistsException;
 import com.persiangulfwiki.core.dev.exception.DevTestSubjectRevisionLiveException;
 import com.persiangulfwiki.core.dev.exception.DevTestTopicInUseException;
 import com.persiangulfwiki.core.label.exception.InvalidLabelReferentException;
@@ -42,6 +44,7 @@ import com.persiangulfwiki.core.common.exception.TooManyRequestsException;
 import com.persiangulfwiki.core.dev.exception.InvalidDevTestArticleRequestException;
 import com.persiangulfwiki.core.dev.exception.InvalidDevTestMarineRequestException;
 import com.persiangulfwiki.core.dev.exception.InvalidDevTestMediaRequestException;
+import com.persiangulfwiki.core.dev.exception.InvalidDevTestRevisionCheckRequestException;
 import com.persiangulfwiki.core.marinedata.exception.InvalidMarineSeriesRangeException;
 import com.persiangulfwiki.core.marinedata.exception.MarineMetricNotFoundException;
 import com.persiangulfwiki.core.marinedata.exception.MarineStationNotFoundException;
@@ -84,6 +87,8 @@ import com.persiangulfwiki.core.expertreviewer.exception.DuplicatePendingApplica
 import com.persiangulfwiki.core.expertreviewer.exception.InvalidApplicationStatusException;
 import com.persiangulfwiki.core.oauth2.exception.PasswordAlreadySetException;
 import com.persiangulfwiki.core.password.exception.InvalidPasswordResetTokenException;
+import com.persiangulfwiki.core.revisioncheck.exception.RevisionCheckNotFoundException;
+import com.persiangulfwiki.core.search.exception.SearchRateLimitedException;
 import com.persiangulfwiki.core.source.exception.SourceNotFoundException;
 import com.persiangulfwiki.core.subject.exception.ExpertVerificationNotFoundException;
 import com.persiangulfwiki.core.subject.exception.InvalidMergeTargetException;
@@ -762,6 +767,31 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestSubjectRevisionLive"), "DEV_TEST_SUBJECT_REVISION_LIVE", request);
     }
 
+    @ExceptionHandler(DevTestMediaJobNotPendingException.class)
+    public ProblemDetail handleDevTestMediaJobNotPending(DevTestMediaJobNotPendingException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestMediaJobNotPending"), "DEV_TEST_MEDIA_JOB_NOT_PENDING", request);
+    }
+
+    @ExceptionHandler(InvalidDevTestRevisionCheckRequestException.class)
+    public ProblemDetail handleInvalidDevTestRevisionCheckRequest(InvalidDevTestRevisionCheckRequestException ex,
+            HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidDevTestRevisionCheckRequest"),
+                "INVALID_DEV_TEST_REVISION_CHECK_REQUEST", request);
+    }
+
+    @ExceptionHandler(DevTestRevisionCheckExistsException.class)
+    public ProblemDetail handleDevTestRevisionCheckExists(DevTestRevisionCheckExistsException ex,
+            HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.CONFLICT, resolve("error.devTestRevisionCheckExists"),
+                "DEV_TEST_REVISION_CHECK_EXISTS", request);
+    }
+
+    @ExceptionHandler(RevisionCheckNotFoundException.class)
+    public ProblemDetail handleRevisionCheckNotFound(RevisionCheckNotFoundException ex, HttpServletRequest request) {
+        return ProblemDetails.of(HttpStatus.NOT_FOUND, resolve("error.revisionCheckNotFound"), "REVISION_CHECK_NOT_FOUND",
+                request);
+    }
+
     @ExceptionHandler(InvalidDevTestMarineRequestException.class)
     public ProblemDetail handleInvalidDevTestMarineRequest(InvalidDevTestMarineRequestException ex, HttpServletRequest request) {
         return ProblemDetails.of(HttpStatus.BAD_REQUEST, resolve("error.invalidDevTestMarineRequest"), "INVALID_DEV_TEST_MARINE_REQUEST", request);
@@ -838,6 +868,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ProblemDetail> handleMetadataEditRateLimited(MetadataEditRateLimitedException ex, HttpServletRequest request) {
         return retryAfter(ex, ProblemDetails.of(
                 HttpStatus.TOO_MANY_REQUESTS, resolve("error.metadataEditRateLimited"), "METADATA_EDIT_RATE_LIMITED", request));
+    }
+
+    @ExceptionHandler(SearchRateLimitedException.class)
+    public ResponseEntity<ProblemDetail> handleSearchRateLimited(SearchRateLimitedException ex, HttpServletRequest request) {
+        return retryAfter(ex, ProblemDetails.of(
+                HttpStatus.TOO_MANY_REQUESTS, resolve("error.searchRateLimited"), "SEARCH_RATE_LIMITED", request));
     }
 
     private static ResponseEntity<ProblemDetail> retryAfter(TooManyRequestsException ex, ProblemDetail body) {

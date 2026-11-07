@@ -71,10 +71,10 @@ public class ArticleMedia extends AuditableEntity {
     @Column(name = "failure_code", length = 60)
     private @Nullable String failureCode;
 
-    // The pipeline job this item waits on; a result is applied only when its job_id matches.
-    // See V19.
-    @Column(name = "processing_job_id")
-    private @Nullable UUID processingJobId;
+    // The jobs row (V37) this item waits on while PROCESSING; a finished row is applied only
+    // while it is still the one named here. See V38. Null for a VIDEO, which has no job type.
+    @Column(name = "processing_queue_job_id")
+    private @Nullable Long processingQueueJobId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "publication_status", nullable = false, length = 20)
@@ -99,6 +99,12 @@ public class ArticleMedia extends AuditableEntity {
 
     @Column
     private @Nullable String placeholder;
+
+    // What the file itself claims about its author and licence, as the pipeline read it from
+    // the original. A hint for moderators, never the licence -- see V38.
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private @Nullable MediaAttribution attribution;
 
     // Set only by the dev-profile fixture endpoint; null on every row a real caller creates.
     @Column(name = "dev_marker", length = 40)

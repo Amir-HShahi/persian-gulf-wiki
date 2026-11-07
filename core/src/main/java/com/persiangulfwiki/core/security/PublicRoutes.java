@@ -20,11 +20,15 @@ import java.util.List;
 public final class PublicRoutes {
 
     // GETs under the public paths below that still need a verified account: the slug check tells
-    // whether an unapproved draft holds a slug, which GET /api/articles/by-slug hides. Carved out
-    // of CONTENT_READS rather than matched ahead of it in SecurityConfig, so the two filters also
-    // stop downgrading an unverified session to anonymous here and answer 403, not 401.
-    private static final RequestMatcher AUTHENTICATED_READS = PathPatternRequestMatcher.withDefaults()
-            .matcher(HttpMethod.GET, "/api/articles/slug-availability");
+    // whether an unapproved draft holds a slug, which GET /api/articles/by-slug hides, and a
+    // revision's checks are for its author and moderators only, so an anonymous caller is a 401
+    // there rather than a 404 or 403 decided as nobody. Carved out of CONTENT_READS rather than
+    // matched ahead of it in SecurityConfig, so the two filters also stop downgrading an
+    // unverified session to anonymous here and answer 403, not 401.
+    private static final RequestMatcher AUTHENTICATED_READS = new OrRequestMatcher(List.of(
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/articles/slug-availability"),
+            PathPatternRequestMatcher.withDefaults()
+                    .matcher(HttpMethod.GET, "/api/articles/*/translations/*/revisions/*/checks")));
 
     // Anonymous GET only -- every other method on these paths requires an account (see
     // SecurityConfig). Scoped by method on purpose: widening to all methods would make the
@@ -47,7 +51,11 @@ public final class PublicRoutes {
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/profiles/**"),
             // Homepage data cards: public provider data with nothing per-user in it.
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/marine-metrics"),
-            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/marine-metrics/**"))));
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/marine-metrics/**"),
+            // Article search: published articles only, the same for every caller, and rate-limited
+            // per client address (SearchRateLimitService) since anyone can call it.
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/search"),
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/search/suggestions"))));
 
     public static final RequestMatcher API_DOCS = new OrRequestMatcher(List.of(
             PathPatternRequestMatcher.withDefaults().matcher("/docs/**"),

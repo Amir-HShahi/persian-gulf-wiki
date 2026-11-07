@@ -26,6 +26,7 @@ import com.persiangulfwiki.core.moderation.exception.TaskAlreadyDecidedException
 import com.persiangulfwiki.core.moderation.exception.TaskNotClaimableException;
 import com.persiangulfwiki.core.moderation.repository.ModerationDecisionRepository;
 import com.persiangulfwiki.core.moderation.repository.ModerationTaskRepository;
+import com.persiangulfwiki.core.revisioncheck.service.RevisionCheckService;
 import com.persiangulfwiki.core.subject.entity.SubjectRevisionStatus;
 import com.persiangulfwiki.core.subject.event.SubjectRevisionSubmittedEvent;
 import com.persiangulfwiki.core.subject.service.SubjectRevisionService;
@@ -95,6 +96,7 @@ public class ModerationService {
     private final MediaModerationService mediaModerationService;
     private final MediaReadService mediaReadService;
     private final SubjectRevisionService subjectRevisionService;
+    private final RevisionCheckService revisionCheckService;
     private final MessageSource messageSource;
 
     // The article package's half of the submit endpoint, joined here rather than by a direct
@@ -327,6 +329,9 @@ public class ModerationService {
                         : null,
                 task.getSubjectRevisionId() != null
                         ? subjectRevisionService.getForReview(task.getSubjectRevisionId())
+                        : null,
+                task.getRevisionId() != null
+                        ? revisionCheckService.getForRevision(task.getRevisionId())
                         : null);
     }
 

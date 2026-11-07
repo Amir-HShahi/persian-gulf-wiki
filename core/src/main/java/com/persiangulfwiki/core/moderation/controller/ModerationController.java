@@ -109,11 +109,15 @@ public class ModerationController {
             + "caption in every language and every hotspot, including hotspots to panoramas that are not "
             + "public yet (which the public never sees until their target is approved). For an edit, "
             + "`mediaReview.current` is the item's approved version in the same full form, to compare the "
-            + "proposal against; it is null while the item has never been approved. For a subject revision "
-            + "task (`subjectRevisionId` set) it is `subjectReview`: the revision, each field it changes with "
-            + "the value before and after, and the sources those values cite. For an article revision task "
-            + "both are null. The response is never cacheable and asks browsers not to send it as a referrer.")
-    @ApiResponse(responseCode = "200", description = "The task and, for a gallery item or subject revision task, what it judges.")
+            + "proposal against; it is null while the item has never been approved. `mediaReview.fileAttribution` "
+            + "is what the file itself claims about its author and licence, to compare with the declaration. For a "
+            + "subject revision task (`subjectRevisionId` set) it is `subjectReview`: the revision, each field it "
+            + "changes with the value before and after, and the sources those values cite. For an article "
+            + "revision task both are null and `revisionChecks` carries the revision's automatic text and "
+            + "dead-link checks, which are advisory and never block the decision. The response is never cacheable "
+            + "and asks browsers not to send it as a referrer.")
+    @ApiResponse(responseCode = "200", description = "The task and what it judges: the gallery item or subject "
+            + "revision under review, or an article revision's automatic checks.")
     @ApiResponse(responseCode = "400", description = "The id in the path is not a valid UUID.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "401", description = "Access token cookie missing, invalid, or expired.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "403", description = "The account does not hold the moderator role, or its email address is not yet verified.", content = @Content(schema = @Schema(implementation = ProblemDetail.class)))

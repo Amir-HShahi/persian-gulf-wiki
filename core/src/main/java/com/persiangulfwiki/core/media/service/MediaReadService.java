@@ -5,6 +5,7 @@ import com.persiangulfwiki.core.article.exception.ArticleNotFoundException;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
 import com.persiangulfwiki.core.article.service.ArticleVisibilityService;
 import com.persiangulfwiki.core.media.dto.GeoPointResponse;
+import com.persiangulfwiki.core.media.dto.MediaAttributionResponse;
 import com.persiangulfwiki.core.media.dto.MediaMetadataResponse;
 import com.persiangulfwiki.core.media.dto.MediaMetadataVersionResponse;
 import com.persiangulfwiki.core.media.dto.MediaResponse;
@@ -13,6 +14,7 @@ import com.persiangulfwiki.core.media.dto.MediaVariantResponse;
 import com.persiangulfwiki.core.media.dto.PanoramaLinkResponse;
 import com.persiangulfwiki.core.media.dto.PanoramaLinkTargetResponse;
 import com.persiangulfwiki.core.media.entity.ArticleMedia;
+import com.persiangulfwiki.core.media.entity.MediaAttribution;
 import com.persiangulfwiki.core.media.entity.MediaDescription;
 import com.persiangulfwiki.core.media.entity.MediaFailureCode;
 import com.persiangulfwiki.core.media.entity.MediaKind;
@@ -146,7 +148,8 @@ public class MediaReadService {
                         .orElse(null);
 
         return new MediaReviewResponse(toResponse(media, null, moderator), toMetadata(version), version.getStatus(),
-                version.getSubmittedBy(), version.getCreatedAt(), descriptions, links, current);
+                version.getSubmittedBy(), version.getCreatedAt(), descriptions, links, current,
+                toAttributionResponse(media.getAttribution()));
     }
 
     // Full versions (every caption, every link the caller may see) for a caller who has already
@@ -290,6 +293,13 @@ public class MediaReadService {
         return articleRepository.findById(articleId)
                 .map(article -> articleVisibilityService.isArticleReadableBy(article, callerUserId, isCallerModerator))
                 .orElse(false);
+    }
+
+    private static @Nullable MediaAttributionResponse toAttributionResponse(@Nullable MediaAttribution attribution) {
+        return attribution == null
+                ? null
+                : new MediaAttributionResponse(attribution.author(), attribution.credit(), attribution.copyright(),
+                        attribution.license(), attribution.licenseUrl(), attribution.createdAt());
     }
 
     private static MediaMetadataResponse toMetadata(MediaMetadataVersion version) {

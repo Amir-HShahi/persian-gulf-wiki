@@ -1,5 +1,6 @@
 package com.persiangulfwiki.core.dev;
 
+import com.persiangulfwiki.core.jobqueue.repository.QueueJobRepository;
 import com.persiangulfwiki.core.media.repository.ArticleMediaRepository;
 import com.persiangulfwiki.core.subject.service.SubjectInfoboxCacheService;
 
@@ -24,6 +25,7 @@ import java.time.temporal.ChronoUnit;
 public class DevTestMediaSweeper {
 
     private final ArticleMediaRepository articleMediaRepository;
+    private final QueueJobRepository queueJobRepository;
     private final SubjectInfoboxCacheService subjectInfoboxCacheService;
 
     @Value("${app.dev.test-media-ttl-hours}")
@@ -50,6 +52,13 @@ public class DevTestMediaSweeper {
         // Marker-matched, so an item uploaded through the real flow is untouchable here. No
         // storage cleanup: fixtures never write objects.
         long deleted = articleMediaRepository.deleteByDevMarkerAndCreatedAtBefore(DevTestFixtures.MARKER, threshold);
+        // The parked jobs rows minted with withQueueJob: the worker never deletes them (it deletes
+        // finished jobs only, and a parked one is never claimed), so this is their only way out.
+        // Marked in their payload, so a real job is never matched.
+        int deletedJobs = queueJobRepository.deleteByDevMarkerCreatedBefore(DevTestFixtures.MARKER, threshold);
+        if (deletedJobs > 0) {
+            log.info("swept {} minted test pipeline job(s) older than the {}h TTL", deletedJobs, testMediaTtlHours);
+        }
         if (deleted > 0) {
             log.info("swept {} minted test gallery item(s) older than the {}h TTL", deleted, testMediaTtlHours);
             // Cached infoboxes may show what was just deleted.

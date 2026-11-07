@@ -4,6 +4,8 @@ import com.persiangulfwiki.core.article.entity.Article;
 import com.persiangulfwiki.core.article.exception.ArticleNotFoundException;
 import com.persiangulfwiki.core.article.repository.ArticleRepository;
 import com.persiangulfwiki.core.article.service.ArticleVisibilityService;
+import com.persiangulfwiki.core.jobqueue.entity.JobType;
+import com.persiangulfwiki.core.jobqueue.service.JobQueueService;
 import com.persiangulfwiki.core.media.dto.MediaResponse;
 import com.persiangulfwiki.core.media.dto.ReserveMediaRequest;
 import com.persiangulfwiki.core.media.dto.ReserveMediaResponse;
@@ -15,7 +17,6 @@ import com.persiangulfwiki.core.media.exception.DuplicateMediaException;
 import com.persiangulfwiki.core.media.exception.MediaNotAwaitingUploadException;
 import com.persiangulfwiki.core.media.exception.MediaNotFoundException;
 import com.persiangulfwiki.core.media.exception.NotMediaUploaderException;
-import com.persiangulfwiki.core.media.pipeline.MediaJobPublisher;
 import com.persiangulfwiki.core.media.repository.ArticleMediaRepository;
 import com.persiangulfwiki.core.media.storage.MediaStorage;
 import com.persiangulfwiki.core.media.storage.PresignedUpload;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,8 +41,9 @@ import java.util.UUID;
 //               (PENDING_REVIEW), then signs a PUT for the staging object. No storage round
 //               trip: signing is local.
 //   complete -- checks what actually landed in storage against what was declared. A match
-//               moves the item to PROCESSING and queues a pipeline job; a mismatch or a
-//               missing object is FAILED, and a mismatched object is deleted on the spot.
+//               moves the item to PROCESSING and inserts its pipeline job in the same
+//               transaction; a mismatch or a missing object is FAILED, and a mismatched object
+//               is deleted on the spot.
 //
 // No moderation task is opened here, for either the item or its first metadata version: that
 // happens when the pipeline reports READY (MediaProcessingService), so a moderator is never
@@ -56,7 +59,7 @@ public class MediaUploadService {
     private final MediaMetadataVersionService mediaMetadataVersionService;
     private final MediaUploadLimitService mediaUploadLimitService;
     private final MediaStorage mediaStorage;
-    private final MediaJobPublisher mediaJobPublisher;
+    private final JobQueueService jobQueueService;
     private final MediaReadService mediaReadService;
 
     @Value("${app.media.upload-url-ttl-minutes}")
@@ -128,9 +131,33 @@ public class MediaUploadService {
             fail(media, MediaFailureCode.UPLOAD_MISMATCH);
         } else {
             media.setProcessingStatus(ProcessingStatus.PROCESSING);
-            media.setProcessingJobId(mediaJobPublisher.publish(media, key));
+            // A VIDEO is queued nowhere: the worker has no video handler, and a job of a type it
+            // cannot run is dead-lettered as failed, which would read as a broken file. So it
+            // stays PROCESSING until the stuck-processing sweep fails it as processing_timeout
+            // -- up to app.media.processing-timeout-minutes plus the sweep's hour, about 2 h,
+            // during which it holds one of its uploader's pending slots and its bytes count
+            // against their quota. The owner chose this on 2026-11-07 knowing that cost, for as
+            // long as the worker has no video handler.
+            Optional<JobType> jobType = MediaProcessingService.jobTypeFor(media.getType());
+            if (jobType.isPresent()) {
+                media.setProcessingQueueJobId(jobQueueService.enqueue(jobType.get(), jobPayload(media, key)));
+            }
         }
         return mediaReadService.toResponse(articleMediaRepository.save(media), callerUserId, false);
+    }
+
+    // The worker's image/panorama payload (submission-pipeline/README.md). submission_id names
+    // the item's folders in the media bucket (pending/{id}/, originals/{id}/), which is why it
+    // must be the server-generated id. declared_sha256 makes the worker refuse a file whose bytes
+    // hash differently (checksum_mismatch); content_type and declared_bytes are not read by the
+    // worker today and cost nothing to send.
+    private static Map<String, Object> jobPayload(ArticleMedia media, String stagingKey) {
+        return Map.of(
+                "submission_id", media.getId().toString(),
+                "object_key", stagingKey,
+                "declared_sha256", media.getDeclaredSha256(),
+                "content_type", media.getDeclaredContentType(),
+                "declared_bytes", media.getDeclaredBytes());
     }
 
     // The staging object is keyed by the server-generated media id alone, never by anything

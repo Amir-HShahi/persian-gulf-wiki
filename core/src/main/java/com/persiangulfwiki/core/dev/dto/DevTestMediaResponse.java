@@ -10,7 +10,8 @@ import java.util.UUID;
 // GET/complete, the metadata version ids for POST /api/dev/test-moderation-tasks, and the link
 // ids for asserting what the read path filters. laterMetadataVersionIds holds versions 2, 3, ...
 // in request order (empty unless requested); currentMetadataVersionId is the newest approved
-// version, or null; panoramaLinkIds is empty unless links were requested.
+// version, or null; panoramaLinkIds is empty unless links were requested. queueJobId is the parked
+// jobs row minted with withQueueJob, or null.
 public record DevTestMediaResponse(
         UUID mediaId,
         UUID articleId,
@@ -20,5 +21,6 @@ public record DevTestMediaResponse(
         UUID firstMetadataVersionId,
         List<UUID> laterMetadataVersionIds,
         UUID currentMetadataVersionId,
-        List<UUID> panoramaLinkIds) {
+        List<UUID> panoramaLinkIds,
+        Long queueJobId) {
 }

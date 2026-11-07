@@ -89,3 +89,6 @@ app:
     # TTL for the windows minted by POST /api/dev/test-featured-articles, reclaimed hourly by
     # DevTestFeaturedArticleSweeper at :05. Same reasoning as the TTLs above.
     test-featured-article-ttl-hours: ${DEV_TEST_FEATURED_ARTICLE_TTL_HOURS:6}
+    # TTL for the checks minted by POST /api/dev/test-revision-checks, reclaimed hourly by
+    # DevTestRevisionCheckSweeper at :00. Same reasoning as the TTLs above.
+    test-revision-check-ttl-hours: ${DEV_TEST_REVISION_CHECK_TTL_HOURS:6}

@@ -23,8 +23,9 @@ public record ReserveMediaRequest(
 
         @NotBlank(message = "{validation.contentType.required}")
         @Size(max = 100, message = "{validation.contentType.tooLong}")
-        @Schema(description = "MIME type of the file. IMAGE: image/jpeg, image/png, image/webp. PANORAMA_360: "
-                + "image/jpeg, image/png, image/webp. VIDEO: video/mp4, video/quicktime, video/webm.",
+        @Schema(description = "MIME type of the file. IMAGE: image/jpeg, image/png, image/webp, image/heic, "
+                + "image/avif. PANORAMA_360: image/jpeg, image/png, image/webp, image/heic, image/avif. VIDEO: "
+                + "video/mp4, video/quicktime, video/webm.",
                 example = "image/jpeg")
         String contentType,
 

@@ -762,7 +762,7 @@ class DevTestContentEndpointIntegrationTests {
     }
 
     private DevTestMediaRequest mediaRequest(UUID articleId, ProcessingStatus processing, PublicationStatus publication) {
-        return new DevTestMediaRequest(articleId, null, processing, publication, null, null, null, null);
+        return new DevTestMediaRequest(articleId, null, processing, publication, null, null, null, null, null);
     }
 
     // Every state the gallery defines, including the ones only the pipeline or a moderator can
@@ -793,6 +793,9 @@ class DevTestContentEndpointIntegrationTests {
             assertThat(media.getCurrentMetadataVersionId()).isEqualTo(approved ? minted.firstMetadataVersionId() : null);
             assertThat(media.getVariants()).hasSize(c.processing() == ProcessingStatus.READY ? 1 : 0);
             assertThat(media.getFailureCode()).isEqualTo(c.processing() == ProcessingStatus.FAILED ? "upload_mismatch" : null);
+            // No pipeline job unless withQueueJob asks for one, PROCESSING included.
+            assertThat(minted.queueJobId()).isNull();
+            assertThat(media.getProcessingQueueJobId()).isNull();
         }
     }
 
@@ -800,13 +803,13 @@ class DevTestContentEndpointIntegrationTests {
     void mintsLaterMetadataVersionsInAnyStatusAndPanoramaLinksOnAnyVersion() throws Exception {
         UUID articleId = mintArticleId();
         DevTestMediaResponse target = mintMedia(new DevTestMediaRequest(articleId, MediaKind.PANORAMA_360,
-                ProcessingStatus.READY, PublicationStatus.PUBLISHED, null, null, null, null));
+                ProcessingStatus.READY, PublicationStatus.PUBLISHED, null, null, null, null, null));
         // v2 approved (current), v3 rejected, v4 and v5 pending -- links on the newest by default.
         DevTestMediaResponse source = mintMedia(new DevTestMediaRequest(articleId, MediaKind.PANORAMA_360,
                 ProcessingStatus.READY, PublicationStatus.PUBLISHED, null,
                 List.of(MetadataVersionStatus.APPROVED, MetadataVersionStatus.REJECTED,
                         MetadataVersionStatus.PENDING_REVIEW, MetadataVersionStatus.PENDING_REVIEW),
-                List.of(target.mediaId()), null));
+                List.of(target.mediaId()), null, null));
 
         assertThat(source.laterMetadataVersionIds()).hasSize(4);
         assertThat(source.laterMetadataVersionIds().stream()
@@ -825,7 +828,7 @@ class DevTestContentEndpointIntegrationTests {
         // Links on a chosen version, here the first.
         DevTestMediaResponse onFirst = mintMedia(new DevTestMediaRequest(articleId, MediaKind.PANORAMA_360,
                 ProcessingStatus.READY, PublicationStatus.PUBLISHED, null, List.of(MetadataVersionStatus.PENDING_REVIEW),
-                List.of(target.mediaId()), 1));
+                List.of(target.mediaId()), 1, null));
         assertThat(panoramaLinkRepository.findByMetadataVersionId(onFirst.firstMetadataVersionId())).hasSize(1);
         assertThat(onFirst.currentMetadataVersionId()).isEqualTo(onFirst.firstMetadataVersionId());
 
@@ -834,23 +837,23 @@ class DevTestContentEndpointIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new DevTestMediaRequest(articleId, null,
                                 ProcessingStatus.READY, PublicationStatus.PENDING, null,
-                                List.of(MetadataVersionStatus.APPROVED), null, null))))
+                                List.of(MetadataVersionStatus.APPROVED), null, null, null))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_DEV_TEST_MEDIA_REQUEST"));
         mockMvc.perform(post("/api/dev/test-media")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new DevTestMediaRequest(articleId, null, null, null,
-                                null, null, List.of(target.mediaId()), 2))))
+                                null, null, List.of(target.mediaId()), 2, null))))
                 .andExpect(status().isBadRequest());
         mockMvc.perform(post("/api/dev/test-media")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new DevTestMediaRequest(articleId, null, null, null,
-                                null, null, List.of(UUID.randomUUID()), null))))
+                                null, null, List.of(UUID.randomUUID()), null, null))))
                 .andExpect(status().isNotFound());
         mockMvc.perform(post("/api/dev/test-media")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new DevTestMediaRequest(UUID.randomUUID(), null,
-                                null, null, null, null, null, null))))
+                                null, null, null, null, null, null, null))))
                 .andExpect(status().isNotFound());
         // A blank id in the list ("" from an API client's template body) reads as null: 400, not a 500.
         mockMvc.perform(post("/api/dev/test-media")

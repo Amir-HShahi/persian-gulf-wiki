@@ -15,7 +15,8 @@ import java.util.UUID;
 // signed URLs while it is not public) and the version under review in full -- every language's
 // caption and every hotspot, including hotspots to targets that are not public yet, which the
 // public views drop. `current` is the other side of the comparison for an edit: the approved
-// version the proposal would replace, in the same full form.
+// version the proposal would replace, in the same full form. fileAttribution sits beside the
+// declared metadata so a moderator can compare the two.
 public record MediaReviewResponse(
         @Schema(description = "The gallery item. Its `metadata`/`links` are its current approved version -- what the "
                 + "public sees -- or, for an item never approved, its newest version, which is then usually the "
@@ -42,5 +43,10 @@ public record MediaReviewResponse(
         @Schema(description = "The item's current approved version in full, to compare the proposal against: "
                 + "every caption and every hotspot, including hotspots to targets that are not public. Null "
                 + "while the item has never been approved.", nullable = true)
-        @Nullable MediaMetadataVersionResponse current) {
+        @Nullable MediaMetadataVersionResponse current,
+
+        @Schema(description = "What the uploaded file itself claims about its author and licence -- a hint to check "
+                + "against the declaration, never the licence. Null when the file states nothing, or it has not "
+                + "been processed yet.", nullable = true)
+        @Nullable MediaAttributionResponse fileAttribution) {
 }
